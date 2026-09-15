@@ -24,18 +24,30 @@
     <div class="field">
       <label>পূর্ণ নাম <span class="required">*</span></label>
       <input type="text" formControlName="fullName" />
+      @if (showError('fullName')) {
+        <p class="field-error">{{ errorMessage('fullName') }}</p>
+      }
     </div>
     <div class="field">
       <label>পিতা/স্বামী <span class="required">*</span></label>
       <input type="text" formControlName="fatherOrHusband" />
+      @if (showError('fatherOrHusband')) {
+        <p class="field-error">{{ errorMessage('fatherOrHusband') }}</p>
+      }
     </div>
     <div class="field">
       <label>মাতা <span class="required">*</span></label>
       <input type="text" formControlName="mother" />
+      @if (showError('mother')) {
+        <p class="field-error">{{ errorMessage('mother') }}</p>
+      }
     </div>
     <div class="field">
       <label>জন্ম তারিখ <span class="required">*</span></label>
       <input type="date" formControlName="dob" />
+      @if (showError('dob')) {
+        <p class="field-error">{{ errorMessage('dob') }}</p>
+      }
     </div>
     <div class="field">
       <label>জাতীয়তা</label>
@@ -48,10 +60,16 @@
     <div class="field">
       <label>NID নং</label>
       <input type="text" formControlName="nid" placeholder="১০-১৭ সংখ্যা" />
+      @if (showError('nid')) {
+        <p class="field-error">{{ errorMessage('nid') }}</p>
+      }
     </div>
     <div class="field">
       <label>মোবাইল <span class="required">*</span></label>
       <input type="text" formControlName="mobile" placeholder="01XXXXXXXXX" />
+      @if (showError('mobile')) {
+        <p class="field-error">{{ errorMessage('mobile') }}</p>
+      }
     </div>
     <div class="field">
       <label>WhatsApp</label>
@@ -60,6 +78,9 @@
     <div class="field">
       <label>ই-মেইল</label>
       <input type="email" formControlName="email" />
+      @if (showError('email')) {
+        <p class="field-error">{{ errorMessage('email') }}</p>
+      }
     </div>
   </div>
 </section>
