@@ -160,7 +160,13 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
 
   private validateAddressGroup(
     label: string,
-    address: { district?: string; upazila?: string; postOffice?: string; road?: string; house?: string },
+    address: {
+      district?: string;
+      upazila?: string;
+      postOffice?: string;
+      road?: string;
+      house?: string;
+    },
   ): string[] {
     const errs: string[] = [];
     if (!address.district?.trim()) errs.push(`${label}: জেলা আবশ্যক`);
