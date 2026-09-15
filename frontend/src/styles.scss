@@ -298,7 +298,8 @@ textarea:focus {
 .reg-header-text {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   gap: 0.5rem;
   min-width: 0;
 }
