@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import SignaturePad from 'signature_pad';
 import { MAX_PHOTO_BYTES } from '../../core/models/registration.model';
@@ -10,9 +10,25 @@ import { PropertyListComponent } from './components/property-list/property-list.
 import { NomineeListComponent } from './components/nominee-list/nominee-list.component';
 import { PaymentInfoComponent } from './components/payment-info/payment-info.component';
 import { ConfirmationComponent } from './components/confirmation/confirmation.component';
+import { ReviewSummaryComponent } from './components/review-summary/review-summary.component';
 import { buildRegistrationForm, propertiesArray, nomineesArray } from './registration-form.builder';
 
 const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
+
+export interface RegistrationStep {
+  id: number;
+  title: string;
+  shortLabel: string;
+}
+
+export const REGISTRATION_STEPS: RegistrationStep[] = [
+  { id: 1, title: 'সদস্যের তথ্য', shortLabel: 'সদস্য' },
+  { id: 2, title: 'সম্পত্তি ও মালিকানা', shortLabel: 'সম্পত্তি' },
+  { id: 3, title: 'জরুরি যোগাযোগ ও নমিনি', shortLabel: 'নমিনি' },
+  { id: 4, title: 'পেমেন্ট', shortLabel: 'পেমেন্ট' },
+  { id: 5, title: 'অঙ্গীকার ও স্বাক্ষর', shortLabel: 'স্বাক্ষর' },
+  { id: 6, title: 'পর্যালোচনা ও সাবমিট', shortLabel: 'পর্যালোচনা' },
+];
 
 @Component({
   selector: 'app-registration-page',
@@ -26,10 +42,11 @@ const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
     NomineeListComponent,
     PaymentInfoComponent,
     ConfirmationComponent,
+    ReviewSummaryComponent,
   ],
   templateUrl: './registration-page.component.html',
 })
-export class RegistrationPageComponent implements AfterViewInit {
+export class RegistrationPageComponent implements AfterViewInit, AfterViewChecked {
   @ViewChild('sigCanvas') sigCanvas?: ElementRef<HTMLCanvasElement>;
 
   form: FormGroup;
@@ -40,6 +57,9 @@ export class RegistrationPageComponent implements AfterViewInit {
   memberPhotoPreview = '';
   private signaturePad?: SignaturePad;
 
+  steps = REGISTRATION_STEPS;
+  currentStep = 1;
+
   constructor(
     private fb: FormBuilder,
     private registrationService: RegistrationService,
@@ -48,10 +68,26 @@ export class RegistrationPageComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    this.setupSignaturePad();
+  }
+
+  ngAfterViewChecked(): void {
+    if (!this.sigCanvas) {
+      this.signaturePad = undefined;
+    } else if (!this.signaturePad) {
+      this.setupSignaturePad();
+    }
+  }
+
+  private setupSignaturePad(): void {
     if (this.sigCanvas) {
       this.signaturePad = new SignaturePad(this.sigCanvas.nativeElement, {
         backgroundColor: 'rgb(255,255,255)',
       });
+      const existing = this.form.get('memberSignature')?.value;
+      if (existing) {
+        this.signaturePad.fromDataURL(existing);
+      }
     }
   }
 
@@ -97,7 +133,7 @@ export class RegistrationPageComponent implements AfterViewInit {
     this.memberPhotoPreview = '';
   }
 
-  private validate(): string[] {
+  private validateMemberStep(): string[] {
     const errs: string[] = [];
     const v = this.form.value;
 
@@ -109,6 +145,13 @@ export class RegistrationPageComponent implements AfterViewInit {
     else if (!MOBILE_PATTERN.test(v.mobile.trim())) errs.push('মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)');
     if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) errs.push('ই-মেইল সঠিক নয়');
     if (v.nid && !/^\d{10,17}$/.test(v.nid)) errs.push('NID নম্বর ১০-১৭ সংখ্যার হতে হবে');
+
+    return errs;
+  }
+
+  private validatePropertyStep(): string[] {
+    const errs: string[] = [];
+    const v = this.form.value;
 
     (v.properties as any[]).forEach((property, i) => {
       const label = `সম্পত্তি #${i + 1}`;
@@ -137,12 +180,89 @@ export class RegistrationPageComponent implements AfterViewInit {
       });
     });
 
+    return errs;
+  }
+
+  private validateContactStep(): string[] {
+    return [];
+  }
+
+  private validatePaymentStep(): string[] {
+    const errs: string[] = [];
+    const v = this.form.value;
+
     if (!v.admissionFee) errs.push('ভর্তি ফি আবশ্যক');
     if (!v.subscription) errs.push('চাঁদা আবশ্যক');
     if (!v.paymentMethod) errs.push('পেমেন্ট মাধ্যম আবশ্যক');
-    if (!v.declarationAccepted) errs.push('অঙ্গীকারনামায় সম্মতি প্রদান আবশ্যক');
 
     return errs;
+  }
+
+  private validateDeclarationStep(): string[] {
+    const errs: string[] = [];
+    if (!this.form.value.declarationAccepted) errs.push('অঙ্গীকারনামায় সম্মতি প্রদান আবশ্যক');
+    return errs;
+  }
+
+  private validateStep(step: number): string[] {
+    switch (step) {
+      case 1:
+        return this.validateMemberStep();
+      case 2:
+        return this.validatePropertyStep();
+      case 3:
+        return this.validateContactStep();
+      case 4:
+        return this.validatePaymentStep();
+      case 5:
+        return this.validateDeclarationStep();
+      default:
+        return [];
+    }
+  }
+
+  private validate(): string[] {
+    return [
+      ...this.validateMemberStep(),
+      ...this.validatePropertyStep(),
+      ...this.validateContactStep(),
+      ...this.validatePaymentStep(),
+      ...this.validateDeclarationStep(),
+    ];
+  }
+
+  /** Returns the first step (1-based) that fails its own validation, or null if all steps pass. */
+  private firstInvalidStep(): number | null {
+    for (const step of this.steps) {
+      if (step.id === this.steps.length) continue;
+      if (this.validateStep(step.id).length > 0) return step.id;
+    }
+    return null;
+  }
+
+  goToStep(step: number): void {
+    this.currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  nextStep(): void {
+    this.errors = [];
+    const stepErrors = this.validateStep(this.currentStep);
+    if (stepErrors.length > 0) {
+      this.errors = stepErrors;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (this.currentStep < this.steps.length) {
+      this.goToStep(this.currentStep + 1);
+    }
+  }
+
+  prevStep(): void {
+    this.errors = [];
+    if (this.currentStep > 1) {
+      this.goToStep(this.currentStep - 1);
+    }
   }
 
   onSubmit(): void {
@@ -152,7 +272,12 @@ export class RegistrationPageComponent implements AfterViewInit {
     const clientErrors = this.validate();
     if (clientErrors.length > 0) {
       this.errors = clientErrors;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const invalidStep = this.firstInvalidStep();
+      if (invalidStep) {
+        this.goToStep(invalidStep);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
 
@@ -185,6 +310,7 @@ export class RegistrationPageComponent implements AfterViewInit {
     this.memberPhotoPreview = '';
     this.signaturePad?.clear();
     this.submitAttempted = false;
+    this.currentStep = 1;
   }
 
   toggleDeclaration(): void {

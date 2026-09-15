@@ -53,47 +53,90 @@
         <input type="date" formControlName="submissionDate" />
       </div>
 
-      <app-member-info [form]="form" />
-      <app-address-info [form]="form" />
-      <app-property-list [form]="form" [properties]="properties" [submitAttempted]="submitAttempted" />
+      <nav class="stepper" aria-label="নিবন্ধন ধাপসমূহ">
+        @for (step of steps; track step.id; let last = $last) {
+          <div class="stepper-item" [class.active]="currentStep === step.id" [class.done]="currentStep > step.id">
+            <button
+              type="button"
+              class="stepper-circle"
+              [attr.aria-current]="currentStep === step.id ? 'step' : null"
+              (click)="currentStep >= step.id ? goToStep(step.id) : null"
+            >
+              {{ step.id }}
+            </button>
+            <span class="stepper-label">{{ step.shortLabel }}</span>
+          </div>
+          @if (!last) {
+            <div class="stepper-line" [class.done]="currentStep > step.id"></div>
+          }
+        }
+      </nav>
 
-      <div class="grid-2" style="margin-bottom:2rem">
-        <app-urgent-contact [form]="form" />
-        <app-nominee-list [nominees]="nominees" />
-      </div>
+      @if (currentStep === 1) {
+        <app-member-info [form]="form" />
+        <app-address-info [form]="form" />
+      }
 
-      <app-payment-info [form]="form" />
+      @if (currentStep === 2) {
+        <app-property-list [form]="form" [properties]="properties" [submitAttempted]="submitAttempted" />
+      }
 
-      <div style="background:var(--amber-50);border:1px solid var(--amber-200);border-radius:0.5rem;padding:1rem;margin-bottom:2rem;font-size:0.875rem;color:#1f2937;line-height:1.6">
-        <p style="margin-top:0">
-          <strong>অঙ্গীকারনামা:</strong> আমি অঙ্গীকার করছি যে, উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদের গঠনতন্ত্র,
-          নিয়ম-শৃঙ্খলা ও বিধি সংক্রান্ত সিদ্ধান্তসমূহ মেনে চলবো এবং সংগঠনের উদ্দেশ্য ও স্বার্থবিরোধী কোনো কর্মকাণ্ডে অংশগ্রহণ
-          করবো না। সংগঠনের সিদ্ধান্তসমূহে সদস্যদের অধিকার, সম্পত্তির নিরাপত্তা, পারস্পরিক সহযোগিতা, সামাজিক কল্যাণ ও
-          এলাকার উন্নয়নে দায়িত্বশীলভাবে সহযোগিতা করবো। উপরোক্ত তথ্যসমূহ আমার জ্ঞান ও বিশ্বাস অনুযায়ী সঠিক।
-        </p>
-        <label class="checkbox-item">
-          <input type="checkbox" [checked]="form.get('declarationAccepted')?.value" (change)="toggleDeclaration()" />
-          আমি সকল শর্তাবলীতে সম্মতি প্রদান করছি।
-        </label>
-      </div>
-
-      <section style="margin-bottom:2rem">
-        <h2 class="section-title">৭. স্বাক্ষর ও তারিখ</h2>
-        <label style="display:block;font-size:0.875rem;color:#374151;margin-bottom:0.5rem">
-          সদস্যের স্বাক্ষর (ঐচ্ছিক — শুধু অনলাইনে স্বাক্ষর করতে চাইলে)
-        </label>
-        <div style="border:1px solid #d1d5db;border-radius:0.5rem;overflow:hidden;background:#fff">
-          <canvas #sigCanvas style="width:100%;height:8rem;cursor:crosshair;display:block"></canvas>
+      @if (currentStep === 3) {
+        <div class="grid-2">
+          <app-urgent-contact [form]="form" />
+          <app-nominee-list [nominees]="nominees" />
         </div>
-        <button type="button" (click)="clearSignature()" style="margin-top:0.5rem;font-size:0.875rem;color:#dc2626;background:none;border:none;text-decoration:underline;cursor:pointer">
-          স্বাক্ষর মুছুন
-        </button>
-      </section>
+      }
 
-      <div style="text-align:center">
-        <button type="submit" class="btn btn-primary" [disabled]="submitting" style="font-size:1.1rem;padding:0.75rem 2rem">
-          {{ submitting ? 'সাবমিট হচ্ছে...' : 'ফর্ম সাবমিট করুন' }}
-        </button>
+      @if (currentStep === 4) {
+        <app-payment-info [form]="form" />
+      }
+
+      @if (currentStep === 5) {
+        <div style="background:var(--amber-50);border:1px solid var(--amber-200);border-radius:0.5rem;padding:1rem;margin-bottom:2rem;font-size:0.875rem;color:#1f2937;line-height:1.6">
+          <p style="margin-top:0">
+            <strong>অঙ্গীকারনামা:</strong> আমি অঙ্গীকার করছি যে, উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদের গঠনতন্ত্র,
+            নিয়ম-শৃঙ্খলা ও বিধি সংক্রান্ত সিদ্ধান্তসমূহ মেনে চলবো এবং সংগঠনের উদ্দেশ্য ও স্বার্থবিরোধী কোনো কর্মকাণ্ডে অংশগ্রহণ
+            করবো না। সংগঠনের সিদ্ধান্তসমূহে সদস্যদের অধিকার, সম্পত্তির নিরাপত্তা, পারস্পরিক সহযোগিতা, সামাজিক কল্যাণ ও
+            এলাকার উন্নয়নে দায়িত্বশীলভাবে সহযোগিতা করবো। উপরোক্ত তথ্যসমূহ আমার জ্ঞান ও বিশ্বাস অনুযায়ী সঠিক।
+          </p>
+          <label class="checkbox-item">
+            <input type="checkbox" [checked]="form.get('declarationAccepted')?.value" (change)="toggleDeclaration()" />
+            আমি সকল শর্তাবলীতে সম্মতি প্রদান করছি।
+          </label>
+        </div>
+
+        <section style="margin-bottom:2rem">
+          <label style="display:block;font-size:0.875rem;color:#374151;margin-bottom:0.5rem">
+            সদস্যের স্বাক্ষর (ঐচ্ছিক — শুধু অনলাইনে স্বাক্ষর করতে চাইলে)
+          </label>
+          <div style="border:1px solid #d1d5db;border-radius:0.5rem;overflow:hidden;background:#fff">
+            <canvas #sigCanvas style="width:100%;height:8rem;cursor:crosshair;display:block"></canvas>
+          </div>
+          <button type="button" (click)="clearSignature()" style="margin-top:0.5rem;font-size:0.875rem;color:#dc2626;background:none;border:none;text-decoration:underline;cursor:pointer">
+            স্বাক্ষর মুছুন
+          </button>
+        </section>
+      }
+
+      @if (currentStep === 6) {
+        <app-review-summary [form]="form" (editStep)="goToStep($event)" />
+      }
+
+      <div style="display:flex;justify-content:space-between;margin-top:2rem">
+        @if (currentStep > 1) {
+          <button type="button" class="btn btn-secondary" (click)="prevStep()">পূর্ববর্তী</button>
+        } @else {
+          <span></span>
+        }
+
+        @if (currentStep < steps.length) {
+          <button type="button" class="btn btn-primary" (click)="nextStep()">পরবর্তী</button>
+        } @else {
+          <button type="submit" class="btn btn-primary" [disabled]="submitting" style="font-size:1.1rem;padding:0.75rem 2rem">
+            {{ submitting ? 'সাবমিট হচ্ছে...' : 'ফর্ম সাবমিট করুন' }}
+          </button>
+        }
       </div>
     </div>
   </form>

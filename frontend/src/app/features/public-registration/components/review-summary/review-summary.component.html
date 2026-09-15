@@ -1,0 +1,68 @@
+<section [formGroup]="form">
+  <h2 class="section-title">৭. পর্যালোচনা করুন</h2>
+  <p style="font-size:0.85rem;color:#4b5563;margin-top:0">সাবমিট করার আগে নিচের তথ্যগুলো যাচাই করে নিন।</p>
+
+  <div class="card" style="padding:1rem;margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+      <h3 style="margin:0;color:#374151;font-size:0.95rem">সদস্যের তথ্য</h3>
+      <button type="button" (click)="goTo(1)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.75rem">
+        সম্পাদনা করুন
+      </button>
+    </div>
+    <div class="grid-2" style="font-size:0.875rem">
+      <div><strong>নাম:</strong> {{ form.get('fullName')?.value || '—' }}</div>
+      <div><strong>পিতা/স্বামী:</strong> {{ form.get('fatherOrHusband')?.value || '—' }}</div>
+      <div><strong>মোবাইল:</strong> {{ form.get('mobile')?.value || '—' }}</div>
+      <div><strong>ই-মেইল:</strong> {{ form.get('email')?.value || '—' }}</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+      <h3 style="margin:0;color:#374151;font-size:0.95rem">সম্পত্তির তথ্য</h3>
+      <button type="button" (click)="goTo(2)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.75rem">
+        সম্পাদনা করুন
+      </button>
+    </div>
+    <p style="font-size:0.875rem;margin:0">মোট সম্পত্তি: {{ properties.length }} টি</p>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+      <h3 style="margin:0;color:#374151;font-size:0.95rem">জরুরি যোগাযোগ ও নমিনি</h3>
+      <button type="button" (click)="goTo(3)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.75rem">
+        সম্পাদনা করুন
+      </button>
+    </div>
+    <div style="font-size:0.875rem">
+      <div><strong>জরুরি যোগাযোগ:</strong> {{ form.get('urgentContactName')?.value || '—' }}</div>
+      <div><strong>নমিনি সংখ্যা:</strong> {{ nominees.length }} জন</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+      <h3 style="margin:0;color:#374151;font-size:0.95rem">পেমেন্ট তথ্য</h3>
+      <button type="button" (click)="goTo(4)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.75rem">
+        সম্পাদনা করুন
+      </button>
+    </div>
+    <div class="grid-2" style="font-size:0.875rem">
+      <div><strong>ভর্তি ফি:</strong> {{ form.get('admissionFee')?.value || '—' }}</div>
+      <div><strong>চাঁদা:</strong> {{ form.get('subscription')?.value || '—' }}</div>
+      <div><strong>মাধ্যম:</strong> {{ form.get('paymentMethod')?.value || '—' }}</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+      <h3 style="margin:0;color:#374151;font-size:0.95rem">অঙ্গীকার</h3>
+      <button type="button" (click)="goTo(5)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.75rem">
+        সম্পাদনা করুন
+      </button>
+    </div>
+    <p style="font-size:0.875rem;margin:0">
+      {{ form.get('declarationAccepted')?.value ? 'সম্মতি প্রদান করা হয়েছে' : 'সম্মতি প্রদান করা হয়নি' }}
+    </p>
+  </div>
+</section>
