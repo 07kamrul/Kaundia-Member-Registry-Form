@@ -5,6 +5,30 @@ export interface Nominee {
   address: string;
 }
 
+export interface PropertyItem {
+  propertyType: string[];
+  propertyTypeOther: string;
+  khatianNo: string;
+  dagNo: string;
+  landQuantity: string;
+  ownership: string;
+  applicableDocs: string[];
+}
+
+export const MAX_PROPERTY_COUNT = 9;
+
+export function createEmptyProperty(): PropertyItem {
+  return {
+    propertyType: [],
+    propertyTypeOther: "",
+    khatianNo: "",
+    dagNo: "",
+    landQuantity: "",
+    ownership: "",
+    applicableDocs: [],
+  };
+}
+
 export interface FormData {
   // Member Info
   fullName: string;
@@ -29,13 +53,8 @@ export interface FormData {
   urgentContactAddress?: string;
 
   // Property Info
-  propertyType: string;
-  propertyTypeOther: string;
-  khatianNo: string;
-  dagNo: string;
-  landQuantity: string;
-  ownership: string;
-  applicableDocs: string[];
+  propertyCount: number;
+  properties: PropertyItem[];
 
   // Nominees
   nominees: Nominee[];
@@ -55,6 +74,9 @@ export interface FormData {
 
   // Honeypot
   website: string;
+
+  // Client-side only (not persisted to Sheets/PDF)
+  declarationAccepted?: boolean;
 }
 
 export interface SubmissionResult {

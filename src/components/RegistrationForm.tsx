@@ -3,6 +3,13 @@
 import React, { useState, useRef } from "react";
 import Image from "next/image";
 import SignatureCanvas from "react-signature-canvas";
+import {
+  MAX_PROPERTY_COUNT,
+  createEmptyProperty,
+  type FormData,
+  type Nominee,
+  type PropertyItem,
+} from "@/lib/types";
 
 const PROPERTY_TYPES = ["জমি", "বাড়ি", "ফ্ল্যাট", "প্লট", "অন্যান্য"];
 const OWNERSHIP_TYPES = ["একক", "যৌথ"];
@@ -13,49 +20,6 @@ const DOCUMENT_OPTIONS = [
   "উত্তরাধিকার সনদ",
 ];
 const PAYMENT_METHODS = ["নগদ", "ব্যাংক", "MFS (বিকাশ/নগদ/রকেট)", "অন্যান্য"];
-
-interface Nominee {
-  name: string;
-  relation: string;
-  mobile: string;
-  address: string;
-}
-
-interface FormData {
-  fullName: string;
-  fatherOrHusband: string;
-  mother: string;
-  dob: string;
-  nationality: string;
-  occupation: string;
-  nid: string;
-  mobile: string;
-  whatsapp: string;
-  email: string;
-  permanentAddress: string;
-  currentAddress: string;
-  propertyType: string;
-  propertyTypeOther: string;
-  khatianNo: string;
-  dagNo: string;
-  landQuantity: string;
-  ownership: string;
-  applicableDocs: string[];
-  urgentContactName: string;
-  urgentContactRelation: string;
-  urgentContactMobile: string;
-  urgentContactAddress: string;
-  nominees: Nominee[];
-  admissionFee: string;
-  subscription: string;
-  receiptNo: string;
-  paymentMethod: string;
-  memberSignature: string;
-  memberPhoto: string;
-  submissionDate: string;
-  declarationAccepted: boolean;
-  website: string;
-}
 
 const initialFormData: FormData = {
   fullName: "",
@@ -70,13 +34,8 @@ const initialFormData: FormData = {
   email: "",
   permanentAddress: "",
   currentAddress: "",
-  propertyType: "",
-  propertyTypeOther: "",
-  khatianNo: "",
-  dagNo: "",
-  landQuantity: "",
-  ownership: "",
-  applicableDocs: [],
+  propertyCount: 1,
+  properties: [createEmptyProperty()],
   urgentContactName: "",
   urgentContactRelation: "",
   urgentContactMobile: "",
@@ -107,12 +66,56 @@ export default function RegistrationForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleDocToggle = (doc: string) => {
+  const updateProperty = (index: number, patch: Partial<PropertyItem>) => {
     setFormData((prev) => {
-      const docs = prev.applicableDocs.includes(doc)
-        ? prev.applicableDocs.filter((d) => d !== doc)
-        : [...prev.applicableDocs, doc];
-      return { ...prev, applicableDocs: docs };
+      const properties = [...prev.properties];
+      properties[index] = { ...properties[index], ...patch };
+      return { ...prev, properties };
+    });
+  };
+
+  const handlePropertyFieldChange = (
+    index: number,
+    field: "khatianNo" | "dagNo" | "landQuantity" | "propertyTypeOther",
+    value: string
+  ) => {
+    updateProperty(index, { [field]: value });
+  };
+
+  const handlePropertyTypeToggle = (index: number, type: string) => {
+    const current = formData.properties[index]?.propertyType ?? [];
+    const propertyType = current.includes(type)
+      ? current.filter((t) => t !== type)
+      : [...current, type];
+    updateProperty(index, { propertyType });
+  };
+
+  const handlePropertyOwnershipChange = (index: number, ownership: string) => {
+    updateProperty(index, { ownership });
+  };
+
+  const handlePropertyDocToggle = (index: number, doc: string) => {
+    const current = formData.properties[index]?.applicableDocs ?? [];
+    const applicableDocs = current.includes(doc)
+      ? current.filter((d) => d !== doc)
+      : [...current, doc];
+    updateProperty(index, { applicableDocs });
+  };
+
+  const handlePropertyCountChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const count = Number(e.target.value);
+    setFormData((prev) => {
+      const properties = [...prev.properties];
+      if (count > properties.length) {
+        while (properties.length < count) {
+          properties.push(createEmptyProperty());
+        }
+      } else {
+        properties.length = count;
+      }
+      return { ...prev, propertyCount: count, properties };
     });
   };
 
@@ -195,8 +198,12 @@ export default function RegistrationForm() {
       clientErrors.push("ই-মেইল সঠিক নয়");
     if (formData.nid && !/^\d{10,17}$/.test(formData.nid))
       clientErrors.push("NID নম্বর ১০-১৭ সংখ্যার হতে হবে");
-    if (!formData.propertyType) clientErrors.push("সম্পত্তির ধরন আবশ্যক");
-    if (!formData.ownership) clientErrors.push("মালিকানা আবশ্যক");
+    formData.properties.forEach((property, i) => {
+      const label = `সম্পত্তি #${i + 1}`;
+      if (property.propertyType.length === 0)
+        clientErrors.push(`${label}: সম্পত্তির ধরন আবশ্যক`);
+      if (!property.ownership) clientErrors.push(`${label}: মালিকানা আবশ্যক`);
+    });
     if (!formData.admissionFee) clientErrors.push("ভর্তি ফি আবশ্যক");
     if (!formData.subscription) clientErrors.push("চাঁদা আবশ্যক");
     if (!formData.paymentMethod) clientErrors.push("পেমেন্ট মাধ্যম আবশ্যক");
@@ -515,14 +522,14 @@ export default function RegistrationForm() {
             <Field label="স্থায়ী ঠিকানা">
               <Textarea
                 name="permanentAddress"
-                value={formData.permanentAddress}
+                value={formData.permanentAddress ?? ""}
                 onChange={handleChange}
               />
             </Field>
             <Field label="বর্তমান ঠিকানা">
               <Textarea
                 name="currentAddress"
-                value={formData.currentAddress}
+                value={formData.currentAddress ?? ""}
                 onChange={handleChange}
               />
             </Field>
@@ -531,86 +538,128 @@ export default function RegistrationForm() {
 
         {/* Section 3: Property Info */}
         <Section number="৩" title="আবাসন / সম্পত্তির মালিকানা তথ্য">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              সম্পত্তির ধরন <span className="text-red-500">*</span>
-            </label>
-            <div className="flex flex-wrap gap-x-5 gap-y-2">
-              {PROPERTY_TYPES.map((t) => (
-                <Checkbox
-                  key={t}
-                  label={t}
-                  checked={formData.propertyType === t}
-                  onChange={() =>
-                    setFormData((prev) => ({ ...prev, propertyType: t }))
-                  }
-                />
-              ))}
-              {formData.propertyType === "অন্যান্য" && (
-                <Input
-                  name="propertyTypeOther"
-                  value={formData.propertyTypeOther}
-                  onChange={handleChange}
-                  placeholder="বিস্তারিত লিখুন"
-                />
-              )}
-            </div>
+          <div className="mb-6 max-w-xs">
+            <Field label="সম্পত্তির সংখ্যা" required>
+              <Select
+                name="propertyCount"
+                value={String(formData.propertyCount)}
+                onChange={handlePropertyCountChange}
+              >
+                <option value="">নির্বাচন করুন</option>
+                {Array.from({ length: MAX_PROPERTY_COUNT }, (_, i) => i + 1).map(
+                  (n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  )
+                )}
+              </Select>
+            </Field>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <Field label="খতিয়ান নং">
-              <Input
-                name="khatianNo"
-                value={formData.khatianNo}
-                onChange={handleChange}
-              />
-            </Field>
-            <Field label="দাগ নং">
-              <Input name="dagNo" value={formData.dagNo} onChange={handleChange} />
-            </Field>
-            <Field label="জমির পরিমাণ">
-              <Input
-                name="landQuantity"
-                value={formData.landQuantity}
-                onChange={handleChange}
-                placeholder="যেমন: ২ শতক"
-              />
-            </Field>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                মালিকানা <span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-5">
-                {OWNERSHIP_TYPES.map((t) => (
-                  <Checkbox
-                    key={t}
-                    label={t}
-                    checked={formData.ownership === t}
-                    onChange={() =>
-                      setFormData((prev) => ({ ...prev, ownership: t }))
+          {formData.properties.map((property, index) => (
+            <div
+              key={index}
+              className="border border-gray-200 rounded-lg p-4 mb-4 last:mb-0"
+            >
+              <h3 className="font-bold text-emerald-900 mb-4">
+                সম্পত্তি #{index + 1}
+              </h3>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  সম্পত্তির ধরন <span className="text-red-500">*</span>
+                </label>
+                <div className="flex flex-wrap gap-x-5 gap-y-2">
+                  {PROPERTY_TYPES.map((t) => (
+                    <Checkbox
+                      key={t}
+                      label={t}
+                      checked={property.propertyType.includes(t)}
+                      onChange={() => handlePropertyTypeToggle(index, t)}
+                    />
+                  ))}
+                  {property.propertyType.includes("অন্যান্য") && (
+                    <Input
+                      value={property.propertyTypeOther}
+                      onChange={(e) =>
+                        handlePropertyFieldChange(
+                          index,
+                          "propertyTypeOther",
+                          e.target.value
+                        )
+                      }
+                      placeholder="বিস্তারিত লিখুন"
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <Field label="খতিয়ান নং">
+                  <Input
+                    value={property.khatianNo}
+                    onChange={(e) =>
+                      handlePropertyFieldChange(index, "khatianNo", e.target.value)
                     }
                   />
-                ))}
+                </Field>
+                <Field label="দাগ নং">
+                  <Input
+                    value={property.dagNo}
+                    onChange={(e) =>
+                      handlePropertyFieldChange(index, "dagNo", e.target.value)
+                    }
+                  />
+                </Field>
+                <Field label="জমির পরিমাণ">
+                  <Input
+                    value={property.landQuantity}
+                    onChange={(e) =>
+                      handlePropertyFieldChange(
+                        index,
+                        "landQuantity",
+                        e.target.value
+                      )
+                    }
+                    placeholder="যেমন: ২ শতক"
+                  />
+                </Field>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    মালিকানা <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-5">
+                    {OWNERSHIP_TYPES.map((t) => (
+                      <Checkbox
+                        key={t}
+                        label={t}
+                        checked={property.ownership === t}
+                        onChange={() => handlePropertyOwnershipChange(index, t)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Applicable Documents */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  প্রযোজ্য কাগজ
+                </label>
+                <div className="flex flex-wrap gap-x-5 gap-y-2">
+                  {DOCUMENT_OPTIONS.map((doc) => (
+                    <Checkbox
+                      key={doc}
+                      label={doc}
+                      checked={property.applicableDocs.includes(doc)}
+                      onChange={() => handlePropertyDocToggle(index, doc)}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Applicable Documents */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              প্রযোজ্য কাগজ
-            </label>
-            <div className="flex flex-wrap gap-x-5 gap-y-2">
-              {DOCUMENT_OPTIONS.map((doc) => (
-                <Checkbox
-                  key={doc}
-                  label={doc}
-                  checked={formData.applicableDocs.includes(doc)}
-                  onChange={() => handleDocToggle(doc)}
-                />
-              ))}
-            </div>
-          </div>
+          ))}
         </Section>
 
         {/* Section 4 & 5: Urgent contact + Nominee, side by side */}
@@ -623,28 +672,28 @@ export default function RegistrationForm() {
               <Field label="নাম">
                 <Input
                   name="urgentContactName"
-                  value={formData.urgentContactName}
+                  value={formData.urgentContactName ?? ""}
                   onChange={handleChange}
                 />
               </Field>
               <Field label="সম্পর্ক">
                 <Input
                   name="urgentContactRelation"
-                  value={formData.urgentContactRelation}
+                  value={formData.urgentContactRelation ?? ""}
                   onChange={handleChange}
                 />
               </Field>
               <Field label="মোবাইল">
                 <Input
                   name="urgentContactMobile"
-                  value={formData.urgentContactMobile}
+                  value={formData.urgentContactMobile ?? ""}
                   onChange={handleChange}
                 />
               </Field>
               <Field label="ঠিকানা">
                 <Input
                   name="urgentContactAddress"
-                  value={formData.urgentContactAddress}
+                  value={formData.urgentContactAddress ?? ""}
                   onChange={handleChange}
                 />
               </Field>
@@ -814,7 +863,7 @@ export default function RegistrationForm() {
           </p>
           <Checkbox
             label="আমি সকল শর্তাবলীতে সম্মতি প্রদান করছি।"
-            checked={formData.declarationAccepted}
+            checked={formData.declarationAccepted ?? false}
             onChange={() =>
               setFormData((prev) => ({
                 ...prev,
@@ -951,6 +1000,29 @@ function Textarea({
       rows={3}
       className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent resize-none"
     />
+  );
+}
+
+function Select({
+  name,
+  value,
+  onChange,
+  children,
+}: {
+  name?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <select
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent"
+    >
+      {children}
+    </select>
   );
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processSubmission } from "@/lib/submit";
 import { generatePdf } from "@/lib/pdf";
-import type { FormData } from "@/lib/types";
+import { createEmptyProperty, type FormData } from "@/lib/types";
 
 function validate(data: FormData): string[] {
   const errors: string[] = [];
@@ -26,8 +26,15 @@ function validate(data: FormData): string[] {
     errors.push("NID নম্বর ১০-১৭ সংখ্যার হতে হবে");
   }
 
-  if (!data.propertyType?.trim()) errors.push("সম্পত্তির ধরন আবশ্যক");
-  if (!data.ownership?.trim()) errors.push("মালিকানা আবশ্যক");
+  if (!data.properties?.length) {
+    errors.push("অন্তত একটি সম্পত্তি যোগ করুন");
+  } else {
+    data.properties.forEach((property, i) => {
+      const label = `সম্পত্তি #${i + 1}`;
+      if (!property.propertyType?.length) errors.push(`${label}: সম্পত্তির ধরন আবশ্যক`);
+      if (!property.ownership?.trim()) errors.push(`${label}: মালিকানা আবশ্যক`);
+    });
+  }
 
   if (!data.admissionFee && data.admissionFee !== "0") errors.push("ভর্তি ফি আবশ্যক");
   if (!data.subscription && data.subscription !== "0") errors.push("চাঁদা আবশ্যক");
@@ -97,13 +104,8 @@ export async function GET(request: NextRequest) {
       mobile: "",
       whatsapp: "",
       email: "",
-      propertyType: "",
-      propertyTypeOther: "",
-      khatianNo: "",
-      dagNo: "",
-      landQuantity: "",
-      ownership: "",
-      applicableDocs: [],
+      propertyCount: 1,
+      properties: [createEmptyProperty()],
       nominees: [],
       admissionFee: "",
       subscription: "",

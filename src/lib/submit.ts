@@ -1,8 +1,42 @@
 import { appendRow, uploadFile, uploadPdf, getRowCount } from "./google";
 import { generatePdf } from "./pdf";
-import type { FormData, SubmissionResult } from "./types";
+import { MAX_PROPERTY_COUNT, type FormData, type PropertyItem, type SubmissionResult } from "./types";
 import fs from "fs";
 import path from "path";
+
+function formatPropertyType(property: PropertyItem): string {
+  const types = property.propertyType.includes("অন্যান্য")
+    ? property.propertyType.map((t) =>
+        t === "অন্যান্য" && property.propertyTypeOther
+          ? `${t} (${property.propertyTypeOther})`
+          : t
+      )
+    : property.propertyType;
+  return types.join(", ");
+}
+
+// Flattens the properties array into a fixed set of columns
+// (property1_*..property{MAX_PROPERTY_COUNT}_*), leaving unused
+// property columns blank when propertyCount is lower than the max.
+function buildPropertyColumns(properties: PropertyItem[]): string[] {
+  const columns: string[] = [];
+  for (let i = 0; i < MAX_PROPERTY_COUNT; i++) {
+    const property = properties[i];
+    if (!property) {
+      columns.push("", "", "", "", "", "");
+      continue;
+    }
+    columns.push(
+      formatPropertyType(property),
+      property.khatianNo,
+      property.dagNo,
+      property.landQuantity,
+      property.ownership,
+      property.applicableDocs.join(", ")
+    );
+  }
+  return columns;
+}
 
 function buildRow(data: FormData, formNo: string): (string | number)[] {
   return [
@@ -19,13 +53,8 @@ function buildRow(data: FormData, formNo: string): (string | number)[] {
     data.mobile,
     data.whatsapp,
     data.email,
-    // Property Info
-    data.propertyType === "other" ? data.propertyTypeOther : data.propertyType,
-    data.khatianNo,
-    data.dagNo,
-    data.landQuantity,
-    data.ownership,
-    data.applicableDocs.join(", "),
+    // Property Info (flattened, property1_*..property9_*)
+    ...buildPropertyColumns(data.properties),
     // Nominee 1
     data.nominees[0]?.name ?? "",
     data.nominees[0]?.relation ?? "",

@@ -1,5 +1,11 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import type { FormData } from "./types";
+import type { FormData, PropertyItem } from "./types";
+
+function formatPropertyType(property: PropertyItem): string {
+  return property.propertyType.includes("অন্যান্য") && property.propertyTypeOther
+    ? [...property.propertyType.filter((t) => t !== "অন্যান্য"), `অন্যান্য (${property.propertyTypeOther})`].join(", ")
+    : property.propertyType.join(", ");
+}
 
 function drawLine(
   page: ReturnType<PDFDocument["addPage"]>,
@@ -47,9 +53,41 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
   const pageWidth = 595; // A4
   const pageHeight = 842;
   const margin = 40;
-  const page = pdfDoc.addPage([pageWidth, pageHeight]);
+  let page = pdfDoc.addPage([pageWidth, pageHeight]);
 
   let y = pageHeight - margin;
+
+  // Starts a fresh page and resets the y cursor when the current page
+  // runs out of room (used by the property loop, which can grow up to
+  // MAX_PROPERTY_COUNT sub-sections).
+  function ensureSpace(neededHeight: number) {
+    if (y - neededHeight < margin) {
+      page = pdfDoc.addPage([pageWidth, pageHeight]);
+      y = pageHeight - margin;
+    }
+  }
+
+  function drawKeyValueRows(rows: [string, string][]) {
+    const labelWidth = 130;
+    const rowHeight = 18;
+    for (const [label, value] of rows) {
+      ensureSpace(rowHeight);
+      drawRect(page, margin, y - rowHeight, pageWidth - margin * 2, rowHeight);
+      page.drawText(label + ":", {
+        x: margin + 5,
+        y: y - 13,
+        size: 9,
+        font: fontBold,
+      });
+      page.drawText(value || "-", {
+        x: margin + labelWidth + 5,
+        y: y - 13,
+        size: 9,
+        font,
+      });
+      y -= rowHeight;
+    }
+  }
 
   // ── HEADER ──
   const titleText = "Uttar Kaundia Abashan Malik Kalyan Porishod";
@@ -118,35 +156,12 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
     ["Email", data.email],
   ];
 
-  for (const [label, value] of memberFields) {
-    const labelWidth = 130;
-    const rowHeight = 18;
-
-    // Draw row background
-    drawRect(page, margin, y - rowHeight, pageWidth - margin * 2, rowHeight);
-
-    // Label
-    page.drawText(label + ":", {
-      x: margin + 5,
-      y: y - 13,
-      size: 9,
-      font: fontBold,
-    });
-
-    // Value
-    page.drawText(value || "-", {
-      x: margin + labelWidth + 5,
-      y: y - 13,
-      size: 9,
-      font,
-    });
-
-    y -= rowHeight;
-  }
+  drawKeyValueRows(memberFields);
 
   y -= 15;
 
-  // ── SECTION: PROPERTY INFO ──
+  // ── SECTION: PROPERTY INFO (one sub-section per entry) ──
+  ensureSpace(23);
   page.drawText("2. Property Information", {
     x: margin,
     y,
@@ -157,41 +172,33 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
   drawLine(page, margin, y, pageWidth - margin, y, 0.5);
   y -= 5;
 
-  const propertyFields: [string, string][] = [
-    ["Property Type", data.propertyType === "other" ? data.propertyTypeOther : data.propertyType],
-    ["Khatian No", data.khatianNo],
-    ["Dag No", data.dagNo],
-    ["Land Quantity", data.landQuantity],
-    ["Ownership", data.ownership],
-    ["Applicable Docs", data.applicableDocs.join(", ")],
-  ];
-
-  for (const [label, value] of propertyFields) {
-    const labelWidth = 130;
-    const rowHeight = 18;
-
-    drawRect(page, margin, y - rowHeight, pageWidth - margin * 2, rowHeight);
-
-    page.drawText(label + ":", {
-      x: margin + 5,
-      y: y - 13,
-      size: 9,
+  data.properties.forEach((property, index) => {
+    ensureSpace(15);
+    page.drawText(`Property #${index + 1}`, {
+      x: margin,
+      y,
+      size: 10,
       font: fontBold,
     });
+    y -= 15;
 
-    page.drawText(value || "-", {
-      x: margin + labelWidth + 5,
-      y: y - 13,
-      size: 9,
-      font,
-    });
+    const propertyFields: [string, string][] = [
+      ["Property Type", formatPropertyType(property)],
+      ["Khatian No", property.khatianNo],
+      ["Dag No", property.dagNo],
+      ["Land Quantity", property.landQuantity],
+      ["Ownership", property.ownership],
+      ["Applicable Docs", property.applicableDocs.join(", ")],
+    ];
 
-    y -= rowHeight;
-  }
+    drawKeyValueRows(propertyFields);
+    y -= 10;
+  });
 
-  y -= 15;
+  y -= 5;
 
   // ── SECTION: NOMINEES ──
+  ensureSpace(23);
   page.drawText("3. Nominees", {
     x: margin,
     y,
@@ -209,31 +216,11 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
     ["Address", data.nominees[0]?.address || ""],
   ];
 
-  for (const [label, value] of nomineeFields) {
-    const labelWidth = 130;
-    const rowHeight = 18;
-
-    drawRect(page, margin, y - rowHeight, pageWidth - margin * 2, rowHeight);
-
-    page.drawText(label + ":", {
-      x: margin + 5,
-      y: y - 13,
-      size: 9,
-      font: fontBold,
-    });
-
-    page.drawText(value || "-", {
-      x: margin + labelWidth + 5,
-      y: y - 13,
-      size: 9,
-      font,
-    });
-
-    y -= rowHeight;
-  }
+  drawKeyValueRows(nomineeFields);
 
   if (data.nominees[1]) {
     y -= 5;
+    ensureSpace(15);
     page.drawText("Nominee 2:", {
       x: margin,
       y,
@@ -249,33 +236,13 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
       ["Address", data.nominees[1].address],
     ];
 
-    for (const [label, value] of nominee2Fields) {
-      const labelWidth = 130;
-      const rowHeight = 18;
-
-      drawRect(page, margin, y - rowHeight, pageWidth - margin * 2, rowHeight);
-
-      page.drawText(label + ":", {
-        x: margin + 5,
-        y: y - 13,
-        size: 9,
-        font: fontBold,
-      });
-
-      page.drawText(value || "-", {
-        x: margin + labelWidth + 5,
-        y: y - 13,
-        size: 9,
-        font,
-      });
-
-      y -= rowHeight;
-    }
+    drawKeyValueRows(nominee2Fields);
   }
 
   y -= 15;
 
   // ── SECTION: PAYMENT ──
+  ensureSpace(23);
   page.drawText("4. Payment", {
     x: margin,
     y,
@@ -293,32 +260,12 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
     ["Payment Method", data.paymentMethod],
   ];
 
-  for (const [label, value] of paymentFields) {
-    const labelWidth = 130;
-    const rowHeight = 18;
-
-    drawRect(page, margin, y - rowHeight, pageWidth - margin * 2, rowHeight);
-
-    page.drawText(label + ":", {
-      x: margin + 5,
-      y: y - 13,
-      size: 9,
-      font: fontBold,
-    });
-
-    page.drawText(value || "-", {
-      x: margin + labelWidth + 5,
-      y: y - 13,
-      size: 9,
-      font,
-    });
-
-    y -= rowHeight;
-  }
+  drawKeyValueRows(paymentFields);
 
   y -= 20;
 
   // ── SIGNATURE AREA ──
+  ensureSpace(15);
   drawLine(page, margin, y, pageWidth - margin, y, 1);
   y -= 15;
 
@@ -339,6 +286,7 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
   y -= 30;
 
   // ── OFFICE USE ONLY ──
+  ensureSpace(30 + 4 * 15); // heading + rule + 4 office fields
   page.drawText("For Office Use Only:", {
     x: margin,
     y,
