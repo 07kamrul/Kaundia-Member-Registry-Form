@@ -11,7 +11,7 @@
         </label>
       }
       @if (isTypeChecked('অন্যান্য')) {
-        <input type="text" formControlName="propertyTypeOther" placeholder="বিস্তারিত লিখুন" style="max-width:14rem" />
+        <input type="text" formControlName="propertyTypeOther" placeholder="বিস্তারিত লিখুন" style="max-width:14rem;width:100%" />
       }
     </div>
   </div>
@@ -23,12 +23,12 @@
     </div>
     <div class="field" formGroupName="dagNo">
       <label>দাগ নং</label>
-      <div style="display:flex;gap:0.75rem">
-        <div style="display:flex;align-items:center;gap:0.5rem;flex:1">
+      <div class="flex-row-wrap">
+        <div style="display:flex;align-items:center;gap:0.5rem;flex:1 1 8rem">
           <span style="font-size:0.875rem;color:#4b5563">CS:</span>
           <input type="text" formControlName="cs" />
         </div>
-        <div style="display:flex;align-items:center;gap:0.5rem;flex:1">
+        <div style="display:flex;align-items:center;gap:0.5rem;flex:1 1 8rem">
           <span style="font-size:0.875rem;color:#4b5563">RS:</span>
           <input type="text" formControlName="rs" />
         </div>
@@ -59,12 +59,12 @@
     <div class="field">
       <label>যৌথ মালিকগণ <span class="required">*</span></label>
       @for (co of coOwners.controls; track co; let ci = $index) {
-        <div [formGroup]="coOwnerGroup(ci)" style="display:flex;gap:0.5rem;align-items:flex-end;margin-bottom:0.5rem">
-          <div class="field" style="flex:1;margin-bottom:0">
+        <div [formGroup]="coOwnerGroup(ci)" class="flex-row-wrap" style="align-items:flex-end;margin-bottom:0.5rem">
+          <div class="field" style="flex:1 1 10rem;margin-bottom:0">
             <label>মালিকের নাম <span class="required">*</span></label>
             <input type="text" formControlName="ownerName" />
           </div>
-          <div class="field" style="flex:1;margin-bottom:0">
+          <div class="field" style="flex:1 1 10rem;margin-bottom:0">
             <label>মোবাইল নং <span class="required">*</span></label>
             <input type="text" formControlName="ownerPhone" placeholder="01XXXXXXXXX" />
           </div>
@@ -93,7 +93,7 @@
             {{ doc }}
           </label>
           @if (findDocEntry(doc); as entry) {
-            <div style="margin-top:0.5rem;margin-left:1.5rem;max-width:24rem">
+            <div style="margin-top:0.5rem;margin-left:1.5rem;max-width:24rem;width:100%">
               @if (entry.get('fileDataUrl')?.value) {
                 <div style="display:flex;align-items:center;gap:0.75rem;border:1px solid #d1d5db;border-radius:0.5rem;padding:0.5rem">
                   <span style="flex:1;font-size:0.75rem;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">

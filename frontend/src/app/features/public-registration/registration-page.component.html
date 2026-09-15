@@ -1,10 +1,10 @@
 @if (success) {
   <app-confirmation [submissionId]="success.id" [fullName]="success.fullName" (reset)="resetForm()" />
 } @else {
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card" style="max-width:48rem;margin:1.5rem auto;position:relative;overflow:hidden">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card reg-card">
     <div style="position:absolute;inset:0;background-image:url('/banner.jpeg');background-size:cover;background-position:center;opacity:0.08;pointer-events:none;z-index:0"></div>
-    <img src="/logo.jpeg" alt="সংগঠনের লোগো" style="position:absolute;top:1rem;left:1.5rem;width:7rem;height:7rem;object-fit:contain;border-radius:50%;border:2px solid #065f46;background:#fff;padding:0.25rem;z-index:2" />
-    <div style="padding:1rem 1.5rem;position:relative;z-index:1">
+    <img src="/logo.jpeg" alt="সংগঠনের লোগো" class="reg-logo" />
+    <div class="reg-card-body">
       @if (errors.length > 0) {
         <div class="error-box">
           <h3>নিম্নলিখিত সমস্যা দূর করুন:</h3>
@@ -31,7 +31,7 @@
         </div>
       </div>
 
-      <div class="field" style="max-width:16rem;margin-bottom:1.5rem">
+      <div class="field" style="max-width:16rem;width:100%;margin-bottom:1.5rem">
         <label>নিবন্ধনের তারিখ</label>
         <input type="date" formControlName="submissionDate" />
       </div>

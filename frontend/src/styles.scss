@@ -240,3 +240,87 @@ textarea:focus {
 .stepper-line.done {
   background: var(--emerald-600);
 }
+
+.reg-card {
+  max-width: 48rem;
+  margin: 1.5rem auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.reg-card-body {
+  padding: 1rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.reg-logo {
+  position: absolute;
+  top: 1rem;
+  left: 1.5rem;
+  width: 7rem;
+  height: 7rem;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 2px solid var(--emerald-800);
+  background: #fff;
+  padding: 0.25rem;
+  z-index: 2;
+}
+
+@media (max-width: 640px) {
+  .reg-card {
+    margin: 0.5rem;
+  }
+
+  .reg-card-body {
+    padding: 0.75rem;
+  }
+
+  .reg-logo {
+    width: 4rem;
+    height: 4rem;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    border-radius: 0.5rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .stepper {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .stepper-circle {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
+  }
+
+  .stepper-label {
+    font-size: 0.625rem;
+    white-space: normal;
+    max-width: 3.5rem;
+    text-align: center;
+  }
+
+  .stepper-line {
+    min-width: 0.5rem;
+  }
+}
+
+.flex-row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
