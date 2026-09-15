@@ -13,6 +13,7 @@ export class HomeComponent {
   form: FormGroup;
   error = '';
   submitting = false;
+  submitAttempted = false;
 
   constructor(
     private fb: FormBuilder,
@@ -25,7 +26,21 @@ export class HomeComponent {
     });
   }
 
+  showError(controlName: string): boolean {
+    const control = this.form.get(controlName);
+    return !!control && control.invalid && (control.touched || this.submitAttempted);
+  }
+
+  errorMessage(controlName: string): string {
+    const messages: Record<string, string> = {
+      identifier: 'ইউজারনেম / ইমেইল আবশ্যক',
+      password: 'পাসওয়ার্ড আবশ্যক',
+    };
+    return messages[controlName] ?? '';
+  }
+
   onSubmit(): void {
+    this.submitAttempted = true;
     if (this.form.invalid) return;
     this.error = '';
     this.submitting = true;

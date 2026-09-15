@@ -139,4 +139,18 @@ export class PropertyItemComponent {
     const entry = this.findDocEntry(type);
     return this.submitAttempted && !!entry && !entry.get('fileDataUrl')?.value;
   }
+
+  showPropertyTypeError(): boolean {
+    const value = this.property.get('propertyType')?.value as string[];
+    return this.submitAttempted && (!value || value.length === 0);
+  }
+
+  showOwnershipError(): boolean {
+    return this.submitAttempted && !this.property.get('ownership')?.value;
+  }
+
+  showCoOwnerError(controlName: 'ownerName' | 'ownerPhone', index: number): boolean {
+    const control = this.coOwnerGroup(index).get(controlName);
+    return this.submitAttempted && !control?.value?.trim();
+  }
 }

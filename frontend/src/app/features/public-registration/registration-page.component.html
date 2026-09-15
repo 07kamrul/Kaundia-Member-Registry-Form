@@ -85,7 +85,7 @@
       }
 
       @if (currentStep === 4) {
-        <app-payment-info [form]="form" />
+        <app-payment-info [form]="form" [submitAttempted]="submitAttempted" />
       }
 
       @if (currentStep === 5) {

@@ -4,10 +4,16 @@
     <div class="field">
       <label>ভর্তি ফি (টাকা) <span class="required">*</span></label>
       <input type="number" formControlName="admissionFee" />
+      @if (showError('admissionFee')) {
+        <p class="field-error">{{ errorMessage('admissionFee') }}</p>
+      }
     </div>
     <div class="field">
       <label>চাঁদা (টাকা) <span class="required">*</span></label>
       <input type="number" formControlName="subscription" />
+      @if (showError('subscription')) {
+        <p class="field-error">{{ errorMessage('subscription') }}</p>
+      }
     </div>
     <div class="field">
       <label>রসিদ নং</label>
@@ -28,5 +34,8 @@
         </label>
       }
     </div>
+    @if (showError('paymentMethod')) {
+      <p class="field-error">{{ errorMessage('paymentMethod') }}</p>
+    }
   </div>
 </section>

@@ -14,6 +14,9 @@
         <input type="text" formControlName="propertyTypeOther" placeholder="বিস্তারিত লিখুন" style="max-width:14rem;width:100%" />
       }
     </div>
+    @if (showPropertyTypeError()) {
+      <p class="field-error">সম্পত্তির ধরন আবশ্যক</p>
+    }
   </div>
 
   <div class="grid-2">
@@ -52,6 +55,9 @@
           </label>
         }
       </div>
+      @if (showOwnershipError()) {
+        <p class="field-error">মালিকানা আবশ্যক</p>
+      }
     </div>
   </div>
 
@@ -63,10 +69,16 @@
           <div class="field" style="flex:1 1 10rem;margin-bottom:0">
             <label>মালিকের নাম <span class="required">*</span></label>
             <input type="text" formControlName="ownerName" />
+            @if (showCoOwnerError('ownerName', ci)) {
+              <p class="field-error">নাম আবশ্যক</p>
+            }
           </div>
           <div class="field" style="flex:1 1 10rem;margin-bottom:0">
             <label>মোবাইল নং <span class="required">*</span></label>
             <input type="text" formControlName="ownerPhone" placeholder="01XXXXXXXXX" />
+            @if (showCoOwnerError('ownerPhone', ci)) {
+              <p class="field-error">মোবাইল নং আবশ্যক</p>
+            }
           </div>
           <button
             type="button"
