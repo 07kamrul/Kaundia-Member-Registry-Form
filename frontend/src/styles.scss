@@ -315,17 +315,6 @@ textarea:focus {
 }
 
 @media (min-width: 640px) {
-  .reg-header {
-    flex-direction: row;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .reg-header-text {
-    align-items: flex-start;
-    text-align: left;
-  }
-
   .reg-logo {
     width: 6rem;
     height: 6rem;
