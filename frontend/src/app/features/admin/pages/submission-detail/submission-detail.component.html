@@ -16,11 +16,28 @@
         <p><strong>ইমেইল:</strong> {{ submission.email }}</p>
         <p><strong>NID:</strong> {{ submission.nid }}</p>
         <p><strong>স্ট্যাটাস:</strong> {{ submission.status }}</p>
-        <p><strong>স্থায়ী ঠিকানা:</strong> {{ submission.permanentAddress }}</p>
-        <p><strong>বর্তমান ঠিকানা:</strong> {{ submission.currentAddress }}</p>
         <p><strong>ভর্তি ফি:</strong> {{ submission.admissionFee }}</p>
         <p><strong>চাঁদা:</strong> {{ submission.subscription }}</p>
         <p><strong>পেমেন্ট মাধ্যম:</strong> {{ submission.paymentMethod }}</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:1rem">
+        <div>
+          <h3 style="color:#374151;margin-bottom:0.5rem">স্থায়ী ঠিকানা</h3>
+          <p><strong>বাসা/হোল্ডিং নং:</strong> {{ submission.permanentHouse }}</p>
+          <p><strong>রাস্তা/গ্রাম:</strong> {{ submission.permanentRoad }}</p>
+          <p><strong>ডাকঘর:</strong> {{ submission.permanentPostOffice }}</p>
+          <p><strong>উপজেলা/থানা:</strong> {{ submission.permanentUpazila }}</p>
+          <p><strong>জেলা:</strong> {{ submission.permanentDistrict }}</p>
+        </div>
+        <div>
+          <h3 style="color:#374151;margin-bottom:0.5rem">বর্তমান ঠিকানা</h3>
+          <p><strong>বাসা/হোল্ডিং নং:</strong> {{ submission.currentHouse }}</p>
+          <p><strong>রাস্তা/গ্রাম:</strong> {{ submission.currentRoad }}</p>
+          <p><strong>ডাকঘর:</strong> {{ submission.currentPostOffice }}</p>
+          <p><strong>উপজেলা/থানা:</strong> {{ submission.currentUpazila }}</p>
+          <p><strong>জেলা:</strong> {{ submission.currentDistrict }}</p>
+        </div>
       </div>
 
       <h3 style="margin-top:1.5rem;color:#374151">সম্পত্তিসমূহ</h3>

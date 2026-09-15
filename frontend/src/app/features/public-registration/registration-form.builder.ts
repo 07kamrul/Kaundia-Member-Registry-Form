@@ -31,6 +31,16 @@ export function buildPropertyGroup(fb: FormBuilder): FormGroup {
   });
 }
 
+export function buildAddressGroup(fb: FormBuilder): FormGroup {
+  return fb.group({
+    house: [''],
+    road: [''],
+    postOffice: [''],
+    upazila: [''],
+    district: [''],
+  });
+}
+
 export function buildNomineeGroup(fb: FormBuilder): FormGroup {
   return fb.group({
     name: [''],
@@ -53,8 +63,8 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
     whatsapp: [''],
     email: ['', Validators.email],
 
-    permanentAddress: [''],
-    currentAddress: [''],
+    permanentAddress: buildAddressGroup(fb),
+    currentAddress: buildAddressGroup(fb),
 
     urgentContactName: [''],
     urgentContactRelation: [''],

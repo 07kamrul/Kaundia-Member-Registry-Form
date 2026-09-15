@@ -5,6 +5,18 @@ export interface Nominee {
   address: string;
 }
 
+export interface AddressDetail {
+  house: string;
+  road: string;
+  postOffice: string;
+  upazila: string;
+  district: string;
+}
+
+export function createEmptyAddress(): AddressDetail {
+  return { house: '', road: '', postOffice: '', upazila: '', district: '' };
+}
+
 export interface CoOwner {
   ownerName: string;
   ownerPhone: string;
@@ -97,8 +109,8 @@ export interface FormDataModel {
   mobile: string;
   whatsapp: string;
   email: string;
-  permanentAddress?: string;
-  currentAddress?: string;
+  permanentAddress?: AddressDetail;
+  currentAddress?: AddressDetail;
   urgentContactName?: string;
   urgentContactRelation?: string;
   urgentContactMobile?: string;

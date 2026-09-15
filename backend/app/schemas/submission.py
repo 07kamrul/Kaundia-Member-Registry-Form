@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
-from app.schemas.common import Nominee, PropertyIn
+from app.schemas.common import AddressDetail, Nominee, PropertyIn
 
 
 class SubmissionPayload(BaseModel):
@@ -21,8 +21,8 @@ class SubmissionPayload(BaseModel):
     whatsapp: str
     email: EmailStr
 
-    permanent_address: str | None = None
-    current_address: str | None = None
+    permanent_address: AddressDetail | None = None
+    current_address: AddressDetail | None = None
 
     urgent_contact_name: str | None = None
     urgent_contact_relation: str | None = None

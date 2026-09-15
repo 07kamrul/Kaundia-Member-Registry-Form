@@ -15,8 +15,25 @@
         <p><strong>জন্ম তারিখ:</strong> {{ profile.dob }}</p>
         <p><strong>মোবাইল:</strong> {{ profile.mobile }}</p>
         <p><strong>ইমেইল:</strong> {{ profile.email }}</p>
-        <p><strong>স্থায়ী ঠিকানা:</strong> {{ profile.permanentAddress }}</p>
-        <p><strong>বর্তমান ঠিকানা:</strong> {{ profile.currentAddress }}</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:1rem">
+        <div>
+          <h3 style="color:#374151;margin-bottom:0.5rem">স্থায়ী ঠিকানা</h3>
+          <p><strong>বাসা/হোল্ডিং নং:</strong> {{ profile.permanentHouse }}</p>
+          <p><strong>রাস্তা/গ্রাম:</strong> {{ profile.permanentRoad }}</p>
+          <p><strong>ডাকঘর:</strong> {{ profile.permanentPostOffice }}</p>
+          <p><strong>উপজেলা/থানা:</strong> {{ profile.permanentUpazila }}</p>
+          <p><strong>জেলা:</strong> {{ profile.permanentDistrict }}</p>
+        </div>
+        <div>
+          <h3 style="color:#374151;margin-bottom:0.5rem">বর্তমান ঠিকানা</h3>
+          <p><strong>বাসা/হোল্ডিং নং:</strong> {{ profile.currentHouse }}</p>
+          <p><strong>রাস্তা/গ্রাম:</strong> {{ profile.currentRoad }}</p>
+          <p><strong>ডাকঘর:</strong> {{ profile.currentPostOffice }}</p>
+          <p><strong>উপজেলা/থানা:</strong> {{ profile.currentUpazila }}</p>
+          <p><strong>জেলা:</strong> {{ profile.currentDistrict }}</p>
+        </div>
       </div>
 
       <h3 style="color:#374151">সম্পত্তিসমূহ</h3>

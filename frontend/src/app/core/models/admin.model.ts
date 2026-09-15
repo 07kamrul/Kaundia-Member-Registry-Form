@@ -17,8 +17,16 @@ export interface SubmissionDetail extends SubmissionSummary {
   nid: string;
   whatsapp: string;
   email: string;
-  permanentAddress?: string;
-  currentAddress?: string;
+  permanentHouse?: string;
+  permanentRoad?: string;
+  permanentPostOffice?: string;
+  permanentUpazila?: string;
+  permanentDistrict?: string;
+  currentHouse?: string;
+  currentRoad?: string;
+  currentPostOffice?: string;
+  currentUpazila?: string;
+  currentDistrict?: string;
   urgentContactName?: string;
   urgentContactRelation?: string;
   urgentContactMobile?: string;

@@ -12,8 +12,16 @@ export interface MemberProfile {
   dob: string;
   mobile: string;
   email?: string;
-  permanentAddress?: string;
-  currentAddress?: string;
+  permanentHouse?: string;
+  permanentRoad?: string;
+  permanentPostOffice?: string;
+  permanentUpazila?: string;
+  permanentDistrict?: string;
+  currentHouse?: string;
+  currentRoad?: string;
+  currentPostOffice?: string;
+  currentUpazila?: string;
+  currentDistrict?: string;
   properties: unknown[];
   nominees: unknown[];
 }

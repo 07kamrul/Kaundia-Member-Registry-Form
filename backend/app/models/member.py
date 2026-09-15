@@ -35,8 +35,16 @@ class Member(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Address info
-    permanent_address: Mapped[str | None] = mapped_column(Text, nullable=True)
-    current_address: Mapped[str | None] = mapped_column(Text, nullable=True)
+    permanent_house: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    permanent_road: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    permanent_post_office: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    permanent_upazila: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    permanent_district: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    current_house: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    current_road: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    current_post_office: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    current_upazila: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    current_district: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Urgent contact
     urgent_contact_name: Mapped[str | None] = mapped_column(String(255), nullable=True)

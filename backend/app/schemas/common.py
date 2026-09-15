@@ -1,6 +1,14 @@
 from pydantic import BaseModel
 
 
+class AddressDetail(BaseModel):
+    house: str | None = None
+    road: str | None = None
+    post_office: str | None = None
+    upazila: str | None = None
+    district: str | None = None
+
+
 class Nominee(BaseModel):
     name: str
     relation: str

@@ -40,8 +40,24 @@ export class RegistrationService {
       mobile: formData.mobile,
       whatsapp: formData.whatsapp,
       email: formData.email,
-      permanent_address: formData.permanentAddress,
-      current_address: formData.currentAddress,
+      permanent_address: formData.permanentAddress
+        ? {
+            house: formData.permanentAddress.house,
+            road: formData.permanentAddress.road,
+            post_office: formData.permanentAddress.postOffice,
+            upazila: formData.permanentAddress.upazila,
+            district: formData.permanentAddress.district,
+          }
+        : null,
+      current_address: formData.currentAddress
+        ? {
+            house: formData.currentAddress.house,
+            road: formData.currentAddress.road,
+            post_office: formData.currentAddress.postOffice,
+            upazila: formData.currentAddress.upazila,
+            district: formData.currentAddress.district,
+          }
+        : null,
       urgent_contact_name: formData.urgentContactName,
       urgent_contact_relation: formData.urgentContactRelation,
       urgent_contact_mobile: formData.urgentContactMobile,

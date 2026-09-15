@@ -72,8 +72,16 @@ class MemberDetail(MemberSummary):
     occupation: str
     nid: str
     whatsapp: str
-    permanent_address: str | None = None
-    current_address: str | None = None
+    permanent_house: str | None = None
+    permanent_road: str | None = None
+    permanent_post_office: str | None = None
+    permanent_upazila: str | None = None
+    permanent_district: str | None = None
+    current_house: str | None = None
+    current_road: str | None = None
+    current_post_office: str | None = None
+    current_upazila: str | None = None
+    current_district: str | None = None
     urgent_contact_name: str | None = None
     urgent_contact_relation: str | None = None
     urgent_contact_mobile: str | None = None

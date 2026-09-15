@@ -1,13 +1,51 @@
 <section [formGroup]="form">
   <h2 class="section-title">২. ঠিকানার তথ্য</h2>
   <div class="grid-2">
-    <div class="field">
-      <label>স্থায়ী ঠিকানা</label>
-      <textarea rows="3" formControlName="permanentAddress"></textarea>
+    <div formGroupName="permanentAddress">
+      <h3 style="font-size:0.9rem;color:#374151;margin:0 0 0.5rem">স্থায়ী ঠিকানা</h3>
+      <div class="field">
+        <label>বাসা/হোল্ডিং নং</label>
+        <input type="text" formControlName="house" />
+      </div>
+      <div class="field">
+        <label>রাস্তা/গ্রাম</label>
+        <input type="text" formControlName="road" />
+      </div>
+      <div class="field">
+        <label>ডাকঘর</label>
+        <input type="text" formControlName="postOffice" />
+      </div>
+      <div class="field">
+        <label>উপজেলা/থানা</label>
+        <input type="text" formControlName="upazila" />
+      </div>
+      <div class="field">
+        <label>জেলা</label>
+        <input type="text" formControlName="district" />
+      </div>
     </div>
-    <div class="field">
-      <label>বর্তমান ঠিকানা</label>
-      <textarea rows="3" formControlName="currentAddress"></textarea>
+    <div formGroupName="currentAddress">
+      <h3 style="font-size:0.9rem;color:#374151;margin:0 0 0.5rem">বর্তমান ঠিকানা</h3>
+      <div class="field">
+        <label>বাসা/হোল্ডিং নং</label>
+        <input type="text" formControlName="house" />
+      </div>
+      <div class="field">
+        <label>রাস্তা/গ্রাম</label>
+        <input type="text" formControlName="road" />
+      </div>
+      <div class="field">
+        <label>ডাকঘর</label>
+        <input type="text" formControlName="postOffice" />
+      </div>
+      <div class="field">
+        <label>উপজেলা/থানা</label>
+        <input type="text" formControlName="upazila" />
+      </div>
+      <div class="field">
+        <label>জেলা</label>
+        <input type="text" formControlName="district" />
+      </div>
     </div>
   </div>
 </section>
