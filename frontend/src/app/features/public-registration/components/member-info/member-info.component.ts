@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -9,4 +9,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 })
 export class MemberInfoComponent {
   @Input({ required: true }) form!: FormGroup;
+  @Input() memberPhotoPreview = '';
+  @Output() photoChange = new EventEmitter<Event>();
+  @Output() photoClear = new EventEmitter<void>();
 }
