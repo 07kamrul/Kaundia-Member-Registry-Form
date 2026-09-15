@@ -1,4 +1,4 @@
-import { appendRow, uploadPdf, getRowCount } from "./google";
+import { appendRow, uploadFile, uploadPdf, getRowCount } from "./google";
 import { generatePdf } from "./pdf";
 import type { FormData, SubmissionResult } from "./types";
 import fs from "fs";
@@ -45,6 +45,30 @@ function buildRow(data: FormData, formNo: string): (string | number)[] {
     data.memberSignature ? "Yes" : "No",
     "", // Drive link (filled after upload)
   ];
+}
+
+const PHOTO_DATA_URL_RE = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
+const MIME_TO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+function decodePhotoDataUrl(
+  dataUrl: string
+): { buffer: Buffer; mimeType: string; ext: string } | null {
+  const match = PHOTO_DATA_URL_RE.exec(dataUrl.trim());
+  if (!match) return null;
+
+  const [, mimeType, base64] = match;
+  const ext = MIME_TO_EXT[mimeType] ?? "jpg";
+
+  try {
+    return { buffer: Buffer.from(base64, "base64"), mimeType, ext };
+  } catch {
+    return null;
+  }
 }
 
 function logSubmission(formNo: string, row: Record<string, unknown>) {
@@ -104,11 +128,12 @@ export async function processSubmission(data: FormData): Promise<SubmissionResul
     };
   }
 
+  const safeName = data.fullName.replace(/[^a-zA-Z0-9\u0980-\u09FF]/g, "_");
+
   // Upload to Drive
   let driveFileId: string;
   let driveFileLink: string;
   try {
-    const safeName = data.fullName.replace(/[^a-zA-Z0-9\u0980-\u09FF]/g, "_");
     const fileName = `${safeName}_${formNo}.pdf`;
     const result = await uploadPdf(fileName, pdfBuffer);
     driveFileId = result.fileId;
@@ -125,10 +150,36 @@ export async function processSubmission(data: FormData): Promise<SubmissionResul
     };
   }
 
+  // Upload member photo to the same Drive folder (best-effort \u2014 a photo
+  // problem shouldn't block a submission that already has its PDF saved).
+  let photoFileId: string | undefined;
+  let photoFileLink: string | undefined;
+  if (data.memberPhoto) {
+    const decoded = decodePhotoDataUrl(data.memberPhoto);
+    if (!decoded) {
+      console.error(`[Drive] Photo skipped: invalid image data for ${formNo}`);
+      logSubmission(formNo, { warning: "Invalid member photo data, skipped upload" });
+    } else {
+      try {
+        const photoFileName = `${safeName}_${formNo}_photo.${decoded.ext}`;
+        const result = await uploadFile(photoFileName, decoded.buffer, decoded.mimeType);
+        photoFileId = result.fileId;
+        photoFileLink = result.fileLink;
+        console.log(`[Drive] Photo uploaded: ${photoFileId}`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`[Drive] Photo upload failed: ${msg}`);
+        logSubmission(formNo, { warning: "Photo upload failed", details: msg });
+      }
+    }
+  }
+
   logSubmission(formNo, {
     sheetRow: rowCount + 2,
     driveFileId,
     driveFileLink,
+    photoFileId,
+    photoFileLink,
   });
 
   return {
@@ -136,5 +187,7 @@ export async function processSubmission(data: FormData): Promise<SubmissionResul
     formNo,
     driveFileId,
     driveFileLink,
+    photoFileId,
+    photoFileLink,
   };
 }

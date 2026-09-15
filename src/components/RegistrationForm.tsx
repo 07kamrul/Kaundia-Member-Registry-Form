@@ -51,6 +51,7 @@ interface FormData {
   receiptNo: string;
   paymentMethod: string;
   memberSignature: string;
+  memberPhoto: string;
   submissionDate: string;
   declarationAccepted: boolean;
   website: string;
@@ -86,6 +87,7 @@ const initialFormData: FormData = {
   receiptNo: "",
   paymentMethod: "",
   memberSignature: "",
+  memberPhoto: "",
   submissionDate: new Date().toISOString().split("T")[0],
   declarationAccepted: false,
   website: "",
@@ -147,6 +149,33 @@ export default function RegistrationForm() {
   const clearSignature = () => {
     sigRef.current?.clear();
     setFormData((prev) => ({ ...prev, memberSignature: "" }));
+  };
+
+  const MAX_PHOTO_BYTES = 3 * 1024 * 1024; // 3MB
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErrors(["ছবির ফাইল নির্বাচন করুন (JPG/PNG)"]);
+      return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      setErrors(["ছবির সাইজ ৩ এমবি-এর কম হতে হবে"]);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((prev) => ({ ...prev, memberPhoto: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearPhoto = () => {
+    setFormData((prev) => ({ ...prev, memberPhoto: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -312,38 +341,72 @@ export default function RegistrationForm() {
         )}
 
         {/* Header */}
-        <div className="relative flex flex-col items-center text-center mb-4">
+        <div className="flex flex-col items-center text-center mb-4">
           <p className="text-sm text-emerald-900 mb-1" dir="rtl">
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
           </p>
-          <div className="flex items-center gap-3">
-            <div className="relative w-16 h-16 shrink-0">
-              <Image
-                src="/images/logo.jpeg"
-                alt="উত্তর কাউন্দিয়া লোগো"
-                fill
-                sizes="64px"
-                className="object-contain rounded-full"
-              />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
+            <div className="flex items-center gap-3 mx-auto sm:mx-0">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
+                <Image
+                  src="/images/logo.jpeg"
+                  alt="উত্তর কাউন্দিয়া লোগো"
+                  fill
+                  sizes="112px"
+                  className="object-contain rounded-full"
+                />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-emerald-900">
+                  উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  (সকল জমি, বাড়ি ও ফ্ল্যাট মালিকদের ঐক্যবদ্ধ অরাজনৈতিক আবাসন সংগঠন)
+                </p>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  উত্তর কাউন্দিয়া, সাভার, ঢাকা। | স্থাপিত : ২০২৬ ইং
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-emerald-900">
-                উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                (সকল জমি, বাড়ি ও ফ্ল্যাট মালিকদের ঐক্যবদ্ধ অরাজনৈতিক আবাসন সংগঠন)
-              </p>
-              <p className="text-xs sm:text-sm text-gray-600">
-                উত্তর কাউন্দিয়া, সাভার, ঢাকা। | স্থাপিত : ২০২৬ ইং
-              </p>
-            </div>
-          </div>
 
-          {/* Photo placeholder box */}
-          <div className="hidden sm:flex absolute right-0 top-0 w-20 h-24 border-2 border-dashed border-emerald-700/60 items-center justify-center text-center text-[10px] text-emerald-800 leading-tight p-1">
-            সদস্যের ছবি
-            <br />
-            ২&quot;×২&quot;
+            {/* Member photo upload */}
+            <div className="flex flex-col items-center gap-1 mx-auto sm:mx-0 shrink-0">
+            <label
+              htmlFor="memberPhoto"
+              className="flex w-20 h-24 border-2 border-dashed border-emerald-700/60 items-center justify-center text-center text-[10px] text-emerald-800 leading-tight p-1 cursor-pointer overflow-hidden bg-white hover:bg-emerald-50 transition"
+            >
+              {formData.memberPhoto ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={formData.memberPhoto}
+                  alt="সদস্যের ছবি"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>
+                  সদস্যের ছবি
+                  <br />
+                  ২&quot;×২&quot;
+                </span>
+              )}
+            </label>
+            <input
+              id="memberPhoto"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+            {formData.memberPhoto && (
+              <button
+                type="button"
+                onClick={clearPhoto}
+                className="text-[10px] text-red-700 underline"
+              >
+                মুছুন
+              </button>
+            )}
+            </div>
           </div>
 
           <div className="mt-3 bg-emerald-800 text-white text-sm sm:text-base font-bold px-4 py-2 rounded-md">

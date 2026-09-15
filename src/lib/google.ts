@@ -79,9 +79,10 @@ export async function getRowCount(): Promise<number> {
   return (res.data.values?.length ?? 1) - 1; // minus header
 }
 
-export async function uploadPdf(
+export async function uploadFile(
   fileName: string,
-  pdfBuffer: Buffer
+  fileBuffer: Buffer,
+  mimeType: string
 ): Promise<{ fileId: string; fileLink: string }> {
   const auth = getAuth();
   const drive = google.drive({ version: "v3", auth });
@@ -95,8 +96,8 @@ export async function uploadPdf(
       parents: [folderId],
     },
     media: {
-      mimeType: "application/pdf",
-      body: pdfBuffer,
+      mimeType,
+      body: fileBuffer,
     },
     fields: "id, webViewLink",
   });
@@ -106,6 +107,13 @@ export async function uploadPdf(
     res.data.webViewLink ?? `https://drive.google.com/file/d/${fileId}/view`;
 
   return { fileId, fileLink };
+}
+
+export async function uploadPdf(
+  fileName: string,
+  pdfBuffer: Buffer
+): Promise<{ fileId: string; fileLink: string }> {
+  return uploadFile(fileName, pdfBuffer, "application/pdf");
 }
 
 export { getAuth };

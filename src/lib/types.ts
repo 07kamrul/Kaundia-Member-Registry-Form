@@ -50,6 +50,9 @@ export interface FormData {
   memberSignature: string;
   submissionDate: string;
 
+  // Member Photo (base64 data URL, e.g. "data:image/jpeg;base64,...")
+  memberPhoto?: string;
+
   // Honeypot
   website: string;
 }
@@ -59,5 +62,7 @@ export interface SubmissionResult {
   formNo: string;
   driveFileId?: string;
   driveFileLink?: string;
+  photoFileId?: string;
+  photoFileLink?: string;
   error?: string;
 }
