@@ -18,20 +18,20 @@
       <div class="reg-header">
         <img src="/logo.jpeg" alt="সংগঠনের লোগো" class="reg-logo" />
         <div class="reg-header-text">
-          <p style="font-size:0.85rem;color:#064e3b" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
-          <h1 style="font-size:1.25rem;color:#064e3b;margin:0">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</h1>
-          <p style="font-size:0.8rem;color:#4b5563;margin:0">
+          <p class="bismillah-line" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+          <h1 class="reg-org-name">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</h1>
+          <p class="reg-org-subtitle">
             (সকল জমি, বাড়ি ও ফ্ল্যাট মালিকদের ঐক্যবদ্ধ অরাজনৈতিক আবাসন সংগঠন)
           </p>
-          <p style="font-size:0.8rem;color:#4b5563;margin:0">উত্তর কাউন্দিয়া, সাভার, ঢাকা। | স্থাপিত : ২০২৬ ইং</p>
+          <p class="reg-org-subtitle">উত্তর কাউন্দিয়া, সাভার, ঢাকা। | স্থাপিত : ২০২৬ ইং</p>
 
-          <div style="margin-top:0.5rem;background:#065f46;color:#fff;font-weight:700;padding:0.5rem 1rem;border-radius:0.375rem;display:inline-block">
+          <div class="reg-form-badge">
             সদস্য নিবন্ধন ও মালিকানা তথ্য ফরম
           </div>
         </div>
       </div>
 
-      <div class="field" style="max-width:16rem;width:100%;margin-bottom:1.5rem">
+      <div class="field submission-date-field">
         <label>নিবন্ধনের তারিখ</label>
         <input type="date" formControlName="submissionDate" />
       </div>
@@ -56,14 +56,16 @@
       </nav>
 
       @if (currentStep === 1) {
-        <app-member-info
-          [form]="form"
-          [memberPhotoPreview]="memberPhotoPreview"
-          [submitAttempted]="submitAttempted"
-          (photoChange)="onPhotoChange($event)"
-          (photoClear)="clearPhoto()"
-        />
-        <app-address-info [form]="form" />
+        <div class="step-content-grid">
+          <app-member-info
+            [form]="form"
+            [memberPhotoPreview]="memberPhotoPreview"
+            [submitAttempted]="submitAttempted"
+            (photoChange)="onPhotoChange($event)"
+            (photoClear)="clearPhoto()"
+          />
+          <app-address-info [form]="form" />
+        </div>
       }
 
       @if (currentStep === 2) {
@@ -82,8 +84,8 @@
       }
 
       @if (currentStep === 5) {
-        <div style="background:var(--amber-50);border:1px solid var(--amber-200);border-radius:0.5rem;padding:1rem;margin-bottom:2rem;font-size:0.875rem;color:#1f2937;line-height:1.6">
-          <p style="margin-top:0">
+        <div class="declaration-box">
+          <p>
             <strong>অঙ্গীকারনামা:</strong> আমি অঙ্গীকার করছি যে, উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদের গঠনতন্ত্র,
             নিয়ম-শৃঙ্খলা ও বিধি সংক্রান্ত সিদ্ধান্তসমূহ মেনে চলবো এবং সংগঠনের উদ্দেশ্য ও স্বার্থবিরোধী কোনো কর্মকাণ্ডে অংশগ্রহণ
             করবো না। সংগঠনের সিদ্ধান্তসমূহে সদস্যদের অধিকার, সম্পত্তির নিরাপত্তা, পারস্পরিক সহযোগিতা, সামাজিক কল্যাণ ও
@@ -95,14 +97,14 @@
           </label>
         </div>
 
-        <section style="margin-bottom:2rem">
-          <label style="display:block;font-size:0.875rem;color:#374151;margin-bottom:0.5rem">
+        <section class="signature-section">
+          <label class="signature-label">
             সদস্যের স্বাক্ষর (ঐচ্ছিক — শুধু অনলাইনে স্বাক্ষর করতে চাইলে)
           </label>
-          <div style="border:1px solid #d1d5db;border-radius:0.5rem;overflow:hidden;background:#fff">
-            <canvas #sigCanvas style="width:100%;height:8rem;cursor:crosshair;display:block"></canvas>
+          <div class="signature-box">
+            <canvas #sigCanvas class="signature-canvas"></canvas>
           </div>
-          <button type="button" (click)="clearSignature()" style="margin-top:0.5rem;font-size:0.875rem;color:#dc2626;background:none;border:none;text-decoration:underline;cursor:pointer">
+          <button type="button" (click)="clearSignature()" class="signature-clear-btn">
             স্বাক্ষর মুছুন
           </button>
         </section>
@@ -112,7 +114,7 @@
         <app-review-summary [form]="form" (editStep)="goToStep($event)" />
       }
 
-      <div style="display:flex;justify-content:space-between;margin-top:2rem">
+      <div class="step-nav-row">
         @if (currentStep > 1) {
           <button type="button" class="btn btn-secondary" (click)="prevStep()">পূর্ববর্তী</button>
         } @else {
@@ -122,7 +124,7 @@
         @if (currentStep < steps.length) {
           <button type="button" class="btn btn-primary" (click)="nextStep()">পরবর্তী</button>
         } @else {
-          <button type="submit" class="btn btn-primary" [disabled]="submitting" style="font-size:1.1rem;padding:0.75rem 2rem">
+          <button type="submit" class="btn btn-primary submit-btn" [disabled]="submitting">
             {{ submitting ? 'সাবমিট হচ্ছে...' : 'ফর্ম সাবমিট করুন' }}
           </button>
         }
