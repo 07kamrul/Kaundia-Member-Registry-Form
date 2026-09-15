@@ -192,6 +192,17 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
     ];
 
     drawKeyValueRows(propertyFields);
+
+    if (property.ownership === "যৌথ" && property.coOwners.length > 0) {
+      const coOwnerFields: [string, string][] = property.coOwners.map(
+        (coOwner, coIndex) => [
+          `Co-Owner ${coIndex + 1}`,
+          `${coOwner.ownerName} (${coOwner.ownerPhone})`,
+        ]
+      );
+      drawKeyValueRows(coOwnerFields);
+    }
+
     y -= 10;
   });
 

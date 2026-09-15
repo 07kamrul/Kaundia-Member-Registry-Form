@@ -5,6 +5,11 @@ export interface Nominee {
   address: string;
 }
 
+export interface CoOwner {
+  ownerName: string;
+  ownerPhone: string;
+}
+
 export interface PropertyItem {
   propertyType: string[];
   propertyTypeOther: string;
@@ -13,9 +18,18 @@ export interface PropertyItem {
   landQuantity: string;
   ownership: string;
   applicableDocs: string[];
+  // Only populated/used when ownership === "যৌথ"
+  coOwners: CoOwner[];
 }
 
 export const MAX_PROPERTY_COUNT = 9;
+// Cap on co-owner rows flattened into Sheet columns per property
+// (property{n}_coOwner1_name..property{n}_coOwner{MAX_CO_OWNER_COUNT}_name/phone).
+export const MAX_CO_OWNER_COUNT = 5;
+
+export function createEmptyCoOwner(): CoOwner {
+  return { ownerName: "", ownerPhone: "" };
+}
 
 export function createEmptyProperty(): PropertyItem {
   return {
@@ -26,6 +40,7 @@ export function createEmptyProperty(): PropertyItem {
     landQuantity: "",
     ownership: "",
     applicableDocs: [],
+    coOwners: [],
   };
 }
 

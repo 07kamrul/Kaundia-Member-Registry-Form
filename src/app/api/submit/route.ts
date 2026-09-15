@@ -33,6 +33,14 @@ function validate(data: FormData): string[] {
       const label = `সম্পত্তি #${i + 1}`;
       if (!property.propertyType?.length) errors.push(`${label}: সম্পত্তির ধরন আবশ্যক`);
       if (!property.ownership?.trim()) errors.push(`${label}: মালিকানা আবশ্যক`);
+      if (property.ownership === "যৌথ") {
+        const hasFilledCoOwner = property.coOwners?.some(
+          (co) => co.ownerName?.trim() && co.ownerPhone?.trim()
+        );
+        if (!hasFilledCoOwner) {
+          errors.push(`${label}: অন্তত একজন মালিকের নাম ও মোবাইল নং আবশ্যক`);
+        }
+      }
     });
   }
 

@@ -6,6 +6,8 @@ import SignatureCanvas from "react-signature-canvas";
 import {
   MAX_PROPERTY_COUNT,
   createEmptyProperty,
+  createEmptyCoOwner,
+  type CoOwner,
   type FormData,
   type Nominee,
   type PropertyItem,
@@ -91,7 +93,43 @@ export default function RegistrationForm() {
   };
 
   const handlePropertyOwnershipChange = (index: number, ownership: string) => {
-    updateProperty(index, { ownership });
+    if (ownership === "যৌথ") {
+      const current = formData.properties[index]?.coOwners ?? [];
+      updateProperty(index, {
+        ownership,
+        coOwners: current.length > 0 ? current : [createEmptyCoOwner()],
+      });
+    } else {
+      // Switching back to একক: discard co-owner data rather than leaving it
+      // hidden and stale.
+      updateProperty(index, { ownership, coOwners: [] });
+    }
+  };
+
+  const handleCoOwnerChange = (
+    propertyIndex: number,
+    coOwnerIndex: number,
+    field: keyof CoOwner,
+    value: string
+  ) => {
+    const coOwners = [...(formData.properties[propertyIndex]?.coOwners ?? [])];
+    coOwners[coOwnerIndex] = { ...coOwners[coOwnerIndex], [field]: value };
+    updateProperty(propertyIndex, { coOwners });
+  };
+
+  const addCoOwner = (propertyIndex: number) => {
+    const coOwners = [
+      ...(formData.properties[propertyIndex]?.coOwners ?? []),
+      createEmptyCoOwner(),
+    ];
+    updateProperty(propertyIndex, { coOwners });
+  };
+
+  const removeCoOwner = (propertyIndex: number, coOwnerIndex: number) => {
+    const coOwners = (formData.properties[propertyIndex]?.coOwners ?? []).filter(
+      (_, i) => i !== coOwnerIndex
+    );
+    updateProperty(propertyIndex, { coOwners });
   };
 
   const handlePropertyDocToggle = (index: number, doc: string) => {
@@ -203,6 +241,26 @@ export default function RegistrationForm() {
       if (property.propertyType.length === 0)
         clientErrors.push(`${label}: সম্পত্তির ধরন আবশ্যক`);
       if (!property.ownership) clientErrors.push(`${label}: মালিকানা আবশ্যক`);
+      if (property.ownership === "যৌথ") {
+        const hasFilledCoOwner = property.coOwners.some(
+          (co) => co.ownerName.trim() && co.ownerPhone.trim()
+        );
+        if (!hasFilledCoOwner) {
+          clientErrors.push(`${label}: অন্তত একজন মালিকের নাম ও মোবাইল নং আবশ্যক`);
+        } else {
+          property.coOwners.forEach((co, ci) => {
+            if (!co.ownerName.trim() && !co.ownerPhone.trim()) return;
+            if (!co.ownerName.trim())
+              clientErrors.push(`${label}, মালিক #${ci + 1}: নাম আবশ্যক`);
+            if (!co.ownerPhone.trim())
+              clientErrors.push(`${label}, মালিক #${ci + 1}: মোবাইল নং আবশ্যক`);
+            else if (!/^01[3-9]\d{8}$/.test(co.ownerPhone.trim()))
+              clientErrors.push(
+                `${label}, মালিক #${ci + 1}: মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)`
+              );
+          });
+        }
+      }
     });
     if (!formData.admissionFee) clientErrors.push("ভর্তি ফি আবশ্যক");
     if (!formData.subscription) clientErrors.push("চাঁদা আবশ্যক");
@@ -641,6 +699,71 @@ export default function RegistrationForm() {
                   </div>
                 </div>
               </div>
+
+              {/* Co-owners (shown only for যৌথ / joint ownership) */}
+              {property.ownership === "যৌথ" && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    যৌথ মালিকগণ <span className="text-red-500">*</span>
+                  </label>
+                  <div className="space-y-3">
+                    {property.coOwners.map((coOwner, coIndex) => (
+                      <div
+                        key={coIndex}
+                        className="flex flex-col sm:flex-row gap-2 sm:items-end"
+                      >
+                        <div className="flex-1">
+                          <Field label="মালিকের নাম" required>
+                            <Input
+                              value={coOwner.ownerName}
+                              onChange={(e) =>
+                                handleCoOwnerChange(
+                                  index,
+                                  coIndex,
+                                  "ownerName",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </Field>
+                        </div>
+                        <div className="flex-1">
+                          <Field label="মোবাইল নং" required>
+                            <Input
+                              value={coOwner.ownerPhone}
+                              onChange={(e) =>
+                                handleCoOwnerChange(
+                                  index,
+                                  coIndex,
+                                  "ownerPhone",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="01XXXXXXXXX"
+                            />
+                          </Field>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeCoOwner(index, coIndex)}
+                          aria-label="এই মালিক মুছুন"
+                          title="মুছুন"
+                          className="shrink-0 text-red-600 hover:text-red-800 border border-red-200 rounded p-2 h-fit"
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => addCoOwner(index)}
+                    className="mt-2 text-emerald-800 text-sm hover:underline"
+                  >
+                    + আরো যোগ করুন
+                  </button>
+                </div>
+              )}
 
               {/* Applicable Documents */}
               <div>

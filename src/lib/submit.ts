@@ -1,6 +1,12 @@
 import { appendRow, uploadFile, uploadPdf, getRowCount } from "./google";
 import { generatePdf } from "./pdf";
-import { MAX_PROPERTY_COUNT, type FormData, type PropertyItem, type SubmissionResult } from "./types";
+import {
+  MAX_PROPERTY_COUNT,
+  MAX_CO_OWNER_COUNT,
+  type FormData,
+  type PropertyItem,
+  type SubmissionResult,
+} from "./types";
 import fs from "fs";
 import path from "path";
 
@@ -15,6 +21,18 @@ function formatPropertyType(property: PropertyItem): string {
   return types.join(", ");
 }
 
+// Flattens one property's co-owners into a fixed set of columns
+// (coOwner1_name, coOwner1_phone, ..coOwner{MAX_CO_OWNER_COUNT}_*), leaving
+// unused co-owner columns blank. Only meaningful when ownership === "যৌথ".
+function buildCoOwnerColumns(property: PropertyItem | undefined): string[] {
+  const columns: string[] = [];
+  for (let i = 0; i < MAX_CO_OWNER_COUNT; i++) {
+    const coOwner = property?.ownership === "যৌথ" ? property.coOwners[i] : undefined;
+    columns.push(coOwner?.ownerName ?? "", coOwner?.ownerPhone ?? "");
+  }
+  return columns;
+}
+
 // Flattens the properties array into a fixed set of columns
 // (property1_*..property{MAX_PROPERTY_COUNT}_*), leaving unused
 // property columns blank when propertyCount is lower than the max.
@@ -23,7 +41,7 @@ function buildPropertyColumns(properties: PropertyItem[]): string[] {
   for (let i = 0; i < MAX_PROPERTY_COUNT; i++) {
     const property = properties[i];
     if (!property) {
-      columns.push("", "", "", "", "", "");
+      columns.push("", "", "", "", "", "", ...buildCoOwnerColumns(undefined));
       continue;
     }
     columns.push(
@@ -32,7 +50,8 @@ function buildPropertyColumns(properties: PropertyItem[]): string[] {
       property.dagNo,
       property.landQuantity,
       property.ownership,
-      property.applicableDocs.join(", ")
+      property.applicableDocs.join(", "),
+      ...buildCoOwnerColumns(property)
     );
   }
   return columns;
