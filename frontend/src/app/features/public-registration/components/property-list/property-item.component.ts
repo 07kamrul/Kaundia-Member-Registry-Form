@@ -52,9 +52,7 @@ export class PropertyItemComponent {
 
   toggleType(type: string): void {
     const current = this.property.get('propertyType')?.value as string[];
-    const next = current.includes(type)
-      ? current.filter((t) => t !== type)
-      : [...current, type];
+    const next = current.includes(type) ? current.filter((t) => t !== type) : [...current, type];
     this.property.get('propertyType')?.setValue(next);
   }
 
@@ -78,9 +76,8 @@ export class PropertyItemComponent {
   }
 
   findDocEntry(type: string): FormGroup | undefined {
-    return this.applicableDocs.controls.find(
-      (c) => c.get('type')?.value === type,
-    ) as FormGroup | undefined;
+    return this.applicableDocs.controls.find((c) => c.get('type')?.value === type) as
+      FormGroup | undefined;
   }
 
   isDocChecked(type: string): boolean {
