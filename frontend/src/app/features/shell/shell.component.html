@@ -1,0 +1,19 @@
+<nav style="display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:#064e3b;color:#fff">
+  <a routerLink="/dashboard" style="color:#fff;font-weight:600;text-decoration:none">কাউন্দিয়া</a>
+
+  <a routerLink="/dashboard" style="color:#d1fae5;text-decoration:none">ড্যাশবোর্ড</a>
+  <a routerLink="/profile" style="color:#d1fae5;text-decoration:none">প্রোফাইল</a>
+  <a routerLink="/installments" style="color:#d1fae5;text-decoration:none">কিস্তি</a>
+  <a routerLink="/change-password" style="color:#d1fae5;text-decoration:none">পাসওয়ার্ড পরিবর্তন</a>
+
+  @if (auth.role === 'admin') {
+    <a routerLink="/submissions" style="color:#fef3c7;text-decoration:none">সাবমিশন</a>
+    <a routerLink="/members" style="color:#fef3c7;text-decoration:none">সদস্য তালিকা</a>
+  }
+
+  <button type="button" (click)="logout()" style="margin-left:auto;background:none;border:1px solid #fff;color:#fff;padding:0.4rem 0.9rem;border-radius:0.375rem;cursor:pointer">
+    লগআউট
+  </button>
+</nav>
+
+<router-outlet />

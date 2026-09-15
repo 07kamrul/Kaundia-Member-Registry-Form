@@ -45,7 +45,7 @@ export class SubmissionDetailComponent implements OnInit {
     if (!this.submission) return;
     this.actionError = '';
     this.adminService.approveSubmission(this.submission.id).subscribe({
-      next: () => this.router.navigate(['/admin/submissions']),
+      next: () => this.router.navigate(['/submissions']),
       error: () => (this.actionError = 'অনুমোদন ব্যর্থ হয়েছে।'),
     });
   }
@@ -57,7 +57,7 @@ export class SubmissionDetailComponent implements OnInit {
     }
     this.actionError = '';
     this.adminService.rejectSubmission(this.submission.id, this.rejectReason).subscribe({
-      next: () => this.router.navigate(['/admin/submissions']),
+      next: () => this.router.navigate(['/submissions']),
       error: () => (this.actionError = 'বাতিল করা ব্যর্থ হয়েছে।'),
     });
   }

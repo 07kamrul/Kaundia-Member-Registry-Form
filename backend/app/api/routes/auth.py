@@ -6,9 +6,35 @@ from app.core.security import create_access_token, create_refresh_token, verify_
 from app.db.session import get_db
 from app.models.admin import AdminUser
 from app.models.credential import MemberCredential
-from app.schemas.auth import AdminLoginRequest, MemberLoginRequest, TokenResponse
+from app.schemas.auth import AdminLoginRequest, LoginRequest, MemberLoginRequest, TokenResponse
 
 router = APIRouter(tags=["auth"])
+
+
+@router.post("/login", response_model=TokenResponse)
+async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
+    admin_result = await db.execute(select(AdminUser).where(AdminUser.email == payload.identifier))
+    admin = admin_result.scalar_one_or_none()
+    if admin is not None and verify_password(payload.password, admin.password_hash):
+        return TokenResponse(
+            access_token=create_access_token(str(admin.id), "admin"),
+            refresh_token=create_refresh_token(str(admin.id), "admin"),
+            role="admin",
+        )
+
+    credential_result = await db.execute(
+        select(MemberCredential).where(MemberCredential.username == payload.identifier)
+    )
+    credential = credential_result.scalar_one_or_none()
+    if credential is not None and verify_password(payload.password, credential.password_hash):
+        return TokenResponse(
+            access_token=create_access_token(str(credential.member_id), "member"),
+            refresh_token=create_refresh_token(str(credential.member_id), "member"),
+            must_change_password=credential.must_change_password,
+            role="member",
+        )
+
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
 
 @router.post("/admin/login", response_model=TokenResponse)

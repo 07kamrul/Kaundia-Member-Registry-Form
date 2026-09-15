@@ -10,6 +10,7 @@ interface TokenResponse {
   access_token: string;
   refresh_token: string;
   must_change_password?: boolean;
+  role: UserRole;
 }
 
 const ACCESS_TOKEN_KEY = 'krmf_access_token';
@@ -39,16 +40,10 @@ export class AuthService {
     return this.roleValue();
   }
 
-  adminLogin(email: string, password: string): Observable<TokenResponse> {
+  login(identifier: string, password: string): Observable<TokenResponse> {
     return this.http
-      .post<TokenResponse>(`${environment.apiBaseUrl}/admin/login`, { email, password })
-      .pipe(tap((res) => this.storeSession(res, 'admin')));
-  }
-
-  memberLogin(username: string, password: string): Observable<TokenResponse> {
-    return this.http
-      .post<TokenResponse>(`${environment.apiBaseUrl}/member/login`, { username, password })
-      .pipe(tap((res) => this.storeSession(res, 'member')));
+      .post<TokenResponse>(`${environment.apiBaseUrl}/login`, { identifier, password })
+      .pipe(tap((res) => this.storeSession(res, res.role)));
   }
 
   private storeSession(res: TokenResponse, role: UserRole): void {
@@ -72,12 +67,7 @@ export class AuthService {
   }
 
   handleUnauthorized(): void {
-    const currentRole = this.role;
     this.logout();
-    if (currentRole === 'admin') {
-      this.router.navigate(['/admin/login']);
-    } else {
-      this.router.navigate(['/member/login']);
-    }
+    this.router.navigate(['/login']);
   }
 }

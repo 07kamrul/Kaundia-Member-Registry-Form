@@ -4,12 +4,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-member-login',
+  selector: 'app-login',
   standalone: true,
   imports: [ReactiveFormsModule],
-  templateUrl: './member-login.component.html',
+  templateUrl: './login.component.html',
 })
-export class MemberLoginComponent {
+export class LoginComponent {
   form: FormGroup;
   error = '';
   submitting = false;
@@ -20,7 +20,7 @@ export class MemberLoginComponent {
     private router: Router,
   ) {
     this.form = this.fb.group({
-      username: ['', Validators.required],
+      identifier: ['', Validators.required],
       password: ['', Validators.required],
     });
   }
@@ -29,19 +29,19 @@ export class MemberLoginComponent {
     if (this.form.invalid) return;
     this.error = '';
     this.submitting = true;
-    const { username, password } = this.form.value;
-    this.auth.memberLogin(username, password).subscribe({
+    const { identifier, password } = this.form.value;
+    this.auth.login(identifier, password).subscribe({
       next: (res) => {
         this.submitting = false;
         if (res.must_change_password) {
-          this.router.navigate(['/member/change-password']);
+          this.router.navigate(['/change-password']);
         } else {
-          this.router.navigate(['/member/dashboard']);
+          this.router.navigate(['/dashboard']);
         }
       },
       error: () => {
         this.submitting = false;
-        this.error = 'লগইন ব্যর্থ হয়েছে। ইউজারনেম অথবা পাসওয়ার্ড সঠিক নয়।';
+        this.error = 'লগইন ব্যর্থ হয়েছে। তথ্য সঠিক নয়।';
       },
     });
   }
