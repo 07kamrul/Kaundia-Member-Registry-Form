@@ -3,6 +3,7 @@
 } @else {
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card" style="max-width:48rem;margin:1.5rem auto;position:relative;overflow:hidden">
     <div style="position:absolute;inset:0;background-image:url('/banner.jpeg');background-size:cover;background-position:center;opacity:0.08;pointer-events:none;z-index:0"></div>
+    <img src="/logo.jpeg" alt="সংগঠনের লোগো" style="position:absolute;top:1rem;left:1.5rem;width:4.5rem;height:4.5rem;object-fit:contain;border-radius:50%;border:2px solid #065f46;background:#fff;padding:0.25rem;z-index:2" />
     <div style="padding:1rem 1.5rem;position:relative;z-index:1">
       @if (errors.length > 0) {
         <div class="error-box">
@@ -16,7 +17,6 @@
       }
 
       <div style="text-align:center;margin-bottom:1rem">
-        <img src="/logo.jpeg" alt="সংগঠনের লোগো" style="width:4.5rem;height:4.5rem;object-fit:contain;border-radius:50%;border:2px solid #065f46;background:#fff;padding:0.25rem;margin-bottom:0.25rem" />
         <p style="font-size:0.85rem;color:#064e3b" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
         <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
           <h1 style="font-size:1.25rem;color:#064e3b;margin:0">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</h1>
