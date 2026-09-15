@@ -93,8 +93,11 @@
           </p>
           <label class="checkbox-item">
             <input type="checkbox" [checked]="form.get('declarationAccepted')?.value" (change)="toggleDeclaration()" />
-            আমি সকল শর্তাবলীতে সম্মতি প্রদান করছি।
+            আমি সকল শর্তাবলীতে সম্মতি প্রদান করছি। <span class="required">*</span>
           </label>
+          @if (submitAttempted && !form.get('declarationAccepted')?.value) {
+            <p class="field-error">অঙ্গীকারনামায় সম্মতি প্রদান আবশ্যক</p>
+          }
         </div>
 
         <section class="signature-section">
