@@ -1,8 +1,8 @@
 @if (success) {
   <app-confirmation [submissionId]="success.id" [fullName]="success.fullName" (reset)="resetForm()" />
 } @else {
+  <div class="page-with-banner">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card reg-card">
-    <div style="position:absolute;inset:0;background-image:url('/banner.jpeg');background-size:cover;background-position:center;opacity:0.08;pointer-events:none;z-index:0"></div>
     <img src="/logo.jpeg" alt="সংগঠনের লোগো" class="reg-logo" />
     <div class="reg-card-body">
       @if (errors.length > 0) {
@@ -129,5 +129,6 @@
       </div>
     </div>
   </form>
+  </div>
 }
 

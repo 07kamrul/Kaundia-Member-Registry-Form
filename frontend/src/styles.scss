@@ -43,6 +43,17 @@ a {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
+.page-with-banner {
+  min-height: 100vh;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('/banner.jpeg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
 .btn {
   display: inline-block;
   border: none;

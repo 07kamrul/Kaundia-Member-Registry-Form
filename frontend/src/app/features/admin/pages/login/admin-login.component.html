@@ -1,22 +1,24 @@
-<a routerLink="/member/login" class="btn btn-secondary" style="position:fixed;top:1.5rem;right:1.5rem">সদস্য লগইন</a>
-<div style="max-width:24rem;margin:4rem auto" class="card">
-  <div style="padding:1.5rem">
-    <h1 style="text-align:center;color:#064e3b;font-size:1.25rem">অ্যাডমিন লগইন</h1>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      @if (error) {
-        <div class="error-box"><p style="margin:0;color:#b91c1c">{{ error }}</p></div>
-      }
-      <div class="field">
-        <label>ইমেইল</label>
-        <input type="email" formControlName="email" />
-      </div>
-      <div class="field">
-        <label>পাসওয়ার্ড</label>
-        <input type="password" formControlName="password" />
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%" [disabled]="submitting || form.invalid">
-        {{ submitting ? 'লগইন হচ্ছে...' : 'লগইন' }}
-      </button>
-    </form>
+<a routerLink="/member/login" class="btn btn-secondary" style="position:fixed;top:1.5rem;right:1.5rem;z-index:1">সদস্য লগইন</a>
+<div class="page-with-banner">
+  <div style="max-width:24rem;width:100%" class="card">
+    <div style="padding:1.5rem">
+      <h1 style="text-align:center;color:#064e3b;font-size:1.25rem">অ্যাডমিন লগইন</h1>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        @if (error) {
+          <div class="error-box"><p style="margin:0;color:#b91c1c">{{ error }}</p></div>
+        }
+        <div class="field">
+          <label>ইমেইল</label>
+          <input type="email" formControlName="email" />
+        </div>
+        <div class="field">
+          <label>পাসওয়ার্ড</label>
+          <input type="password" formControlName="password" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%" [disabled]="submitting || form.invalid">
+          {{ submitting ? 'লগইন হচ্ছে...' : 'লগইন' }}
+        </button>
+      </form>
+    </div>
   </div>
 </div>
