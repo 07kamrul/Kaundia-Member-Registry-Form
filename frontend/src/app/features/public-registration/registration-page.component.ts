@@ -1,5 +1,6 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import SignaturePad from 'signature_pad';
 import { MAX_PHOTO_BYTES } from '../../core/models/registration.model';
 import { RegistrationService } from '../../core/services/registration.service';
@@ -35,6 +36,7 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     MemberInfoComponent,
     AddressInfoComponent,
     UrgentContactComponent,
@@ -142,7 +144,8 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     if (!v.mother?.trim()) errs.push('মাতা আবশ্যক');
     if (!v.dob) errs.push('জন্ম তারিখ আবশ্যক');
     if (!v.mobile?.trim()) errs.push('মোবাইল আবশ্যক');
-    else if (!MOBILE_PATTERN.test(v.mobile.trim())) errs.push('মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)');
+    else if (!MOBILE_PATTERN.test(v.mobile.trim()))
+      errs.push('মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)');
     if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) errs.push('ই-মেইল সঠিক নয়');
     if (v.nid && !/^\d{10,17}$/.test(v.nid)) errs.push('NID নম্বর ১০-১৭ সংখ্যার হতে হবে');
 
