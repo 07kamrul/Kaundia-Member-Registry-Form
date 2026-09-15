@@ -1,0 +1,100 @@
+@if (success) {
+  <app-confirmation [submissionId]="success.id" [fullName]="success.fullName" (reset)="resetForm()" />
+} @else {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card" style="max-width:48rem;margin:1.5rem auto">
+    <div style="padding:1rem 1.5rem">
+      @if (errors.length > 0) {
+        <div class="error-box">
+          <h3>নিম্নলিখিত সমস্যা দূর করুন:</h3>
+          <ul>
+            @for (err of errors; track err) {
+              <li>{{ err }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div style="text-align:center;margin-bottom:1rem">
+        <p style="font-size:0.85rem;color:#064e3b" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
+          <h1 style="font-size:1.25rem;color:#064e3b;margin:0">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</h1>
+          <p style="font-size:0.8rem;color:#4b5563;margin:0">
+            (সকল জমি, বাড়ি ও ফ্ল্যাট মালিকদের ঐক্যবদ্ধ অরাজনৈতিক আবাসন সংগঠন)
+          </p>
+          <p style="font-size:0.8rem;color:#4b5563;margin:0">উত্তর কাউন্দিয়া, সাভার, ঢাকা। | স্থাপিত : ২০২৬ ইং</p>
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem">
+            <label
+              for="memberPhoto"
+              style="display:flex;width:5rem;height:6rem;border:2px dashed #047857;align-items:center;justify-content:center;text-align:center;font-size:0.625rem;color:#065f46;padding:0.25rem;cursor:pointer;overflow:hidden;background:#fff"
+            >
+              @if (memberPhotoPreview) {
+                <img [src]="memberPhotoPreview" alt="সদস্যের ছবি" style="width:100%;height:100%;object-fit:cover" />
+              } @else {
+                <span>সদস্যের ছবি<br />২"×২"</span>
+              }
+            </label>
+            <input id="memberPhoto" type="file" accept="image/*" (change)="onPhotoChange($event)" style="display:none" />
+            @if (memberPhotoPreview) {
+              <button type="button" (click)="clearPhoto()" style="font-size:0.625rem;color:#b91c1c;background:none;border:none;text-decoration:underline;cursor:pointer">
+                মুছুন
+              </button>
+            }
+          </div>
+
+          <div style="margin-top:0.5rem;background:#065f46;color:#fff;font-weight:700;padding:0.5rem 1rem;border-radius:0.375rem">
+            সদস্য নিবন্ধন ও মালিকানা তথ্য ফরম
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="max-width:16rem;margin-bottom:1.5rem">
+        <label>নিবন্ধনের তারিখ</label>
+        <input type="date" formControlName="submissionDate" />
+      </div>
+
+      <app-member-info [form]="form" />
+      <app-address-info [form]="form" />
+      <app-property-list [form]="form" [properties]="properties" [submitAttempted]="submitAttempted" />
+
+      <div class="grid-2" style="margin-bottom:2rem">
+        <app-urgent-contact [form]="form" />
+        <app-nominee-list [nominees]="nominees" />
+      </div>
+
+      <app-payment-info [form]="form" />
+
+      <div style="background:var(--amber-50);border:1px solid var(--amber-200);border-radius:0.5rem;padding:1rem;margin-bottom:2rem;font-size:0.875rem;color:#1f2937;line-height:1.6">
+        <p style="margin-top:0">
+          <strong>অঙ্গীকারনামা:</strong> আমি অঙ্গীকার করছি যে, উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদের গঠনতন্ত্র,
+          নিয়ম-শৃঙ্খলা ও বিধি সংক্রান্ত সিদ্ধান্তসমূহ মেনে চলবো এবং সংগঠনের উদ্দেশ্য ও স্বার্থবিরোধী কোনো কর্মকাণ্ডে অংশগ্রহণ
+          করবো না। সংগঠনের সিদ্ধান্তসমূহে সদস্যদের অধিকার, সম্পত্তির নিরাপত্তা, পারস্পরিক সহযোগিতা, সামাজিক কল্যাণ ও
+          এলাকার উন্নয়নে দায়িত্বশীলভাবে সহযোগিতা করবো। উপরোক্ত তথ্যসমূহ আমার জ্ঞান ও বিশ্বাস অনুযায়ী সঠিক।
+        </p>
+        <label class="checkbox-item">
+          <input type="checkbox" [checked]="form.get('declarationAccepted')?.value" (change)="toggleDeclaration()" />
+          আমি সকল শর্তাবলীতে সম্মতি প্রদান করছি।
+        </label>
+      </div>
+
+      <section style="margin-bottom:2rem">
+        <h2 class="section-title">৭. স্বাক্ষর ও তারিখ</h2>
+        <label style="display:block;font-size:0.875rem;color:#374151;margin-bottom:0.5rem">
+          সদস্যের স্বাক্ষর (ঐচ্ছিক — শুধু অনলাইনে স্বাক্ষর করতে চাইলে)
+        </label>
+        <div style="border:1px solid #d1d5db;border-radius:0.5rem;overflow:hidden;background:#fff">
+          <canvas #sigCanvas style="width:100%;height:8rem;cursor:crosshair;display:block"></canvas>
+        </div>
+        <button type="button" (click)="clearSignature()" style="margin-top:0.5rem;font-size:0.875rem;color:#dc2626;background:none;border:none;text-decoration:underline;cursor:pointer">
+          স্বাক্ষর মুছুন
+        </button>
+      </section>
+
+      <div style="text-align:center">
+        <button type="submit" class="btn btn-primary" [disabled]="submitting" style="font-size:1.1rem;padding:0.75rem 2rem">
+          {{ submitting ? 'সাবমিট হচ্ছে...' : 'ফর্ম সাবমিট করুন' }}
+        </button>
+      </div>
+    </div>
+  </form>
+}

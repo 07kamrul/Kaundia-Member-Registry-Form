@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kaundia
+      POSTGRES_PASSWORD: kaundia
+      POSTGRES_DB: kaundia
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaundia"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://kaundia:kaundia@postgres:5432/kaundia
+      JWT_SECRET_KEY: change-this-to-a-long-random-secret
+      UPLOAD_DIR: /app/uploads
+      SMTP_HOST: ${SMTP_HOST:-localhost}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-Kaundia Member Registry <no-reply@example.com>}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-this-password}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrator}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:9091}
+    ports:
+      - "9090:9090"
+    volumes:
+      - backend_uploads:/app/uploads
+    command: >
+      sh -c "alembic upgrade head &&
+             python -m app.seed &&
+             uvicorn app.main:app --host 0.0.0.0 --port 9090"
+
+  # Placeholder for the existing Next.js frontend. Uncomment and configure
+  # once you want to run the frontend alongside the backend via compose.
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   environment:
+  #     NEXT_PUBLIC_API_BASE_URL: http://localhost:9090/api
+  #   ports:
+  #     - "9091:9091"
+
+volumes:
+  postgres_data:
+  backend_uploads:

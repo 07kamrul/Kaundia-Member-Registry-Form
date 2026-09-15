@@ -1,0 +1,47 @@
+<div style="max-width:60rem;margin:2rem auto;padding:0 1rem">
+  <h1 style="color:#064e3b">আবেদনসমূহ</h1>
+
+  <div class="field" style="max-width:16rem">
+    <label>স্ট্যাটাস অনুযায়ী ফিল্টার</label>
+    <select [value]="statusFilter" (change)="onFilterChange($event)">
+      @for (s of statuses; track s) {
+        <option [value]="s">{{ s || 'সব' }}</option>
+      }
+    </select>
+  </div>
+
+  @if (loading) {
+    <p>লোড হচ্ছে...</p>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else {
+    <div class="card" style="overflow:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+        <thead>
+          <tr style="background:#f3f4f6;text-align:left">
+            <th style="padding:0.6rem">নাম</th>
+            <th style="padding:0.6rem">মোবাইল</th>
+            <th style="padding:0.6rem">স্ট্যাটাস</th>
+            <th style="padding:0.6rem">তারিখ</th>
+            <th style="padding:0.6rem"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of submissions; track s.id) {
+            <tr style="border-top:1px solid #e5e7eb">
+              <td style="padding:0.6rem">{{ s.fullName }}</td>
+              <td style="padding:0.6rem">{{ s.mobile }}</td>
+              <td style="padding:0.6rem">{{ s.status }}</td>
+              <td style="padding:0.6rem">{{ s.createdAt }}</td>
+              <td style="padding:0.6rem">
+                <a [routerLink]="['/admin/submissions', s.id]" style="color:#065f46">বিস্তারিত</a>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" style="padding:1rem;text-align:center;color:#6b7280">কোনো আবেদন পাওয়া যায়নি</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

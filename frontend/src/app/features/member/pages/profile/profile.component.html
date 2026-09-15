@@ -1,0 +1,33 @@
+<div style="max-width:40rem;margin:2rem auto;padding:0 1rem">
+  <h1 style="color:#064e3b">আমার প্রোফাইল</h1>
+
+  @if (loading) {
+    <p>লোড হচ্ছে...</p>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else if (profile) {
+    <div class="card" style="padding:1.5rem">
+      <div class="grid-2">
+        <p><strong>সদস্য নং:</strong> {{ profile.memberId }}</p>
+        <p><strong>নাম:</strong> {{ profile.fullName }}</p>
+        <p><strong>পিতা/স্বামী:</strong> {{ profile.fatherOrHusband }}</p>
+        <p><strong>মাতা:</strong> {{ profile.mother }}</p>
+        <p><strong>জন্ম তারিখ:</strong> {{ profile.dob }}</p>
+        <p><strong>মোবাইল:</strong> {{ profile.mobile }}</p>
+        <p><strong>ইমেইল:</strong> {{ profile.email }}</p>
+        <p><strong>স্থায়ী ঠিকানা:</strong> {{ profile.permanentAddress }}</p>
+        <p><strong>বর্তমান ঠিকানা:</strong> {{ profile.currentAddress }}</p>
+      </div>
+
+      <h3 style="color:#374151">সম্পত্তিসমূহ</h3>
+      <pre style="background:#f9fafb;padding:0.75rem;border-radius:0.375rem;overflow:auto;font-size:0.75rem">{{
+        profile.properties | json
+      }}</pre>
+
+      <h3 style="color:#374151">মনোনীত ব্যক্তি</h3>
+      <pre style="background:#f9fafb;padding:0.75rem;border-radius:0.375rem;overflow:auto;font-size:0.75rem">{{
+        profile.nominees | json
+      }}</pre>
+    </div>
+  }
+</div>

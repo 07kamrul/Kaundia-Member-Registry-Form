@@ -1,0 +1,56 @@
+<div style="max-width:48rem;margin:2rem auto;padding:0 1rem">
+  <h1 style="color:#064e3b">আবেদনের বিস্তারিত</h1>
+
+  @if (loading) {
+    <p>লোড হচ্ছে...</p>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else if (submission) {
+    <div class="card" style="padding:1.5rem">
+      <div class="grid-2">
+        <p><strong>নাম:</strong> {{ submission.fullName }}</p>
+        <p><strong>পিতা/স্বামী:</strong> {{ submission.fatherOrHusband }}</p>
+        <p><strong>মাতা:</strong> {{ submission.mother }}</p>
+        <p><strong>জন্ম তারিখ:</strong> {{ submission.dob }}</p>
+        <p><strong>মোবাইল:</strong> {{ submission.mobile }}</p>
+        <p><strong>ইমেইল:</strong> {{ submission.email }}</p>
+        <p><strong>NID:</strong> {{ submission.nid }}</p>
+        <p><strong>স্ট্যাটাস:</strong> {{ submission.status }}</p>
+        <p><strong>স্থায়ী ঠিকানা:</strong> {{ submission.permanentAddress }}</p>
+        <p><strong>বর্তমান ঠিকানা:</strong> {{ submission.currentAddress }}</p>
+        <p><strong>ভর্তি ফি:</strong> {{ submission.admissionFee }}</p>
+        <p><strong>চাঁদা:</strong> {{ submission.subscription }}</p>
+        <p><strong>পেমেন্ট মাধ্যম:</strong> {{ submission.paymentMethod }}</p>
+      </div>
+
+      <h3 style="margin-top:1.5rem;color:#374151">সম্পত্তিসমূহ</h3>
+      <pre style="background:#f9fafb;padding:0.75rem;border-radius:0.375rem;overflow:auto;font-size:0.75rem">{{
+        submission.properties | json
+      }}</pre>
+
+      <h3 style="color:#374151">মনোনীত ব্যক্তি</h3>
+      <pre style="background:#f9fafb;padding:0.75rem;border-radius:0.375rem;overflow:auto;font-size:0.75rem">{{
+        submission.nominees | json
+      }}</pre>
+
+      @if (submission.status === 'pending') {
+        @if (actionError) {
+          <div class="error-box"><p style="margin:0">{{ actionError }}</p></div>
+        }
+        <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
+          <button type="button" class="btn btn-primary" (click)="approve()">অনুমোদন করুন</button>
+          <button type="button" class="btn btn-secondary" (click)="showRejectForm = !showRejectForm">বাতিল করুন</button>
+        </div>
+        @if (showRejectForm) {
+          <div class="field" style="margin-top:1rem;max-width:24rem">
+            <label>বাতিলের কারণ <span class="required">*</span></label>
+            <textarea rows="3" [(ngModel)]="rejectReason"></textarea>
+            <button type="button" class="btn btn-primary" style="margin-top:0.5rem" (click)="reject()">
+              নিশ্চিত করুন
+            </button>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

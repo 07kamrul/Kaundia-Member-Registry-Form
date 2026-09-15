@@ -1,0 +1,32 @@
+<section [formGroup]="form">
+  <h2 class="section-title">৬. সদস্যপদ ও চাঁদা</h2>
+  <div class="grid-2">
+    <div class="field">
+      <label>ভর্তি ফি (টাকা) <span class="required">*</span></label>
+      <input type="number" formControlName="admissionFee" />
+    </div>
+    <div class="field">
+      <label>চাঁদা (টাকা) <span class="required">*</span></label>
+      <input type="number" formControlName="subscription" />
+    </div>
+    <div class="field">
+      <label>রসিদ নং</label>
+      <input type="text" formControlName="receiptNo" />
+    </div>
+  </div>
+  <div class="field">
+    <label>মাধ্যম <span class="required">*</span></label>
+    <div class="checkbox-row">
+      @for (m of paymentMethods; track m) {
+        <label class="checkbox-item">
+          <input
+            type="checkbox"
+            [checked]="form.get('paymentMethod')?.value === m"
+            (change)="selectMethod(m)"
+          />
+          {{ m }}
+        </label>
+      }
+    </div>
+  </div>
+</section>

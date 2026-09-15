@@ -1,0 +1,36 @@
+<div style="max-width:40rem;margin:2rem auto;padding:0 1rem">
+  <h1 style="color:#064e3b">আমার কিস্তি</h1>
+
+  @if (loading) {
+    <p>লোড হচ্ছে...</p>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else {
+    <div class="card" style="overflow:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+        <thead>
+          <tr style="background:#f3f4f6;text-align:left">
+            <th style="padding:0.6rem">বছর</th>
+            <th style="padding:0.6rem">মাস</th>
+            <th style="padding:0.6rem">পরিমাণ</th>
+            <th style="padding:0.6rem">স্ট্যাটাস</th>
+            <th style="padding:0.6rem">পরিশোধের তারিখ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of installments; track i.id) {
+            <tr style="border-top:1px solid #e5e7eb">
+              <td style="padding:0.6rem">{{ i.year }}</td>
+              <td style="padding:0.6rem">{{ i.month }}</td>
+              <td style="padding:0.6rem">{{ i.amount }}</td>
+              <td style="padding:0.6rem">{{ i.status }}</td>
+              <td style="padding:0.6rem">{{ i.paidAt || '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" style="padding:1rem;text-align:center;color:#6b7280">কোনো কিস্তি নেই</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

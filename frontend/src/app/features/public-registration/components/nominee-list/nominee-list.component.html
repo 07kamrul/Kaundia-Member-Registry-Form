@@ -1,0 +1,63 @@
+<div class="card" style="overflow:hidden">
+  <h2 class="section-title" style="border-radius:0;margin:0">৫. মনোনীত ব্যক্তি (Nominee)</h2>
+  <div style="padding:0.75rem" [formGroup]="group(0)">
+    <div class="field">
+      <label>নাম</label>
+      <input type="text" formControlName="name" />
+    </div>
+    <div class="field">
+      <label>পিতা/স্বামী / সম্পর্ক</label>
+      <input type="text" formControlName="relation" />
+    </div>
+    <div class="field">
+      <label>মোবাইল</label>
+      <input type="text" formControlName="mobile" />
+    </div>
+    <div class="field">
+      <label>ঠিকানা</label>
+      <input type="text" formControlName="address" />
+    </div>
+  </div>
+</div>
+
+@if (nominees.length > 1) {
+  <div style="margin-top:1rem">
+    <h3 style="font-size:0.9rem;color:#374151;margin-bottom:0.75rem">অতিরিক্ত মনোনীত ব্যক্তি</h3>
+    @for (n of nominees.controls; track n; let i = $index) {
+      @if (i > 0) {
+        <div class="card" style="padding:1rem;margin-bottom:1rem" [formGroup]="group(i)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+            <h4 style="margin:0;color:#374151">মনোনীত ব্যক্তি {{ i + 1 }}</h4>
+            <button type="button" (click)="removeNominee(i)" style="color:#dc2626;background:none;border:none;cursor:pointer;font-size:0.875rem">
+              মুছুন
+            </button>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>নাম</label>
+              <input type="text" formControlName="name" />
+            </div>
+            <div class="field">
+              <label>সম্পর্ক</label>
+              <input type="text" formControlName="relation" />
+            </div>
+            <div class="field">
+              <label>মোবাইল</label>
+              <input type="text" formControlName="mobile" />
+            </div>
+            <div class="field">
+              <label>ঠিকানা</label>
+              <input type="text" formControlName="address" />
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+}
+
+@if (nominees.length < 5) {
+  <button type="button" (click)="addNominee()" style="color:#065f46;background:none;border:none;cursor:pointer;font-size:0.875rem;margin-top:0.5rem">
+    + আরও মনোনীত ব্যক্তি যোগ করুন
+  </button>
+}

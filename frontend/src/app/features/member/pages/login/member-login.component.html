@@ -1,0 +1,21 @@
+<div style="max-width:24rem;margin:4rem auto" class="card">
+  <div style="padding:1.5rem">
+    <h1 style="text-align:center;color:#064e3b;font-size:1.25rem">সদস্য লগইন</h1>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      @if (error) {
+        <div class="error-box"><p style="margin:0;color:#b91c1c">{{ error }}</p></div>
+      }
+      <div class="field">
+        <label>ইউজারনেম</label>
+        <input type="text" formControlName="username" />
+      </div>
+      <div class="field">
+        <label>পাসওয়ার্ড</label>
+        <input type="password" formControlName="password" />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%" [disabled]="submitting || form.invalid">
+        {{ submitting ? 'লগইন হচ্ছে...' : 'লগইন' }}
+      </button>
+    </form>
+  </div>
+</div>

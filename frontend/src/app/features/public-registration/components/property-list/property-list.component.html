@@ -1,0 +1,16 @@
+<section [formGroup]="form">
+  <h2 class="section-title">৩. আবাসন / সম্পত্তির মালিকানা তথ্য</h2>
+  <div class="field" style="max-width:16rem">
+    <label>সম্পত্তির সংখ্যা <span class="required">*</span></label>
+    <select [value]="form.get('propertyCount')?.value" (change)="onCountChange($event)">
+      <option value="">নির্বাচন করুন</option>
+      @for (n of propertyCounts; track n) {
+        <option [value]="n">{{ n }}</option>
+      }
+    </select>
+  </div>
+
+  @for (p of properties.controls; track p; let i = $index) {
+    <app-property-item [property]="propertyGroup(i)" [index]="i" [submitAttempted]="submitAttempted" />
+  }
+</section>
