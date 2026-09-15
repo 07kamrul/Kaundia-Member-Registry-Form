@@ -4,14 +4,9 @@
   <div class="page-with-banner">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card reg-card">
     <div class="reg-card-body">
-      @if (errors.length > 0) {
+      @if (serverError) {
         <div class="error-box">
-          <h3>নিম্নলিখিত সমস্যা দূর করুন:</h3>
-          <ul>
-            @for (err of errors; track err) {
-              <li>{{ err }}</li>
-            }
-          </ul>
+          <p>{{ serverError }}</p>
         </div>
       }
 

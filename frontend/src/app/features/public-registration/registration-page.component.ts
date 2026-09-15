@@ -53,6 +53,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
 
   form: FormGroup;
   errors: string[] = [];
+  serverError: string | null = null;
   submitting = false;
   submitAttempted = false;
   success: { id: string; fullName: string } | null = null;
@@ -113,11 +114,11 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      this.errors = ['ছবির ফাইল নির্বাচন করুন (JPG/PNG)'];
+      this.serverError = 'ছবির ফাইল নির্বাচন করুন (JPG/PNG)';
       return;
     }
     if (file.size > MAX_PHOTO_BYTES) {
-      this.errors = ['ছবির সাইজ ৩ এমবি-এর কম হতে হবে'];
+      this.serverError = 'ছবির সাইজ ৩ এমবি-এর কম হতে হবে';
       return;
     }
 
@@ -270,6 +271,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
 
   onSubmit(): void {
     this.errors = [];
+    this.serverError = null;
     this.submitAttempted = true;
 
     const clientErrors = this.validate();
@@ -295,13 +297,13 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
         if (res.success) {
           this.success = { id: res.id ?? '', fullName: this.form.value.fullName };
         } else {
-          this.errors = [res.error ?? 'সাবমিটে সমস্যা হয়েছে'];
+          this.serverError = res.error ?? 'সাবমিটে সমস্যা হয়েছে';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       },
       error: () => {
         this.submitting = false;
-        this.errors = ['নেটওয়ার্কে সমস্যা। অনুগ্রহ করে আবার চেষ্টা করুন।'];
+        this.serverError = 'নেটওয়ার্কে সমস্যা। অনুগ্রহ করে আবার চেষ্টা করুন।';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
     });
@@ -313,6 +315,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     this.memberPhotoPreview = '';
     this.signaturePad?.clear();
     this.submitAttempted = false;
+    this.serverError = null;
     this.currentStep = 1;
   }
 
