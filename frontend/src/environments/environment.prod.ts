@@ -1,4 +1,4 @@
 export const environment = {
-  production: false,
+  production: true,
   apiUrl: 'https://kaundiaapi.anshintech.dpdns.org/api/v1',
 };
