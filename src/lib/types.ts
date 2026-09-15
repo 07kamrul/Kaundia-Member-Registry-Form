@@ -10,6 +10,23 @@ export interface CoOwner {
   ownerPhone: string;
 }
 
+// One entry exists per currently-checked "প্রযোজ্য কাগজ" item. Unchecking the
+// item removes its entry (and discards the attached file) instead of leaving
+// it hidden and stale.
+export interface ApplicableDocEntry {
+  type: string;
+  // Original filename of the attached file, empty until one is chosen.
+  fileName: string;
+  // Data URL (data:<mime>;base64,...) of the attached file, empty until
+  // uploaded. This is how the file travels from the browser to the API
+  // route in the JSON submission payload (mirrors memberPhoto).
+  fileDataUrl: string;
+  // Populated server-side after the file is uploaded to Drive; never set by
+  // the client. Used to render "সংযুক্তি" notes in the PDF and to fill the
+  // per-doc Sheet columns.
+  driveUrl?: string;
+}
+
 export interface PropertyItem {
   propertyType: string[];
   propertyTypeOther: string;
@@ -17,9 +34,30 @@ export interface PropertyItem {
   dagNo: string;
   landQuantity: string;
   ownership: string;
-  applicableDocs: string[];
+  applicableDocs: ApplicableDocEntry[];
   // Only populated/used when ownership === "যৌথ"
   coOwners: CoOwner[];
+}
+
+export const DOCUMENT_OPTIONS = [
+  "খতিয়ান/পর্চা",
+  "নামজারি/মিউটেশন",
+  "খাজনা/কর রশিদ",
+  "উত্তরাধিকার সনদ",
+];
+
+// Accepted MIME types for a প্রযোজ্য কাগজ attachment (image or PDF only).
+export const ALLOWED_DOC_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "application/pdf",
+];
+
+export const MAX_DOC_FILE_BYTES = 5 * 1024 * 1024; // 5MB per file
+
+export function createEmptyApplicableDoc(type: string): ApplicableDocEntry {
+  return { type, fileName: "", fileDataUrl: "" };
 }
 
 export const MAX_PROPERTY_COUNT = 9;
@@ -39,7 +77,7 @@ export function createEmptyProperty(): PropertyItem {
     dagNo: "",
     landQuantity: "",
     ownership: "",
-    applicableDocs: [],
+    applicableDocs: [] as ApplicableDocEntry[],
     coOwners: [],
   };
 }

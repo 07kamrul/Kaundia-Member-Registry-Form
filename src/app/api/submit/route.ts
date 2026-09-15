@@ -1,7 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processSubmission } from "@/lib/submit";
 import { generatePdf } from "@/lib/pdf";
-import { createEmptyProperty, type FormData } from "@/lib/types";
+import {
+  createEmptyProperty,
+  ALLOWED_DOC_MIME_TYPES,
+  MAX_DOC_FILE_BYTES,
+  type FormData,
+} from "@/lib/types";
+
+const DOC_DATA_URL_RE = /^data:([a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
+
+// Server-side mirror of the client's mandatory-attachment + type/size checks
+// (never trust the client alone). Returns null when the attachment is valid.
+function validateDocAttachment(dataUrl: string): string | null {
+  const match = DOC_DATA_URL_RE.exec(dataUrl.trim());
+  if (!match) return "ফাইল পড়া যায়নি";
+
+  const [, mimeType, base64] = match;
+  if (!ALLOWED_DOC_MIME_TYPES.includes(mimeType)) {
+    return "শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য";
+  }
+  // Base64 encodes 3 bytes as 4 chars; this is an upper-bound estimate that
+  // avoids decoding the whole payload just to check its size.
+  const approxBytes = Math.floor((base64.length * 3) / 4);
+  if (approxBytes > MAX_DOC_FILE_BYTES) {
+    return `ফাইলের সাইজ সর্বোচ্চ ${MAX_DOC_FILE_BYTES / (1024 * 1024)} এমবি হতে হবে`;
+  }
+  return null;
+}
 
 function validate(data: FormData): string[] {
   const errors: string[] = [];
@@ -41,6 +67,16 @@ function validate(data: FormData): string[] {
           errors.push(`${label}: অন্তত একজন মালিকের নাম ও মোবাইল নং আবশ্যক`);
         }
       }
+      property.applicableDocs?.forEach((doc) => {
+        if (!doc.fileDataUrl) {
+          errors.push(`${label}: "${doc.type}" এর জন্য ফাইল সংযুক্ত করা আবশ্যক`);
+          return;
+        }
+        const docError = validateDocAttachment(doc.fileDataUrl);
+        if (docError) {
+          errors.push(`${label}: "${doc.type}" - ${docError}`);
+        }
+      });
     });
   }
 

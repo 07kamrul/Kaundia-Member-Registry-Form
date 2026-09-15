@@ -3,6 +3,8 @@ import { generatePdf } from "./pdf";
 import {
   MAX_PROPERTY_COUNT,
   MAX_CO_OWNER_COUNT,
+  DOCUMENT_OPTIONS,
+  type ApplicableDocEntry,
   type FormData,
   type PropertyItem,
   type SubmissionResult,
@@ -33,6 +35,16 @@ function buildCoOwnerColumns(property: PropertyItem | undefined): string[] {
   return columns;
 }
 
+// Flattens one property's applicable-doc uploads into a fixed set of
+// columns (property{n}_doc_<type>_url), one per DOCUMENT_OPTIONS entry, in
+// a stable order. Blank when the doc type wasn't checked or its upload
+// hasn't completed.
+function buildDocColumns(property: PropertyItem | undefined): string[] {
+  return DOCUMENT_OPTIONS.map(
+    (type) => property?.applicableDocs.find((d) => d.type === type)?.driveUrl ?? ""
+  );
+}
+
 // Flattens the properties array into a fixed set of columns
 // (property1_*..property{MAX_PROPERTY_COUNT}_*), leaving unused
 // property columns blank when propertyCount is lower than the max.
@@ -41,7 +53,16 @@ function buildPropertyColumns(properties: PropertyItem[]): string[] {
   for (let i = 0; i < MAX_PROPERTY_COUNT; i++) {
     const property = properties[i];
     if (!property) {
-      columns.push("", "", "", "", "", "", ...buildCoOwnerColumns(undefined));
+      columns.push(
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ...buildCoOwnerColumns(undefined),
+        ...buildDocColumns(undefined)
+      );
       continue;
     }
     columns.push(
@@ -50,8 +71,9 @@ function buildPropertyColumns(properties: PropertyItem[]): string[] {
       property.dagNo,
       property.landQuantity,
       property.ownership,
-      property.applicableDocs.join(", "),
-      ...buildCoOwnerColumns(property)
+      property.applicableDocs.map((d) => d.type).join(", "),
+      ...buildCoOwnerColumns(property),
+      ...buildDocColumns(property)
     );
   }
   return columns;
@@ -95,28 +117,80 @@ function buildRow(data: FormData, formNo: string): (string | number)[] {
   ];
 }
 
-const PHOTO_DATA_URL_RE = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
+const DATA_URL_RE = /^data:([a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
 const MIME_TO_EXT: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/jpg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
+  "application/pdf": "pdf",
 };
 
-function decodePhotoDataUrl(
+function decodeDataUrl(
   dataUrl: string
 ): { buffer: Buffer; mimeType: string; ext: string } | null {
-  const match = PHOTO_DATA_URL_RE.exec(dataUrl.trim());
+  const match = DATA_URL_RE.exec(dataUrl.trim());
   if (!match) return null;
 
   const [, mimeType, base64] = match;
-  const ext = MIME_TO_EXT[mimeType] ?? "jpg";
+  const ext = MIME_TO_EXT[mimeType] ?? "bin";
 
   try {
     return { buffer: Buffer.from(base64, "base64"), mimeType, ext };
   } catch {
     return null;
   }
+}
+
+// Sanitizes a doc type label (may contain "/" e.g. "খতিয়ান/পর্চা") for use in
+// a filename, keeping Bengali script and alphanumerics.
+function safeFileSegment(value: string): string {
+  return value.replace(/[^a-zA-Z0-9ঀ-৿]/g, "_");
+}
+
+// Uploads every attached প্রযোজ্য কাগজ file to Drive and returns a new
+// properties array (immutable copy) with each entry's `driveUrl` populated.
+// Throws with a message naming the specific failed item so submission can
+// be blocked without silently dropping a mandatory attachment.
+async function uploadApplicableDocs(
+  properties: PropertyItem[],
+  formNo: string,
+  safeName: string
+): Promise<PropertyItem[]> {
+  const uploaded: PropertyItem[] = [];
+
+  for (let i = 0; i < properties.length; i++) {
+    const property = properties[i];
+    const applicableDocs: ApplicableDocEntry[] = [];
+
+    for (const doc of property.applicableDocs) {
+      if (!doc.fileDataUrl) {
+        throw new Error(
+          `সম্পত্তি #${i + 1}: "${doc.type}" এর ফাইল সংযুক্ত করা হয়নি`
+        );
+      }
+      const decoded = decodeDataUrl(doc.fileDataUrl);
+      if (!decoded) {
+        throw new Error(
+          `সম্পত্তি #${i + 1}: "${doc.type}" এর ফাইল পড়া যায়নি`
+        );
+      }
+      try {
+        const fileName = `${safeName}_${formNo}_property${i + 1}_${safeFileSegment(
+          doc.type
+        )}.${decoded.ext}`;
+        const result = await uploadFile(fileName, decoded.buffer, decoded.mimeType);
+        applicableDocs.push({ ...doc, driveUrl: result.fileLink });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        throw new Error(`সম্পত্তি #${i + 1}: "${doc.type}" আপলোড ব্যর্থ হয়েছে (${msg})`);
+      }
+    }
+
+    uploaded.push({ ...property, applicableDocs });
+  }
+
+  return uploaded;
 }
 
 function logSubmission(formNo: string, row: Record<string, unknown>) {
@@ -142,6 +216,21 @@ export async function processSubmission(data: FormData): Promise<SubmissionResul
   // Generate form number
   const rowCount = await getRowCount();
   const formNo = `KK-${String(rowCount + 1).padStart(4, "0")}`;
+  const safeName = data.fullName.replace(/[^a-zA-Z0-9ঀ-৿]/g, "_");
+
+  // Upload each checked প্রযোজ্য কাগজ attachment before building the row/PDF,
+  // so their Drive links can be written in the same pass. Any failed or
+  // missing mandatory attachment blocks the whole submission.
+  let properties: PropertyItem[];
+  try {
+    properties = await uploadApplicableDocs(data.properties, formNo, safeName);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[Drive] Applicable doc upload failed: ${msg}`);
+    logSubmission(formNo, { error: "Applicable doc upload failed", details: msg });
+    return { success: false, formNo, error: msg };
+  }
+  data = { ...data, properties };
 
   // Build and insert row
   const rowValues = buildRow(data, formNo);
@@ -176,8 +265,6 @@ export async function processSubmission(data: FormData): Promise<SubmissionResul
     };
   }
 
-  const safeName = data.fullName.replace(/[^a-zA-Z0-9\u0980-\u09FF]/g, "_");
-
   // Upload to Drive
   let driveFileId: string;
   let driveFileLink: string;
@@ -203,7 +290,7 @@ export async function processSubmission(data: FormData): Promise<SubmissionResul
   let photoFileId: string | undefined;
   let photoFileLink: string | undefined;
   if (data.memberPhoto) {
-    const decoded = decodePhotoDataUrl(data.memberPhoto);
+    const decoded = decodeDataUrl(data.memberPhoto);
     if (!decoded) {
       console.error(`[Drive] Photo skipped: invalid image data for ${formNo}`);
       logSubmission(formNo, { warning: "Invalid member photo data, skipped upload" });

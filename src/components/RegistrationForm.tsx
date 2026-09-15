@@ -5,8 +5,13 @@ import Image from "next/image";
 import SignatureCanvas from "react-signature-canvas";
 import {
   MAX_PROPERTY_COUNT,
+  DOCUMENT_OPTIONS,
+  ALLOWED_DOC_MIME_TYPES,
+  MAX_DOC_FILE_BYTES,
   createEmptyProperty,
   createEmptyCoOwner,
+  createEmptyApplicableDoc,
+  type ApplicableDocEntry,
   type CoOwner,
   type FormData,
   type Nominee,
@@ -15,13 +20,8 @@ import {
 
 const PROPERTY_TYPES = ["জমি", "বাড়ি", "ফ্ল্যাট", "প্লট", "অন্যান্য"];
 const OWNERSHIP_TYPES = ["একক", "যৌথ"];
-const DOCUMENT_OPTIONS = [
-  "খতিয়ান/পর্চা",
-  "নামজারি/মিউটেশন",
-  "খাজনা/কর রশিদ",
-  "উত্তরাধিকার সনদ",
-];
 const PAYMENT_METHODS = ["নগদ", "ব্যাংক", "MFS (বিকাশ/নগদ/রকেট)", "অন্যান্য"];
+const MAX_DOC_FILE_MB = MAX_DOC_FILE_BYTES / (1024 * 1024);
 
 const initialFormData: FormData = {
   fullName: "",
@@ -58,6 +58,8 @@ export default function RegistrationForm() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [docFileErrors, setDocFileErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<{ formNo: string; driveFileLink: string } | null>(null);
   const sigRef = useRef<SignatureCanvas>(null);
 
@@ -132,12 +134,81 @@ export default function RegistrationForm() {
     updateProperty(propertyIndex, { coOwners });
   };
 
+  const docErrorKey = (propertyIndex: number, docType: string) =>
+    `${propertyIndex}::${docType}`;
+
   const handlePropertyDocToggle = (index: number, doc: string) => {
     const current = formData.properties[index]?.applicableDocs ?? [];
-    const applicableDocs = current.includes(doc)
-      ? current.filter((d) => d !== doc)
-      : [...current, doc];
+    const isChecked = current.some((d) => d.type === doc);
+    const applicableDocs = isChecked
+      ? current.filter((d) => d.type !== doc)
+      : [...current, createEmptyApplicableDoc(doc)];
     updateProperty(index, { applicableDocs });
+    if (isChecked) {
+      // Unchecking discards the attached file and any pending error for it.
+      setDocFileErrors((prev) => {
+        const next = { ...prev };
+        delete next[docErrorKey(index, doc)];
+        return next;
+      });
+    }
+  };
+
+  const updateApplicableDoc = (
+    propertyIndex: number,
+    docType: string,
+    patch: Partial<ApplicableDocEntry>
+  ) => {
+    const applicableDocs = (
+      formData.properties[propertyIndex]?.applicableDocs ?? []
+    ).map((d) => (d.type === docType ? { ...d, ...patch } : d));
+    updateProperty(propertyIndex, { applicableDocs });
+  };
+
+  const handleDocFileChange = (
+    propertyIndex: number,
+    docType: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+
+    const key = docErrorKey(propertyIndex, docType);
+
+    if (!ALLOWED_DOC_MIME_TYPES.includes(file.type)) {
+      setDocFileErrors((prev) => ({
+        ...prev,
+        [key]: "শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য",
+      }));
+      return;
+    }
+    if (file.size > MAX_DOC_FILE_BYTES) {
+      setDocFileErrors((prev) => ({
+        ...prev,
+        [key]: `ফাইলের সাইজ সর্বোচ্চ ${MAX_DOC_FILE_MB} এমবি হতে হবে`,
+      }));
+      return;
+    }
+
+    setDocFileErrors((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      updateApplicableDoc(propertyIndex, docType, {
+        fileName: file.name,
+        fileDataUrl: reader.result as string,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeDocFile = (propertyIndex: number, docType: string) => {
+    updateApplicableDoc(propertyIndex, docType, { fileName: "", fileDataUrl: "" });
   };
 
   const handlePropertyCountChange = (
@@ -222,6 +293,7 @@ export default function RegistrationForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors([]);
+    setSubmitAttempted(true);
 
     // Client-side validation
     const clientErrors: string[] = [];
@@ -261,6 +333,11 @@ export default function RegistrationForm() {
           });
         }
       }
+      property.applicableDocs.forEach((doc) => {
+        if (!doc.fileDataUrl) {
+          clientErrors.push(`${label}: "${doc.type}" এর জন্য ফাইল সংযুক্ত করা আবশ্যক`);
+        }
+      });
     });
     if (!formData.admissionFee) clientErrors.push("ভর্তি ফি আবশ্যক");
     if (!formData.subscription) clientErrors.push("চাঁদা আবশ্যক");
@@ -770,15 +847,30 @@ export default function RegistrationForm() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   প্রযোজ্য কাগজ
                 </label>
-                <div className="flex flex-wrap gap-x-5 gap-y-2">
-                  {DOCUMENT_OPTIONS.map((doc) => (
-                    <Checkbox
-                      key={doc}
-                      label={doc}
-                      checked={property.applicableDocs.includes(doc)}
-                      onChange={() => handlePropertyDocToggle(index, doc)}
-                    />
-                  ))}
+                <div className="flex flex-col gap-3">
+                  {DOCUMENT_OPTIONS.map((doc) => {
+                    const entry = property.applicableDocs.find((d) => d.type === doc);
+                    return (
+                      <div key={doc}>
+                        <Checkbox
+                          label={doc}
+                          checked={!!entry}
+                          onChange={() => handlePropertyDocToggle(index, doc)}
+                        />
+                        {entry && (
+                          <div className="mt-2 ml-6">
+                            <DocAttachControl
+                              entry={entry}
+                              error={docFileErrors[docErrorKey(index, doc)]}
+                              missing={submitAttempted && !entry.fileDataUrl}
+                              onFileChange={(e) => handleDocFileChange(index, doc, e)}
+                              onRemove={() => removeDocFile(index, doc)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -1168,6 +1260,99 @@ function Checkbox({
       />
       <span>{label}</span>
     </label>
+  );
+}
+
+function DocAttachControl({
+  entry,
+  error,
+  missing,
+  onFileChange,
+  onRemove,
+}: {
+  entry: ApplicableDocEntry;
+  error?: string;
+  missing?: boolean;
+  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemove: () => void;
+}) {
+  const inputId = `doc-file-${entry.type}-${Math.random().toString(36).slice(2)}`;
+  const isImage = entry.fileDataUrl.startsWith("data:image/");
+  const hasFile = !!entry.fileDataUrl;
+
+  return (
+    <div className="max-w-sm">
+      {hasFile ? (
+        <div
+          className={`flex items-center gap-3 border rounded-lg p-2 ${
+            missing ? "border-red-400 bg-red-50" : "border-gray-300 bg-white"
+          }`}
+        >
+          {isImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={entry.fileDataUrl}
+              alt={entry.fileName}
+              className="w-10 h-10 object-cover rounded shrink-0"
+            />
+          ) : (
+            <span className="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-lg shrink-0">
+              📄
+            </span>
+          )}
+          <span className="flex-1 text-xs text-gray-700 truncate" title={entry.fileName}>
+            {entry.fileName}
+          </span>
+          <label
+            htmlFor={inputId}
+            className="text-xs text-emerald-800 hover:underline cursor-pointer shrink-0"
+          >
+            পরিবর্তন
+          </label>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-xs text-red-600 hover:underline shrink-0"
+          >
+            মুছুন
+          </button>
+          <input
+            id={inputId}
+            type="file"
+            accept="image/jpeg,image/png,application/pdf"
+            onChange={onFileChange}
+            className="hidden"
+          />
+        </div>
+      ) : (
+        <div>
+          <label
+            htmlFor={inputId}
+            className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-lg px-3 py-2 text-xs cursor-pointer transition ${
+              missing
+                ? "border-red-400 text-red-700 bg-red-50 hover:bg-red-100"
+                : "border-gray-300 text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            📎 ফাইল সংযুক্ত করুন
+          </label>
+          <input
+            id={inputId}
+            type="file"
+            accept="image/jpeg,image/png,application/pdf"
+            onChange={onFileChange}
+            className="hidden"
+          />
+        </div>
+      )}
+      <p className="text-[11px] text-gray-500 mt-1">
+        সর্বোচ্চ {MAX_DOC_FILE_MB} এমবি (JPG/PNG/PDF)
+      </p>
+      {error && <p className="text-[11px] text-red-600 mt-1">{error}</p>}
+      {missing && !error && (
+        <p className="text-[11px] text-red-600 mt-1">এই কাগজের ফাইল সংযুক্ত করা আবশ্যক</p>
+      )}
+    </div>
   );
 }
 

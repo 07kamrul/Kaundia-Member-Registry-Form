@@ -188,10 +188,24 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
       ["Dag No", property.dagNo],
       ["Land Quantity", property.landQuantity],
       ["Ownership", property.ownership],
-      ["Applicable Docs", property.applicableDocs.join(", ")],
+      [
+        "Applicable Docs",
+        property.applicableDocs.map((d) => d.type).join(", "),
+      ],
     ];
 
     drawKeyValueRows(propertyFields);
+
+    // List Drive links for each uploaded supporting document, rather than
+    // embedding the (potentially large) images/PDFs into this form PDF.
+    const uploadedDocs = property.applicableDocs.filter((d) => d.driveUrl);
+    if (uploadedDocs.length > 0) {
+      const attachmentFields: [string, string][] = uploadedDocs.map((d) => [
+        "সংযুক্তি",
+        `${d.type}: ${d.driveUrl}`,
+      ]);
+      drawKeyValueRows(attachmentFields);
+    }
 
     if (property.ownership === "যৌথ" && property.coOwners.length > 0) {
       const coOwnerFields: [string, string][] = property.coOwners.map(
