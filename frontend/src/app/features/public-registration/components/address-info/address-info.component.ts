@@ -2,6 +2,14 @@ import { Component, DestroyRef, inject, Input, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
+const ADDRESS_FIELD_ERROR_MESSAGES: Record<string, string> = {
+  district: 'জেলা আবশ্যক',
+  upazila: 'উপজেলা/থানা আবশ্যক',
+  postOffice: 'ডাকঘর আবশ্যক',
+  road: 'রাস্তা/গ্রাম আবশ্যক',
+  house: 'বাসা/হোল্ডিং নং আবশ্যক',
+};
+
 @Component({
   selector: 'app-address-info',
   standalone: true,
@@ -10,6 +18,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 })
 export class AddressInfoComponent implements OnInit {
   @Input({ required: true }) form!: FormGroup;
+  @Input() submitAttempted = false;
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -48,5 +57,14 @@ export class AddressInfoComponent implements OnInit {
 
   private copyCurrentAddressToPermanent(): void {
     this.permanentAddressGroup.patchValue(this.currentAddressGroup.value, { emitEvent: false });
+  }
+
+  showError(groupName: 'currentAddress' | 'permanentAddress', controlName: string): boolean {
+    const control = this.form.get(`${groupName}.${controlName}`);
+    return !!control && control.invalid && (control.touched || this.submitAttempted);
+  }
+
+  errorMessage(controlName: string): string {
+    return ADDRESS_FIELD_ERROR_MESSAGES[controlName] ?? '';
   }
 }

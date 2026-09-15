@@ -150,6 +150,24 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) errs.push('ই-মেইল সঠিক নয়');
     if (v.nid && !/^\d{10,17}$/.test(v.nid)) errs.push('NID নম্বর ১০-১৭ সংখ্যার হতে হবে');
 
+    errs.push(...this.validateAddressGroup('বর্তমান ঠিকানা', v.currentAddress));
+    if (this.form.get('permanentAddress')?.enabled) {
+      errs.push(...this.validateAddressGroup('স্থায়ী ঠিকানা', v.permanentAddress));
+    }
+
+    return errs;
+  }
+
+  private validateAddressGroup(
+    label: string,
+    address: { district?: string; upazila?: string; postOffice?: string; road?: string; house?: string },
+  ): string[] {
+    const errs: string[] = [];
+    if (!address.district?.trim()) errs.push(`${label}: জেলা আবশ্যক`);
+    if (!address.upazila?.trim()) errs.push(`${label}: উপজেলা/থানা আবশ্যক`);
+    if (!address.postOffice?.trim()) errs.push(`${label}: ডাকঘর আবশ্যক`);
+    if (!address.road?.trim()) errs.push(`${label}: রাস্তা/গ্রাম আবশ্যক`);
+    if (!address.house?.trim()) errs.push(`${label}: বাসা/হোল্ডিং নং আবশ্যক`);
     return errs;
   }
 
@@ -254,6 +272,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     const stepErrors = this.validateStep(this.currentStep);
     if (stepErrors.length > 0) {
       this.errors = stepErrors;
+      this.form.markAllAsTouched();
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }

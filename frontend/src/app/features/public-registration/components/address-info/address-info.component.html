@@ -7,23 +7,48 @@
 
       </div>
       <div class="field">
-        <label>জেলা</label>
+        <div class="field-label-row">
+          <label>জেলা <span class="required">*</span></label>
+          @if (showError('currentAddress', 'district')) {
+            <span class="field-error-inline">{{ errorMessage('district') }}</span>
+          }
+        </div>
         <input type="text" formControlName="district" />
       </div>
       <div class="field">
-        <label>উপজেলা/থানা</label>
+        <div class="field-label-row">
+          <label>উপজেলা/থানা <span class="required">*</span></label>
+          @if (showError('currentAddress', 'upazila')) {
+            <span class="field-error-inline">{{ errorMessage('upazila') }}</span>
+          }
+        </div>
         <input type="text" formControlName="upazila" />
       </div>
       <div class="field">
-        <label>ডাকঘর</label>
+        <div class="field-label-row">
+          <label>ডাকঘর <span class="required">*</span></label>
+          @if (showError('currentAddress', 'postOffice')) {
+            <span class="field-error-inline">{{ errorMessage('postOffice') }}</span>
+          }
+        </div>
         <input type="text" formControlName="postOffice" />
       </div>
       <div class="field">
-        <label>রাস্তা/গ্রাম</label>
+        <div class="field-label-row">
+          <label>রাস্তা/গ্রাম <span class="required">*</span></label>
+          @if (showError('currentAddress', 'road')) {
+            <span class="field-error-inline">{{ errorMessage('road') }}</span>
+          }
+        </div>
         <input type="text" formControlName="road" />
       </div>
       <div class="field">
-        <label>বাসা/হোল্ডিং নং</label>
+        <div class="field-label-row">
+          <label>বাসা/হোল্ডিং নং <span class="required">*</span></label>
+          @if (showError('currentAddress', 'house')) {
+            <span class="field-error-inline">{{ errorMessage('house') }}</span>
+          }
+        </div>
         <input type="text" formControlName="house" />
       </div>
     </div>
@@ -38,23 +63,48 @@
           <label for="sameAsCurrentAddress" style="margin:0; font-size:12px">বর্তমান ঠিকানার সাথে একই</label>
         </div>
       <div class="field">
-        <label>জেলা</label>
+        <div class="field-label-row">
+          <label>জেলা <span class="required">*</span></label>
+          @if (showError('permanentAddress', 'district')) {
+            <span class="field-error-inline">{{ errorMessage('district') }}</span>
+          }
+        </div>
         <input type="text" formControlName="district" />
       </div>
       <div class="field">
-        <label>উপজেলা/থানা</label>
+        <div class="field-label-row">
+          <label>উপজেলা/থানা <span class="required">*</span></label>
+          @if (showError('permanentAddress', 'upazila')) {
+            <span class="field-error-inline">{{ errorMessage('upazila') }}</span>
+          }
+        </div>
         <input type="text" formControlName="upazila" />
       </div>
       <div class="field">
-        <label>ডাকঘর</label>
+        <div class="field-label-row">
+          <label>ডাকঘর <span class="required">*</span></label>
+          @if (showError('permanentAddress', 'postOffice')) {
+            <span class="field-error-inline">{{ errorMessage('postOffice') }}</span>
+          }
+        </div>
         <input type="text" formControlName="postOffice" />
       </div>
       <div class="field">
-        <label>রাস্তা/গ্রাম</label>
+        <div class="field-label-row">
+          <label>রাস্তা/গ্রাম <span class="required">*</span></label>
+          @if (showError('permanentAddress', 'road')) {
+            <span class="field-error-inline">{{ errorMessage('road') }}</span>
+          }
+        </div>
         <input type="text" formControlName="road" />
       </div>
       <div class="field">
-        <label>বাসা/হোল্ডিং নং</label>
+        <div class="field-label-row">
+          <label>বাসা/হোল্ডিং নং <span class="required">*</span></label>
+          @if (showError('permanentAddress', 'house')) {
+            <span class="field-error-inline">{{ errorMessage('house') }}</span>
+          }
+        </div>
         <input type="text" formControlName="house" />
       </div>
     </div>

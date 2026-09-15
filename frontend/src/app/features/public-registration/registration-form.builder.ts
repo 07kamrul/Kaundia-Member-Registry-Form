@@ -33,11 +33,11 @@ export function buildPropertyGroup(fb: FormBuilder): FormGroup {
 
 export function buildAddressGroup(fb: FormBuilder): FormGroup {
   return fb.group({
-    house: [''],
-    road: [''],
-    postOffice: [''],
-    upazila: [''],
-    district: [''],
+    house: ['', Validators.required],
+    road: ['', Validators.required],
+    postOffice: ['', Validators.required],
+    upazila: ['', Validators.required],
+    district: ['', Validators.required],
   });
 }
 
