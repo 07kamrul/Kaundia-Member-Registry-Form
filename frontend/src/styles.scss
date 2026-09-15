@@ -108,6 +108,18 @@ a {
   margin: 0;
 }
 
+.field-label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.field-error-inline {
+  color: var(--red-600);
+  font-size: 0.8rem;
+}
+
 input[type='text'],
 input[type='date'],
 input[type='email'],
