@@ -3,7 +3,7 @@ import re
 import uuid
 from pathlib import Path
 
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile, status
 
 from app.core.config import get_settings
 
@@ -18,6 +18,9 @@ _MIME_EXTENSIONS = {
     "application/pdf": ".pdf",
 }
 
+_ALLOWED_UPLOAD_EXTENSIONS = {".jpg", ".jpeg", ".png", ".pdf"}
+_MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+
 
 def _upload_root() -> Path:
     root = Path(settings.upload_dir)
@@ -26,15 +29,30 @@ def _upload_root() -> Path:
 
 
 async def save_upload_file(upload_file: UploadFile, subdir: str) -> str:
-    """Save a multipart UploadFile to disk and return its relative path."""
+    """Save a multipart UploadFile to disk and return its relative path.
+
+    Rejects files outside the image/PDF allow-list or over the size cap,
+    since this is reachable from an unauthenticated public endpoint.
+    """
+    suffix = Path(upload_file.filename or "").suffix.lower()
+    if suffix not in _ALLOWED_UPLOAD_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Unsupported file type '{suffix or 'unknown'}'. Allowed: jpg, jpeg, png, pdf.",
+        )
+
+    contents = await upload_file.read()
+    if len(contents) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File exceeds the 10 MB upload limit.",
+        )
+
     target_dir = _upload_root() / subdir
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    suffix = Path(upload_file.filename or "").suffix or ""
     filename = f"{uuid.uuid4().hex}{suffix}"
     target_path = target_dir / filename
-
-    contents = await upload_file.read()
     target_path.write_bytes(contents)
 
     return str(Path(subdir) / filename)

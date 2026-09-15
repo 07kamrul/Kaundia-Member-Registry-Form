@@ -1,29 +1,36 @@
 from functools import lru_cache
 
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_INSECURE_JWT_DEFAULT = "insecure-dev-secret-change-me"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    # Application
+    app_env: str = "development"
+
     # Database
     database_url: str = "sqlite+aiosqlite:///./dev.db"
 
     # JWT
-    jwt_secret_key: str = "insecure-dev-secret-change-me"
+    jwt_secret_key: str = Field(default=_INSECURE_JWT_DEFAULT, validation_alias="SECRET_KEY")
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
 
     # Uploads
-    upload_dir: str = "uploads"
+    upload_dir: str = Field(default="uploads", validation_alias="STORAGE_BASE_DIR")
 
     # SMTP
     smtp_host: str = "localhost"
     smtp_port: int = 587
-    smtp_user: str = ""
+    smtp_user: str = Field(default="", validation_alias="SMTP_USERNAME")
     smtp_password: str = ""
-    smtp_from: str = "Kaundia Member Registry <no-reply@example.com>"
+    smtp_sender_email: str = Field(default="no-reply@example.com", validation_alias="SMTP_SENDER_EMAIL")
+    smtp_sender_name: str = Field(default="Kaundia Member Registry", validation_alias="SMTP_SENDER_NAME")
 
     # Admin bootstrap
     admin_email: str = "admin@example.com"
@@ -32,6 +39,19 @@ class Settings(BaseSettings):
 
     # CORS
     cors_origins: str = "http://localhost:9091"
+
+    @model_validator(mode="after")
+    def _reject_insecure_secret_in_production(self) -> "Settings":
+        if self.app_env == "production" and self.jwt_secret_key == _INSECURE_JWT_DEFAULT:
+            raise ValueError(
+                "JWT secret is using the insecure default. Set SECRET_KEY to a strong "
+                "random value before running with APP_ENV=production."
+            )
+        return self
+
+    @property
+    def smtp_from(self) -> str:
+        return f"{self.smtp_sender_name} <{self.smtp_sender_email}>"
 
     @property
     def cors_origins_list(self) -> list[str]:

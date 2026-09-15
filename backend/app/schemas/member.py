@@ -97,3 +97,4 @@ class RejectRequest(BaseModel):
 
 class ApproveResponse(BaseModel):
     member_id: str
+    email_sent: bool

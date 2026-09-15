@@ -58,8 +58,9 @@ async def test_submission_approval_member_id_login_flow(
 ) -> None:
     sent_emails: list[dict] = []
 
-    async def fake_send_email(to: str, subject: str, html_body: str) -> None:
+    async def fake_send_email(to: str, subject: str, html_body: str) -> bool:
         sent_emails.append({"to": to, "subject": subject, "html_body": html_body})
+        return True
 
     monkeypatch.setattr(admin_routes, "send_email", fake_send_email)
 

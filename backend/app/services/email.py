@@ -9,9 +9,11 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-async def send_email(to: str, subject: str, html_body: str) -> None:
+async def send_email(to: str, subject: str, html_body: str) -> bool:
     """Send an HTML email. Logs and swallows errors instead of raising,
-    so email delivery issues never block the primary request flow."""
+    so email delivery issues never block the primary request flow.
+    Returns whether the send succeeded, so callers can surface delivery
+    failures instead of assuming the recipient was notified."""
     message = EmailMessage()
     message["From"] = settings.smtp_from
     message["To"] = to
@@ -28,5 +30,7 @@ async def send_email(to: str, subject: str, html_body: str) -> None:
             password=settings.smtp_password or None,
             start_tls=settings.smtp_port == 587,
         )
+        return True
     except Exception:
         logger.exception("Failed to send email to %s", to)
+        return False

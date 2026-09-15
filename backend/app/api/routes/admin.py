@@ -72,7 +72,7 @@ async def approve_submission(
     db.add(credential)
     await db.commit()
 
-    await send_email(
+    email_sent = await send_email(
         to=member.email,
         subject="Kaundia Member Registry - Membership Approved",
         html_body=(
@@ -85,7 +85,7 @@ async def approve_submission(
         ),
     )
 
-    return ApproveResponse(member_id=generated_member_id)
+    return ApproveResponse(member_id=generated_member_id, email_sent=email_sent)
 
 
 @router.post("/submissions/{member_id}/reject", status_code=status.HTTP_204_NO_CONTENT)
