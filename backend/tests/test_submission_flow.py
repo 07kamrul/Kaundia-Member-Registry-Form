@@ -86,6 +86,13 @@ async def test_submission_approval_member_id_login_flow(
     assert submission["status"] == "pending"
     member_pk = submission["id"]
 
+    # 1b. Pending (unverified) member cannot log in yet — no credential exists
+    pending_login = await client.post(
+        "/api/member/login",
+        json={"username": "any-username", "password": "any-password"},
+    )
+    assert pending_login.status_code == 401
+
     # 2. Admin login
     login_response = await client.post(
         "/api/admin/login", json={"email": "admin@example.com", "password": "adminpass123"}

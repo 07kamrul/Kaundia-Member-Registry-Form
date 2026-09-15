@@ -35,7 +35,7 @@ export class ChangePasswordComponent {
       next: () => {
         this.submitting = false;
         this.success = true;
-        setTimeout(() => this.router.navigate(['/member/profile']), 1200);
+        setTimeout(() => this.router.navigate(['/member/dashboard']), 1200);
       },
       error: () => {
         this.submitting = false;

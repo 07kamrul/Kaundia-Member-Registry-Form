@@ -5,6 +5,10 @@ import { memberGuard } from './core/guards/member.guard';
 export const routes: Routes = [
   {
     path: '',
+    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
+  },
+  {
+    path: 'register',
     loadComponent: () =>
       import('./features/public-registration/registration-page.component').then(
         (m) => m.RegistrationPageComponent,
@@ -49,6 +53,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'member/dashboard',
+    canActivate: [memberGuard],
+    loadComponent: () =>
+      import('./features/member/pages/dashboard/member-dashboard.component').then(
+        (m) => m.MemberDashboardComponent,
+      ),
+  },
+  {
     path: 'member/change-password',
     canActivate: [memberGuard],
     loadComponent: () =>
@@ -60,9 +72,7 @@ export const routes: Routes = [
     path: 'member/profile',
     canActivate: [memberGuard],
     loadComponent: () =>
-      import('./features/member/pages/profile/profile.component').then(
-        (m) => m.ProfileComponent,
-      ),
+      import('./features/member/pages/profile/profile.component').then((m) => m.ProfileComponent),
   },
   {
     path: 'member/installments',

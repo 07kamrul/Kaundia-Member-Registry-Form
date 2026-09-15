@@ -36,7 +36,7 @@ export class MemberLoginComponent {
         if (res.must_change_password) {
           this.router.navigate(['/member/change-password']);
         } else {
-          this.router.navigate(['/member/profile']);
+          this.router.navigate(['/member/dashboard']);
         }
       },
       error: () => {

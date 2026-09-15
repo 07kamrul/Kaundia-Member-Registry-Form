@@ -1,0 +1,27 @@
+<div style="max-width:32rem;margin:2rem auto;padding:0 1rem">
+  <h1 style="color:#064e3b">সদস্য ড্যাশবোর্ড</h1>
+
+  @if (loading) {
+    <p>লোড হচ্ছে...</p>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else if (profile) {
+    <div class="card" style="padding:1.5rem;margin-bottom:1.5rem">
+      <p><strong>সদস্য নং:</strong> {{ profile.memberId }}</p>
+      <p><strong>নাম:</strong> {{ profile.fullName }}</p>
+      <p><strong>মোবাইল:</strong> {{ profile.mobile }}</p>
+    </div>
+  }
+
+  <div class="card" style="padding:1.5rem">
+    <a routerLink="/member/profile" class="btn btn-secondary" style="width:100%;display:block;margin-bottom:0.75rem">
+      প্রোফাইল দেখুন
+    </a>
+    <a routerLink="/member/installments" class="btn btn-secondary" style="width:100%;display:block;margin-bottom:0.75rem">
+      কিস্তির তথ্য
+    </a>
+    <a routerLink="/member/change-password" class="btn btn-secondary" style="width:100%;display:block">
+      পাসওয়ার্ড পরিবর্তন করুন
+    </a>
+  </div>
+</div>
