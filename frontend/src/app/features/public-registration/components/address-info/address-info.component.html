@@ -4,14 +4,7 @@
     <div formGroupName="currentAddress">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin:0 0 0.5rem">
         <h3 style="font-size:0.9rem;color:#374151;margin:0">বর্তমান ঠিকানা</h3>
-        <div style="display:flex;align-items:center;gap:0.5rem">
-          <input
-            type="checkbox"
-            id="sameAsCurrentAddress"
-            [formControl]="sameAsCurrentAddress"
-          />
-          <label for="sameAsCurrentAddress" style="margin:0">বর্তমান ঠিকানার সাথে একই</label>
-        </div>
+
       </div>
       <div class="field">
         <label>জেলা</label>
@@ -36,6 +29,14 @@
     </div>
     <div formGroupName="permanentAddress">
       <h3 style="font-size:0.9rem;color:#374151;margin:0 0 0.5rem">স্থায়ী ঠিকানা</h3>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <input
+            type="checkbox"
+            id="sameAsCurrentAddress"
+            [formControl]="sameAsCurrentAddress"
+          />
+          <label for="sameAsCurrentAddress" style="margin:0">বর্তমান ঠিকানার সাথে একই</label>
+        </div>
       <div class="field">
         <label>জেলা</label>
         <input type="text" formControlName="district" />
