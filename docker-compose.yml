@@ -32,10 +32,14 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-Kaundia Member Registry <no-reply@example.com>}
+      SMTP_SENDER_EMAIL: ${SMTP_SENDER_EMAIL:-}
+      SMTP_SENDER_NAME: ${SMTP_SENDER_NAME:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-this-password}
       ADMIN_NAME: ${ADMIN_NAME:-Administrator}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:9091}
+      STORAGE_BASE_DIR: ${STORAGE_BASE_DIR:-storage/kaundia/uploads}
     ports:
       - "9090:9090"
     volumes:
