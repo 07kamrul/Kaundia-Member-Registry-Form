@@ -185,7 +185,10 @@ export async function generatePdf(data: FormData): Promise<Buffer> {
     const propertyFields: [string, string][] = [
       ["Property Type", formatPropertyType(property)],
       ["Khatian No", property.khatianNo],
-      ["Dag No", property.dagNo],
+      [
+        "Dag No",
+        `দাগ নং: CS: ${property.dagNo.cs}, RS: ${property.dagNo.rs}`,
+      ],
       ["Land Quantity", property.landQuantity],
       ["Ownership", property.ownership],
       [

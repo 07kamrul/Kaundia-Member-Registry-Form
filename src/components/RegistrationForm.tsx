@@ -80,10 +80,19 @@ export default function RegistrationForm() {
 
   const handlePropertyFieldChange = (
     index: number,
-    field: "khatianNo" | "dagNo" | "landQuantity" | "propertyTypeOther",
+    field: "khatianNo" | "landQuantity" | "propertyTypeOther",
     value: string
   ) => {
     updateProperty(index, { [field]: value });
+  };
+
+  const handleDagNoChange = (
+    index: number,
+    subField: "cs" | "rs",
+    value: string
+  ) => {
+    const dagNo = { ...formData.properties[index]?.dagNo, [subField]: value };
+    updateProperty(index, { dagNo });
   };
 
   const handlePropertyTypeToggle = (index: number, type: string) => {
@@ -740,12 +749,26 @@ export default function RegistrationForm() {
                   />
                 </Field>
                 <Field label="দাগ নং">
-                  <Input
-                    value={property.dagNo}
-                    onChange={(e) =>
-                      handlePropertyFieldChange(index, "dagNo", e.target.value)
-                    }
-                  />
+                  <div className="flex gap-3">
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="text-sm text-gray-600 shrink-0">CS:</span>
+                      <Input
+                        value={property.dagNo.cs}
+                        onChange={(e) =>
+                          handleDagNoChange(index, "cs", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="text-sm text-gray-600 shrink-0">RS:</span>
+                      <Input
+                        value={property.dagNo.rs}
+                        onChange={(e) =>
+                          handleDagNoChange(index, "rs", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
                 </Field>
                 <Field label="জমির পরিমাণ">
                   <Input

@@ -46,7 +46,8 @@ function buildDocColumns(property: PropertyItem | undefined): string[] {
 }
 
 // Flattens the properties array into a fixed set of columns
-// (property1_*..property{MAX_PROPERTY_COUNT}_*), leaving unused
+// (property1_*..property{MAX_PROPERTY_COUNT}_*, with dagNo split into
+// property{i}_dagNo_cs and property{i}_dagNo_rs), leaving unused
 // property columns blank when propertyCount is lower than the max.
 function buildPropertyColumns(properties: PropertyItem[]): string[] {
   const columns: string[] = [];
@@ -54,6 +55,7 @@ function buildPropertyColumns(properties: PropertyItem[]): string[] {
     const property = properties[i];
     if (!property) {
       columns.push(
+        "",
         "",
         "",
         "",
@@ -68,7 +70,8 @@ function buildPropertyColumns(properties: PropertyItem[]): string[] {
     columns.push(
       formatPropertyType(property),
       property.khatianNo,
-      property.dagNo,
+      property.dagNo.cs,
+      property.dagNo.rs,
       property.landQuantity,
       property.ownership,
       property.applicableDocs.map((d) => d.type).join(", "),

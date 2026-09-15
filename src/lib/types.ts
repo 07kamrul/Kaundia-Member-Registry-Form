@@ -27,11 +27,16 @@ export interface ApplicableDocEntry {
   driveUrl?: string;
 }
 
+export interface DagNo {
+  cs: string;
+  rs: string;
+}
+
 export interface PropertyItem {
   propertyType: string[];
   propertyTypeOther: string;
   khatianNo: string;
-  dagNo: string;
+  dagNo: DagNo;
   landQuantity: string;
   ownership: string;
   applicableDocs: ApplicableDocEntry[];
@@ -74,7 +79,7 @@ export function createEmptyProperty(): PropertyItem {
     propertyType: [],
     propertyTypeOther: "",
     khatianNo: "",
-    dagNo: "",
+    dagNo: { cs: "", rs: "" },
     landQuantity: "",
     ownership: "",
     applicableDocs: [] as ApplicableDocEntry[],
