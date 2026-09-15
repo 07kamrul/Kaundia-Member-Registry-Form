@@ -2,11 +2,24 @@
   <div class="card" style="max-width:28rem;width:100%;padding:2rem;text-align:center">
     <img src="/logo.jpeg" alt="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ লোগো" style="width:5rem;height:5rem;object-fit:cover;border-radius:50%;margin:0 auto 1rem" />
     <h1 style="color:#064e3b;font-size:1.5rem;margin-bottom:0.5rem">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</h1>
-    <p style="color:#6b7280;margin-bottom:2rem">লগইন করুন অথবা নতুন সদস্য হিসেবে নিবন্ধন করুন</p>
+    <p style="color:#6b7280;margin-bottom:1.5rem">লগইন করুন অথবা নতুন সদস্য হিসেবে নিবন্ধন করুন</p>
 
-    <a routerLink="/login" class="btn btn-primary" style="width:100%;display:block;margin-bottom:1.5rem">
-      লগইন
-    </a>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" style="text-align:left">
+      @if (error) {
+        <div class="error-box"><p style="margin:0;color:#b91c1c">{{ error }}</p></div>
+      }
+      <div class="field">
+        <label>ইউজারনেম / ইমেইল</label>
+        <input type="text" formControlName="identifier" />
+      </div>
+      <div class="field">
+        <label>পাসওয়ার্ড</label>
+        <input type="password" formControlName="password" />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%" [disabled]="submitting || form.invalid">
+        {{ submitting ? 'লগইন হচ্ছে...' : 'লগইন' }}
+      </button>
+    </form>
 
     <hr style="border:none;border-top:1px solid #e5e7eb;margin:1.5rem 0" />
 
