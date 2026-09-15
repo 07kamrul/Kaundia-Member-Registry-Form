@@ -1,8 +1,9 @@
 <section [formGroup]="form">
   <h2 class="section-title">১. সদস্যের ব্যক্তিগত তথ্য</h2>
 
-  <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;margin-bottom:1rem">
-    <label
+  <div class="grid-2">
+    <div class="field">
+       <label
       for="memberPhoto"
       style="display:flex;width:5rem;height:6rem;border:2px dashed #047857;align-items:center;justify-content:center;text-align:center;font-size:0.625rem;color:#065f46;padding:0.25rem;cursor:pointer;overflow:hidden;background:#fff"
     >
@@ -18,10 +19,6 @@
         মুছুন
       </button>
     }
-  </div>
-
-  <div class="grid-2">
-    <div class="field">
       <label>পূর্ণ নাম <span class="required">*</span></label>
       <input type="text" formControlName="fullName" />
       @if (showError('fullName')) {
