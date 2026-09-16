@@ -74,8 +74,8 @@
 
       @if (currentStep === 3) {
         <div class="grid-2">
-          <app-urgent-contact [form]="form" />
-          <app-nominee-list [nominees]="nominees" />
+          <app-urgent-contact [form]="form" [submitAttempted]="submitAttempted" />
+          <app-nominee-list [nominees]="nominees" [submitAttempted]="submitAttempted" />
         </div>
       }
 

@@ -4,6 +4,9 @@
     <div class="field">
       <label>নাম <span class="required">*</span></label>
       <input type="text" formControlName="urgentContactName" />
+      @if (showError('urgentContactName')) {
+        <p class="field-error">নাম আবশ্যক</p>
+      }
     </div>
     <div class="field">
       <label>সম্পর্ক</label>
@@ -12,6 +15,11 @@
     <div class="field">
       <label>মোবাইল <span class="required">*</span></label>
       <input type="text" formControlName="urgentContactMobile" />
+      @if (showError('urgentContactMobile')) {
+        <p class="field-error">মোবাইল আবশ্যক</p>
+      } @else if (mobileInvalid()) {
+        <p class="field-error">মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)</p>
+      }
     </div>
     <div class="field">
       <label>ঠিকানা</label>

@@ -4,6 +4,9 @@
     <div class="field">
       <label>নাম <span class="required">*</span></label>
       <input type="text" formControlName="name" />
+      @if (showError(0, 'name')) {
+        <p class="field-error">নাম আবশ্যক</p>
+      }
     </div>
     <div class="field">
       <label>পিতা/স্বামী / সম্পর্ক</label>
@@ -12,6 +15,11 @@
     <div class="field">
       <label>মোবাইল <span class="required">*</span></label>
       <input type="text" formControlName="mobile" />
+      @if (showError(0, 'mobile')) {
+        <p class="field-error">মোবাইল আবশ্যক</p>
+      } @else if (mobileInvalid(0)) {
+        <p class="field-error">মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)</p>
+      }
     </div>
     <div class="field">
       <label>ঠিকানা</label>
@@ -36,6 +44,9 @@
             <div class="field">
               <label>নাম <span class="required">*</span></label>
               <input type="text" formControlName="name" />
+              @if (showError(i, 'name')) {
+                <p class="field-error">নাম আবশ্যক</p>
+              }
             </div>
             <div class="field">
               <label>সম্পর্ক</label>
@@ -44,6 +55,11 @@
             <div class="field">
               <label>মোবাইল <span class="required">*</span></label>
               <input type="text" formControlName="mobile" />
+              @if (showError(i, 'mobile')) {
+                <p class="field-error">মোবাইল আবশ্যক</p>
+              } @else if (mobileInvalid(i)) {
+                <p class="field-error">মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)</p>
+              }
             </div>
             <div class="field">
               <label>ঠিকানা</label>
