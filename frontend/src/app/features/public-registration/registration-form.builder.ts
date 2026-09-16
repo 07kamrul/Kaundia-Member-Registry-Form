@@ -44,9 +44,9 @@ export function buildAddressGroup(fb: FormBuilder): FormGroup {
 
 export function buildNomineeGroup(fb: FormBuilder): FormGroup {
   return fb.group({
-    name: [''],
+    name: ['', Validators.required],
     relation: [''],
-    mobile: [''],
+    mobile: ['', [Validators.required, Validators.pattern(MOBILE_PATTERN)]],
     address: [''],
   });
 }
@@ -67,9 +67,9 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
     permanentAddress: buildAddressGroup(fb),
     currentAddress: buildAddressGroup(fb),
 
-    urgentContactName: [''],
+    urgentContactName: ['', Validators.required],
     urgentContactRelation: [''],
-    urgentContactMobile: [''],
+    urgentContactMobile: ['', [Validators.required, Validators.pattern(MOBILE_PATTERN)]],
     urgentContactAddress: [''],
 
     propertyCount: new FormControl(null),
