@@ -20,7 +20,7 @@ def _submission_payload() -> dict:
         "occupation": "Farmer",
         "nid": "1234567890",
         "mobile": "01700000000",
-        "whatsapp": "01700000000",
+        "gender": "পুরুষ",
         "email": "member@example.com",
         "permanent_address": {
             "house": "12",

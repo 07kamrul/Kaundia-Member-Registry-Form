@@ -107,7 +107,7 @@ export interface FormDataModel {
   occupation: string;
   nid: string;
   mobile: string;
-  whatsapp: string;
+  gender: string;
   email: string;
   permanentAddress?: AddressDetail;
   currentAddress?: AddressDetail;

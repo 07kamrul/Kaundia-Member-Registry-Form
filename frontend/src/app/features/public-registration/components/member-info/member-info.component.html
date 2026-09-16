@@ -1,100 +1,112 @@
 <section [formGroup]="form">
   <h2 class="section-title">১. সদস্যের ব্যক্তিগত তথ্য</h2>
 
-  <div class="member-photo-row" style="display:flex;gap:0.75rem;align-items:flex-start;margin-bottom:1rem">
-    <label
-      for="memberPhoto"
-      style="display:flex;width:5rem;height:6rem;border:2px dashed #047857;align-items:center;justify-content:center;text-align:center;font-size:0.625rem;color:#065f46;padding:0.25rem;cursor:pointer;overflow:hidden;background:#fff;flex-shrink:0"
-    >
-      @if (memberPhotoPreview) {
-        <img [src]="memberPhotoPreview" alt="সদস্যের ছবি" style="width:100%;height:100%;object-fit:cover" />
-      } @else {
-        <span>সদস্যের ছবি<br />২"×২"</span>
-      }
-    </label>
-    <input id="memberPhoto" type="file" accept="image/*" (change)="photoChange.emit($event)" style="display:none" />
-    @if (memberPhotoPreview) {
-      <button type="button" (click)="photoClear.emit()" style="font-size:0.875rem;color:#b91c1c;background:none;border:none;text-decoration:underline;cursor:pointer">
-        মুছুন
-      </button>
-    }
-  </div>
+  <div class="member-info-columns">
+    <div class="member-info-column">
+      <div class="member-photo-box">
+        <label for="memberPhoto" class="member-photo-frame">
+          @if (memberPhotoPreview) {
+            <img [src]="memberPhotoPreview" alt="সদস্যের ছবি" />
+          } @else {
+            <span>সদস্যের ছবি<br />২"×২"</span>
+          }
+        </label>
+        <input id="memberPhoto" type="file" accept="image/*" (change)="photoChange.emit($event)" style="display:none" />
+        @if (memberPhotoPreview) {
+          <button type="button" (click)="photoClear.emit()" class="member-photo-clear">
+            মুছুন
+          </button>
+        }
+      </div>
 
-  <div class="grid-2">
-    <div class="field">
-      <div class="field-label-row">
-        <label>পূর্ণ নাম <span class="required">*</span></label>
-        @if (showError('fullName')) {
-          <span class="field-error-inline">{{ errorMessage('fullName') }}</span>
-        }
+      <div class="field">
+        <div class="field-label-row">
+          <label>পূর্ণ নাম <span class="required">*</span></label>
+          @if (showError('fullName')) {
+            <span class="field-error-inline">{{ errorMessage('fullName') }}</span>
+          }
+        </div>
+        <input type="text" formControlName="fullName" />
       </div>
-      <input type="text" formControlName="fullName" />
-    </div>
-    <div class="field">
-      <div class="field-label-row">
-        <label>পিতা/স্বামী <span class="required">*</span></label>
-        @if (showError('fatherOrHusband')) {
-          <span class="field-error-inline">{{ errorMessage('fatherOrHusband') }}</span>
-        }
+      <div class="field">
+        <div class="field-label-row">
+          <label>পিতা/স্বামী <span class="required">*</span></label>
+          @if (showError('fatherOrHusband')) {
+            <span class="field-error-inline">{{ errorMessage('fatherOrHusband') }}</span>
+          }
+        </div>
+        <input type="text" formControlName="fatherOrHusband" />
       </div>
-      <input type="text" formControlName="fatherOrHusband" />
-    </div>
-    <div class="field">
-      <div class="field-label-row">
-        <label>মাতা <span class="required">*</span></label>
-        @if (showError('mother')) {
-          <span class="field-error-inline">{{ errorMessage('mother') }}</span>
-        }
+      <div class="field">
+        <div class="field-label-row">
+          <label>মাতা <span class="required">*</span></label>
+          @if (showError('mother')) {
+            <span class="field-error-inline">{{ errorMessage('mother') }}</span>
+          }
+        </div>
+        <input type="text" formControlName="mother" />
       </div>
-      <input type="text" formControlName="mother" />
-    </div>
-    <div class="field">
-      <div class="field-label-row">
-        <label>জন্ম তারিখ <span class="required">*</span></label>
-        @if (showError('dob')) {
-          <span class="field-error-inline">{{ errorMessage('dob') }}</span>
-        }
+      <div class="field">
+        <div class="field-label-row">
+          <label>জন্ম তারিখ <span class="required">*</span></label>
+          @if (showError('dob')) {
+            <span class="field-error-inline">{{ errorMessage('dob') }}</span>
+          }
+        </div>
+        <input type="date" formControlName="dob" />
       </div>
-      <input type="date" formControlName="dob" />
     </div>
-    <div class="field">
-      <label>জাতীয়তা</label>
-      <input type="text" formControlName="nationality" />
-    </div>
-    <div class="field">
-      <label>পেশা</label>
-      <input type="text" formControlName="occupation" />
-    </div>
-    <div class="field">
-      <div class="field-label-row">
-        <label>NID নং</label>
-        @if (showError('nid')) {
-          <span class="field-error-inline">{{ errorMessage('nid') }}</span>
-        }
+
+    <div class="member-info-column">
+      <div class="field">
+        <div class="field-label-row">
+          <label>NID নং</label>
+          @if (showError('nid')) {
+            <span class="field-error-inline">{{ errorMessage('nid') }}</span>
+          }
+        </div>
+        <input type="text" formControlName="nid" placeholder="১০-১৭ সংখ্যা" />
       </div>
-      <input type="text" formControlName="nid" placeholder="১০-১৭ সংখ্যা" />
-    </div>
-    <div class="field">
-      <div class="field-label-row">
-        <label>মোবাইল <span class="required">*</span></label>
-        @if (showError('mobile')) {
-          <span class="field-error-inline">{{ errorMessage('mobile') }}</span>
-        }
+      <div class="field">
+        <div class="field-label-row">
+          <label>মোবাইল (WhatsApp) <span class="required">*</span></label>
+          @if (showError('mobile')) {
+            <span class="field-error-inline">{{ errorMessage('mobile') }}</span>
+          }
+        </div>
+        <input type="text" formControlName="mobile" placeholder="01XXXXXXXXX" />
       </div>
-      <input type="text" formControlName="mobile" placeholder="01XXXXXXXXX" />
-    </div>
-    <div class="field">
-      <label>WhatsApp</label>
-      <input type="text" formControlName="whatsapp" />
-    </div>
-    <div class="field">
-      <div class="field-label-row">
-        <label>ই-মেইল</label>
-        @if (showError('email')) {
-          <span class="field-error-inline">{{ errorMessage('email') }}</span>
-        }
+      <div class="field">
+        <div class="field-label-row">
+          <label>ই-মেইল</label>
+          @if (showError('email')) {
+            <span class="field-error-inline">{{ errorMessage('email') }}</span>
+          }
+        </div>
+        <input type="email" formControlName="email" />
       </div>
-      <input type="email" formControlName="email" />
+      <div class="field">
+        <label>পেশা</label>
+        <input type="text" formControlName="occupation" />
+      </div>
+      <div class="field">
+        <label>জাতীয়তা</label>
+        <input type="text" formControlName="nationality" />
+      </div>
+      <div class="field">
+        <div class="field-label-row">
+          <label>লিঙ্গ <span class="required">*</span></label>
+          @if (showError('gender')) {
+            <span class="field-error-inline">{{ errorMessage('gender') }}</span>
+          }
+        </div>
+        <div class="gender-toggle" role="radiogroup" aria-label="লিঙ্গ">
+          <input type="radio" id="genderMale" formControlName="gender" value="পুরুষ" />
+          <label for="genderMale">পুরুষ</label>
+          <input type="radio" id="genderFemale" formControlName="gender" value="মহিলা" />
+          <label for="genderFemale">মহিলা</label>
+        </div>
+      </div>
     </div>
   </div>
 </section>

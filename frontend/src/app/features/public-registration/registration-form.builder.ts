@@ -61,7 +61,7 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
     occupation: [''],
     nid: ['', Validators.pattern(NID_PATTERN)],
     mobile: ['', [Validators.required, Validators.pattern(MOBILE_PATTERN)]],
-    whatsapp: [''],
+    gender: ['', Validators.required],
     email: ['', Validators.email],
 
     permanentAddress: buildAddressGroup(fb),

@@ -154,6 +154,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     if (!v.mobile?.trim()) errs.push('মোবাইল আবশ্যক');
     else if (!MOBILE_PATTERN.test(v.mobile.trim()))
       errs.push('মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)');
+    if (!v.gender?.trim()) errs.push('লিঙ্গ নির্বাচন করুন');
     if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) errs.push('ই-মেইল সঠিক নয়');
     if (v.nid && !/^\d{10,17}$/.test(v.nid)) errs.push('NID নম্বর ১০-১৭ সংখ্যার হতে হবে');
 

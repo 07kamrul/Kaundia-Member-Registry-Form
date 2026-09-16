@@ -71,7 +71,7 @@ class MemberDetail(MemberSummary):
     nationality: str
     occupation: str
     nid: str
-    whatsapp: str
+    gender: str
     permanent_house: str | None = None
     permanent_road: str | None = None
     permanent_post_office: str | None = None

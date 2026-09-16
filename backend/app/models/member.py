@@ -31,7 +31,7 @@ class Member(Base):
     occupation: Mapped[str] = mapped_column(String(255), nullable=False)
     nid: Mapped[str] = mapped_column(String(64), nullable=False)
     mobile: Mapped[str] = mapped_column(String(32), nullable=False)
-    whatsapp: Mapped[str] = mapped_column(String(32), nullable=False)
+    gender: Mapped[str] = mapped_column(String(16), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Address info

@@ -28,6 +28,7 @@ export class MemberInfoComponent {
       dob: 'জন্ম তারিখ আবশ্যক',
       email: 'ই-মেইল সঠিক নয়',
       nid: 'NID নম্বর ১০-১৭ সংখ্যার হতে হবে',
+      gender: 'লিঙ্গ নির্বাচন করুন',
     };
 
     if (controlName === 'mobile') {

@@ -18,7 +18,7 @@ class SubmissionPayload(BaseModel):
     occupation: str
     nid: str
     mobile: str
-    whatsapp: str
+    gender: str
     email: EmailStr
 
     permanent_address: AddressDetail | None = None

@@ -15,7 +15,7 @@ export interface SubmissionDetail extends SubmissionSummary {
   nationality: string;
   occupation: string;
   nid: string;
-  whatsapp: string;
+  gender: string;
   email: string;
   permanentHouse?: string;
   permanentRoad?: string;

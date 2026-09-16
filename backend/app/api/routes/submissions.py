@@ -44,7 +44,7 @@ async def create_submission(
         occupation=data.occupation,
         nid=data.nid,
         mobile=data.mobile,
-        whatsapp=data.whatsapp,
+        gender=data.gender,
         email=data.email,
         permanent_house=data.permanent_address.house if data.permanent_address else None,
         permanent_road=data.permanent_address.road if data.permanent_address else None,

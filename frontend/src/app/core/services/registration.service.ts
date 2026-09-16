@@ -38,7 +38,7 @@ export class RegistrationService {
       occupation: formData.occupation,
       nid: formData.nid,
       mobile: formData.mobile,
-      whatsapp: formData.whatsapp,
+      gender: formData.gender,
       email: formData.email,
       permanent_address: formData.permanentAddress
         ? {
