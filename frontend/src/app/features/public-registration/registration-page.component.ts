@@ -191,6 +191,11 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     const errs: string[] = [];
     const v = this.form.value;
 
+    if (!v.propertyCount) {
+      errs.push('সম্পত্তির সংখ্যা নির্বাচন করুন');
+      return errs;
+    }
+
     (v.properties as any[]).forEach((property, i) => {
       const label = `সম্পত্তি #${i + 1}`;
       if (!property.propertyType || property.propertyType.length === 0) {
