@@ -36,6 +36,7 @@ class PropertyOut(BaseModel):
     khatian_no: str | None = None
     dag_no_cs: str | None = None
     dag_no_rs: str | None = None
+    holding_number: str | None = None
     land_quantity: str | None = None
     ownership: str | None = None
     co_owners: list[CoOwnerOut] = []
@@ -77,11 +78,13 @@ class MemberDetail(MemberSummary):
     permanent_post_office: str | None = None
     permanent_upazila: str | None = None
     permanent_district: str | None = None
+    permanent_division: str | None = None
     current_house: str | None = None
     current_road: str | None = None
     current_post_office: str | None = None
     current_upazila: str | None = None
     current_district: str | None = None
+    current_division: str | None = None
     urgent_contact_name: str | None = None
     urgent_contact_relation: str | None = None
     urgent_contact_mobile: str | None = None

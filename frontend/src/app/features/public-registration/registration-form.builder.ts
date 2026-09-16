@@ -24,6 +24,7 @@ export function buildPropertyGroup(fb: FormBuilder): FormGroup {
     propertyTypeOther: [''],
     khatianNo: ['', Validators.required],
     dagNo: fb.group({ cs: ['', Validators.required], rs: ['', Validators.required] }),
+    holdingNumber: [''],
     landQuantity: [''],
     ownership: ['', Validators.required],
     applicableDocs: fb.array([]),

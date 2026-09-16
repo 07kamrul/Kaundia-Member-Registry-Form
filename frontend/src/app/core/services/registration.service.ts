@@ -47,6 +47,7 @@ export class RegistrationService {
             post_office: formData.permanentAddress.postOffice,
             upazila: formData.permanentAddress.upazila,
             district: formData.permanentAddress.district,
+            division: formData.permanentAddress.division,
           }
         : null,
       current_address: formData.currentAddress
@@ -56,6 +57,7 @@ export class RegistrationService {
             post_office: formData.currentAddress.postOffice,
             upazila: formData.currentAddress.upazila,
             district: formData.currentAddress.district,
+            division: formData.currentAddress.division,
           }
         : null,
       urgent_contact_name: formData.urgentContactName,
@@ -74,6 +76,7 @@ export class RegistrationService {
         khatian_no: property.khatianNo,
         dag_no_cs: property.dagNo.cs,
         dag_no_rs: property.dagNo.rs,
+        holding_number: property.holdingNumber,
         land_quantity: property.landQuantity,
         ownership: property.ownership,
         co_owners: property.coOwners.map((coOwner) => ({

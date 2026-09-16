@@ -11,10 +11,11 @@ export interface AddressDetail {
   postOffice: string;
   upazila: string;
   district: string;
+  division: string;
 }
 
 export function createEmptyAddress(): AddressDetail {
-  return { house: '', road: '', postOffice: '', upazila: '', district: '' };
+  return { house: '', road: '', postOffice: '', upazila: '', district: '', division: '' };
 }
 
 export interface CoOwner {
@@ -39,6 +40,7 @@ export interface PropertyItem {
   propertyTypeOther: string;
   khatianNo: string;
   dagNo: DagNo;
+  holdingNumber: string;
   landQuantity: string;
   ownership: string;
   applicableDocs: ApplicableDocEntry[];
@@ -87,6 +89,7 @@ export function createEmptyProperty(): PropertyItem {
     propertyTypeOther: '',
     khatianNo: '',
     dagNo: { cs: '', rs: '' },
+    holdingNumber: '',
     landQuantity: '',
     ownership: '',
     applicableDocs: [],

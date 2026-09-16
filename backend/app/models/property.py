@@ -15,6 +15,7 @@ class Property(Base):
     khatian_no: Mapped[str | None] = mapped_column(String(128), nullable=True)
     dag_no_cs: Mapped[str | None] = mapped_column(String(128), nullable=True)
     dag_no_rs: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    holding_number: Mapped[str | None] = mapped_column(String(128), nullable=True)
     land_quantity: Mapped[str | None] = mapped_column(String(128), nullable=True)
     ownership: Mapped[str | None] = mapped_column(String(32), nullable=True)
 

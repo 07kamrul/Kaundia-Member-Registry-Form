@@ -27,6 +27,10 @@
         <p class="field-error">খতিয়ান নং আবশ্যক</p>
       }
     </div>
+    <div class="field">
+      <label [attr.for]="'prop' + index + '_holdingNumber'">হোল্ডিং নম্বর</label>
+      <input [id]="'prop' + index + '_holdingNumber'" type="text" formControlName="holdingNumber" />
+    </div>
     <div class="field" formGroupName="dagNo">
       <label>দাগ নং <span class="required">*</span></label>
       <div class="flex-row-wrap">

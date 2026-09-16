@@ -7,6 +7,7 @@ class AddressDetail(BaseModel):
     post_office: str | None = None
     upazila: str | None = None
     district: str | None = None
+    division: str | None = None
 
 
 class Nominee(BaseModel):
@@ -31,6 +32,7 @@ class PropertyIn(BaseModel):
     khatian_no: str | None = None
     dag_no_cs: str | None = None
     dag_no_rs: str | None = None
+    holding_number: str | None = None
     land_quantity: str | None = None
     ownership: str | None = None
     co_owners: list[CoOwner] = []
