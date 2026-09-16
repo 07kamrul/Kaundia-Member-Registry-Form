@@ -1,5 +1,11 @@
 <div class="card" style="overflow:hidden">
   <h2 class="section-title" style="border-radius:0;margin:0">৫. মনোনীত ব্যক্তি (Nominee)</h2>
+  <div style="padding:0.75rem 0.75rem 0">
+    <label class="checkbox-item">
+      <input type="checkbox" [checked]="sameAsUrgentContact" (change)="toggleSameAsUrgentContact()" />
+      জরুরি যোগাযোগের তথ্য থেকে একই তথ্য ব্যবহার করুন
+    </label>
+  </div>
   <div style="padding:0.75rem" [formGroup]="group(0)">
     <div class="field">
       <label for="nominee0_name">নাম <span class="required">*</span></label>

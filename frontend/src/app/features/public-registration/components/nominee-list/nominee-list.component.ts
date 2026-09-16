@@ -10,13 +10,33 @@ import { FormBuilder } from '@angular/forms';
   templateUrl: './nominee-list.component.html',
 })
 export class NomineeListComponent {
+  @Input({ required: true }) form!: FormGroup;
   @Input({ required: true }) nominees!: FormArray;
   @Input() submitAttempted = false;
+
+  sameAsUrgentContact = false;
 
   constructor(private fb: FormBuilder) {}
 
   group(index: number): FormGroup {
     return this.nominees.at(index) as FormGroup;
+  }
+
+  toggleSameAsUrgentContact(): void {
+    this.sameAsUrgentContact = !this.sameAsUrgentContact;
+    const nominee = this.group(0);
+
+    if (this.sameAsUrgentContact) {
+      nominee.patchValue({
+        name: this.form.get('urgentContactName')?.value ?? '',
+        relation: this.form.get('urgentContactRelation')?.value ?? '',
+        mobile: this.form.get('urgentContactMobile')?.value ?? '',
+        address: this.form.get('urgentContactAddress')?.value ?? '',
+      });
+      nominee.disable({ emitEvent: false });
+    } else {
+      nominee.enable({ emitEvent: false });
+    }
   }
 
   showError(index: number, controlName: 'name' | 'mobile'): boolean {
