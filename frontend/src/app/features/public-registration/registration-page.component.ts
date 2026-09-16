@@ -279,22 +279,24 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
   }
 
   goToStep(step: number): void {
+    if (step > this.currentStep) {
+      for (let s = this.currentStep; s < step; s++) {
+        const stepErrors = this.validateStep(s);
+        if (stepErrors.length > 0) {
+          this.errors = stepErrors;
+          this.form.markAllAsTouched();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      }
+    }
+    this.errors = [];
     this.currentStep = step;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   nextStep(): void {
-    this.errors = [];
-    const stepErrors = this.validateStep(this.currentStep);
-    if (stepErrors.length > 0) {
-      this.errors = stepErrors;
-      this.form.markAllAsTouched();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-    if (this.currentStep < this.steps.length) {
-      this.goToStep(this.currentStep + 1);
-    }
+    this.goToStep(this.currentStep + 1);
   }
 
   prevStep(): void {

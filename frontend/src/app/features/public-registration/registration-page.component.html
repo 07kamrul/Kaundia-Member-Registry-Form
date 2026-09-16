@@ -43,7 +43,7 @@
               type="button"
               class="stepper-circle"
               [attr.aria-current]="currentStep === step.id ? 'step' : null"
-              (click)="currentStep >= step.id ? goToStep(step.id) : null"
+              (click)="goToStep(step.id)"
             >
               {{ step.id }}
             </button>
