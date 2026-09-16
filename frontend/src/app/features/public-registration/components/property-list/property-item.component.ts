@@ -150,4 +150,8 @@ export class PropertyItemComponent {
     const control = this.coOwnerGroup(index).get(controlName);
     return this.submitAttempted && !control?.value?.trim();
   }
+
+  showApplicableDocsError(): boolean {
+    return this.submitAttempted && this.applicableDocs.length === 0;
+  }
 }

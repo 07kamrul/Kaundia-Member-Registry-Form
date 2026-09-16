@@ -205,13 +205,15 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
           errs.push(`${label}: অন্তত একজন মালিকের নাম ও মোবাইল নং আবশ্যক`);
         } else {
           (property.coOwners as any[]).forEach((co, ci) => {
-            if (!co.ownerName?.trim() && !co.ownerPhone?.trim()) return;
             if (!co.ownerName?.trim()) errs.push(`${label}, মালিক #${ci + 1}: নাম আবশ্যক`);
             if (!co.ownerPhone?.trim()) errs.push(`${label}, মালিক #${ci + 1}: মোবাইল নং আবশ্যক`);
             else if (!MOBILE_PATTERN.test(co.ownerPhone.trim()))
               errs.push(`${label}, মালিক #${ci + 1}: মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)`);
           });
         }
+      }
+      if (!property.applicableDocs || property.applicableDocs.length === 0) {
+        errs.push(`${label}: প্রযোজ্য কাগজ নির্বাচন আবশ্যক`);
       }
       (property.applicableDocs as any[]).forEach((doc) => {
         if (!doc.fileDataUrl) errs.push(`${label}: "${doc.type}" এর জন্য ফাইল সংযুক্ত করা আবশ্যক`);
@@ -284,6 +286,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
         const stepErrors = this.validateStep(s);
         if (stepErrors.length > 0) {
           this.errors = stepErrors;
+          this.submitAttempted = true;
           this.form.markAllAsTouched();
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;

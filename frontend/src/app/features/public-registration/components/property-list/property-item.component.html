@@ -96,7 +96,10 @@
   }
 
   <div class="field">
-    <label>প্রযোজ্য কাগজ</label>
+    <label>প্রযোজ্য কাগজ <span class="required">*</span></label>
+    @if (showApplicableDocsError()) {
+      <p class="field-error">প্রযোজ্য কাগজ নির্বাচন আবশ্যক</p>
+    }
     <div style="display:flex;flex-direction:column;gap:0.75rem">
       @for (doc of documentOptions; track doc) {
         <div>
