@@ -14,7 +14,7 @@
     </label>
     <input id="memberPhoto" type="file" accept="image/*" (change)="photoChange.emit($event)" style="display:none" />
     @if (memberPhotoPreview) {
-      <button type="button" (click)="photoClear.emit()" style="font-size:0.625rem;color:#b91c1c;background:none;border:none;text-decoration:underline;cursor:pointer">
+      <button type="button" (click)="photoClear.emit()" style="font-size:0.875rem;color:#b91c1c;background:none;border:none;text-decoration:underline;cursor:pointer">
         মুছুন
       </button>
     }
