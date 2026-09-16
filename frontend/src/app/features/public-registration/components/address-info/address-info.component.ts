@@ -1,8 +1,17 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, DestroyRef, inject, Input, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { BehaviorSubject, Observable, switchMap } from 'rxjs';
+import {
+  AddressLocationService,
+  District,
+  Division,
+  Upazila,
+} from '../../services/address-location.service';
 
 const ADDRESS_FIELD_ERROR_MESSAGES: Record<string, string> = {
+  division: 'বিভাগ আবশ্যক',
   district: 'জেলা আবশ্যক',
   upazila: 'উপজেলা/থানা আবশ্যক',
   postOffice: 'ডাকঘর আবশ্যক',
@@ -13,7 +22,7 @@ const ADDRESS_FIELD_ERROR_MESSAGES: Record<string, string> = {
 @Component({
   selector: 'app-address-info',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, AsyncPipe],
   templateUrl: './address-info.component.html',
 })
 export class AddressInfoComponent implements OnInit {
@@ -21,8 +30,40 @@ export class AddressInfoComponent implements OnInit {
   @Input() submitAttempted = false;
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly addressLocationService = inject(AddressLocationService);
 
   sameAsCurrentAddress = new FormControl(false);
+
+  divisions$: Observable<Division[]> = this.addressLocationService.getDivisions();
+
+  private readonly currentDivision$ = new BehaviorSubject<string>('');
+  private readonly permanentDivision$ = new BehaviorSubject<string>('');
+  private readonly currentDistrict$ = new BehaviorSubject<string>('');
+  private readonly permanentDistrict$ = new BehaviorSubject<string>('');
+
+  currentDistricts$: Observable<District[]> = this.currentDivision$.pipe(
+    switchMap((divisionName) =>
+      this.addressLocationService.getDistrictsByDivisionName(divisionName),
+    ),
+  );
+
+  permanentDistricts$: Observable<District[]> = this.permanentDivision$.pipe(
+    switchMap((divisionName) =>
+      this.addressLocationService.getDistrictsByDivisionName(divisionName),
+    ),
+  );
+
+  currentUpazilas$: Observable<Upazila[]> = this.currentDistrict$.pipe(
+    switchMap((districtName) =>
+      this.addressLocationService.getUpazilasByDistrictName(districtName),
+    ),
+  );
+
+  permanentUpazilas$: Observable<Upazila[]> = this.permanentDistrict$.pipe(
+    switchMap((districtName) =>
+      this.addressLocationService.getUpazilasByDistrictName(districtName),
+    ),
+  );
 
   ngOnInit(): void {
     this.sameAsCurrentAddress.valueChanges
@@ -36,6 +77,52 @@ export class AddressInfoComponent implements OnInit {
           this.copyCurrentAddressToPermanent();
         }
       });
+
+    this.currentAddressGroup
+      .get('division')!
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((division) => this.onDivisionChange('currentAddress', division ?? ''));
+
+    this.permanentAddressGroup
+      .get('division')!
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((division) => this.onDivisionChange('permanentAddress', division ?? ''));
+
+    this.currentAddressGroup
+      .get('district')!
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((district) => this.onDistrictChange('currentAddress', district ?? ''));
+
+    this.permanentAddressGroup
+      .get('district')!
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((district) => this.onDistrictChange('permanentAddress', district ?? ''));
+  }
+
+  private onDivisionChange(
+    groupName: 'currentAddress' | 'permanentAddress',
+    divisionName: string,
+  ): void {
+    const subject =
+      groupName === 'currentAddress' ? this.currentDivision$ : this.permanentDivision$;
+    if (subject.value === divisionName) {
+      return;
+    }
+    subject.next(divisionName);
+    this.form.get(`${groupName}.district`)?.setValue('', { emitEvent: true });
+  }
+
+  private onDistrictChange(
+    groupName: 'currentAddress' | 'permanentAddress',
+    districtName: string,
+  ): void {
+    const subject =
+      groupName === 'currentAddress' ? this.currentDistrict$ : this.permanentDistrict$;
+    if (subject.value === districtName) {
+      return;
+    }
+    subject.next(districtName);
+    this.form.get(`${groupName}.upazila`)?.setValue('', { emitEvent: false });
   }
 
   private get currentAddressGroup(): FormGroup {
@@ -56,7 +143,10 @@ export class AddressInfoComponent implements OnInit {
   }
 
   private copyCurrentAddressToPermanent(): void {
-    this.permanentAddressGroup.patchValue(this.currentAddressGroup.value, { emitEvent: false });
+    const currentValue = this.currentAddressGroup.value;
+    this.permanentDivision$.next(currentValue.division ?? '');
+    this.permanentDistrict$.next(currentValue.district ?? '');
+    this.permanentAddressGroup.patchValue(currentValue, { emitEvent: false });
   }
 
   showError(groupName: 'currentAddress' | 'permanentAddress', controlName: string): boolean {

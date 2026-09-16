@@ -161,6 +161,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
   private validateAddressGroup(
     label: string,
     address: {
+      division?: string;
       district?: string;
       upazila?: string;
       postOffice?: string;
@@ -169,6 +170,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     },
   ): string[] {
     const errs: string[] = [];
+    if (!address.division?.trim()) errs.push(`${label}: বিভাগ আবশ্যক`);
     if (!address.district?.trim()) errs.push(`${label}: জেলা আবশ্যক`);
     if (!address.upazila?.trim()) errs.push(`${label}: উপজেলা/থানা আবশ্যক`);
     if (!address.postOffice?.trim()) errs.push(`${label}: ডাকঘর আবশ্যক`);

@@ -38,6 +38,7 @@ export function buildAddressGroup(fb: FormBuilder): FormGroup {
     postOffice: ['', Validators.required],
     upazila: ['', Validators.required],
     district: ['', Validators.required],
+    division: ['', Validators.required],
   });
 }
 
