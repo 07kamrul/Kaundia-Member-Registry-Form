@@ -59,7 +59,7 @@
         <div class="step-content-grid">
           <app-member-info
             [form]="form"
-            [memberPhotoPreview]="memberPhotoPreview"
+            [memberPhotoPreview]="memberPhotoPreview()"
             [submitAttempted]="submitAttempted"
             (photoChange)="onPhotoChange($event)"
             (photoClear)="clearPhoto()"

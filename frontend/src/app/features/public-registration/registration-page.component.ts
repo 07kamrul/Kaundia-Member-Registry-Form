@@ -1,4 +1,11 @@
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import SignaturePad from 'signature_pad';
@@ -57,7 +64,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
   submitting = false;
   submitAttempted = false;
   success: { id: string; fullName: string } | null = null;
-  memberPhotoPreview = '';
+  memberPhotoPreview = signal('');
   private signaturePad?: SignaturePad;
 
   steps = REGISTRATION_STEPS;
@@ -126,14 +133,14 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     reader.onload = () => {
       const dataUrl = reader.result as string;
       this.form.get('memberPhoto')?.setValue(dataUrl);
-      this.memberPhotoPreview = dataUrl;
+      this.memberPhotoPreview.set(dataUrl);
     };
     reader.readAsDataURL(file);
   }
 
   clearPhoto(): void {
     this.form.get('memberPhoto')?.setValue('');
-    this.memberPhotoPreview = '';
+    this.memberPhotoPreview.set('');
   }
 
   private validateMemberStep(): string[] {
@@ -339,7 +346,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
   resetForm(): void {
     this.success = null;
     this.form = buildRegistrationForm(this.fb);
-    this.memberPhotoPreview = '';
+    this.memberPhotoPreview.set('');
     this.signaturePad?.clear();
     this.submitAttempted = false;
     this.serverError = null;
