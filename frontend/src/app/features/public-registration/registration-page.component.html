@@ -10,16 +10,6 @@
         </div>
       }
 
-      @if (errors.length > 0) {
-        <div class="error-box">
-          <ul>
-            @for (err of errors; track err) {
-              <li>{{ err }}</li>
-            }
-          </ul>
-        </div>
-      }
-
       <div class="reg-header">
         <img src="/logo.jpeg" alt="সংগঠনের লোগো" class="reg-logo" />
         
@@ -125,6 +115,16 @@
 
       @if (currentStep === 6) {
         <app-review-summary [form]="form" (editStep)="goToStep($event)" />
+      }
+
+      @if (errors.length > 0) {
+        <div class="error-box">
+          <ul>
+            @for (err of errors; track err) {
+              <li>{{ err }}</li>
+            }
+          </ul>
+        </div>
       }
 
       <div class="step-nav-row">

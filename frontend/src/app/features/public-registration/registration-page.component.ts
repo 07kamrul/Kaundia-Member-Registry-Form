@@ -231,13 +231,14 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
   private validateContactStep(): string[] {
     const errs: string[] = [];
     const v = this.form.value;
+    const nominees = this.form.getRawValue().nominees;
 
     if (!v.urgentContactName?.trim()) errs.push('জরুরি যোগাযোগ: নাম আবশ্যক');
     if (!v.urgentContactMobile?.trim()) errs.push('জরুরি যোগাযোগ: মোবাইল আবশ্যক');
     else if (!MOBILE_PATTERN.test(v.urgentContactMobile.trim()))
       errs.push('জরুরি যোগাযোগ: মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)');
 
-    (v.nominees as any[]).forEach((nominee, i) => {
+    (nominees as any[]).forEach((nominee, i) => {
       const label = `মনোনীত ব্যক্তি #${i + 1}`;
       if (!nominee.name?.trim()) errs.push(`${label}: নাম আবশ্যক`);
       if (!nominee.mobile?.trim()) errs.push(`${label}: মোবাইল আবশ্যক`);
