@@ -11,6 +11,15 @@
     <div class="field">
       <label>চাঁদা (টাকা) <span class="required">*</span></label>
       <input type="number" formControlName="subscription" />
+      @if (subscriptionBreakdown(); as b) {
+        <p class="field-hint">
+          মোট {{ b.totalDecimal }} শতাংশ: প্রথম ১ শতাংশ = {{ firstDecimalRate }}৳
+          @if (b.additionalDecimal > 0) {
+            + পরবর্তী {{ b.additionalDecimal }} শতাংশ × {{ additionalDecimalRate }}৳ = {{ b.additionalAmount }}৳
+          }
+          = মোট {{ b.amount }}৳
+        </p>
+      }
       @if (showError('subscription')) {
         <p class="field-error">{{ errorMessage('subscription') }}</p>
       }
