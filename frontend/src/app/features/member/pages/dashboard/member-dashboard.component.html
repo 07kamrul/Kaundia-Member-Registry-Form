@@ -1,27 +1,56 @@
-<div style="max-width:32rem;margin:2rem auto;padding:0 1rem">
-  <h1 style="color:#064e3b">সদস্য ড্যাশবোর্ড</h1>
+<div style="max-width:40rem;margin:0 auto">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">সদস্য ড্যাশবোর্ড</h1>
+      <p class="page-subtitle">আপনার প্রোফাইল ও কার্যক্রমের সারসংক্ষেপ</p>
+    </div>
+  </div>
 
   @if (loading) {
-    <p>লোড হচ্ছে...</p>
+    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else if (profile) {
-    <div class="card" style="padding:1.5rem;margin-bottom:1.5rem">
-      <p><strong>সদস্য নং:</strong> {{ profile.memberId }}</p>
-      <p><strong>নাম:</strong> {{ profile.fullName }}</p>
-      <p><strong>মোবাইল:</strong> {{ profile.mobile }}</p>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <span class="stat-card-icon"><app-icon name="user" /></span>
+        <div>
+          <p class="stat-card-label">সদস্য নং</p>
+          <p class="stat-card-value">{{ profile.memberId }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-icon"><app-icon name="user" /></span>
+        <div>
+          <p class="stat-card-label">নাম</p>
+          <p class="stat-card-value">{{ profile.fullName }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-icon"><app-icon name="wallet" /></span>
+        <div>
+          <p class="stat-card-label">মোবাইল</p>
+          <p class="stat-card-value">{{ profile.mobile }}</p>
+        </div>
+      </div>
     </div>
   }
 
-  <div class="card" style="padding:1.5rem">
-    <a routerLink="/profile" class="btn btn-secondary" style="width:100%;display:block;margin-bottom:0.75rem">
+  <div class="action-list">
+    <a routerLink="/profile" class="action-link">
+      <span class="action-link-icon"><app-icon name="user" [size]="18" /></span>
       প্রোফাইল দেখুন
+      <span class="action-link-chevron"><app-icon name="chevron-right" [size]="18" /></span>
     </a>
-    <a routerLink="/installments" class="btn btn-secondary" style="width:100%;display:block;margin-bottom:0.75rem">
+    <a routerLink="/installments" class="action-link">
+      <span class="action-link-icon"><app-icon name="wallet" [size]="18" /></span>
       কিস্তির তথ্য
+      <span class="action-link-chevron"><app-icon name="chevron-right" [size]="18" /></span>
     </a>
-    <a routerLink="/change-password" class="btn btn-secondary" style="width:100%;display:block">
+    <a routerLink="/change-password" class="action-link">
+      <span class="action-link-icon"><app-icon name="lock" [size]="18" /></span>
       পাসওয়ার্ড পরিবর্তন করুন
+      <span class="action-link-chevron"><app-icon name="chevron-right" [size]="18" /></span>
     </a>
   </div>
 </div>

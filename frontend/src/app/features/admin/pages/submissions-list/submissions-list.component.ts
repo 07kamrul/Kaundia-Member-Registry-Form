@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
 import type { SubmissionStatus, SubmissionSummary } from '../../../../core/models/admin.model';
+import { IconComponent } from '../../../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-submissions-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, IconComponent],
   templateUrl: './submissions-list.component.html',
 })
 export class SubmissionsListComponent implements OnInit {

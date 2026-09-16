@@ -1,19 +1,45 @@
-<nav style="display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:#064e3b;color:#fff">
-  <a routerLink="/dashboard" style="color:#fff;font-weight:600;text-decoration:none">কাউন্দিয়া</a>
+<div class="app-shell">
+  <aside class="sidebar" [class.sidebar-open]="sidebarOpen()">
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-mark">ক</span>
+      <span class="sidebar-brand-text">কাউন্দিয়া</span>
+    </div>
 
-  <a routerLink="/dashboard" style="color:#d1fae5;text-decoration:none">ড্যাশবোর্ড</a>
-  <a routerLink="/profile" style="color:#d1fae5;text-decoration:none">প্রোফাইল</a>
-  <a routerLink="/installments" style="color:#d1fae5;text-decoration:none">কিস্তি</a>
-  <a routerLink="/change-password" style="color:#d1fae5;text-decoration:none">পাসওয়ার্ড পরিবর্তন</a>
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="sidebar-link"
+          [class.sidebar-link-admin]="item.adminOnly"
+          (click)="closeSidebar()"
+        >
+          <app-icon [name]="item.icon" [size]="19" />
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
 
-  @if (auth.isAdmin) {
-    <a routerLink="/submissions" style="color:#fef3c7;text-decoration:none">সাবমিশন</a>
-    <a routerLink="/members" style="color:#fef3c7;text-decoration:none">সদস্য তালিকা</a>
+    <button type="button" class="sidebar-logout" (click)="logout()">
+      <app-icon name="logout" [size]="19" />
+      <span>লগআউট</span>
+    </button>
+  </aside>
+
+  @if (sidebarOpen()) {
+    <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
   }
 
-  <button type="button" (click)="logout()" style="margin-left:auto;background:none;border:1px solid #fff;color:#fff;padding:0.4rem 0.9rem;border-radius:0.375rem;cursor:pointer">
-    লগআউট
-  </button>
-</nav>
+  <div class="app-main">
+    <header class="topbar">
+      <button type="button" class="topbar-menu-btn" (click)="toggleSidebar()" aria-label="মেনু খুলুন">
+        <app-icon [name]="sidebarOpen() ? 'close' : 'menu'" [size]="22" />
+      </button>
+      <span class="topbar-title">কাউন্দিয়া সমবায় সমিতি</span>
+    </header>
 
-<router-outlet />
+    <main class="app-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

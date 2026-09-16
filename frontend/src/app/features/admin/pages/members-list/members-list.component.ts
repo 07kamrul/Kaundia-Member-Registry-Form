@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../../core/services/admin.service';
 import type { Installment, Member } from '../../../../core/models/admin.model';
+import { IconComponent } from '../../../../shared/icon/icon.component';
 
 interface MemberWithInstallments extends Member {
   installments: Installment[];
@@ -14,7 +15,7 @@ interface MemberWithInstallments extends Member {
 @Component({
   selector: 'app-members-list',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, IconComponent],
   templateUrl: './members-list.component.html',
 })
 export class MembersListComponent implements OnInit {

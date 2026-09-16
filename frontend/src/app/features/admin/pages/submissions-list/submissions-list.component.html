@@ -1,5 +1,10 @@
-<div style="max-width:60rem;margin:2rem auto;padding:0 1rem">
-  <h1 style="color:#064e3b">আবেদনসমূহ</h1>
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">আবেদনসমূহ</h1>
+      <p class="page-subtitle">নতুন সদস্যপদের আবেদন পর্যালোচনা করুন</p>
+    </div>
+  </div>
 
   <div class="field" style="max-width:16rem">
     <label>স্ট্যাটাস অনুযায়ী ফিল্টার</label>
@@ -11,34 +16,45 @@
   </div>
 
   @if (loading) {
-    <p>লোড হচ্ছে...</p>
+    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
-    <div class="card" style="overflow:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+    <div class="data-table-wrap">
+      <table class="data-table">
         <thead>
-          <tr style="background:#f3f4f6;text-align:left">
-            <th style="padding:0.6rem">নাম</th>
-            <th style="padding:0.6rem">মোবাইল</th>
-            <th style="padding:0.6rem">স্ট্যাটাস</th>
-            <th style="padding:0.6rem">তারিখ</th>
-            <th style="padding:0.6rem"></th>
+          <tr>
+            <th>নাম</th>
+            <th>মোবাইল</th>
+            <th>স্ট্যাটাস</th>
+            <th>তারিখ</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (s of submissions; track s.id) {
-            <tr style="border-top:1px solid #e5e7eb">
-              <td style="padding:0.6rem">{{ s.fullName }}</td>
-              <td style="padding:0.6rem">{{ s.mobile }}</td>
-              <td style="padding:0.6rem">{{ s.status }}</td>
-              <td style="padding:0.6rem">{{ s.createdAt }}</td>
-              <td style="padding:0.6rem">
-                <a [routerLink]="['/submissions', s.id]" style="color:#065f46">বিস্তারিত</a>
+            <tr>
+              <td>{{ s.fullName }}</td>
+              <td>{{ s.mobile }}</td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.status-pending]="s.status === 'pending'"
+                  [class.status-approved]="s.status === 'approved'"
+                  [class.status-rejected]="s.status === 'rejected'"
+                >
+                  {{ s.status }}
+                </span>
+              </td>
+              <td>{{ s.createdAt }}</td>
+              <td>
+                <a [routerLink]="['/submissions', s.id]" class="btn-icon" style="color:var(--emerald-800);text-decoration:none;font-weight:600">
+                  বিস্তারিত <app-icon name="chevron-right" [size]="16" />
+                </a>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="5" style="padding:1rem;text-align:center;color:#6b7280">কোনো আবেদন পাওয়া যায়নি</td></tr>
+            <tr><td colspan="5" class="empty-state">কোনো আবেদন পাওয়া যায়নি</td></tr>
           }
         </tbody>
       </table>
