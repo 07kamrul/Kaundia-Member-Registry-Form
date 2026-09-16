@@ -15,6 +15,15 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #4443 | 11:53 PM | 🔴 | AdminRole enum now serializes by value instead of member name | ~325 |
+| #4442 | " | 🔴 | Fixed SQLAlchemy Enum type handling for AdminRole | ~273 |
+| #4410 | 10:54 PM | 🟣 | Added role hierarchy enum to AdminUser model | ~319 |
 | #4409 | 10:52 PM | 🔵 | Kaundia authentication architecture mapped for role hierarchy implementation | ~668 |
 | #4408 | " | 🔵 | Discovered existing authentication system structure | ~518 |
+
+### Sep 17, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #4478 | 12:24 AM | 🔵 | Kaundia project architecture and business domain mapped | ~739 |
 </claude-mem-context>
