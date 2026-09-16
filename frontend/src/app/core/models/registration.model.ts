@@ -63,6 +63,19 @@ export const PAYMENT_METHODS: string[] = [
   'অন্যান্য',
 ];
 
+export const ORG_BANK_INFO = {
+  bankName: 'ব্র্যাক ব্যাংক পিএলসি',
+  branch: 'শ্যামপুর এসএমই/কৃষি শাখা',
+  accountName: 'Md Kamrul Hasan',
+  accountNumber: '1071193760001',
+  routingNumber: '060276537',
+};
+
+export const ORG_MFS_INFO = {
+  number: '01758290421',
+  type: 'পার্সোনাল',
+};
+
 export const ALLOWED_DOC_MIME_TYPES: string[] = [
   'image/jpeg',
   'image/jpg',

@@ -74,5 +74,19 @@
     @if (showError('paymentMethod')) {
       <p class="field-error">{{ errorMessage('paymentMethod') }}</p>
     }
+    @if (isBankSelected) {
+      <div class="field-hint" style="border:1px solid #d1d5db;border-radius:0.5rem;padding:0.75rem;margin-top:0.5rem">
+        <p><strong>ব্যাংক:</strong> {{ bankInfo.bankName }}</p>
+        <p><strong>শাখা:</strong> {{ bankInfo.branch }}</p>
+        <p><strong>হিসাবের নাম:</strong> {{ bankInfo.accountName }}</p>
+        <p><strong>হিসাব নং:</strong> {{ bankInfo.accountNumber }}</p>
+        <p><strong>রাউটিং নং:</strong> {{ bankInfo.routingNumber }}</p>
+      </div>
+    }
+    @if (isMfsSelected) {
+      <div class="field-hint" style="border:1px solid #d1d5db;border-radius:0.5rem;padding:0.75rem;margin-top:0.5rem">
+        <p><strong>MFS নম্বর:</strong> {{ mfsInfo.number }} ({{ mfsInfo.type }})</p>
+      </div>
+    }
   </div>
 </section>

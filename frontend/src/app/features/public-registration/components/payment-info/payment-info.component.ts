@@ -4,6 +4,8 @@ import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
   ALLOWED_DOC_MIME_TYPES,
   MAX_DOC_FILE_BYTES,
+  ORG_BANK_INFO,
+  ORG_MFS_INFO,
   PAYMENT_METHODS,
 } from '../../../../core/models/registration.model';
 import { propertiesArray } from '../../registration-form.builder';
@@ -32,6 +34,8 @@ export class PaymentInfoComponent implements OnInit {
   readonly additionalDecimalRate = ADDITIONAL_DECIMAL_RATE;
   readonly subscriptionBreakdown = signal<SubscriptionBreakdown | null>(null);
   readonly maxReceiptFileMb = MAX_DOC_FILE_BYTES / (1024 * 1024);
+  readonly bankInfo = ORG_BANK_INFO;
+  readonly mfsInfo = ORG_MFS_INFO;
   receiptFileError = '';
 
   constructor(private destroyRef: DestroyRef) {}
@@ -104,6 +108,14 @@ export class PaymentInfoComponent implements OnInit {
 
   selectMethod(method: string): void {
     this.form.get('paymentMethod')?.setValue(method);
+  }
+
+  get isBankSelected(): boolean {
+    return this.form.get('paymentMethod')?.value === PAYMENT_METHODS[1];
+  }
+
+  get isMfsSelected(): boolean {
+    return this.form.get('paymentMethod')?.value === PAYMENT_METHODS[2];
   }
 
   showError(controlName: string): boolean {
