@@ -21,6 +21,19 @@ _MIME_EXTENSIONS = {
 _ALLOWED_UPLOAD_EXTENSIONS = {".jpg", ".jpeg", ".png", ".pdf"}
 _MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 
+_UNSAFE_PATH_CHARS_RE = re.compile(r'[\\/:*?"<>|]')
+
+
+def sanitize_path_segment(value: str) -> str:
+    """Make a string safe to use as a single filesystem path segment.
+
+    Strips characters that are unsafe on Windows/Linux filesystems while
+    preserving Unicode (e.g. Bengali) text, and collapses empty results to
+    'misc' so a folder is never created with an empty or '.'/'..' name.
+    """
+    cleaned = _UNSAFE_PATH_CHARS_RE.sub("", value).strip().strip(".")
+    return cleaned or "misc"
+
 
 def _upload_root() -> Path:
     root = Path(settings.upload_dir)

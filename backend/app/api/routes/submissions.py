@@ -10,7 +10,7 @@ from app.models.property import ApplicableDoc, CoOwner, Property
 from app.models.nominee import Nominee
 from app.schemas.member import SubmissionCreateResponse
 from app.schemas.submission import SubmissionPayload
-from app.services.storage import save_data_url, save_upload_file
+from app.services.storage import sanitize_path_segment, save_data_url, save_upload_file
 
 router = APIRouter(tags=["submissions"])
 
@@ -70,16 +70,22 @@ async def create_submission(
         submission_date=data.submission_date,
     )
 
+    db.add(member)
+    await db.flush()  # assigns member.id, used to namespace uploaded files below
+
+    member_dir = f"member_{member.id}"
+
     if member_photo is not None and member_photo.filename:
-        member.member_photo_path = await save_upload_file(member_photo, "photos")
+        member.member_photo_path = await save_upload_file(member_photo, f"photos/{member_dir}")
 
     if receipt_photo is not None and receipt_photo.filename:
-        member.receipt_photo_path = await save_upload_file(receipt_photo, "receipts")
+        member.receipt_photo_path = await save_upload_file(receipt_photo, f"receipts/{member_dir}")
 
     doc_file_iter = iter(doc_files)
 
     for property_in in data.properties:
         property_row = Property(
+            member_id=member.id,
             property_type=property_in.property_type,
             property_type_other=property_in.property_type_other,
             khatian_no=property_in.khatian_no,
@@ -88,23 +94,31 @@ async def create_submission(
             land_quantity=property_in.land_quantity,
             ownership=property_in.ownership,
         )
+        db.add(property_row)
+        await db.flush()  # assigns property_row.id for co_owners/applicable_docs FKs
+
         for co_owner_in in property_in.co_owners:
-            property_row.co_owners.append(
-                CoOwner(owner_name=co_owner_in.owner_name, owner_phone=co_owner_in.owner_phone)
+            db.add(
+                CoOwner(
+                    property_id=property_row.id,
+                    owner_name=co_owner_in.owner_name,
+                    owner_phone=co_owner_in.owner_phone,
+                )
             )
         for doc_in in property_in.applicable_docs:
             doc_file = next(doc_file_iter, None)
             file_path = None
             if doc_file is not None and doc_file.filename:
-                file_path = await save_upload_file(doc_file, "documents")
-            property_row.applicable_docs.append(
-                ApplicableDoc(doc_type=doc_in.doc_type, file_path=file_path)
+                doc_type_dir = sanitize_path_segment(doc_in.doc_type)
+                file_path = await save_upload_file(doc_file, f"documents/{member_dir}/{doc_type_dir}")
+            db.add(
+                ApplicableDoc(property_id=property_row.id, doc_type=doc_in.doc_type, file_path=file_path)
             )
-        member.properties.append(property_row)
 
     for nominee_in in data.nominees:
-        member.nominees.append(
+        db.add(
             Nominee(
+                member_id=member.id,
                 name=nominee_in.name,
                 relation=nominee_in.relation,
                 mobile=nominee_in.mobile,
@@ -112,7 +126,6 @@ async def create_submission(
             )
         )
 
-    db.add(member)
     await db.commit()
     await db.refresh(member)
 
