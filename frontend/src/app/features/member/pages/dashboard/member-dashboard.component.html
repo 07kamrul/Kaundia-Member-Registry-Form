@@ -1,4 +1,4 @@
-<div style="max-width:40rem;margin:0 auto">
+<div style="max-width:56rem;margin:0 auto">
   <div class="page-header">
     <div>
       <h1 class="page-title">সদস্য ড্যাশবোর্ড</h1>
@@ -10,47 +10,19 @@
     <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
-  } @else if (profile) {
-    <div class="stat-grid">
-      <div class="stat-card">
-        <span class="stat-card-icon"><app-icon name="user" /></span>
-        <div>
-          <p class="stat-card-label">সদস্য নং</p>
-          <p class="stat-card-value">{{ profile.memberId }}</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-card-icon"><app-icon name="user" /></span>
-        <div>
-          <p class="stat-card-label">নাম</p>
-          <p class="stat-card-value">{{ profile.fullName }}</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-card-icon"><app-icon name="wallet" /></span>
-        <div>
-          <p class="stat-card-label">মোবাইল</p>
-          <p class="stat-card-value">{{ profile.mobile }}</p>
-        </div>
-      </div>
+  } @else {
+    <div class="summary-grid">
+      @for (card of cards; track card.route) {
+        <a [routerLink]="card.route" class="summary-card">
+          <span class="summary-card-icon"><app-icon [name]="card.icon" [size]="22" /></span>
+          <div class="summary-card-body">
+            <p class="summary-card-title">{{ card.title }}</p>
+            <p class="summary-card-value">{{ card.value }}</p>
+            <p class="summary-card-hint">{{ card.hint }}</p>
+          </div>
+          <span class="summary-card-chevron"><app-icon name="chevron-right" [size]="18" /></span>
+        </a>
+      }
     </div>
   }
-
-  <div class="action-list">
-    <a routerLink="/profile" class="action-link">
-      <span class="action-link-icon"><app-icon name="user" [size]="18" /></span>
-      প্রোফাইল দেখুন
-      <span class="action-link-chevron"><app-icon name="chevron-right" [size]="18" /></span>
-    </a>
-    <a routerLink="/installments" class="action-link">
-      <span class="action-link-icon"><app-icon name="wallet" [size]="18" /></span>
-      কিস্তির তথ্য
-      <span class="action-link-chevron"><app-icon name="chevron-right" [size]="18" /></span>
-    </a>
-    <a routerLink="/change-password" class="action-link">
-      <span class="action-link-icon"><app-icon name="lock" [size]="18" /></span>
-      পাসওয়ার্ড পরিবর্তন করুন
-      <span class="action-link-chevron"><app-icon name="chevron-right" [size]="18" /></span>
-    </a>
-  </div>
 </div>

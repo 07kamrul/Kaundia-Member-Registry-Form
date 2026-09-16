@@ -10,7 +10,8 @@ export type IconName =
   | 'logout'
   | 'menu'
   | 'close'
-  | 'chevron-right';
+  | 'chevron-right'
+  | 'chevron-left';
 
 const ICON_PATHS: Record<IconName, string> = {
   dashboard:
@@ -28,6 +29,7 @@ const ICON_PATHS: Record<IconName, string> = {
   menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
   close: '<path d="M6 6l12 12"/><path d="M18 6L6 18"/>',
   'chevron-right': '<path d="M9 6l6 6-6 6"/>',
+  'chevron-left': '<path d="M15 6l-6 6 6 6"/>',
 };
 
 @Component({

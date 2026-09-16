@@ -19,6 +19,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'সদস্য তালিকা', route: '/members', icon: 'users', adminOnly: true },
 ];
 
+const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed';
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -28,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
 })
 export class ShellComponent {
   readonly sidebarOpen = signal(false);
+  readonly sidebarCollapsed = signal(this.readStoredCollapsed());
 
   constructor(
     public auth: AuthService,
@@ -38,6 +41,12 @@ export class ShellComponent {
     return NAV_ITEMS.filter((item) => !item.adminOnly || this.auth.isAdmin);
   }
 
+  get pageTitle(): string {
+    const activeRoute = this.router.url.split('?')[0];
+    const match = NAV_ITEMS.find((item) => activeRoute.startsWith(item.route));
+    return match?.label ?? 'ড্যাশবোর্ড';
+  }
+
   toggleSidebar(): void {
     this.sidebarOpen.update((open) => !open);
   }
@@ -46,8 +55,32 @@ export class ShellComponent {
     this.sidebarOpen.set(false);
   }
 
+  toggleCollapse(): void {
+    this.sidebarCollapsed.update((collapsed) => {
+      const next = !collapsed;
+      this.storeCollapsed(next);
+      return next;
+    });
+  }
+
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  private readStoredCollapsed(): boolean {
+    try {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  }
+
+  private storeCollapsed(value: boolean): void {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(value));
+    } catch {
+      // localStorage unavailable (private mode, SSR) — collapse state just won't persist.
+    }
   }
 }

@@ -104,7 +104,7 @@ async def reject_submission(
 
     await send_email(
         to=member.email,
-        subject="Kaundia Member Registry - Application Update",
+        subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - আবেদনের আপডেট",
         html_body=(
             f"<p>Dear {member.full_name},</p>"
             f"<p>Your membership application was not approved.</p>"

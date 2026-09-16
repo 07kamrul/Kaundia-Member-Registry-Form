@@ -28,12 +28,14 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.5rem 0.6rem 1.25rem;
+  overflow: hidden;
 }
 
 .sidebar-brand-mark {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 0.6rem;
@@ -44,8 +46,12 @@
 
 .sidebar-brand-text {
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.85rem;
+  line-height: 1.25;
   letter-spacing: 0.01em;
+  white-space: normal;
+  overflow: hidden;
+  transition: opacity 0.15s ease;
 }
 
 .sidebar-nav {
@@ -95,11 +101,12 @@
   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+.sidebar-collapse-btn,
 .sidebar-logout {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   padding: 0.65rem 0.75rem;
   border-radius: 0.55rem;
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -109,10 +116,21 @@
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  white-space: nowrap;
 }
 
+.sidebar-collapse-btn {
+  display: none;
+}
+
+.sidebar-collapse-btn:hover,
 .sidebar-logout:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-link-label {
+  overflow: hidden;
+  transition: opacity 0.1s ease;
 }
 
 .sidebar-backdrop {
@@ -158,6 +176,23 @@
   background: var(--gray-50);
 }
 
+.topbar-collapse-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  color: var(--emerald-900);
+  cursor: pointer;
+}
+
+.topbar-collapse-btn:hover {
+  background: var(--gray-50);
+}
+
 .topbar-title {
   font-weight: 700;
   color: var(--emerald-900);
@@ -172,6 +207,7 @@
 @media (min-width: 1024px) {
   .sidebar {
     transform: translateX(0);
+    transition: width 0.2s ease;
   }
 
   .sidebar-backdrop {
@@ -180,14 +216,48 @@
 
   .app-main {
     margin-left: 15.5rem;
+    transition: margin-left 0.2s ease;
   }
 
   .topbar-menu-btn {
     display: none;
   }
 
+  .topbar-collapse-btn {
+    display: flex;
+  }
+
+  .sidebar-collapse-btn {
+    display: flex;
+  }
+
   .app-content {
     padding: 2rem 2.5rem 3rem;
+  }
+
+  .sidebar.sidebar-collapsed {
+    width: 4.5rem;
+    overflow: visible;
+  }
+
+  .sidebar.sidebar-collapsed .sidebar-brand {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .sidebar.sidebar-collapsed .sidebar-link,
+  .sidebar.sidebar-collapsed .sidebar-collapse-btn,
+  .sidebar.sidebar-collapsed .sidebar-logout {
+    justify-content: center;
+  }
+
+  .sidebar.sidebar-collapsed .sidebar-brand-text,
+  .sidebar.sidebar-collapsed .sidebar-link-label {
+    display: none;
+  }
+
+  .app-main.app-main-collapsed {
+    margin-left: 4.5rem;
   }
 }
 

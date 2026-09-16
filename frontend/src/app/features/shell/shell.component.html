@@ -1,8 +1,12 @@
 <div class="app-shell">
-  <aside class="sidebar" [class.sidebar-open]="sidebarOpen()">
-    <div class="sidebar-brand">
+  <aside
+    class="sidebar"
+    [class.sidebar-open]="sidebarOpen()"
+    [class.sidebar-collapsed]="sidebarCollapsed()"
+  >
+    <div class="sidebar-brand" [title]="'উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ'">
       <span class="sidebar-brand-mark">ক</span>
-      <span class="sidebar-brand-text">কাউন্দিয়া</span>
+      <span class="sidebar-brand-text">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</span>
     </div>
 
     <nav class="sidebar-nav">
@@ -12,17 +16,28 @@
           routerLinkActive="active"
           class="sidebar-link"
           [class.sidebar-link-admin]="item.adminOnly"
+          [title]="item.label"
           (click)="closeSidebar()"
         >
           <app-icon [name]="item.icon" [size]="19" />
-          <span>{{ item.label }}</span>
+          <span class="sidebar-link-label">{{ item.label }}</span>
         </a>
       }
     </nav>
 
-    <button type="button" class="sidebar-logout" (click)="logout()">
+    <button
+      type="button"
+      class="sidebar-collapse-btn"
+      (click)="toggleCollapse()"
+      [attr.aria-label]="sidebarCollapsed() ? 'সাইডবার প্রসারিত করুন' : 'সাইডবার সংকুচিত করুন'"
+    >
+      <app-icon [name]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="18" />
+      <span class="sidebar-link-label">সংকুচিত করুন</span>
+    </button>
+
+    <button type="button" class="sidebar-logout" (click)="logout()" title="লগআউট">
       <app-icon name="logout" [size]="19" />
-      <span>লগআউট</span>
+      <span class="sidebar-link-label">লগআউট</span>
     </button>
   </aside>
 
@@ -30,12 +45,20 @@
     <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
   }
 
-  <div class="app-main">
+  <div class="app-main" [class.app-main-collapsed]="sidebarCollapsed()">
     <header class="topbar">
       <button type="button" class="topbar-menu-btn" (click)="toggleSidebar()" aria-label="মেনু খুলুন">
         <app-icon [name]="sidebarOpen() ? 'close' : 'menu'" [size]="22" />
       </button>
-      <span class="topbar-title">কাউন্দিয়া সমবায় সমিতি</span>
+      <button
+        type="button"
+        class="topbar-collapse-btn"
+        (click)="toggleCollapse()"
+        [attr.aria-label]="sidebarCollapsed() ? 'সাইডবার প্রসারিত করুন' : 'সাইডবার সংকুচিত করুন'"
+      >
+        <app-icon name="menu" [size]="20" />
+      </button>
+      <span class="topbar-title">{{ pageTitle }}</span>
     </header>
 
     <main class="app-content">
