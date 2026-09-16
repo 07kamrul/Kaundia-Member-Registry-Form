@@ -21,7 +21,7 @@ class AdminUser(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[AdminRole] = mapped_column(
-        Enum(AdminRole, name="admin_role"),
+        Enum(AdminRole, name="admin_role", values_callable=lambda enum_cls: [member.value for member in enum_cls]),
         nullable=False,
         default=AdminRole.ADMINISTRATOR,
         server_default=AdminRole.ADMINISTRATOR.value,
