@@ -72,8 +72,8 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
     urgentContactMobile: [''],
     urgentContactAddress: [''],
 
-    propertyCount: new FormControl(1),
-    properties: fb.array([buildPropertyGroup(fb)]),
+    propertyCount: new FormControl(null),
+    properties: fb.array([]),
 
     nominees: fb.array([buildNomineeGroup(fb)]),
 
