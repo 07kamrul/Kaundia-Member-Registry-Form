@@ -2,19 +2,19 @@
   <h2 class="section-title" style="border-radius:0;margin:0">৫. মনোনীত ব্যক্তি (Nominee)</h2>
   <div style="padding:0.75rem" [formGroup]="group(0)">
     <div class="field">
-      <label>নাম <span class="required">*</span></label>
-      <input type="text" formControlName="name" />
+      <label for="nominee0_name">নাম <span class="required">*</span></label>
+      <input id="nominee0_name" type="text" formControlName="name" />
       @if (showError(0, 'name')) {
         <p class="field-error">নাম আবশ্যক</p>
       }
     </div>
     <div class="field">
-      <label>পিতা/স্বামী / সম্পর্ক</label>
-      <input type="text" formControlName="relation" />
+      <label for="nominee0_relation">পিতা/স্বামী / সম্পর্ক</label>
+      <input id="nominee0_relation" type="text" formControlName="relation" />
     </div>
     <div class="field">
-      <label>মোবাইল <span class="required">*</span></label>
-      <input type="text" formControlName="mobile" />
+      <label for="nominee0_mobile">মোবাইল <span class="required">*</span></label>
+      <input id="nominee0_mobile" type="text" formControlName="mobile" />
       @if (showError(0, 'mobile')) {
         <p class="field-error">মোবাইল আবশ্যক</p>
       } @else if (mobileInvalid(0)) {
@@ -22,8 +22,8 @@
       }
     </div>
     <div class="field">
-      <label>ঠিকানা</label>
-      <input type="text" formControlName="address" />
+      <label for="nominee0_address">ঠিকানা</label>
+      <input id="nominee0_address" type="text" formControlName="address" />
     </div>
   </div>
 </div>
@@ -42,19 +42,19 @@
           </div>
           <div class="grid-2">
             <div class="field">
-              <label>নাম <span class="required">*</span></label>
-              <input type="text" formControlName="name" />
+              <label [attr.for]="'nominee' + i + '_name'">নাম <span class="required">*</span></label>
+              <input [id]="'nominee' + i + '_name'" type="text" formControlName="name" />
               @if (showError(i, 'name')) {
                 <p class="field-error">নাম আবশ্যক</p>
               }
             </div>
             <div class="field">
-              <label>সম্পর্ক</label>
-              <input type="text" formControlName="relation" />
+              <label [attr.for]="'nominee' + i + '_relation'">সম্পর্ক</label>
+              <input [id]="'nominee' + i + '_relation'" type="text" formControlName="relation" />
             </div>
             <div class="field">
-              <label>মোবাইল <span class="required">*</span></label>
-              <input type="text" formControlName="mobile" />
+              <label [attr.for]="'nominee' + i + '_mobile'">মোবাইল <span class="required">*</span></label>
+              <input [id]="'nominee' + i + '_mobile'" type="text" formControlName="mobile" />
               @if (showError(i, 'mobile')) {
                 <p class="field-error">মোবাইল আবশ্যক</p>
               } @else if (mobileInvalid(i)) {
@@ -62,8 +62,8 @@
               }
             </div>
             <div class="field">
-              <label>ঠিকানা</label>
-              <input type="text" formControlName="address" />
+              <label [attr.for]="'nominee' + i + '_address'">ঠিকানা</label>
+              <input [id]="'nominee' + i + '_address'" type="text" formControlName="address" />
             </div>
           </div>
         </div>

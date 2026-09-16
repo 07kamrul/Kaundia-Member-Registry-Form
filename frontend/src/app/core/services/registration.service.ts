@@ -91,6 +91,14 @@ export class RegistrationService {
       body.append('member_photo', dataUrlToBlob(formData.memberPhoto), 'photo.jpg');
     }
 
+    if (formData.receiptFileDataUrl) {
+      body.append(
+        'receipt_photo',
+        dataUrlToBlob(formData.receiptFileDataUrl),
+        formData.receiptFileName || 'receipt.jpg',
+      );
+    }
+
     for (const property of formData.properties) {
       for (const doc of property.applicableDocs) {
         if (doc.fileDataUrl) {

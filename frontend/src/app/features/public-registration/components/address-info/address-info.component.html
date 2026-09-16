@@ -8,12 +8,12 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>বিভাগ <span class="required">*</span></label>
+          <label for="currentAddress_division">বিভাগ <span class="required">*</span></label>
           @if (showError('currentAddress', 'division')) {
             <span class="field-error-inline">{{ errorMessage('division') }}</span>
           }
         </div>
-        <select formControlName="division">
+        <select id="currentAddress_division" formControlName="division">
           <option value="" disabled>নির্বাচন করুন</option>
           @for (division of divisions$ | async; track division.id) {
             <option [value]="division.bn_name">{{ division.bn_name }}</option>
@@ -22,12 +22,12 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>জেলা <span class="required">*</span></label>
+          <label for="currentAddress_district">জেলা <span class="required">*</span></label>
           @if (showError('currentAddress', 'district')) {
             <span class="field-error-inline">{{ errorMessage('district') }}</span>
           }
         </div>
-        <select formControlName="district">
+        <select id="currentAddress_district" formControlName="district">
           <option value="" disabled>নির্বাচন করুন</option>
           @for (district of currentDistricts$ | async; track district.id) {
             <option [value]="district.bn_name">{{ district.bn_name }}</option>
@@ -36,12 +36,12 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>উপজেলা/থানা <span class="required">*</span></label>
+          <label for="currentAddress_upazila">উপজেলা/থানা <span class="required">*</span></label>
           @if (showError('currentAddress', 'upazila')) {
             <span class="field-error-inline">{{ errorMessage('upazila') }}</span>
           }
         </div>
-        <select formControlName="upazila">
+        <select id="currentAddress_upazila" formControlName="upazila">
           <option value="" disabled>নির্বাচন করুন</option>
           @for (upazila of currentUpazilas$ | async; track upazila.name) {
             <option [value]="upazila.bn_name">{{ upazila.bn_name }}</option>
@@ -50,30 +50,30 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>ডাকঘর <span class="required">*</span></label>
+          <label for="currentAddress_postOffice">ডাকঘর <span class="required">*</span></label>
           @if (showError('currentAddress', 'postOffice')) {
             <span class="field-error-inline">{{ errorMessage('postOffice') }}</span>
           }
         </div>
-        <input type="text" formControlName="postOffice" />
+        <input id="currentAddress_postOffice" type="text" formControlName="postOffice" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>রাস্তা/গ্রাম <span class="required">*</span></label>
+          <label for="currentAddress_road">রাস্তা/গ্রাম <span class="required">*</span></label>
           @if (showError('currentAddress', 'road')) {
             <span class="field-error-inline">{{ errorMessage('road') }}</span>
           }
         </div>
-        <input type="text" formControlName="road" />
+        <input id="currentAddress_road" type="text" formControlName="road" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>বাসা/হোল্ডিং নং <span class="required">*</span></label>
+          <label for="currentAddress_house">বাসা/হোল্ডিং নং <span class="required">*</span></label>
           @if (showError('currentAddress', 'house')) {
             <span class="field-error-inline">{{ errorMessage('house') }}</span>
           }
         </div>
-        <input type="text" formControlName="house" />
+        <input id="currentAddress_house" type="text" formControlName="house" />
       </div>
     </div>
     <div formGroupName="permanentAddress">
@@ -88,12 +88,12 @@
         </div>
       <div class="field">
         <div class="field-label-row">
-          <label>বিভাগ <span class="required">*</span></label>
+          <label for="permanentAddress_division">বিভাগ <span class="required">*</span></label>
           @if (showError('permanentAddress', 'division')) {
             <span class="field-error-inline">{{ errorMessage('division') }}</span>
           }
         </div>
-        <select formControlName="division">
+        <select id="permanentAddress_division" formControlName="division">
           <option value="" disabled>নির্বাচন করুন</option>
           @for (division of divisions$ | async; track division.id) {
             <option [value]="division.bn_name">{{ division.bn_name }}</option>
@@ -102,12 +102,12 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>জেলা <span class="required">*</span></label>
+          <label for="permanentAddress_district">জেলা <span class="required">*</span></label>
           @if (showError('permanentAddress', 'district')) {
             <span class="field-error-inline">{{ errorMessage('district') }}</span>
           }
         </div>
-        <select formControlName="district">
+        <select id="permanentAddress_district" formControlName="district">
           <option value="" disabled>নির্বাচন করুন</option>
           @for (district of permanentDistricts$ | async; track district.id) {
             <option [value]="district.bn_name">{{ district.bn_name }}</option>
@@ -116,12 +116,12 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>উপজেলা/থানা <span class="required">*</span></label>
+          <label for="permanentAddress_upazila">উপজেলা/থানা <span class="required">*</span></label>
           @if (showError('permanentAddress', 'upazila')) {
             <span class="field-error-inline">{{ errorMessage('upazila') }}</span>
           }
         </div>
-        <select formControlName="upazila">
+        <select id="permanentAddress_upazila" formControlName="upazila">
           <option value="" disabled>নির্বাচন করুন</option>
           @for (upazila of permanentUpazilas$ | async; track upazila.name) {
             <option [value]="upazila.bn_name">{{ upazila.bn_name }}</option>
@@ -130,30 +130,30 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>ডাকঘর <span class="required">*</span></label>
+          <label for="permanentAddress_postOffice">ডাকঘর <span class="required">*</span></label>
           @if (showError('permanentAddress', 'postOffice')) {
             <span class="field-error-inline">{{ errorMessage('postOffice') }}</span>
           }
         </div>
-        <input type="text" formControlName="postOffice" />
+        <input id="permanentAddress_postOffice" type="text" formControlName="postOffice" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>রাস্তা/গ্রাম <span class="required">*</span></label>
+          <label for="permanentAddress_road">রাস্তা/গ্রাম <span class="required">*</span></label>
           @if (showError('permanentAddress', 'road')) {
             <span class="field-error-inline">{{ errorMessage('road') }}</span>
           }
         </div>
-        <input type="text" formControlName="road" />
+        <input id="permanentAddress_road" type="text" formControlName="road" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>বাসা/হোল্ডিং নং <span class="required">*</span></label>
+          <label for="permanentAddress_house">বাসা/হোল্ডিং নং <span class="required">*</span></label>
           @if (showError('permanentAddress', 'house')) {
             <span class="field-error-inline">{{ errorMessage('house') }}</span>
           }
         </div>
-        <input type="text" formControlName="house" />
+        <input id="permanentAddress_house" type="text" formControlName="house" />
       </div>
     </div>
   </div>

@@ -81,6 +81,8 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
     subscription: ['', Validators.required],
     receiptNo: [''],
     paymentMethod: ['', Validators.required],
+    receiptFileName: [''],
+    receiptFileDataUrl: [''],
 
     memberSignature: [''],
     submissionDate: [new Date().toISOString().split('T')[0]],

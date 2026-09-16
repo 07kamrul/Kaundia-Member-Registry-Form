@@ -2,15 +2,15 @@
   <h2 class="section-title">৬. সদস্যপদ ও চাঁদা</h2>
   <div class="grid-2">
     <div class="field">
-      <label>ভর্তি ফি (টাকা) <span class="required">*</span></label>
-      <input type="number" formControlName="admissionFee" />
+      <label for="admissionFee">ভর্তি ফি (টাকা) <span class="required">*</span></label>
+      <input id="admissionFee" type="number" formControlName="admissionFee" />
       @if (showError('admissionFee')) {
         <p class="field-error">{{ errorMessage('admissionFee') }}</p>
       }
     </div>
     <div class="field">
-      <label>চাঁদা (টাকা) <span class="required">*</span></label>
-      <input type="number" formControlName="subscription" />
+      <label for="subscription">চাঁদা (টাকা) <span class="required">*</span></label>
+      <input id="subscription" type="number" formControlName="subscription" />
       @if (subscriptionBreakdown(); as b) {
         <p class="field-hint">
           মোট {{ b.totalDecimal }} শতাংশ: প্রথম ১ শতাংশ = {{ firstDecimalRate }}৳
@@ -25,8 +25,36 @@
       }
     </div>
     <div class="field">
-      <label>রসিদ নং</label>
-      <input type="text" formControlName="receiptNo" />
+      <label for="receiptNo">রসিদ নং/Transaction ID</label>
+      <input id="receiptNo" type="text" formControlName="receiptNo" />
+    </div>
+  </div>
+  <div class="field">
+    <label>মানি রসিদের ছবি</label>
+    <div style="margin-top:0.5rem;max-width:24rem;width:100%">
+      @if (form.get('receiptFileDataUrl')?.value) {
+        <div style="display:flex;align-items:center;gap:0.75rem;border:1px solid #d1d5db;border-radius:0.5rem;padding:0.5rem">
+          <span style="flex:1;font-size:0.75rem;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            {{ form.get('receiptFileName')?.value }}
+          </span>
+          <button type="button" (click)="removeReceiptFile()" style="font-size:0.75rem;color:#dc2626;background:none;border:none;cursor:pointer">
+            মুছুন
+          </button>
+        </div>
+      } @else {
+        <label
+          style="display:flex;align-items:center;justify-content:center;gap:0.5rem;border:2px dashed #d1d5db;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.75rem;cursor:pointer"
+        >
+          📎 রসিদের ছবি সংযুক্ত করুন
+          <input type="file" accept="image/jpeg,image/png,application/pdf" (change)="onReceiptFileChange($event)" style="display:none" />
+        </label>
+      }
+      <p style="font-size:0.6875rem;color:#6b7280;margin:0.25rem 0 0">
+        সর্বোচ্চ {{ maxReceiptFileMb }} এমবি (JPG/PNG/PDF)
+      </p>
+      @if (receiptFileError) {
+        <p class="field-error">{{ receiptFileError }}</p>
+      }
     </div>
   </div>
   <div class="field">

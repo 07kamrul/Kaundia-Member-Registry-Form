@@ -39,6 +39,7 @@ export interface SubmissionDetail extends SubmissionSummary {
   paymentMethod: string;
   memberPhotoUrl?: string;
   memberSignatureUrl?: string;
+  receiptPhotoUrl?: string;
   rejectionReason?: string;
 }
 

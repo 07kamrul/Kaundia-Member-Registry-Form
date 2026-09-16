@@ -93,6 +93,7 @@ class MemberDetail(MemberSummary):
     member_signature: str | None = None
     submission_date: str
     member_photo_path: str | None = None
+    receipt_photo_path: str | None = None
     reviewed_at: datetime | None = None
     rejection_reason: str | None = None
     properties: list[PropertyOut] = []

@@ -57,6 +57,7 @@ class Member(Base):
     subscription: Mapped[str] = mapped_column(String(32), nullable=False)
     receipt_no: Mapped[str] = mapped_column(String(64), nullable=False)
     payment_method: Mapped[str] = mapped_column(String(64), nullable=False)
+    receipt_photo_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     # Signature
     member_signature: Mapped[str | None] = mapped_column(Text, nullable=True)

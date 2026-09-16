@@ -19,6 +19,7 @@ router = APIRouter(tags=["submissions"])
 async def create_submission(
     payload: str = Form(...),
     member_photo: UploadFile | None = File(None),
+    receipt_photo: UploadFile | None = File(None),
     doc_files: list[UploadFile] = File(default=[]),
     db: AsyncSession = Depends(get_db),
 ) -> SubmissionCreateResponse:
@@ -27,6 +28,7 @@ async def create_submission(
       applicable_doc entry's order corresponds to the order of files in
       'doc_files' flattened across properties in order.
     - 'member_photo': optional file upload for the member's photo.
+    - 'receipt_photo': optional file upload for the money receipt image.
     - 'doc_files': ordered list of files for each property's applicable_docs.
     """
     try:
@@ -70,6 +72,9 @@ async def create_submission(
 
     if member_photo is not None and member_photo.filename:
         member.member_photo_path = await save_upload_file(member_photo, "photos")
+
+    if receipt_photo is not None and receipt_photo.filename:
+        member.receipt_photo_path = await save_upload_file(receipt_photo, "receipts")
 
     doc_file_iter = iter(doc_files)
 

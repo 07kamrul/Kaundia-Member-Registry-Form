@@ -1,7 +1,11 @@
 import { Component, DestroyRef, Input, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { PAYMENT_METHODS } from '../../../../core/models/registration.model';
+import {
+  ALLOWED_DOC_MIME_TYPES,
+  MAX_DOC_FILE_BYTES,
+  PAYMENT_METHODS,
+} from '../../../../core/models/registration.model';
 import { propertiesArray } from '../../registration-form.builder';
 
 const FIRST_DECIMAL_RATE = 50;
@@ -27,6 +31,8 @@ export class PaymentInfoComponent implements OnInit {
   readonly firstDecimalRate = FIRST_DECIMAL_RATE;
   readonly additionalDecimalRate = ADDITIONAL_DECIMAL_RATE;
   readonly subscriptionBreakdown = signal<SubscriptionBreakdown | null>(null);
+  readonly maxReceiptFileMb = MAX_DOC_FILE_BYTES / (1024 * 1024);
+  receiptFileError = '';
 
   constructor(private destroyRef: DestroyRef) {}
 
@@ -64,6 +70,36 @@ export class PaymentInfoComponent implements OnInit {
       amount,
     });
     this.form.get('subscription')?.setValue(amount, { emitEvent: false });
+  }
+
+  onReceiptFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    if (!ALLOWED_DOC_MIME_TYPES.includes(file.type)) {
+      this.receiptFileError = 'শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য';
+      return;
+    }
+    if (file.size > MAX_DOC_FILE_BYTES) {
+      this.receiptFileError = `ফাইলের সাইজ সর্বোচ্চ ${this.maxReceiptFileMb} এমবি হতে হবে`;
+      return;
+    }
+    this.receiptFileError = '';
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.form.patchValue({
+        receiptFileName: file.name,
+        receiptFileDataUrl: reader.result as string,
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeReceiptFile(): void {
+    this.form.patchValue({ receiptFileName: '', receiptFileDataUrl: '' });
   }
 
   selectMethod(method: string): void {

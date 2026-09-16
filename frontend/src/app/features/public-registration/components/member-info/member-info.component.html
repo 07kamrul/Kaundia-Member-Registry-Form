@@ -24,77 +24,77 @@
 
       <div class="field">
         <div class="field-label-row">
-          <label>পূর্ণ নাম <span class="required">*</span></label>
+          <label for="fullName">পূর্ণ নাম <span class="required">*</span></label>
           @if (showError('fullName')) {
             <span class="field-error-inline">{{ errorMessage('fullName') }}</span>
           }
         </div>
-        <input type="text" formControlName="fullName" />
+        <input id="fullName" type="text" formControlName="fullName" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>পিতা/স্বামী <span class="required">*</span></label>
+          <label for="fatherOrHusband">পিতা/স্বামী <span class="required">*</span></label>
           @if (showError('fatherOrHusband')) {
             <span class="field-error-inline">{{ errorMessage('fatherOrHusband') }}</span>
           }
         </div>
-        <input type="text" formControlName="fatherOrHusband" />
+        <input id="fatherOrHusband" type="text" formControlName="fatherOrHusband" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>মাতা <span class="required">*</span></label>
+          <label for="mother">মাতা <span class="required">*</span></label>
           @if (showError('mother')) {
             <span class="field-error-inline">{{ errorMessage('mother') }}</span>
           }
         </div>
-        <input type="text" formControlName="mother" />
+        <input id="mother" type="text" formControlName="mother" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>জন্ম তারিখ <span class="required">*</span></label>
+          <label for="dob">জন্ম তারিখ <span class="required">*</span></label>
           @if (showError('dob')) {
             <span class="field-error-inline">{{ errorMessage('dob') }}</span>
           }
         </div>
-        <input type="date" formControlName="dob" />
+        <input id="dob" type="date" formControlName="dob" />
       </div>
     </div>
 
     <div class="member-info-column">
       <div class="field">
         <div class="field-label-row">
-          <label>NID নং <span class="required">*</span></label>
+          <label for="nid">NID নং <span class="required">*</span></label>
           @if (showError('nid')) {
             <span class="field-error-inline">{{ errorMessage('nid') }}</span>
           }
         </div>
-        <input type="text" formControlName="nid" placeholder="১০-১৭ সংখ্যা" />
+        <input id="nid" type="text" formControlName="nid" placeholder="১০-১৭ সংখ্যা" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>মোবাইল (WhatsApp) <span class="required">*</span></label>
+          <label for="mobile">মোবাইল (WhatsApp) <span class="required">*</span></label>
           @if (showError('mobile')) {
             <span class="field-error-inline">{{ errorMessage('mobile') }}</span>
           }
         </div>
-        <input type="text" formControlName="mobile" placeholder="01XXXXXXXXX" />
+        <input id="mobile" type="text" formControlName="mobile" placeholder="01XXXXXXXXX" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>ই-মেইল <span class="required">*</span></label>
+          <label for="email">ই-মেইল <span class="required">*</span></label>
           @if (showError('email')) {
             <span class="field-error-inline">{{ errorMessage('email') }}</span>
           }
         </div>
-        <input type="email" formControlName="email" />
+        <input id="email" type="email" formControlName="email" />
       </div>
       <div class="field">
-        <label>পেশা</label>
-        <input type="text" formControlName="occupation" />
+        <label for="occupation">পেশা</label>
+        <input id="occupation" type="text" formControlName="occupation" />
       </div>
       <div class="field">
-        <label>জাতীয়তা</label>
-        <input type="text" formControlName="nationality" />
+        <label for="nationality">জাতীয়তা</label>
+        <input id="nationality" type="text" formControlName="nationality" />
       </div>
       <div class="field">
         <div class="field-label-row">
