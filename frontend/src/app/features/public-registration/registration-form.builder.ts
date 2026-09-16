@@ -59,10 +59,10 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
     dob: ['', Validators.required],
     nationality: ['বাংলাদেশী'],
     occupation: [''],
-    nid: ['', Validators.pattern(NID_PATTERN)],
+    nid: ['', [Validators.required, Validators.pattern(NID_PATTERN)]],
     mobile: ['', [Validators.required, Validators.pattern(MOBILE_PATTERN)]],
     gender: ['', Validators.required],
-    email: ['', Validators.email],
+    email: ['', [Validators.required, Validators.email]],
 
     permanentAddress: buildAddressGroup(fb),
     currentAddress: buildAddressGroup(fb),
@@ -84,7 +84,7 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
 
     memberSignature: [''],
     submissionDate: [new Date().toISOString().split('T')[0]],
-    memberPhoto: [''],
+    memberPhoto: ['', Validators.required],
 
     declarationAccepted: [false, Validators.requiredTrue],
   });

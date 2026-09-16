@@ -26,13 +26,20 @@ export class MemberInfoComponent {
       fatherOrHusband: 'পিতা/স্বামী আবশ্যক',
       mother: 'মাতা আবশ্যক',
       dob: 'জন্ম তারিখ আবশ্যক',
-      email: 'ই-মেইল সঠিক নয়',
-      nid: 'NID নম্বর ১০-১৭ সংখ্যার হতে হবে',
       gender: 'লিঙ্গ নির্বাচন করুন',
+      memberPhoto: 'সদস্যের ছবি আবশ্যক',
     };
 
     if (controlName === 'mobile') {
       return control?.errors?.['required'] ? 'মোবাইল আবশ্যক' : 'মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)';
+    }
+
+    if (controlName === 'email') {
+      return control?.errors?.['required'] ? 'ই-মেইল আবশ্যক' : 'ই-মেইল সঠিক নয়';
+    }
+
+    if (controlName === 'nid') {
+      return control?.errors?.['required'] ? 'NID নম্বর আবশ্যক' : 'NID নম্বর ১০-১৭ সংখ্যার হতে হবে';
     }
 
     return messages[controlName] ?? '';

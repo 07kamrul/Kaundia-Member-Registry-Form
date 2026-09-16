@@ -17,6 +17,9 @@
             মুছুন
           </button>
         }
+        @if (showError('memberPhoto')) {
+          <span class="field-error-inline">{{ errorMessage('memberPhoto') }}</span>
+        }
       </div>
 
       <div class="field">
@@ -60,7 +63,7 @@
     <div class="member-info-column">
       <div class="field">
         <div class="field-label-row">
-          <label>NID নং</label>
+          <label>NID নং <span class="required">*</span></label>
           @if (showError('nid')) {
             <span class="field-error-inline">{{ errorMessage('nid') }}</span>
           }
@@ -78,7 +81,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>ই-মেইল</label>
+          <label>ই-মেইল <span class="required">*</span></label>
           @if (showError('email')) {
             <span class="field-error-inline">{{ errorMessage('email') }}</span>
           }
