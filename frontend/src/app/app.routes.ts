@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { ADMIN_ROLES } from './core/services/auth.service';
 
 export const routes: Routes = [
   {
@@ -53,7 +54,7 @@ export const routes: Routes = [
       },
       {
         path: 'submissions',
-        canActivate: [roleGuard(['admin'])],
+        canActivate: [roleGuard(ADMIN_ROLES)],
         loadComponent: () =>
           import('./features/admin/pages/submissions-list/submissions-list.component').then(
             (m) => m.SubmissionsListComponent,
@@ -61,7 +62,7 @@ export const routes: Routes = [
       },
       {
         path: 'submissions/:id',
-        canActivate: [roleGuard(['admin'])],
+        canActivate: [roleGuard(ADMIN_ROLES)],
         loadComponent: () =>
           import('./features/admin/pages/submission-detail/submission-detail.component').then(
             (m) => m.SubmissionDetailComponent,
@@ -69,7 +70,7 @@ export const routes: Routes = [
       },
       {
         path: 'members',
-        canActivate: [roleGuard(['admin'])],
+        canActivate: [roleGuard(ADMIN_ROLES)],
         loadComponent: () =>
           import('./features/admin/pages/members-list/members-list.component').then(
             (m) => m.MembersListComponent,

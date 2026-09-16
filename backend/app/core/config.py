@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     admin_email: str = "admin@example.com"
     admin_password: str = "change-this-password"
     admin_name: str = "Administrator"
+    admin_role: str = "super_admin"
 
     # CORS
     cors_origins: str = "http://localhost:9091"

@@ -4,7 +4,9 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export type UserRole = 'admin' | 'member';
+export type UserRole = 'super_admin' | 'executive_committee' | 'administrator' | 'member';
+
+export const ADMIN_ROLES: UserRole[] = ['super_admin', 'executive_committee', 'administrator'];
 
 interface TokenResponse {
   access_token: string;

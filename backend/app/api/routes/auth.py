@@ -17,9 +17,9 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> To
     admin = admin_result.scalar_one_or_none()
     if admin is not None and verify_password(payload.password, admin.password_hash):
         return TokenResponse(
-            access_token=create_access_token(str(admin.id), "admin"),
-            refresh_token=create_refresh_token(str(admin.id), "admin"),
-            role="admin",
+            access_token=create_access_token(str(admin.id), admin.role.value),
+            refresh_token=create_refresh_token(str(admin.id), admin.role.value),
+            role=admin.role.value,
         )
 
     credential_result = await db.execute(
@@ -45,8 +45,9 @@ async def admin_login(payload: AdminLoginRequest, db: AsyncSession = Depends(get
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     return TokenResponse(
-        access_token=create_access_token(str(admin.id), "admin"),
-        refresh_token=create_refresh_token(str(admin.id), "admin"),
+        access_token=create_access_token(str(admin.id), admin.role.value),
+        refresh_token=create_refresh_token(str(admin.id), admin.role.value),
+        role=admin.role.value,
     )
 
 

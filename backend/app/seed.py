@@ -10,7 +10,7 @@ from sqlalchemy import select
 from app.core.config import get_settings
 from app.core.security import hash_password
 from app.db.session import AsyncSessionLocal
-from app.models.admin import AdminUser
+from app.models.admin import AdminRole, AdminUser
 
 settings = get_settings()
 
@@ -27,10 +27,11 @@ async def seed_admin() -> None:
             email=settings.admin_email,
             password_hash=hash_password(settings.admin_password),
             name=settings.admin_name,
+            role=AdminRole(settings.admin_role),
         )
         db.add(admin)
         await db.commit()
-        print(f"Created admin user: {settings.admin_email}")
+        print(f"Created admin user: {settings.admin_email} ({admin.role.value})")
 
 
 if __name__ == "__main__":

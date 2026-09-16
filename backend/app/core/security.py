@@ -10,7 +10,9 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-TokenRole = Literal["admin", "member"]
+TokenRole = Literal["super_admin", "executive_committee", "administrator", "member"]
+
+ADMIN_ROLES: tuple[TokenRole, ...] = ("super_admin", "executive_committee", "administrator")
 
 # bcrypt has a hard 72-byte input limit; truncate defensively so arbitrarily
 # long passwords don't raise instead of just losing entropy past 72 bytes.
