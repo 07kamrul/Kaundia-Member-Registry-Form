@@ -42,6 +42,11 @@ export class AuthService {
     return this.roleValue();
   }
 
+  get isAdmin(): boolean {
+    const role = this.roleValue();
+    return role !== null && ADMIN_ROLES.includes(role);
+  }
+
   login(identifier: string, password: string): Observable<TokenResponse> {
     return this.http
       .post<TokenResponse>(`${environment.apiBaseUrl}/login`, { identifier, password })

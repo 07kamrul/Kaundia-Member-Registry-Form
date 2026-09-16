@@ -6,7 +6,7 @@
   <a routerLink="/installments" style="color:#d1fae5;text-decoration:none">কিস্তি</a>
   <a routerLink="/change-password" style="color:#d1fae5;text-decoration:none">পাসওয়ার্ড পরিবর্তন</a>
 
-  @if (auth.role === 'admin') {
+  @if (auth.isAdmin) {
     <a routerLink="/submissions" style="color:#fef3c7;text-decoration:none">সাবমিশন</a>
     <a routerLink="/members" style="color:#fef3c7;text-decoration:none">সদস্য তালিকা</a>
   }
