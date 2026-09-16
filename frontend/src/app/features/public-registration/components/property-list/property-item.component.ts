@@ -146,6 +146,15 @@ export class PropertyItemComponent {
     return this.submitAttempted && !this.property.get('ownership')?.value;
   }
 
+  showKhatianNoError(): boolean {
+    return this.submitAttempted && !this.property.get('khatianNo')?.value?.trim();
+  }
+
+  showDagNoError(controlName: 'cs' | 'rs'): boolean {
+    const control = this.property.get('dagNo')?.get(controlName);
+    return this.submitAttempted && !control?.value?.trim();
+  }
+
   showCoOwnerError(controlName: 'ownerName' | 'ownerPhone', index: number): boolean {
     const control = this.coOwnerGroup(index).get(controlName);
     return this.submitAttempted && !control?.value?.trim();

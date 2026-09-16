@@ -21,11 +21,14 @@
 
   <div class="grid-2">
     <div class="field">
-      <label>খতিয়ান নং</label>
+      <label>খতিয়ান নং <span class="required">*</span></label>
       <input type="text" formControlName="khatianNo" />
+      @if (showKhatianNoError()) {
+        <p class="field-error">খতিয়ান নং আবশ্যক</p>
+      }
     </div>
     <div class="field" formGroupName="dagNo">
-      <label>দাগ নং</label>
+      <label>দাগ নং <span class="required">*</span></label>
       <div class="flex-row-wrap">
         <div style="display:flex;align-items:center;gap:0.5rem;flex:1 1 8rem">
           <span style="font-size:0.875rem;color:#4b5563">CS:</span>
@@ -36,6 +39,12 @@
           <input type="text" formControlName="rs" />
         </div>
       </div>
+      @if (showDagNoError('cs')) {
+        <p class="field-error">CS দাগ নং আবশ্যক</p>
+      }
+      @if (showDagNoError('rs')) {
+        <p class="field-error">RS দাগ নং আবশ্যক</p>
+      }
     </div>
     <div class="field">
       <label>জমির পরিমাণ</label>
