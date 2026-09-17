@@ -22,6 +22,9 @@ interface SummaryCard {
 export class MemberDashboardComponent implements OnInit {
   profile: MemberProfile | null = null;
   cards: SummaryCard[] = [];
+  recentInstallments: Installment[] = [];
+  paidCount = 0;
+  dueCount = 0;
   loading = false;
   error = '';
 
@@ -36,6 +39,12 @@ export class MemberDashboardComponent implements OnInit {
       next: ({ profile, installments }) => {
         this.profile = profile;
         this.cards = this.buildCards(profile, installments);
+        this.dueCount = installments.filter((item) => item.status === 'due').length;
+        this.paidCount = installments.length - this.dueCount;
+        this.recentInstallments = [...installments]
+          .sort((a, b) => b.year - a.year || b.month - a.month)
+          .slice(0, 6)
+          .reverse();
         this.loading = false;
       },
       error: () => {

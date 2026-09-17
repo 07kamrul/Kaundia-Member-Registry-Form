@@ -13,6 +13,41 @@
   } @else {
     @if (profile) {
       <p style="font-size:1.1rem;font-weight:600;margin:0 0 1rem">স্বাগতম, {{ profile.fullName }}</p>
+
+      <div class="stat-tile-grid">
+        <div class="card stat-tile">
+          <p class="stat-tile-label">সদস্য নং</p>
+          <p class="stat-tile-value">{{ profile.memberId }}</p>
+        </div>
+        <div class="card stat-tile">
+          <p class="stat-tile-label">পরিশোধিত মাস</p>
+          <p class="stat-tile-value">{{ paidCount }}</p>
+        </div>
+        <div class="card stat-tile">
+          <p class="stat-tile-label">বাকি মাস</p>
+          <p class="stat-tile-value">{{ dueCount }}</p>
+        </div>
+      </div>
+
+      @if (recentInstallments.length) {
+        <div class="card" style="padding:1rem 1.1rem;margin-bottom:1.5rem">
+          <p class="stat-tile-label" style="margin-bottom:0.6rem">সাম্প্রতিক ৬ মাসের চাঁদা</p>
+          <div class="month-badge-strip">
+            @for (installment of recentInstallments; track installment.id) {
+              <span class="month-badge">
+                <span style="font-size:0.72rem;color:var(--gray-600)">{{ installment.month }}/{{ installment.year }}</span>
+                <span
+                  class="status-badge"
+                  [class.status-paid]="installment.status === 'paid'"
+                  [class.status-due]="installment.status === 'due'"
+                >
+                  {{ installment.status === 'paid' ? 'পরিশোধিত' : 'বাকি' }}
+                </span>
+              </span>
+            }
+          </div>
+        </div>
+      }
     }
     <div class="summary-grid">
       @for (card of cards; track card.route) {

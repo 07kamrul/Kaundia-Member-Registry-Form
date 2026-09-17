@@ -11,43 +11,33 @@
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
-    <div class="data-table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>অনুমতি</th>
-            @for (role of roles; track role.id) {
-              <th style="text-align:center">
-                {{ role.name }}
-                @if (savingRoleId === role.id) {
-                  <span class="spinner" style="margin-left:0.25rem"></span>
-                }
-              </th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (permission of permissions; track permission.key) {
-            <tr>
-              <td>
-                <div>{{ permission.key }}</div>
-                <div style="font-size:0.75rem;color:var(--gray-600)">{{ permission.description }}</div>
-              </td>
-              @for (role of roles; track role.id) {
-                <td style="text-align:center">
-                  <input
-                    type="checkbox"
-                    [checked]="hasPermission(role, permission.key)"
-                    [disabled]="role.name === 'super_admin' || savingRoleId === role.id"
-                    (change)="togglePermission(role, permission.key)"
-                  />
-                </td>
-              }
-            </tr>
+    @for (role of roles; track role.id) {
+      <div class="card role-card">
+        <div class="role-card-header">
+          <span class="role-card-name">{{ role.name }}</span>
+          @if (savingRoleId === role.id) {
+            <span class="spinner"></span>
           }
-        </tbody>
-      </table>
-    </div>
+        </div>
+        @for (permission of permissions; track permission.key) {
+          <div class="role-card-permission">
+            <div>
+              <div class="role-card-permission-label">{{ permission.key }}</div>
+              <div class="role-card-permission-desc">{{ permission.description }}</div>
+            </div>
+            <label class="toggle-switch">
+              <input
+                type="checkbox"
+                [checked]="hasPermission(role, permission.key)"
+                [disabled]="role.name === 'super_admin' || savingRoleId === role.id"
+                (change)="togglePermission(role, permission.key)"
+              />
+              <span class="toggle-switch-track"></span>
+            </label>
+          </div>
+        }
+      </div>
+    }
 
     <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">ব্যবহারকারী-ভিত্তিক ওভাররাইড</h2>
     <p class="page-subtitle" style="margin:0 0 1rem">

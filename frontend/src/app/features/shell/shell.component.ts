@@ -20,6 +20,12 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'সাবমিশন', route: '/submissions', icon: 'inbox', adminOnly: true },
   { label: 'সদস্য তালিকা', route: '/members', icon: 'users', adminOnly: true },
   {
+    label: 'চাঁদা ব্যবস্থাপনা',
+    route: '/installments-management',
+    icon: 'wallet',
+    adminOnly: true,
+  },
+  {
     label: 'ভূমিকা ও অনুমতি',
     route: '/roles',
     icon: 'lock',

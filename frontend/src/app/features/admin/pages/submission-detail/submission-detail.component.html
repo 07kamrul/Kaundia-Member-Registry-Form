@@ -55,14 +55,42 @@
       </div>
 
       <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">সম্পত্তিসমূহ</h3>
-      <pre style="background:var(--gray-50);padding:0.75rem;border-radius:var(--radius-sm);overflow:auto;font-size:0.75rem">{{
-        submission.properties | json
-      }}</pre>
+      @if (propertyCards.length) {
+        <div class="detail-card-grid">
+          @for (propertyCard of propertyCards; track $index) {
+            <div class="card detail-card">
+              <p class="detail-card-title">{{ propertyCard.title }}</p>
+              @for (field of propertyCard.fields; track field.label) {
+                <div class="detail-card-row">
+                  <span class="detail-card-label">{{ field.label }}</span>
+                  <span class="detail-card-value">{{ field.value }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="field-hint">কোনো সম্পত্তির তথ্য দেওয়া হয়নি।</p>
+      }
 
-      <h3 class="section-title" style="background:var(--emerald-700)">মনোনীত ব্যক্তি</h3>
-      <pre style="background:var(--gray-50);padding:0.75rem;border-radius:var(--radius-sm);overflow:auto;font-size:0.75rem">{{
-        submission.nominees | json
-      }}</pre>
+      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">মনোনীত ব্যক্তি</h3>
+      @if (nomineeCards.length) {
+        <div class="detail-card-grid">
+          @for (nomineeCard of nomineeCards; track $index) {
+            <div class="card detail-card">
+              <p class="detail-card-title">{{ nomineeCard.title }}</p>
+              @for (field of nomineeCard.fields; track field.label) {
+                <div class="detail-card-row">
+                  <span class="detail-card-label">{{ field.label }}</span>
+                  <span class="detail-card-value">{{ field.value }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="field-hint">কোনো মনোনীত ব্যক্তির তথ্য দেওয়া হয়নি।</p>
+      }
 
       @if (submission.status === 'pending') {
         @if (actionError) {

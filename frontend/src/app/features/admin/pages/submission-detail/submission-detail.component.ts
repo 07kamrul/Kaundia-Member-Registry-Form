@@ -1,15 +1,62 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { JsonPipe } from '@angular/common';
 import { AdminService } from '../../../../core/services/admin.service';
 import type { SubmissionDetail } from '../../../../core/models/admin.model';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
 
+/** A single label/value row rendered inside a property or nominee card. */
+export interface DetailField {
+  label: string;
+  value: string;
+}
+
+/** A card of label/value rows built from one raw property or nominee record. */
+export interface DetailCard {
+  title: string;
+  fields: DetailField[];
+}
+
+/** Human-readable Bangla labels for known property/nominee record keys. */
+const FIELD_LABELS: Record<string, string> = {
+  type: 'ধরন',
+  category: 'ধরন',
+  address: 'ঠিকানা',
+  location: 'ঠিকানা',
+  area: 'পরিমাণ',
+  size: 'পরিমাণ',
+  description: 'বিবরণ',
+  name: 'নাম',
+  relation: 'সম্পর্ক',
+  relationship: 'সম্পর্ক',
+  mobile: 'মোবাইল',
+  phone: 'মোবাইল',
+  nid: 'NID',
+  percentage: 'শতাংশ',
+  share: 'শতাংশ',
+  dob: 'জন্ম তারিখ',
+  address_1: 'ঠিকানা',
+};
+
+function humanizeKey(key: string): string {
+  return FIELD_LABELS[key] ?? key.replace(/_/g, ' ');
+}
+
+function toDetailCard(record: unknown, index: number, titlePrefix: string): DetailCard {
+  const title = `${titlePrefix} ${index + 1}`;
+  if (typeof record !== 'object' || record === null) {
+    return { title, fields: [{ label: 'মান', value: String(record) }] };
+  }
+  const fields = Object.entries(record as Record<string, unknown>)
+    .filter(([, value]) => value !== null && value !== undefined && value !== '')
+    .map(([key, value]) => ({ label: humanizeKey(key), value: String(value) }));
+  return { title, fields };
+}
+
 @Component({
   selector: 'app-submission-detail',
   standalone: true,
-  imports: [FormsModule, JsonPipe, ConfirmModalComponent],
+  imports: [FormsModule, ConfirmModalComponent],
   templateUrl: './submission-detail.component.html',
 })
 export class SubmissionDetailComponent implements OnInit {
@@ -26,6 +73,18 @@ export class SubmissionDetailComponent implements OnInit {
     private router: Router,
     private adminService: AdminService,
   ) {}
+
+  get propertyCards(): DetailCard[] {
+    return (this.submission?.properties ?? []).map((item, index) =>
+      toDetailCard(item, index, 'সম্পত্তি'),
+    );
+  }
+
+  get nomineeCards(): DetailCard[] {
+    return (this.submission?.nominees ?? []).map((item, index) =>
+      toDetailCard(item, index, 'মনোনীত ব্যক্তি'),
+    );
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

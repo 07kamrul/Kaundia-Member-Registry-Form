@@ -124,6 +124,21 @@ async def list_members(
     return list(result.scalars().all())
 
 
+@router.get("/members/{member_id}/installments", response_model=list[InstallmentOut])
+async def list_member_installments(
+    member_id: int,
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("member.view_all")),
+) -> list[Installment]:
+    await _get_member_or_404(db, member_id)
+    result = await db.execute(
+        select(Installment)
+        .where(Installment.member_id == member_id)
+        .order_by(Installment.year, Installment.month)
+    )
+    return list(result.scalars().all())
+
+
 @router.post(
     "/members/{member_id}/installments",
     response_model=InstallmentOut,

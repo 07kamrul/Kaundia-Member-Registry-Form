@@ -1,0 +1,98 @@
+import { Component, OnInit } from '@angular/core';
+import { AdminService } from '../../../../core/services/admin.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import type { Installment, Member } from '../../../../core/models/admin.model';
+import { IconComponent } from '../../../../shared/icon/icon.component';
+
+const MONTH_NAMES = [
+  '',
+  'জানুয়ারি',
+  'ফেব্রুয়ারি',
+  'মার্চ',
+  'এপ্রিল',
+  'মে',
+  'জুন',
+  'জুলাই',
+  'আগস্ট',
+  'সেপ্টেম্বর',
+  'অক্টোবর',
+  'নভেম্বর',
+  'ডিসেম্বর',
+];
+
+@Component({
+  selector: 'app-installments-management',
+  standalone: true,
+  imports: [IconComponent],
+  templateUrl: './installments-management.component.html',
+})
+export class InstallmentsManagementComponent implements OnInit {
+  members: Member[] = [];
+  loadingMembers = false;
+  error = '';
+
+  selectedMemberId = '';
+  installments: Installment[] = [];
+  loadingInstallments = false;
+  markingId: string | null = null;
+
+  constructor(
+    private adminService: AdminService,
+    public auth: AuthService,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadingMembers = true;
+    this.adminService.listMembers().subscribe({
+      next: (data) => {
+        this.members = data;
+        this.loadingMembers = false;
+        if (data.length > 0) this.selectMember(data[0].id);
+      },
+      error: () => {
+        this.error = 'সদস্য তালিকা লোড করা যায়নি।';
+        this.loadingMembers = false;
+      },
+    });
+  }
+
+  get selectedMember(): Member | undefined {
+    return this.members.find((m) => m.id === this.selectedMemberId);
+  }
+
+  monthName(month: number): string {
+    return MONTH_NAMES[month] ?? String(month);
+  }
+
+  selectMember(memberId: string): void {
+    this.selectedMemberId = memberId;
+    this.loadingInstallments = true;
+    this.installments = [];
+    this.adminService.getMemberInstallments(memberId).subscribe({
+      next: (data) => {
+        this.installments = data;
+        this.loadingInstallments = false;
+      },
+      error: () => {
+        this.error = 'কিস্তির তথ্য লোড করা যায়নি।';
+        this.loadingInstallments = false;
+      },
+    });
+  }
+
+  markPaid(installment: Installment): void {
+    if (!this.auth.hasPermission('member.manage')) return;
+    this.markingId = installment.id;
+    this.adminService.updateInstallment(installment.id, 'paid').subscribe({
+      next: (updated) => {
+        const idx = this.installments.findIndex((i) => i.id === installment.id);
+        if (idx >= 0) this.installments[idx] = updated;
+        this.markingId = null;
+      },
+      error: () => {
+        this.error = 'কিস্তি পরিশোধিত হিসেবে চিহ্নিত করা যায়নি।';
+        this.markingId = null;
+      },
+    });
+  }
+}

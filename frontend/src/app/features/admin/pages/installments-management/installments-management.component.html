@@ -1,0 +1,81 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">চাঁদা ব্যবস্থাপনা</h1>
+      <p class="page-subtitle">সদস্য নির্বাচন করে মাসিক কিস্তির অবস্থা দেখুন ও হালনাগাদ করুন</p>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  }
+
+  @if (loadingMembers) {
+    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+  } @else {
+    <div class="installments-master-detail">
+      <div class="card installments-member-list">
+        @for (m of members; track m.id) {
+          <div
+            class="installments-member-item"
+            [class.active]="m.id === selectedMemberId"
+            (click)="selectMember(m.id)"
+          >
+            <div class="installments-member-name">{{ m.fullName }}</div>
+            <div class="installments-member-id">{{ m.memberId }}</div>
+          </div>
+        } @empty {
+          <p class="empty-state">কোনো সদস্য পাওয়া যায়নি।</p>
+        }
+      </div>
+
+      <div class="card installments-detail-panel">
+        @if (!selectedMember) {
+          <p class="empty-state">সদস্য নির্বাচন করুন।</p>
+        } @else {
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+            <div>
+              <strong>{{ selectedMember.fullName }}</strong>
+              <div style="font-size:0.8rem;color:var(--gray-600)">{{ selectedMember.memberId }}</div>
+            </div>
+          </div>
+
+          @if (loadingInstallments) {
+            <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+          } @else {
+            <div class="month-badge-strip">
+              @for (i of installments; track i.id) {
+                <div class="card installments-month-card">
+                  <div style="font-weight:600;font-size:0.88rem;margin-bottom:0.35rem">
+                    {{ monthName(i.month) }} {{ i.year }}
+                  </div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);margin-bottom:0.55rem">
+                    ৳ {{ i.amount }}
+                  </div>
+                  @if (i.status === 'paid') {
+                    <span class="status-badge status-paid">
+                      <app-icon name="check" [size]="14" /> পরিশোধিত
+                    </span>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      style="width:100%"
+                      [disabled]="!auth.hasPermission('member.manage') || markingId === i.id"
+                      [title]="auth.hasPermission('member.manage') ? '' : 'অনুমতি প্রয়োজন'"
+                      (click)="markPaid(i)"
+                    >
+                      পরিশোধিত হিসেবে চিহ্নিত করুন
+                    </button>
+                  }
+                </div>
+              } @empty {
+                <p class="empty-state">এই সদস্যের কোনো কিস্তি নেই।</p>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -37,6 +37,10 @@ export class AdminService {
     return this.http.get<Member[]>(`${this.base}/members`);
   }
 
+  getMemberInstallments(memberId: string): Observable<Installment[]> {
+    return this.http.get<Installment[]>(`${this.base}/members/${memberId}/installments`);
+  }
+
   deleteMember(memberId: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/members/${memberId}`);
   }
