@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { MemberService } from '../../core/services/member.service';
 import { IconComponent, type IconName } from '../../shared/icon/icon.component';
 
 interface NavItem {
@@ -34,8 +35,6 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed';
-
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -43,15 +42,39 @@ const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed';
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit {
   readonly sidebarOpen = signal(false);
-  readonly sidebarCollapsed = signal(this.readStoredCollapsed());
+  readonly displayName = signal('');
+  readonly memberId = signal('');
 
   constructor(
     public auth: AuthService,
     public theme: ThemeService,
+    private memberService: MemberService,
     private router: Router,
   ) {}
+
+  ngOnInit(): void {
+    if (!this.auth.isAdmin) {
+      this.memberService.getProfile().subscribe({
+        next: (profile) => {
+          this.displayName.set(profile.fullName);
+          this.memberId.set(profile.memberId);
+        },
+        error: () => {
+          // Header still renders without the name/ID; page content shows its own error state.
+        },
+      });
+    }
+  }
+
+  get avatarInitial(): string {
+    return this.welcomeName.trim().charAt(0) || 'ব';
+  }
+
+  get welcomeName(): string {
+    return this.displayName() || (this.auth.isAdmin ? 'প্রশাসক' : '');
+  }
 
   get navItems(): NavItem[] {
     return NAV_ITEMS.filter((item) => {
@@ -62,12 +85,6 @@ export class ShellComponent {
     });
   }
 
-  get pageTitle(): string {
-    const activeRoute = this.router.url.split('?')[0];
-    const match = NAV_ITEMS.find((item) => activeRoute.startsWith(item.route));
-    return match?.label ?? 'ড্যাশবোর্ড';
-  }
-
   toggleSidebar(): void {
     this.sidebarOpen.update((open) => !open);
   }
@@ -76,32 +93,8 @@ export class ShellComponent {
     this.sidebarOpen.set(false);
   }
 
-  toggleCollapse(): void {
-    this.sidebarCollapsed.update((collapsed) => {
-      const next = !collapsed;
-      this.storeCollapsed(next);
-      return next;
-    });
-  }
-
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
-  }
-
-  private readStoredCollapsed(): boolean {
-    try {
-      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  }
-
-  private storeCollapsed(value: boolean): void {
-    try {
-      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(value));
-    } catch {
-      // localStorage unavailable (private mode, SSR) — collapse state just won't persist.
-    }
   }
 }

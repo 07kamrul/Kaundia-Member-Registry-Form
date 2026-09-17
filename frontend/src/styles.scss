@@ -29,6 +29,7 @@
   --red-700: #8A2F22;
   --red-800: #6E251B;
   --surface: #FFFFFF;
+  --surface-2: #F3EFE3;
   --modal-surface: #FFFFFF;
 
   --radius-sm: 0.5rem;
@@ -65,6 +66,7 @@
     --red-700: #E2917E;
     --red-800: #F3C6BA;
     --surface: #181D14;
+    --surface-2: #20261A;
     --modal-surface: #181D14;
   }
 }
@@ -94,6 +96,7 @@
   --red-700: #E2917E;
   --red-800: #F3C6BA;
   --surface: #181D14;
+  --surface-2: #20261A;
   --modal-surface: #181D14;
 }
 
@@ -241,12 +244,13 @@ a {
 
 .btn-ghost {
   background: transparent;
-  border: none;
-  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-800);
 }
 
 .btn-ghost:hover {
-  background: var(--gray-50);
+  background: var(--surface-2);
+  border-color: var(--gray-400);
 }
 
 .btn-sm {

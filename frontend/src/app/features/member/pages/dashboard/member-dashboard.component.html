@@ -17,11 +17,11 @@
       </div>
       <div class="card stat-tile">
         <p class="stat-tile-label">পরিশোধিত মাস</p>
-        <p class="stat-tile-value">{{ paidCount }} / {{ totalCount }}</p>
+        <p class="stat-tile-value" style="color:var(--emerald-800)">{{ paidCount }} / {{ totalCount }}</p>
       </div>
       <div class="card stat-tile">
-        <p class="stat-tile-label">বাকয়া মাস</p>
-        <p class="stat-tile-value">{{ dueCount }}</p>
+        <p class="stat-tile-label">বকেয়া মাস</p>
+        <p class="stat-tile-value" [style.color]="dueCount ? 'var(--red-700)' : 'var(--emerald-800)'">{{ dueCount }}</p>
       </div>
     </div>
 
@@ -35,7 +35,7 @@
               [class.status-paid]="installment.status === 'paid'"
               [class.status-due]="installment.status === 'due'"
             >
-              {{ installment.label }}: {{ installment.status === 'paid' ? 'পরিশোধিত' : 'বাকয়া' }}
+              {{ installment.label }}: {{ installment.status === 'paid' ? 'পরিশোধিত' : 'বকেয়া' }}
             </span>
           }
         </div>

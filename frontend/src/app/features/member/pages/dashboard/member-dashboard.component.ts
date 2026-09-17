@@ -5,7 +5,7 @@ import type { Installment } from '../../../../core/models/admin.model';
 import { monthName } from '../../../../shared/constants/months';
 
 interface RecentContribution {
-  id: number;
+  id: Installment['id'];
   label: string;
   status: Installment['status'];
 }
