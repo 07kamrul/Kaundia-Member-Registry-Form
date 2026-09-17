@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import type { Observable } from 'rxjs';
+import { map, type Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
   Installment,
@@ -10,6 +10,47 @@ import type {
   SubmissionSummary,
 } from '../models/admin.model';
 
+interface MemberApiModel {
+  id: number;
+  member_id: string | null;
+  status: SubmissionStatus;
+  full_name: string;
+  mobile: string;
+  email?: string;
+  due_installments: number;
+}
+
+interface SubmissionSummaryApiModel {
+  id: number;
+  member_id: string | null;
+  status: SubmissionStatus;
+  full_name: string;
+  mobile: string;
+  created_at: string;
+}
+
+function toMember(api: MemberApiModel): Member {
+  return {
+    id: String(api.id),
+    memberId: api.member_id,
+    status: api.status,
+    fullName: api.full_name,
+    mobile: api.mobile,
+    email: api.email,
+    dueInstallments: api.due_installments,
+  };
+}
+
+function toSubmissionSummary(api: SubmissionSummaryApiModel): SubmissionSummary {
+  return {
+    id: String(api.id),
+    fullName: api.full_name,
+    mobile: api.mobile,
+    status: api.status,
+    createdAt: api.created_at,
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private base = `${environment.apiBaseUrl}/admin`;
@@ -18,7 +59,9 @@ export class AdminService {
 
   listSubmissions(status?: SubmissionStatus): Observable<SubmissionSummary[]> {
     const url = status ? `${this.base}/submissions?status=${status}` : `${this.base}/submissions`;
-    return this.http.get<SubmissionSummary[]>(url);
+    return this.http
+      .get<SubmissionSummaryApiModel[]>(url)
+      .pipe(map((rows) => rows.map(toSubmissionSummary)));
   }
 
   getSubmission(id: string): Observable<SubmissionDetail> {
@@ -34,7 +77,9 @@ export class AdminService {
   }
 
   listMembers(): Observable<Member[]> {
-    return this.http.get<Member[]>(`${this.base}/members`);
+    return this.http
+      .get<MemberApiModel[]>(`${this.base}/members`)
+      .pipe(map((rows) => rows.map(toMember)));
   }
 
   getMemberInstallments(memberId: string): Observable<Installment[]> {

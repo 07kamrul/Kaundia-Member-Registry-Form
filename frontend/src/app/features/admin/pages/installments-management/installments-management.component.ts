@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import type { Installment, Member } from '../../../../core/models/admin.model';
@@ -39,15 +40,19 @@ export class InstallmentsManagementComponent implements OnInit {
   constructor(
     private adminService: AdminService,
     public auth: AuthService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     this.loadingMembers = true;
+    const requestedMemberId = this.route.snapshot.queryParamMap.get('memberId');
     this.adminService.listMembers().subscribe({
       next: (data) => {
-        this.members = data;
+        this.members = data.filter((m) => m.status === 'approved');
         this.loadingMembers = false;
-        if (data.length > 0) this.selectMember(data[0].id);
+        const initialMember =
+          this.members.find((m) => m.id === requestedMemberId) ?? this.members[0];
+        if (initialMember) this.selectMember(initialMember.id);
       },
       error: () => {
         this.error = 'সদস্য তালিকা লোড করা যায়নি।';

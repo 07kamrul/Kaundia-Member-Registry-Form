@@ -63,6 +63,7 @@ class MemberSummary(BaseModel):
     mobile: str
     email: str
     created_at: datetime
+    due_installments: int = 0
 
 
 class MemberDetail(MemberSummary):

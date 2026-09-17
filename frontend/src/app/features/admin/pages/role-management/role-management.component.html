@@ -17,25 +17,26 @@
           <span class="role-card-name">{{ role.name }}</span>
           @if (savingRoleId === role.id) {
             <span class="spinner"></span>
+          } @else if (role.name === 'super_admin') {
+            <span class="status-badge status-approved">সকল অনুমতি — সর্বদা</span>
           }
         </div>
-        @for (permission of permissions; track permission.key) {
-          <div class="role-card-permission">
-            <div>
-              <div class="role-card-permission-label">{{ permission.key }}</div>
-              <div class="role-card-permission-desc">{{ permission.description }}</div>
+        <div class="role-card-permissions-grid">
+          @for (permission of permissions; track permission.key) {
+            <div class="role-card-permission">
+              <div class="role-card-permission-label">{{ permission.description }}</div>
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  [checked]="hasPermission(role, permission.key)"
+                  [disabled]="role.name === 'super_admin' || savingRoleId === role.id"
+                  (change)="togglePermission(role, permission.key)"
+                />
+                <span class="toggle-switch-track"></span>
+              </label>
             </div>
-            <label class="toggle-switch">
-              <input
-                type="checkbox"
-                [checked]="hasPermission(role, permission.key)"
-                [disabled]="role.name === 'super_admin' || savingRoleId === role.id"
-                (change)="togglePermission(role, permission.key)"
-              />
-              <span class="toggle-switch-track"></span>
-            </label>
-          </div>
-        }
+          }
+        </div>
       </div>
     }
 
