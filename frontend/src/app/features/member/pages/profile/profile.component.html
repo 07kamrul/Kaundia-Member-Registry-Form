@@ -1,7 +1,7 @@
-<div style="max-width:52rem;margin:0 auto">
+<div style="max-width:56rem;margin:0 auto">
   <div class="page-header">
     <div>
-      <h1 class="page-title">আমার প্রোফাইল</h1>
+      <h1 class="page-title">প্রোফাইল</h1>
     </div>
   </div>
 
@@ -10,45 +10,44 @@
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else if (profile) {
-    <div class="card" style="padding:1.5rem">
-      <div class="grid-2">
-        <p><strong>সদস্য নং:</strong> {{ profile.memberId }}</p>
-        <p><strong>নাম:</strong> {{ profile.fullName }}</p>
-        <p><strong>পিতা/স্বামী:</strong> {{ profile.fatherOrHusband }}</p>
-        <p><strong>মাতা:</strong> {{ profile.mother }}</p>
-        <p><strong>জন্ম তারিখ:</strong> {{ profile.dob }}</p>
-        <p><strong>মোবাইল:</strong> {{ profile.mobile }}</p>
-        <p><strong>ইমেইল:</strong> {{ profile.email }}</p>
+    <div class="detail-card-grid">
+      <div class="card" style="padding:1.25rem">
+        <h3 class="section-title" style="background:var(--emerald-700)">ব্যক্তিগত তথ্য</h3>
+        <div class="detail-card-row"><span class="detail-card-label">নাম</span><span class="detail-card-value">{{ profile.fullName }}</span></div>
+        <div class="detail-card-row"><span class="detail-card-label">পিতা/স্বামী</span><span class="detail-card-value">{{ profile.fatherOrHusband || '—' }}</span></div>
+        <div class="detail-card-row"><span class="detail-card-label">মাতা</span><span class="detail-card-value">{{ profile.mother || '—' }}</span></div>
+        <div class="detail-card-row"><span class="detail-card-label">জন্ম তারিখ</span><span class="detail-card-value">{{ profile.dob }}</span></div>
+        <div class="detail-card-row"><span class="detail-card-label">এনআইডি</span><span class="detail-card-value">{{ profile.nid || '—' }}</span></div>
+        <div class="detail-card-row"><span class="detail-card-label">মোবাইল</span><span class="detail-card-value">{{ profile.mobile }}</span></div>
+        <div class="detail-card-row"><span class="detail-card-label">পেশা</span><span class="detail-card-value">{{ profile.occupation || '—' }}</span></div>
       </div>
 
-      <div class="grid-2" style="margin-top:1rem">
-        <div>
-          <h3 class="section-title" style="background:var(--emerald-700)">স্থায়ী ঠিকানা</h3>
-          <p><strong>বাসা/হোল্ডিং নং:</strong> {{ profile.permanentHouse }}</p>
-          <p><strong>রাস্তা/গ্রাম:</strong> {{ profile.permanentRoad }}</p>
-          <p><strong>ডাকঘর:</strong> {{ profile.permanentPostOffice }}</p>
-          <p><strong>উপজেলা/থানা:</strong> {{ profile.permanentUpazila }}</p>
-          <p><strong>জেলা:</strong> {{ profile.permanentDistrict }}</p>
+      <div class="card" style="padding:1.25rem">
+        <h3 class="section-title" style="background:var(--emerald-700)">ঠিকানা</h3>
+        <div class="detail-card-row">
+          <span class="detail-card-label">স্থায়ী</span>
+          <span class="detail-card-value">গ্রাম: {{ profile.permanentRoad || '—' }}, উপজেলা: {{ profile.permanentUpazila || '—' }}, জেলা: {{ profile.permanentDistrict || '—' }}</span>
         </div>
-        <div>
-          <h3 class="section-title" style="background:var(--emerald-700)">বর্তমান ঠিকানা</h3>
-          <p><strong>বাসা/হোল্ডিং নং:</strong> {{ profile.currentHouse }}</p>
-          <p><strong>রাস্তা/গ্রাম:</strong> {{ profile.currentRoad }}</p>
-          <p><strong>ডাকঘর:</strong> {{ profile.currentPostOffice }}</p>
-          <p><strong>উপজেলা/থানা:</strong> {{ profile.currentUpazila }}</p>
-          <p><strong>জেলা:</strong> {{ profile.currentDistrict }}</p>
+        <div class="detail-card-row">
+          <span class="detail-card-label">বর্তমান</span>
+          @if (profile.currentRoad || profile.currentUpazila || profile.currentDistrict) {
+            <span class="detail-card-value">গ্রাম: {{ profile.currentRoad || '—' }}, উপজেলা: {{ profile.currentUpazila || '—' }}, জেলা: {{ profile.currentDistrict || '—' }}</span>
+          } @else {
+            <span class="detail-card-value">একই — স্থায়ী ঠিকানার অনুরূপ</span>
+          }
         </div>
       </div>
-
-      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">সম্পত্তিসমূহ</h3>
-      <pre style="background:var(--gray-50);padding:0.75rem;border-radius:var(--radius-sm);overflow:auto;font-size:0.75rem">{{
-        profile.properties | json
-      }}</pre>
-
-      <h3 class="section-title" style="background:var(--emerald-700)">মনোনীত ব্যক্তি</h3>
-      <pre style="background:var(--gray-50);padding:0.75rem;border-radius:var(--radius-sm);overflow:auto;font-size:0.75rem">{{
-        profile.nominees | json
-      }}</pre>
     </div>
+
+    <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">সম্পত্তি</h3>
+    @if (propertySummaries.length) {
+      <div class="card" style="padding:0.75rem 1.1rem">
+        @for (summary of propertySummaries; track $index) {
+          <p style="margin:0.4rem 0">{{ summary }}</p>
+        }
+      </div>
+    } @else {
+      <p class="field-hint">কোনো সম্পত্তির তথ্য দেওয়া হয়নি।</p>
+    }
   }
 </div>

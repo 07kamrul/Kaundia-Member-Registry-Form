@@ -1,7 +1,13 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MemberService } from '../../../../core/services/member.service';
+
+function passwordsMatch(control: AbstractControl): ValidationErrors | null {
+  const newPassword = control.get('newPassword')?.value;
+  const confirmPassword = control.get('confirmPassword')?.value;
+  return newPassword === confirmPassword ? null : { passwordMismatch: true };
+}
 
 @Component({
   selector: 'app-change-password',
@@ -20,10 +26,14 @@ export class ChangePasswordComponent {
     private memberService: MemberService,
     private router: Router,
   ) {
-    this.form = this.fb.group({
-      oldPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
-    });
+    this.form = this.fb.group(
+      {
+        oldPassword: ['', Validators.required],
+        newPassword: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', Validators.required],
+      },
+      { validators: passwordsMatch },
+    );
   }
 
   onSubmit(): void {

@@ -1,29 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MemberService, type MemberProfile } from '../../../../core/services/member.service';
 import type { Installment } from '../../../../core/models/admin.model';
-import { IconComponent, type IconName } from '../../../../shared/icon/icon.component';
+import { monthName } from '../../../../shared/constants/months';
 
-interface SummaryCard {
-  route: string;
-  icon: IconName;
-  title: string;
-  value: string;
-  hint: string;
+interface RecentContribution {
+  id: number;
+  label: string;
+  status: Installment['status'];
 }
 
 @Component({
   selector: 'app-member-dashboard',
   standalone: true,
-  imports: [RouterLink, IconComponent],
+  imports: [],
   templateUrl: './member-dashboard.component.html',
 })
 export class MemberDashboardComponent implements OnInit {
   profile: MemberProfile | null = null;
-  cards: SummaryCard[] = [];
-  recentInstallments: Installment[] = [];
+  recentInstallments: RecentContribution[] = [];
   paidCount = 0;
+  totalCount = 0;
   dueCount = 0;
   loading = false;
   error = '';
@@ -38,13 +35,14 @@ export class MemberDashboardComponent implements OnInit {
     }).subscribe({
       next: ({ profile, installments }) => {
         this.profile = profile;
-        this.cards = this.buildCards(profile, installments);
         this.dueCount = installments.filter((item) => item.status === 'due').length;
-        this.paidCount = installments.length - this.dueCount;
+        this.totalCount = installments.length;
+        this.paidCount = this.totalCount - this.dueCount;
         this.recentInstallments = [...installments]
           .sort((a, b) => b.year - a.year || b.month - a.month)
           .slice(0, 6)
-          .reverse();
+          .reverse()
+          .map((item) => ({ id: item.id, label: monthName(item.month), status: item.status }));
         this.loading = false;
       },
       error: () => {
@@ -52,34 +50,5 @@ export class MemberDashboardComponent implements OnInit {
         this.loading = false;
       },
     });
-  }
-
-  private buildCards(profile: MemberProfile, installments: Installment[]): SummaryCard[] {
-    const dueCount = installments.filter((item) => item.status === 'due').length;
-    const paidCount = installments.length - dueCount;
-
-    return [
-      {
-        route: '/profile',
-        icon: 'user',
-        title: 'প্রোফাইল',
-        value: profile.fullName,
-        hint: `সদস্য নং ${profile.memberId}`,
-      },
-      {
-        route: '/installments',
-        icon: 'wallet',
-        title: 'কিস্তির তথ্য',
-        value: dueCount > 0 ? `${dueCount}টি বাকি` : 'সব পরিশোধিত',
-        hint: `${paidCount}টি পরিশোধিত · মোট ${installments.length}টি`,
-      },
-      {
-        route: '/change-password',
-        icon: 'lock',
-        title: 'পাসওয়ার্ড পরিবর্তন',
-        value: 'নিরাপত্তা সেটিংস',
-        hint: 'পাসওয়ার্ড আপডেট করুন',
-      },
-    ];
   }
 }
