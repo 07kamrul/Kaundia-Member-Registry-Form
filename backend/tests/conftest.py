@@ -11,7 +11,7 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 from app.core.security import hash_password
-from app.models.admin import AdminUser
+from app.models.admin import AdminRole, AdminUser
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -49,7 +49,10 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 @pytest_asyncio.fixture
 async def admin_user(db_session: AsyncSession) -> AdminUser:
     admin = AdminUser(
-        email="admin@example.com", password_hash=hash_password("adminpass123"), name="Admin"
+        email="admin@example.com",
+        password_hash=hash_password("adminpass123"),
+        name="Admin",
+        role=AdminRole.EXECUTIVE_COMMITTEE,
     )
     db_session.add(admin)
     await db_session.commit()

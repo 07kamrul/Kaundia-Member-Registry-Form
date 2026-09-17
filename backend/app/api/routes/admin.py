@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.deps import get_current_admin
+from app.core.permissions import require_permission
 from app.core.security import generate_temp_password, hash_password
 from app.db.session import get_db
 from app.models.admin import AdminUser
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 async def list_submissions(
     status_filter: MemberStatus | None = Query(default=None, alias="status"),
     db: AsyncSession = Depends(get_db),
-    _admin: AdminUser = Depends(get_current_admin),
+    _admin: AdminUser = Depends(require_permission("membership.review")),
 ) -> list[Member]:
     query = select(Member)
     if status_filter is not None:
@@ -37,7 +37,7 @@ async def list_submissions(
 async def get_submission(
     member_id: int,
     db: AsyncSession = Depends(get_db),
-    _admin: AdminUser = Depends(get_current_admin),
+    _admin: AdminUser = Depends(require_permission("membership.review")),
 ) -> Member:
     member = await _get_member_or_404(db, member_id)
     return member
@@ -47,7 +47,7 @@ async def get_submission(
 async def approve_submission(
     member_id: int,
     db: AsyncSession = Depends(get_db),
-    admin: AdminUser = Depends(get_current_admin),
+    admin: AdminUser = Depends(require_permission("approve_membership")),
 ) -> ApproveResponse:
     member = await _get_member_or_404(db, member_id)
     if member.status == MemberStatus.APPROVED:
@@ -93,7 +93,7 @@ async def reject_submission(
     member_id: int,
     payload: RejectRequest,
     db: AsyncSession = Depends(get_db),
-    admin: AdminUser = Depends(get_current_admin),
+    admin: AdminUser = Depends(require_permission("approve_membership")),
 ) -> None:
     member = await _get_member_or_404(db, member_id)
     member.status = MemberStatus.REJECTED
@@ -116,7 +116,7 @@ async def reject_submission(
 @router.get("/members", response_model=list[MemberSummary])
 async def list_members(
     db: AsyncSession = Depends(get_db),
-    _admin: AdminUser = Depends(get_current_admin),
+    _admin: AdminUser = Depends(require_permission("member.view_all")),
 ) -> list[Member]:
     result = await db.execute(
         select(Member).where(Member.status == MemberStatus.APPROVED).order_by(Member.member_id)
@@ -133,7 +133,7 @@ async def create_installment(
     member_id: int,
     payload: InstallmentCreate,
     db: AsyncSession = Depends(get_db),
-    _admin: AdminUser = Depends(get_current_admin),
+    _admin: AdminUser = Depends(require_permission("member.manage")),
 ) -> Installment:
     await _get_member_or_404(db, member_id)
     installment = Installment(
@@ -150,7 +150,7 @@ async def update_installment(
     installment_id: int,
     payload: InstallmentUpdate,
     db: AsyncSession = Depends(get_db),
-    _admin: AdminUser = Depends(get_current_admin),
+    _admin: AdminUser = Depends(require_permission("member.manage")),
 ) -> Installment:
     result = await db.execute(select(Installment).where(Installment.id == installment_id))
     installment = result.scalar_one_or_none()

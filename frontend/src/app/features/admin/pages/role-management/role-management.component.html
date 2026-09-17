@@ -1,0 +1,52 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">ভূমিকা ও অনুমতি ব্যবস্থাপনা</h1>
+      <p class="page-subtitle">প্রতিটি ভূমিকার জন্য অনুমতি নির্ধারণ করুন</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else {
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>অনুমতি</th>
+            @for (role of roles; track role.id) {
+              <th style="text-align:center">
+                {{ role.name }}
+                @if (savingRoleId === role.id) {
+                  <span class="spinner" style="margin-left:0.25rem"></span>
+                }
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (permission of permissions; track permission.key) {
+            <tr>
+              <td>
+                <div>{{ permission.key }}</div>
+                <div style="font-size:0.75rem;color:var(--gray-600)">{{ permission.description }}</div>
+              </td>
+              @for (role of roles; track role.id) {
+                <td style="text-align:center">
+                  <input
+                    type="checkbox"
+                    [checked]="hasPermission(role, permission.key)"
+                    [disabled]="role.name === 'super_admin' || savingRoleId === role.id"
+                    (change)="togglePermission(role, permission.key)"
+                  />
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { ADMIN_ROLES } from './core/services/auth.service';
 
@@ -74,6 +75,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/pages/members-list/members-list.component').then(
             (m) => m.MembersListComponent,
+          ),
+      },
+      {
+        path: 'roles',
+        canActivate: [permissionGuard(['manage_roles'])],
+        loadComponent: () =>
+          import('./features/admin/pages/role-management/role-management.component').then(
+            (m) => m.RoleManagementComponent,
           ),
       },
     ],

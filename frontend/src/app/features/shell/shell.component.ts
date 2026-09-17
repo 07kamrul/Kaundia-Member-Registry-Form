@@ -8,6 +8,7 @@ interface NavItem {
   route: string;
   icon: IconName;
   adminOnly: boolean;
+  requiredPermission?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -17,6 +18,13 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'পাসওয়ার্ড পরিবর্তন', route: '/change-password', icon: 'lock', adminOnly: false },
   { label: 'সাবমিশন', route: '/submissions', icon: 'inbox', adminOnly: true },
   { label: 'সদস্য তালিকা', route: '/members', icon: 'users', adminOnly: true },
+  {
+    label: 'ভূমিকা ও অনুমতি',
+    route: '/roles',
+    icon: 'lock',
+    adminOnly: true,
+    requiredPermission: 'manage_roles',
+  },
 ];
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed';
@@ -38,7 +46,12 @@ export class ShellComponent {
   ) {}
 
   get navItems(): NavItem[] {
-    return NAV_ITEMS.filter((item) => !item.adminOnly || this.auth.isAdmin);
+    return NAV_ITEMS.filter((item) => {
+      if (item.requiredPermission) {
+        return this.auth.hasPermission(item.requiredPermission);
+      }
+      return !item.adminOnly || this.auth.isAdmin;
+    });
   }
 
   get pageTitle(): string {

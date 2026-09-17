@@ -22,6 +22,7 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     must_change_password: bool = False
     role: str | None = None
+    permissions: list[str] = []
 
 
 class ChangePasswordRequest(BaseModel):

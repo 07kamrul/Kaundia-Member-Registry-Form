@@ -1,10 +1,14 @@
 from datetime import datetime
 from enum import Enum as PyEnum
+from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum, Integer, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.rbac import Role
 
 
 class AdminRole(str, PyEnum):
@@ -26,4 +30,9 @@ class AdminUser(Base):
         default=AdminRole.ADMINISTRATOR,
         server_default=AdminRole.ADMINISTRATOR.value,
     )
+    role_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("roles.id", ondelete="SET NULL"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    role_ref: Mapped["Role | None"] = relationship("Role")
