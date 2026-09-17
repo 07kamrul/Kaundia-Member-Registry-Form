@@ -48,5 +48,69 @@
         </tbody>
       </table>
     </div>
+
+    <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">ব্যবহারকারী-ভিত্তিক ওভাররাইড</h2>
+    <p class="page-subtitle" style="margin:0 0 1rem">
+      একজন নির্দিষ্ট ব্যবহারকারীর জন্য তার ভূমিকার ডিফল্টের বাইরে গিয়ে অতিরিক্ত অনুমতি দিন বা প্রত্যাহার করুন।
+    </p>
+
+    <div class="card" style="padding:1.2rem;margin-bottom:1.3rem">
+      <div class="field">
+        <label>ব্যবহারকারী</label>
+        <select [ngModel]="selectedUserId" (ngModelChange)="onSelectUser($event)">
+          @for (user of users; track user.id) {
+            <option [value]="user.id">{{ user.name }} ({{ user.role }})</option>
+          }
+        </select>
+      </div>
+
+      @if (selectedUserId) {
+        <div class="grid-2">
+          <div class="field">
+            <label>অনুমতি</label>
+            <select [(ngModel)]="overrideDraftKey">
+              @for (permission of permissions; track permission.key) {
+                <option [value]="permission.key">{{ permission.description }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label>কার্যক্রম</label>
+            <select [(ngModel)]="overrideDraftAction">
+              <option value="grant">অতিরিক্ত গ্রান্ট করুন</option>
+              <option value="revoke">প্রত্যাহার করুন</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" [disabled]="savingOverride" (click)="applyOverride()">
+          প্রয়োগ করুন
+        </button>
+
+        @if (loadingOverrides) {
+          <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+        } @else if (overrides.length) {
+          <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.4rem">
+            @for (override of overrides; track override.permission_key) {
+              <span
+                class="status-badge"
+                [class.status-approved]="override.granted"
+                [class.status-rejected]="!override.granted"
+              >
+                {{ override.granted ? '+' : '−' }} {{ permissionLabel(override.permission_key) }}
+                <button
+                  type="button"
+                  (click)="removeOverride(override.permission_key)"
+                  style="border:none;background:none;cursor:pointer;margin-left:0.3rem;color:inherit"
+                >
+                  ✕
+                </button>
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="field-hint" style="margin-top:1rem">এই ব্যবহারকারীর জন্য কোনো স্বতন্ত্র অনুমতি নেই।</p>
+        }
+      }
+    </div>
   }
 </div>

@@ -1,37 +1,44 @@
-<div class="page-with-banner">
-  <div class="card" style="max-width:28rem;width:100%;padding:2rem;text-align:center">
-    <img src="/logo.jpeg" alt="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ লোগো" style="width:5rem;height:5rem;object-fit:cover;border-radius:50%;margin:0 auto 1rem" />
-    <h1 style="color:#064e3b;font-size:1.5rem;margin-bottom:0.5rem">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</h1>
-    <p style="color:#6b7280;margin-bottom:1.5rem">লগইন করুন অথবা নতুন সদস্য হিসেবে নিবন্ধন করুন</p>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" style="text-align:left">
-      @if (error) {
-        <div class="error-box"><p style="margin:0;color:#b91c1c">{{ error }}</p></div>
-      }
-      <div class="field">
-        <label>ইউজারনেম / ইমেইল</label>
-        <input type="text" formControlName="identifier" />
-        @if (showError('identifier')) {
-          <p class="field-error">{{ errorMessage('identifier') }}</p>
-        }
+<div class="page-with-banner" style="align-items:flex-start;padding-top:3rem">
+  <div style="max-width:60rem;width:100%;margin:0 auto">
+    <div class="card" style="padding:2.5rem;text-align:center;margin-bottom:1.5rem">
+      <img
+        src="/logo.jpeg"
+        alt="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ লোগো"
+        style="width:5.5rem;height:5.5rem;object-fit:cover;border-radius:50%;margin:0 auto 1rem"
+      />
+      <h1 style="font-size:1.8rem;margin:0 0 0.5rem">উত্তর কাউন্দিয়ার জমির মালিকদের কল্যাণ পরিষদ</h1>
+      <p style="color:var(--gray-600);font-size:1rem;line-height:1.8;max-width:34rem;margin:0 auto 1.5rem">
+        সদস্যপদের আবেদন থেকে শুরু করে মাসিক চাঁদা পরিশোধ পর্যন্ত — পুরো প্রক্রিয়া এখন অনলাইনে। কাগজে আবেদন করার
+        ঝামেলা নেই, অফিসে বারবার যাওয়ার প্রয়োজন নেই।
+      </p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a routerLink="/register" class="btn btn-primary">সদস্যপদের জন্য আবেদন করুন</a>
+        <a routerLink="/login" class="btn btn-secondary">ইতিমধ্যে সদস্য? লগইন করুন</a>
       </div>
-      <div class="field">
-        <label>পাসওয়ার্ড</label>
-        <input type="password" formControlName="password" />
-        @if (showError('password')) {
-          <p class="field-error">{{ errorMessage('password') }}</p>
-        }
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card" style="cursor:default">
+        <div class="summary-card-body">
+          <p class="summary-card-title">আবেদন প্রক্রিয়া</p>
+          <p class="summary-card-value">ধাপে ধাপে ফর্ম</p>
+          <p class="summary-card-hint">ব্যক্তিগত তথ্য, ঠিকানা, জমির বিবরণ ও পেমেন্ট তথ্য</p>
+        </div>
       </div>
-      <button type="submit" class="btn btn-primary" style="width:100%" [disabled]="submitting || form.invalid">
-        {{ submitting ? 'লগইন হচ্ছে...' : 'লগইন' }}
-      </button>
-    </form>
-
-    <hr style="border:none;border-top:1px solid #e5e7eb;margin:1.5rem 0" />
-
-    <p style="margin-bottom:0.75rem">এখনো সদস্য নন?</p>
-    <a routerLink="/register" class="btn btn-secondary" style="width:100%;display:block">
-      নতুন সদস্য নিবন্ধন করুন
-    </a>
+      <div class="summary-card" style="cursor:default">
+        <div class="summary-card-body">
+          <p class="summary-card-title">কমিটির পর্যালোচনা</p>
+          <p class="summary-card-value">যাচাই ও অনুমোদন</p>
+          <p class="summary-card-hint">কার্যনির্বাহী কমিটি ও প্রশাসন প্রতিটি আবেদন যাচাই করেন</p>
+        </div>
+      </div>
+      <div class="summary-card" style="cursor:default">
+        <div class="summary-card-body">
+          <p class="summary-card-title">সদস্য আইডি ও লগইন</p>
+          <p class="summary-card-value">স্বয়ংক্রিয় ইস্যু</p>
+          <p class="summary-card-hint">অনুমোদনের পর সদস্য আইডি ও লগইন তথ্য ইস্যু করা হয়</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -11,6 +11,9 @@
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
+    @if (profile) {
+      <p style="font-size:1.1rem;font-weight:600;margin:0 0 1rem">স্বাগতম, {{ profile.fullName }}</p>
+    }
     <div class="summary-grid">
       @for (card of cards; track card.route) {
         <a [routerLink]="card.route" class="summary-card">

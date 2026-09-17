@@ -27,3 +27,10 @@ class PermissionOverrideIn(BaseModel):
 class PermissionOverrideOut(BaseModel):
     permission_key: str
     granted: bool
+
+
+class AdminUserOut(BaseModel):
+    id: int
+    name: str
+    email: str
+    role: str

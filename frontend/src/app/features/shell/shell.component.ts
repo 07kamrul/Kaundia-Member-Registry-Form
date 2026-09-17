@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { IconComponent, type IconName } from '../../shared/icon/icon.component';
 
 interface NavItem {
@@ -42,6 +43,7 @@ export class ShellComponent {
 
   constructor(
     public auth: AuthService,
+    public theme: ThemeService,
     private router: Router,
   ) {}
 

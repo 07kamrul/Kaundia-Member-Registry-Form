@@ -22,6 +22,13 @@ export interface PermissionOverride {
   granted: boolean;
 }
 
+export interface AdminUserDef {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RbacService {
   private base = `${environment.apiBaseUrl}/admin/rbac`;
@@ -40,6 +47,10 @@ export class RbacService {
     return this.http.put<RoleDef>(`${this.base}/roles/${roleId}/permissions`, {
       permission_keys: permissionKeys,
     });
+  }
+
+  listUsers(): Observable<AdminUserDef[]> {
+    return this.http.get<AdminUserDef[]>(`${this.base}/users`);
   }
 
   listUserOverrides(userId: number): Observable<PermissionOverride[]> {

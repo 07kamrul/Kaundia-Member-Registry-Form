@@ -43,12 +43,16 @@ FastAPI + Angular + Postgres system.
 | **Nominee** | Beneficiary nominated by the member | name, relation, mobile, address |
 | **MemberCredential** | Login credential issued to an approved member | username, password hash, `must_change_password` |
 | **Installment** | A month's subscription/dues record for a member | year, month, amount, status (DUE / PAID), `paid_at` |
-| **AdminUser** | Staff account managing the system | email, password hash, name, `role` (`SUPER_ADMIN`, `EXECUTIVE_COMMITTEE`, `ADMINISTRATOR`) |
+| **AdminUser** | Staff account managing the system | email, password hash, name, `role` (`SUPER_ADMIN`, `EXECUTIVE_COMMITTEE`, `ADMINISTRATOR`), optional `role_id` link to a **Role** |
+| **Role** | A named, configurable RBAC role (seeded from the three admin tiers) | name, description, permissions (M2M) |
+| **Permission** | A single grantable capability, keyed by `resource.action` | `key` (e.g. `member.manage`, `approve_membership`), resource, action, description |
+| **UserPermissionOverride** | Per-user grant/revoke on top of a role's default permissions | user, permission, `granted` (true = extra grant, false = explicit revoke) |
 
 **Relationships:**
 Member 1—N Property, Property 1—N CoOwner/ApplicableDoc, Member 1—N Nominee,
 Member 1—1 MemberCredential, Member 1—N Installment.
 AdminUser reviews Members (`reviewed_by`) and manages Installments.
+AdminUser N—1 Role, Role N—N Permission, AdminUser 1—N UserPermissionOverride.
 
 ---
 
@@ -76,9 +80,18 @@ Member can now log in
 - Approval issues a `MemberCredential`; the member's first login typically forces a
   password change (`must_change_password`).
 - Rejection requires a `rejection_reason` to be recorded.
-- Role-based access control (RBAC) gates who can approve/reject/manage members:
-  `SUPER_ADMIN`, `EXECUTIVE_COMMITTEE`, and `ADMINISTRATOR` are distinct tiers, enforced
-  server-side via `require_admin_roles(*roles)`, not just hidden in the UI.
+- Fine-grained, permission-based RBAC gates who can approve/reject/manage members.
+  Routes are gated by **permission key** (e.g. `member.manage`, `approve_membership`,
+  `manage_notices`), never by role name directly, via `require_permission(key)` — so
+  permissions can be recomposed per role or per user without touching route code.
+  `SUPER_ADMIN` implicitly holds every permission; `EXECUTIVE_COMMITTEE` and
+  `ADMINISTRATOR` get a seeded default permission set for their tier; members get their
+  own self-service permission set (`profile.*`, `property.*_own`, `membership.view_own_status`,
+  etc.). A `super_admin`-only **role management** screen lets committee leadership
+  reassign which permissions each role holds, and `UserPermissionOverride` allows a
+  one-off grant or revoke for an individual admin on top of their role's defaults.
+  Enforcement is server-side; the frontend's `permission.guard.ts` mirrors it in the UI
+  only for navigation/UX, not as the source of truth.
 
 ### 3.2 Dues / installment tracking
 - Each approved member accrues monthly `Installment` records (`year`, `month`,
@@ -92,10 +105,12 @@ Member can now log in
 - JWT access + refresh tokens; bcrypt password hashing.
 - A single unified login endpoint tries admin credentials first, then member
   credentials, and returns a role-tagged token (`super_admin` | `executive_committee`
-  | `administrator` | `member`).
+  | `administrator` | `member`) along with the caller's effective permission set, so the
+  frontend can render/hide actions without a follow-up call.
 - Frontend route guards mirror this: `authGuard` protects the whole authenticated
   shell; `roleGuard(ADMIN_ROLES)` further restricts admin-only routes (submissions
-  review, member management).
+  review, member management); `permission.guard.ts` restricts individual routes/actions
+  (e.g. role management) to callers holding a specific permission key.
 
 ---
 
@@ -129,6 +144,9 @@ Member can now log in
 - As a **super admin**, I want certain sensitive actions restricted to higher-tier
   roles (e.g. super admin / executive committee vs. general administrator), so
   day-to-day staff cannot perform actions reserved for association leadership.
+- As a **super admin**, I want to manage which permissions each role holds (and grant
+  or revoke individual permissions for a specific admin), so I can adapt access to
+  changes in committee structure without needing a code change.
 
 ### Approved member (authenticated)
 - As a **member**, I want to log in with my issued credentials and be forced to set a

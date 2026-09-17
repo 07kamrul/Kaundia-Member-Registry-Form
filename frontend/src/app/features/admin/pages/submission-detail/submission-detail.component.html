@@ -69,19 +69,32 @@
           <div class="error-box"><p style="margin:0">{{ actionError }}</p></div>
         }
         <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
-          <button type="button" class="btn btn-primary" (click)="approve()">অনুমোদন করুন</button>
-          <button type="button" class="btn btn-secondary" (click)="showRejectForm = !showRejectForm">বাতিল করুন</button>
+          <button type="button" class="btn btn-primary" (click)="showApproveModal = true">অনুমোদন করুন</button>
+          <button type="button" class="btn btn-secondary" (click)="showRejectModal = true">বাতিল করুন</button>
         </div>
-        @if (showRejectForm) {
-          <div class="field" style="margin-top:1rem;max-width:24rem">
-            <label>বাতিলের কারণ <span class="required">*</span></label>
-            <textarea rows="3" [(ngModel)]="rejectReason"></textarea>
-            <button type="button" class="btn btn-primary" style="margin-top:0.5rem" (click)="reject()">
-              নিশ্চিত করুন
-            </button>
-          </div>
-        }
       }
     </div>
   }
+
+  <app-confirm-modal
+    [open]="showApproveModal"
+    title="আবেদন অনুমোদন করুন"
+    [message]="submission ? submission.fullName + ' কে সদস্য হিসেবে অনুমোদন দিলে স্বয়ংক্রিয়ভাবে একটি সদস্য আইডি ও লগইন তথ্য তৈরি হবে।' : ''"
+    confirmLabel="নিশ্চিত করুন ও অনুমোদন করুন"
+    (confirm)="approve()"
+    (cancel)="showApproveModal = false"
+  ></app-confirm-modal>
+
+  <app-confirm-modal
+    [open]="showRejectModal"
+    title="আবেদন প্রত্যাখ্যান করুন"
+    [message]="submission ? submission.fullName + ' এর আবেদন প্রত্যাখ্যানের কারণ লিখুন। এটি আবেদনকারীকে জানানো হবে।' : ''"
+    confirmLabel="প্রত্যাখ্যান নিশ্চিত করুন"
+    [danger]="true"
+    [confirmDisabled]="!rejectReason.trim()"
+    (confirm)="reject()"
+    (cancel)="showRejectModal = false"
+  >
+    <textarea rows="3" [(ngModel)]="rejectReason" placeholder="যেমন: প্রয়োজনীয় দলিল সংযুক্ত নেই..."></textarea>
+  </app-confirm-modal>
 </div>

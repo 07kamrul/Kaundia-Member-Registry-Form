@@ -21,9 +21,21 @@
               <div style="font-size:0.8rem;color:var(--gray-600)">সদস্য নং: {{ m.memberId }} · {{ m.mobile }}</div>
             </div>
           </div>
-          <button type="button" class="btn btn-secondary" (click)="m.expanded = !m.expanded">
-            {{ m.expanded ? 'বন্ধ করুন' : 'কিস্তি দেখুন' }}
-          </button>
+          <div style="display:flex;gap:0.5rem">
+            <button type="button" class="btn btn-secondary" (click)="m.expanded = !m.expanded">
+              {{ m.expanded ? 'বন্ধ করুন' : 'কিস্তি দেখুন' }}
+            </button>
+            @if (auth.hasPermission('member.manage')) {
+              <button
+                type="button"
+                class="btn btn-danger btn-icon"
+                title="সদস্য মুছে ফেলুন"
+                (click)="askDelete(m)"
+              >
+                <app-icon name="trash" [size]="16" />
+              </button>
+            }
+          </div>
         </div>
 
         @if (m.expanded) {
@@ -85,4 +97,15 @@
       <p class="empty-state">কোনো সদস্য পাওয়া যায়নি।</p>
     }
   }
+
+  <app-confirm-modal
+    [open]="!!deleteTarget"
+    title="রেকর্ড মুছে ফেলুন?"
+    [message]="deleteTarget ? deleteTarget.fullName + ' এর সদস্য রেকর্ড স্থায়ীভাবে মুছে যাবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।' : ''"
+    confirmLabel="মুছে ফেলুন"
+    [danger]="true"
+    [confirmDisabled]="deleting"
+    (confirm)="confirmDelete()"
+    (cancel)="deleteTarget = null"
+  ></app-confirm-modal>
 </div>

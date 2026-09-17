@@ -18,7 +18,8 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    redirectTo: '',
+    loadComponent: () =>
+      import('./features/auth/pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: '',

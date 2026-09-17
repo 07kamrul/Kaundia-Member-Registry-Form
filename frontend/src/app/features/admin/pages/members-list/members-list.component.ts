@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../../core/services/admin.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import type { Installment, Member } from '../../../../core/models/admin.model';
 import { IconComponent } from '../../../../shared/icon/icon.component';
+import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
 
 interface MemberWithInstallments extends Member {
   installments: Installment[];
@@ -15,15 +17,20 @@ interface MemberWithInstallments extends Member {
 @Component({
   selector: 'app-members-list',
   standalone: true,
-  imports: [FormsModule, IconComponent],
+  imports: [FormsModule, IconComponent, ConfirmModalComponent],
   templateUrl: './members-list.component.html',
 })
 export class MembersListComponent implements OnInit {
   members: MemberWithInstallments[] = [];
   loading = false;
   error = '';
+  deleteTarget: MemberWithInstallments | null = null;
+  deleting = false;
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    public auth: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -64,6 +71,28 @@ export class MembersListComponent implements OnInit {
       next: (updated) => {
         const idx = member.installments.findIndex((i) => i.id === installment.id);
         if (idx >= 0) member.installments[idx] = updated;
+      },
+    });
+  }
+
+  askDelete(member: MemberWithInstallments): void {
+    if (!this.auth.hasPermission('member.manage')) return;
+    this.deleteTarget = member;
+  }
+
+  confirmDelete(): void {
+    if (!this.deleteTarget) return;
+    this.deleting = true;
+    this.adminService.deleteMember(this.deleteTarget.id).subscribe({
+      next: () => {
+        this.members = this.members.filter((m) => m.id !== this.deleteTarget!.id);
+        this.deleteTarget = null;
+        this.deleting = false;
+      },
+      error: () => {
+        this.error = 'সদস্য মুছে ফেলা যায়নি।';
+        this.deleteTarget = null;
+        this.deleting = false;
       },
     });
   }

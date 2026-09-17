@@ -1,0 +1,26 @@
+@if (open) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div class="modal-card">
+      <h3 class="modal-title">{{ title }}</h3>
+      @if (message) {
+        <p class="modal-message">{{ message }}</p>
+      }
+      <div class="modal-body">
+        <ng-content></ng-content>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel.emit()">{{ cancelLabel }}</button>
+        <button
+          type="button"
+          class="btn"
+          [class.btn-primary]="!danger"
+          [class.btn-danger]="danger"
+          [disabled]="confirmDisabled"
+          (click)="confirm.emit()"
+        >
+          {{ confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

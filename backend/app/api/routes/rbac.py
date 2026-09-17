@@ -6,9 +6,10 @@ from sqlalchemy.orm import selectinload
 from app.core.deps import get_current_admin
 from app.core.permissions import PERMISSION_CATALOG, get_effective_permissions, require_permission
 from app.db.session import get_db
-from app.models.admin import AdminUser
+from app.models.admin import AdminRole, AdminUser
 from app.models.rbac import Permission, Role, UserPermissionOverride
 from app.schemas.rbac import (
+    AdminUserOut,
     PermissionOut,
     PermissionOverrideIn,
     PermissionOverrideOut,
@@ -91,6 +92,18 @@ async def update_role_permissions(
         description=role.description,
         permission_keys=sorted(p.key for p in role.permissions),
     )
+
+
+@router.get("/users", response_model=list[AdminUserOut])
+async def list_admin_users(
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("manage_users")),
+) -> list[AdminUserOut]:
+    result = await db.execute(select(AdminUser).where(AdminUser.role != AdminRole.SUPER_ADMIN))
+    return [
+        AdminUserOut(id=user.id, name=user.name, email=user.email, role=user.role.value)
+        for user in result.scalars().all()
+    ]
 
 
 @router.get("/users/{user_id}/overrides", response_model=list[PermissionOverrideOut])

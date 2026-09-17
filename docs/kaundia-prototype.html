@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>কাউন্দিয়া সমিতি — সদস্য ব্যবস্থাপনা প্রোটোটাইপ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{
+    --bg:#FAF8F1; --surface:#FFFFFF; --surface-2:#F3EFE3; --surface-3:#ECE6D4; --ink:#1A2A20; --ink-soft:#47564A;
+    --muted:#78826F; --border:#E2DBC5; --border-soft:#EDE7D6;
+    --primary:#1F3D2A; --primary-strong:#122718; --primary-soft:#E5EDE1; --primary-tint:#2E5138;
+    --gold:#A9791E; --gold-strong:#8A611A; --gold-soft:#F1E4C3; --gold-line:#C9A34C;
+    --danger:#9C3A2C; --danger-soft:#F4E1DA; --success:#276C48; --success-soft:#E1EEE1;
+    --shadow-sm: 0 1px 2px rgba(26,42,32,0.07);
+    --shadow: 0 2px 4px rgba(26,42,32,0.04), 0 12px 28px -8px rgba(26,42,32,0.14);
+    --shadow-lg: 0 8px 16px rgba(26,42,32,0.06), 0 24px 48px -12px rgba(26,42,32,0.22);
+    --radius-lg:18px; --radius-md:12px; --radius-sm:8px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10140D; --surface:#181D14; --surface-2:#20261A; --surface-3:#293120; --ink:#EEF0E5; --ink-soft:#C2CAB6;
+      --muted:#92A085; --border:#2C3324; --border-soft:#252C1F;
+      --primary:#7FB889; --primary-strong:#9FCFA6; --primary-soft:#20301F; --primary-tint:#8FC397;
+      --gold:#DDBB68; --gold-strong:#EBCB82; --gold-soft:#332A16; --gold-line:#8A6E30;
+      --danger:#E2917E; --danger-soft:#33231D; --success:#7FC79B; --success-soft:#1C2E1F;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+      --shadow: 0 2px 6px rgba(0,0,0,0.3), 0 16px 32px -8px rgba(0,0,0,0.45);
+      --shadow-lg: 0 10px 20px rgba(0,0,0,0.35), 0 28px 56px -12px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10140D; --surface:#181D14; --surface-2:#20261A; --surface-3:#293120; --ink:#EEF0E5; --ink-soft:#C2CAB6;
+    --muted:#92A085; --border:#2C3324; --border-soft:#252C1F;
+    --primary:#7FB889; --primary-strong:#9FCFA6; --primary-soft:#20301F; --primary-tint:#8FC397;
+    --gold:#DDBB68; --gold-strong:#EBCB82; --gold-soft:#332A16; --gold-line:#8A6E30;
+    --danger:#E2917E; --danger-soft:#33231D; --success:#7FC79B; --success-soft:#1C2E1F;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+    --shadow: 0 2px 6px rgba(0,0,0,0.3), 0 16px 32px -8px rgba(0,0,0,0.45);
+    --shadow-lg: 0 10px 20px rgba(0,0,0,0.35), 0 28px 56px -12px rgba(0,0,0,0.55);
+  }
+  *{box-sizing:border-box;}
+  html,body{background:var(--bg); color:var(--ink);}
+  body{margin:0; font-family:'Hind Siliguri', sans-serif; -webkit-font-smoothing:antialiased; font-size:15.5px;}
+  h1,h2,h3,.font-display{font-family:'Tiro Bangla', serif; letter-spacing:.01em;}
+  ::selection{background:var(--gold-soft);}
+  ::-moz-selection{background:var(--gold-soft);}
+  .surface{background:var(--surface); border:1px solid var(--border);}
+  .surface2{background:var(--surface-2); border:1px solid var(--border-soft);}
+  .surface3{background:var(--surface-3);}
+  .elevated{box-shadow:var(--shadow); border:1px solid var(--border-soft);}
+  .btn{display:inline-flex; align-items:center; gap:.5rem; border-radius:10px; padding:.62rem 1.15rem; font-weight:600; font-size:.93rem; transition:transform .15s ease, box-shadow .15s ease, background .15s ease, opacity .15s ease; border:1px solid transparent; cursor:pointer; font-family:inherit;}
+  .btn:active{transform:translateY(1px);}
+  .btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .btn-primary{background:var(--primary); color:var(--bg); box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 6px 14px -6px rgba(31,61,42,0.55);}
+  .btn-primary:hover{background:var(--primary-strong); transform:translateY(-1px); box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 10px 20px -8px rgba(31,61,42,0.6);}
+  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--border);}
+  .btn-ghost:hover{background:var(--surface-2); border-color:var(--muted);}
+  .btn-gold{background:var(--gold); color:#241A05; box-shadow:0 6px 14px -6px rgba(169,121,30,0.55);}
+  .btn-gold:hover{background:var(--gold-strong); transform:translateY(-1px);}
+  .btn-danger{background:var(--danger); color:#fff;}
+  .btn-danger:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  .btn-sm{padding:.42rem .8rem; font-size:.83rem; border-radius:8px;}
+  .btn[disabled]{opacity:.4; cursor:not-allowed; transform:none !important; box-shadow:none;}
+  .field-label{font-size:.83rem; font-weight:600; color:var(--ink-soft); margin-bottom:.35rem; display:block;}
+  .field-hint{font-size:.74rem; color:var(--muted); margin-top:.3rem;}
+  .field-input{width:100%; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:.6rem .75rem; font-size:.94rem; color:var(--ink); font-family:inherit; transition:border-color .15s, box-shadow .15s;}
+  .field-input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft);}
+  select.field-input{appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2378826F' stroke-width='1.6'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:left .6rem center; padding-left:2rem;}
+  .badge{display:inline-flex; align-items:center; gap:.35rem; padding:.22rem .68rem; border-radius:999px; font-size:.76rem; font-weight:600; white-space:nowrap; letter-spacing:.01em;}
+  .badge-pending{background:var(--gold-soft); color:var(--gold-strong);}
+  .badge-approved{background:var(--success-soft); color:var(--success);}
+  .badge-rejected{background:var(--danger-soft); color:var(--danger);}
+  .badge-due{background:var(--danger-soft); color:var(--danger);}
+  .badge-paid{background:var(--success-soft); color:var(--success);}
+  .badge-custom{background:var(--gold-soft); color:var(--gold-strong); border:1px solid var(--gold-line);}
+  .card-hover{transition:transform .18s ease, box-shadow .18s ease;}
+  .card-hover:hover{box-shadow:var(--shadow); transform:translateY(-2px);}
+  table{border-collapse:collapse; width:100%;}
+  th{text-align:right; font-size:.76rem; color:var(--muted); font-weight:600; padding:.7rem .9rem; border-bottom:1px solid var(--border);}
+  td{padding:.75rem .9rem; border-bottom:1px solid var(--border-soft); font-size:.9rem;}
+  tbody tr{transition:background .12s;}
+  tbody tr:hover{background:var(--surface-2);}
+  tr:last-child td{border-bottom:none;}
+  .stepper-dot{width:2.1rem; height:2.1rem; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:.85rem; font-weight:700; border:2px solid var(--border); color:var(--muted); background:var(--surface); flex-shrink:0; transition:.2s;}
+  .stepper-dot.active{border-color:var(--primary); color:var(--bg); background:var(--primary); box-shadow:0 0 0 4px var(--primary-soft);}
+  .stepper-dot.done{border-color:var(--success); background:var(--success-soft); color:var(--success);}
+  .modal-backdrop{position:fixed; inset:0; background:rgba(16,20,13,0.6); backdrop-filter:blur(2px); display:flex; align-items:center; justify-content:center; padding:1rem; z-index:50; animation:fadeIn .15s ease;}
+  .modal-card{animation:riseIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0} to{opacity:1}}
+  @keyframes riseIn{from{opacity:0; transform:translateY(8px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
+  @keyframes heroIn{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)}}
+  .hero-anim{animation:heroIn .55s cubic-bezier(.2,.7,.3,1) both;}
+  .hero-anim.d1{animation-delay:.06s;} .hero-anim.d2{animation-delay:.12s;} .hero-anim.d3{animation-delay:.18s;}
+  @media (prefers-reduced-motion: reduce){ .hero-anim, .modal-card, .modal-backdrop{animation:none !important;} }
+  .toast{position:fixed; bottom:1.4rem; left:50%; transform:translateX(-50%); background:var(--primary-strong); color:var(--bg); padding:.75rem 1.3rem; border-radius:11px; box-shadow:var(--shadow-lg); font-size:.88rem; z-index:60;}
+  .scrollbar-thin::-webkit-scrollbar{height:6px; width:6px;}
+  .scrollbar-thin::-webkit-scrollbar-thumb{background:var(--border); border-radius:6px;}
+  a{color:var(--primary);}
+  .nav-link{padding:.6rem .9rem; border-radius:9px; font-size:.9rem; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:.65rem; border-right:2.5px solid transparent; margin-right:-2px;}
+  .nav-link.active{background:var(--primary-soft); color:var(--primary); border-right-color:var(--gold);}
+  .nav-link:hover:not(.active){background:var(--surface-2);}
+  .gold-rule{height:2px; background:linear-gradient(90deg, var(--gold-line), transparent 75%);}
+  .brand-mark{width:2.5rem; height:2.5rem; border-radius:10px; background:var(--primary); color:var(--bg); display:flex; align-items:center; justify-content:center; font-family:'Tiro Bangla',serif; font-size:1.2rem; box-shadow:0 4px 10px -3px rgba(31,61,42,0.55);}
+  .eyebrow{display:inline-flex; align-items:center; gap:.45rem; padding:.3rem .8rem; border-radius:999px; background:var(--gold-soft); color:var(--gold-strong); font-size:.8rem; font-weight:600;}
+  .switch-check{width:2.2rem; height:1.25rem; border-radius:999px; background:var(--border); position:relative; cursor:pointer; flex-shrink:0; transition:background .15s;}
+  .switch-check.on{background:var(--primary);}
+  .switch-check::after{content:""; position:absolute; top:2px; left:2px; width:1rem; height:1rem; border-radius:999px; background:var(--surface); transition:transform .15s; box-shadow:var(--shadow-sm);}
+  .switch-check.on::after{transform:translateX(-.95rem);}
+  @media (max-width: 900px){
+    .admin-grid{grid-template-columns:1fr !important;}
+    .admin-grid aside{border-left:none !important; border-bottom:1px solid var(--border);}
+    .hero-grid{grid-template-columns:1fr !important;}
+  }
+  @media (max-width: 720px){ th,td{padding:.55rem .55rem; font-size:.82rem;} }
+</style>
+</head>
+<body>
+<div id="app" style="max-width:1220px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column;"></div>
+<script>
+/* ===================== DATA ===================== */
+const MONTHS = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
+const bn = (n)=> String(n).replace(/[0-9]/g, d=>"০১২৩৪৫৬৭৮৯"[d]);
+
+function makeInstallments(paidThrough){
+  const list=[];
+  for(let m=0;m<9;m++){
+    list.push({year:2026, month:m, amount:500, status: m<=paidThrough?"PAID":"DUE", paidAt: m<=paidThrough?`২০২৬-${bn(String(m+1).padStart(2,'0'))}-১০`:null});
+  }
+  return list;
+}
+
+let seq = 6;
+function nextMemberId(){ return `KAM-2026-${String(seq++).padStart(4,'0')}`; }
+let refSeq = 8;
+function nextRef(){ return `REF-2026-${String(refSeq++).padStart(4,'0')}`; }
+
+const ADMIN_USERS = [
+  {email:"nasrin.chair@kaundia.org", name:"নাসরিন আক্তার", role:"SUPER_ADMIN", title:"সভাপতি"},
+  {email:"kabir.ec@kaundia.org", name:"কবির হোসেন", role:"EXECUTIVE_COMMITTEE", title:"সাধারণ সম্পাদক"},
+  {email:"rina.office@kaundia.org", name:"রীনা পারভীন", role:"ADMINISTRATOR", title:"অফিস সহকারী"},
+];
+
+/* ---- Permission model ---- */
+const PERMISSIONS = [
+  {key:"member.view", label:"সদস্য ও আবেদনের তথ্য দেখা", desc:"সকল আবেদন ও সদস্যের বিস্তারিত তথ্য দেখার অনুমতি।"},
+  {key:"member.manage", label:"আবেদন পর্যালোচনা, অনুমোদন ও প্রত্যাখ্যান", desc:"বিচারাধীন আবেদন যাচাই করে অনুমোদন বা প্রত্যাখ্যান করার অনুমতি।"},
+  {key:"member.delete", label:"সদস্য রেকর্ড মুছে ফেলা", desc:"সদস্যের স্থায়ী রেকর্ড মুছে ফেলার সংবেদনশীল অনুমতি।"},
+  {key:"installment.manage", label:"চাঁদা/কিস্তি হালনাগাদ করা", desc:"মাসিক চাঁদা পরিশোধিত হিসেবে চিহ্নিত করার অনুমতি।"},
+  {key:"notice.manage", label:"নোটিশ ও ঘোষণা প্রকাশ করা", desc:"সদস্যদের জন্য নোটিশ প্রকাশ ও সম্পাদনার অনুমতি।"},
+  {key:"role.manage", label:"ভূমিকা ও অনুমতি ব্যবস্থাপনা", desc:"রোল ও পারমিশন পুনর্বিন্যাস এবং ইউজার-ভিত্তিক ওভাররাইড নিয়ন্ত্রণের অনুমতি।"},
+];
+const roleState = {
+  EXECUTIVE_COMMITTEE: ["member.view","member.manage","member.delete","installment.manage","notice.manage"],
+  ADMINISTRATOR: ["member.view","member.manage","installment.manage"],
+};
+let overrides = [
+  {adminEmail:"rina.office@kaundia.org", key:"member.delete", granted:true},
+  {adminEmail:"kabir.ec@kaundia.org", key:"notice.manage", granted:false},
+];
+function hasPermission(user, key){
+  if(!user) return false;
+  if(user.role==="SUPER_ADMIN") return true;
+  const ov = overrides.find(o=>o.adminEmail===user.email && o.key===key);
+  if(ov) return ov.granted;
+  return (roleState[user.role]||[]).includes(key);
+}
+function effectivePermissions(user){
+  if(user.role==="SUPER_ADMIN") return PERMISSIONS.map(p=>p.key);
+  return PERMISSIONS.map(p=>p.key).filter(k=>hasPermission(user,k));
+}
+function userOverrides(email){ return overrides.filter(o=>o.adminEmail===email); }
+
+function blankApplication(){
+  return {
+    name:"", fatherHusband:"", motherName:"", dob:"", nid:"", mobile:"", email:"", gender:"পুরুষ", occupation:"",
+    photoName:"", signatureName:"",
+    permanentAddress:"", sameAsPermanent:false, currentAddress:"",
+    properties:[],
+    nominees:[],
+    urgentContact:{name:"", relation:"", mobile:"", address:""},
+    payment:{admissionFee:"৫০০০", subscription:"৫০০", receiptNo:"", method:"নগদ", receiptPhotoName:""}
+  };
+}
+
+function seedMembers(){
+  const list = [];
+  list.push(mkMember({refNo:nextRef(), status:"PENDING", name:"আরিফুল ইসলাম", fatherHusband:"মৃত. আব্দুল করিম", motherName:"রোকেয়া বেগম", dob:"১৯৮৬-০৩-১২", nid:"১৯৯১৪৫৮৭৬৩২১১", mobile:"০১৭১১-২২৩৩৪৪", email:"arif.islam@gmail.com", gender:"পুরুষ", occupation:"ব্যবসায়ী", submittedAt:"২০২৬-০৯-০১",
+    permanentAddress:"গ্রাম: উত্তর কাউন্দিয়া, ডাকঘর: কাউন্দিয়া, উপজেলা: গাজীপুর সদর, জেলা: গাজীপুর", currentAddress:"বাসা-১২, রোড-৪, উত্তরা, ঢাকা",
+    properties:[{type:"আবাসিক", khatian:"৪৫৬ (আরএস)", dag:"১১২৩", holding:"৮৯", quantity:"৫ শতাংশ", ownership:"একক মালিকানা", coOwners:[], docs:["খতিয়ানের কপি.pdf","দলিলের কপি.pdf"]}],
+    nominees:[{name:"আরিফা ইসলাম", relation:"স্ত্রী", mobile:"০১৭১১-৯৯৮৮৭৭", address:"বাসা-১২, রোড-৪, উত্তরা, ঢাকা"}],
+    urgentContact:{name:"জামিল হোসেন", relation:"ভাই", mobile:"০১৯১২-৩৪৫৬৭৮", address:"উত্তর কাউন্দিয়া, গাজীপুর"},
+    payment:{admissionFee:"৫০০০", subscription:"৫০০", receiptNo:"RC-১১০৯", method:"বিকাশ", receiptPhotoName:"রিসিট_আরিফুল.jpg"}
+  }));
+  list.push(mkMember({refNo:nextRef(), status:"PENDING", name:"সালমা খাতুন", fatherHusband:"মোঃ ইদ্রিস আলী", motherName:"জোহরা বেগম", dob:"১৯৯০-০৭-২২", nid:"১৯৯০৬৬৭৭৮৮৯৯০", mobile:"০১৮১৩-৪৪৫৫৬৬", email:"salma.khatun@gmail.com", gender:"মহিলা", occupation:"শিক্ষিকা", submittedAt:"২০২৬-০৯-০৫",
+    permanentAddress:"গ্রাম: উত্তর কাউন্দিয়া, উপজেলা: গাজীপুর সদর, জেলা: গাজীপুর", currentAddress:"একই — স্থায়ী ঠিকানার অনুরূপ",
+    properties:[
+      {type:"আবাসিক", khatian:"২১৯ (সিএস)", dag:"৩৩৪", holding:"৪৪", quantity:"৩.৫ শতাংশ", ownership:"যৌথ মালিকানা", coOwners:[{name:"মোঃ ইদ্রিস আলী", phone:"০১৭১৯-১১২২৩৩"}], docs:["খতিয়ান.pdf"]},
+      {type:"কৃষি", khatian:"৩০১ (আরএস)", dag:"৯৯১", holding:"—", quantity:"১২ শতাংশ", ownership:"একক মালিকানা", coOwners:[], docs:[]}
+    ],
+    nominees:[{name:"ইদ্রিস আলী", relation:"পিতা", mobile:"০১৭১৯-১১২২৩৩", address:"উত্তর কাউন্দিয়া, গাজীপুর"}],
+    urgentContact:{name:"শাহানা বেগম", relation:"বোন", mobile:"০১৭২২-৬৬৭৭৮৮", address:"টঙ্গী, গাজীপুর"},
+    payment:{admissionFee:"৫০০০", subscription:"৫০০", receiptNo:"RC-১১১৪", method:"নগদ", receiptPhotoName:"রিসিট_সালমা.jpg"}
+  }));
+  list.push(mkMember({refNo:nextRef(), status:"PENDING", name:"মোঃ শফিকুল ইসলাম", fatherHusband:"মোঃ আব্দুস সাত্তার", motherName:"হাজেরা বেগম", dob:"১৯৭৮-১১-০৩", nid:"১৯৭৮৩৩২২১১০০৫", mobile:"০১৯২১-৫৫৬৬৭৭", email:"shafiqul78@gmail.com", gender:"পুরুষ", occupation:"সরকারি চাকুরিজীবী", submittedAt:"২০২৬-০৯-১০",
+    permanentAddress:"গ্রাম: দক্ষিণ কাউন্দিয়া, উপজেলা: গাজীপুর সদর, জেলা: গাজীপুর", currentAddress:"বাসা-৭, সেক্টর-১০, উত্তরা, ঢাকা",
+    properties:[{type:"আবাসিক ও বাণিজ্যিক", khatian:"৫৫২ (আরএস)", dag:"৭৭৮", holding:"১০২", quantity:"৭ শতাংশ", ownership:"একক মালিকানা", coOwners:[], docs:["খতিয়ান.pdf","নামজারি.pdf"]}],
+    nominees:[{name:"শারমিন ইসলাম", relation:"কন্যা", mobile:"০১৭৪৪-১১২২৩৩", address:"উত্তরা, ঢাকা"},{name:"সাদিয়া ইসলাম", relation:"কন্যা", mobile:"০১৭৪৪-৪৪৫৫৬৬", address:"উত্তরা, ঢাকা"}],
+    urgentContact:{name:"রফিকুল ইসলাম", relation:"ভাই", mobile:"০১৭১৫-৭৭৮৮৯৯", address:"দক্ষিণ কাউন্দিয়া, গাজীপুর"},
+    payment:{admissionFee:"৫০০০", subscription:"৫০০", receiptNo:"RC-১১২০", method:"ব্যাংক", receiptPhotoName:"রিসিট_শফিকুল.jpg"}
+  }));
+
+  const approvedSeed = [
+    {name:"মোঃ কামাল হোসেন", occupation:"কৃষিবিদ", mobile:"০১৭১১-১১২২৩৩", paidThrough:8},
+    {name:"ফাতেমা বেগম", occupation:"গৃহিণী", mobile:"০১৮১৯-২২৩৩৪৪", paidThrough:6},
+    {name:"মোঃ জসিম উদ্দিন", occupation:"ব্যবসায়ী", mobile:"০১৯৯১-৩৩৪৪৫৫", paidThrough:8},
+    {name:"নাজমা আক্তার", occupation:"শিক্ষিকা", mobile:"০১৭১৮-৪৪৫৫৬৬", paidThrough:4},
+    {name:"মোঃ ইলিয়াস হোসেন", occupation:"চাকুরিজীবী", mobile:"০১৬১২-৫৫৬৬৭৭", paidThrough:7},
+  ];
+  approvedSeed.forEach((s,i)=>{
+    list.push(mkMember({
+      refNo:nextRef(), status:"APPROVED", name:s.name, fatherHusband:"—", motherName:"—", dob:"১৯৮২-০১-০১",
+      nid:"১৯৮২"+String(100000000+i), mobile:s.mobile, email:"", gender:i===1||i===3?"মহিলা":"পুরুষ", occupation:s.occupation,
+      submittedAt:"২০২৬-০৪-১৫", reviewedAt:"২০২৬-০৪-২০", reviewedBy:"নাসরিন আক্তার",
+      permanentAddress:"গ্রাম: উত্তর কাউন্দিয়া, উপজেলা: গাজীপুর সদর, জেলা: গাজীপুর", currentAddress:"একই — স্থায়ী ঠিকানার অনুরূপ",
+      properties:[{type:"আবাসিক", khatian:"৪"+(i+1)+"৫", dag:"৯৮"+i, holding:String(30+i), quantity:(4+i)+" শতাংশ", ownership:"একক মালিকানা", coOwners:[], docs:["খতিয়ান.pdf"]}],
+      nominees:[{name:"পারিবারিক মনোনীত ব্যক্তি", relation:"স্ত্রী/স্বামী", mobile:s.mobile, address:"উত্তর কাউন্দিয়া, গাজীপুর"}],
+      urgentContact:{name:"জরুরি যোগাযোগ", relation:"ভাই/বোন", mobile:"০১৭"+i+"০-০০০০০০", address:"গাজীপুর"},
+      payment:{admissionFee:"৫০০০", subscription:"৫০০", receiptNo:"RC-০০"+(i+1), method:"নগদ", receiptPhotoName:"রিসিট.jpg"},
+      memberId: nextMemberId(), credentials:{username:"member"+(i+1), mustChangePassword:false},
+      installments: makeInstallments(s.paidThrough)
+    }));
+  });
+
+  list.push(mkMember({refNo:nextRef(), status:"REJECTED", name:"মোঃ বাবুল মিয়া", fatherHusband:"মোঃ ছোবহান মিয়া", motherName:"রহিমা খাতুন", dob:"১৯৮৯-০৫-১৮", nid:"১৯৮৯৫৫৬৬৭৭৮৮", mobile:"০১৭৪৪-৯৯০০১১", email:"", gender:"পুরুষ", occupation:"দিনমজুর", submittedAt:"২০২৬-০৮-২০", reviewedAt:"২০২৬-০৮-২৬", reviewedBy:"কবির হোসেন",
+    rejectionReason:"জমির খতিয়ান ও দলিলের কপি স্পষ্ট নয় এবং নামজারির প্রমাণ সংযুক্ত করা হয়নি। সঠিক কাগজপত্রসহ পুনরায় আবেদন করার অনুরোধ করা হলো।",
+    permanentAddress:"গ্রাম: উত্তর কাউন্দিয়া, উপজেলা: গাজীপুর সদর, জেলা: গাজীপুর", currentAddress:"একই — স্থায়ী ঠিকানার অনুরূপ",
+    properties:[{type:"আবাসিক", khatian:"অস্পষ্ট", dag:"—", holding:"—", quantity:"৩ শতাংশ", ownership:"একক মালিকানা", coOwners:[], docs:["খতিয়ান_অস্পষ্ট.jpg"]}],
+    nominees:[], urgentContact:{name:"", relation:"", mobile:"", address:""},
+    payment:{admissionFee:"৫০০০", subscription:"৫০০", receiptNo:"RC-০৯৯০", method:"নগদ", receiptPhotoName:"রিসিট_বাবুল.jpg"}
+  }));
+
+  return list;
+}
+
+function mkMember(o){
+  return Object.assign({
+    id: crypto.randomUUID(), memberId:null, credentials:null, installments:[],
+    reviewedAt:null, reviewedBy:null, rejectionReason:null,
+    photoName:"ছবি.jpg", signatureName:"স্বাক্ষর.png", sameAsPermanent:false
+  }, o);
+}
+
+/* ===================== STATE ===================== */
+const state = {
+  view:"home", role:null, adminUser:null, currentMemberId:null,
+  adminSection:"pending", memberSection:"dashboard",
+  applyStep:0, applyData: blankApplication(),
+  members: seedMembers(),
+  selectedAppId:null, selectedInstallMemberId:null,
+  approveModal:null, rejectModal:null, toast:null, forcePwModal:false, deleteConfirm:null,
+  overrideDraft:{email:null, key:PERMISSIONS[0].key, action:"grant"},
+};
+
+function toast(msg){ state.toast = msg; render(); setTimeout(()=>{ state.toast=null; const el=document.getElementById('toast-el'); if(el) el.remove(); }, 2600); }
+
+/* ===================== HELPERS ===================== */
+function statusBadge(status){
+  const map = {PENDING:["বিচারাধীন","badge-pending"], APPROVED:["অনুমোদিত","badge-approved"], REJECTED:["প্রত্যাখ্যাত","badge-rejected"]};
+  const [label,cls] = map[status];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function duesSummary(m){
+  if(!m.installments || !m.installments.length) return "—";
+  const due = m.installments.filter(i=>i.status==="DUE").length;
+  if(due===0) return `<span class="badge badge-paid">সম্পূর্ণ পরিশোধিত</span>`;
+  return `<span class="badge badge-due">${bn(due)} মাস বকেয়া</span>`;
+}
+function roleLabel(r){ return {SUPER_ADMIN:"সুপার অ্যাডমিন", EXECUTIVE_COMMITTEE:"কার্যনির্বাহী কমিটি", ADMINISTRATOR:"প্রশাসনিক কর্মকর্তা"}[r] || r; }
+
+function icon(name, cls){
+  const map = {
+    home:'<path d="M4 11.5 12 5l8 6.5"/><path d="M6 10v9h12v-9"/>',
+    doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>',
+    users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M23 20c0-2.6-1.8-4.8-4.3-5.6"/>',
+    coin:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5c0-1.1 1.1-2 2.5-2s2.5.9 2.5 2-1.1 1.5-2.5 2-2.5.9-2.5 2 1.1 2 2.5 2 2.5-.9 2.5-2"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>',
+    lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    shield:'<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/>',
+    check:'<path d="M20 6 9 17l-5-5"/>',
+    x:'<path d="M18 6 6 18"/><path d="M6 6l12 12"/>',
+    plus:'<path d="M12 5v14"/><path d="M5 12h14"/>',
+    trash:'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 15h10l1-15"/>',
+    eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    arrowleft:'<path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/>',
+    logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
+    moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>',
+    sparkle:'<path d="M12 3l1.6 4.9L18 9.5l-4.4 1.6L12 16l-1.6-4.9L6 9.5l4.4-1.6Z"/>',
+  };
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="${cls||''}" style="width:1.1em;height:1.1em;flex-shrink:0">${map[name]||''}</svg>`;
+}
+
+/* ===================== HEADER / SHELL ===================== */
+function shell(inner){
+  return `
+  <header class="surface" style="border-left:none; border-right:none; border-top:none; position:sticky; top:0; z-index:30;">
+    <div style="max-width:1220px; margin:0 auto; padding:.9rem 1.4rem; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+      <div style="display:flex; align-items:center; gap:.7rem; cursor:pointer;" onclick="goHome()">
+        <div class="brand-mark">ক</div>
+        <div>
+          <div class="font-display" style="font-size:1.08rem; line-height:1.2; font-weight:700;">কাউন্দিয়া সমিতি</div>
+          <div style="font-size:.72rem; color:var(--muted); line-height:1;">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:.5rem;">
+        ${headerRight()}
+        <button class="btn btn-ghost btn-sm" title="থিম পরিবর্তন" onclick="toggleTheme()">${icon('moon')}</button>
+      </div>
+    </div>
+    <div class="gold-rule"></div>
+  </header>
+  <main style="flex:1; width:100%;">${inner}</main>
+  <footer style="border-top:1px solid var(--border); padding:1.2rem 1.4rem; text-align:center; color:var(--muted); font-size:.78rem;">
+    এটি একটি ক্লিকযোগ্য প্রোটোটাইপ — কোনো তথ্য প্রকৃতপক্ষে সংরক্ষিত হয় না। © ২০২৬ উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ।
+  </footer>
+  ${state.toast? `<div class="toast" id="toast-el">${state.toast}</div>`:""}
+  ${modals()}
+  `;
+}
+function headerRight(){
+  if(state.view==="admin"){
+    return `
+      <select class="field-input btn-sm" style="width:auto;" onchange="switchRole(this.value)" title="ডেমো — ভূমিকা পরিবর্তন">
+        ${ADMIN_USERS.map(u=>`<option value="${u.email}" ${state.adminUser.email===u.email?'selected':''}>${u.name} (${roleLabel(u.role)})</option>`).join('')}
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">${icon('logout')} বের হোন</button>`;
+  }
+  if(state.view==="member"){
+    return `<span style="font-size:.85rem; color:var(--muted);">স্বাগতম, ${currentMember().name}</span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">${icon('logout')} বের হোন</button>`;
+  }
+  return `
+    <button class="btn btn-ghost btn-sm" onclick="go('apply')">আবেদন করুন</button>
+    <button class="btn btn-primary btn-sm" onclick="go('login')">লগইন</button>`;
+}
+function toggleTheme(){
+  const r=document.documentElement;
+  const cur = r.getAttribute('data-theme');
+  r.setAttribute('data-theme', cur==='dark' ? 'light' : 'dark');
+}
+
+function currentMember(){ return state.members.find(m=>m.id===state.currentMemberId); }
+function goHome(){ state.view="home"; render(); }
+function go(v){ state.view=v; render(); }
+function logout(){ state.view="home"; state.role=null; state.adminUser=null; state.currentMemberId=null; render(); }
+function switchRole(email){ state.adminUser = ADMIN_USERS.find(u=>u.email===email); if(state.adminSection==='roles' && !hasPermission(state.adminUser,'role.manage')) state.adminSection='pending'; render(); }
+
+/* ===================== HOME ===================== */
+function viewHome(){
+  const pendingCount = state.members.filter(m=>m.status==="PENDING").length;
+  const approvedCount = state.members.filter(m=>m.status==="APPROVED").length;
+  return `
+  <section style="padding:3.6rem 1.4rem 2.6rem;">
+    <div class="hero-grid" style="display:grid; grid-template-columns:1.1fr .9fr; gap:2.8rem; align-items:center;">
+      <div>
+        <div class="eyebrow hero-anim">${icon('sparkle')} সদস্য ব্যবস্থাপনা পোর্টাল</div>
+        <h1 class="font-display hero-anim d1" style="font-size:2.7rem; line-height:1.28; margin:.9rem 0 1.1rem;">উত্তর কাউন্দিয়ার<br>জমির মালিকদের কল্যাণ পরিষদ</h1>
+        <p class="hero-anim d2" style="color:var(--ink-soft); font-size:1.06rem; line-height:1.85; max-width:38rem;">সদস্যপদের আবেদন থেকে শুরু করে মাসিক চাঁদা পরিশোধ পর্যন্ত — পুরো প্রক্রিয়া এখন অনলাইনে। কাগজে আবেদন করার ঝামেলা নেই, অফিসে বারবার যাওয়ার প্রয়োজন নেই।</p>
+        <div class="hero-anim d3" style="display:flex; gap:.9rem; margin-top:1.9rem; flex-wrap:wrap;">
+          <button class="btn btn-primary" style="padding:.85rem 1.5rem;" onclick="startApply()">${icon('doc')} সদস্যপদের জন্য আবেদন করুন</button>
+          <button class="btn btn-ghost" style="padding:.85rem 1.5rem;" onclick="go('login')">${icon('user')} ইতিমধ্যে সদস্য? লগইন করুন</button>
+        </div>
+      </div>
+      <div class="surface elevated hero-anim d2" style="border-radius:var(--radius-lg); padding:1.7rem;">
+        <div class="font-display" style="font-size:1.05rem; margin-bottom:1.1rem; font-weight:700; display:flex; align-items:center; gap:.5rem;">${icon('shield',)} এই মুহূর্তে</div>
+        <div style="display:flex; flex-direction:column; gap:.8rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:.85rem 1rem; background:var(--surface-2); border-radius:var(--radius-sm);">
+            <span style="color:var(--ink-soft); font-size:.9rem;">পর্যালোচনাধীন আবেদন</span>
+            <span style="font-weight:700; font-size:1.25rem;">${bn(pendingCount)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:.85rem 1rem; background:var(--surface-2); border-radius:var(--radius-sm);">
+            <span style="color:var(--ink-soft); font-size:.9rem;">নিবন্ধিত সদস্য</span>
+            <span style="font-weight:700; font-size:1.25rem;">${bn(approvedCount)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:.85rem 1rem; background:var(--surface-2); border-radius:var(--radius-sm);">
+            <span style="color:var(--ink-soft); font-size:.9rem;">মাসিক চাঁদা</span>
+            <span style="font-weight:700; font-size:1.25rem;">৳ ৫০০</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section style="padding:1rem 1.4rem 3.8rem;">
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.3rem;">
+      ${[
+        ["doc","আবেদন করুন","ব্যক্তিগত তথ্য, ঠিকানা, জমির বিবরণ ও পেমেন্ট তথ্যসহ ধাপে ধাপে ফর্ম পূরণ করুন।"],
+        ["users","কমিটির পর্যালোচনা","কার্যনির্বাহী কমিটি ও প্রশাসন প্রতিটি আবেদন যাচাই করে অনুমোদন বা প্রত্যাখ্যান করেন।"],
+        ["coin","সদস্য আইডি ও লগইন","অনুমোদনের পর স্বয়ংক্রিয়ভাবে সদস্য আইডি তৈরি হয় এবং লগইন তথ্য ইস্যু করা হয়।"],
+      ].map(([ic,t,d])=>`
+        <div class="surface card-hover" style="border-radius:var(--radius-md); padding:1.5rem;">
+          <div style="width:2.7rem; height:2.7rem; border-radius:10px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">${icon(ic)}</div>
+          <div style="font-weight:700; margin-bottom:.45rem; font-size:1.02rem;">${t}</div>
+          <div style="color:var(--muted); font-size:.88rem; line-height:1.75;">${d}</div>
+        </div>`).join('')}
+    </div>
+  </section>`;
+}
+function startApply(){ state.applyData = blankApplication(); state.applyStep=0; go('apply'); }
+
+/* ===================== LOGIN ===================== */
+function viewLogin(){
+  return `
+  <section style="padding:3.4rem 1.4rem; display:flex; justify-content:center;">
+    <div style="width:100%; max-width:37rem;">
+      <div style="text-align:center; margin-bottom:2rem;">
+        <h2 class="font-display" style="font-size:1.65rem; margin:0 0 .5rem;">লগইন করুন</h2>
+        <p style="color:var(--muted); font-size:.9rem;">এটি একটি প্রোটোটাইপ — নিচ থেকে যেকোনো একটি ডেমো অ্যাকাউন্ট বেছে নিয়ে প্রবেশ করুন।</p>
+      </div>
+      <div class="surface elevated" style="border-radius:var(--radius-lg); padding:1.6rem; margin-bottom:1.3rem;">
+        <div style="font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:.55rem; font-size:1.02rem;">${icon('user')} সদস্য লগইন</div>
+        <label class="field-label">সদস্য নির্বাচন করুন</label>
+        <select id="memberSelect" class="field-input" style="margin-bottom:1rem;">
+          ${state.members.filter(m=>m.status==="APPROVED").map(m=>`<option value="${m.id}">${m.name} — ${m.memberId}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary" style="width:100%;" onclick="loginMember()">প্রবেশ করুন</button>
+      </div>
+      <div class="surface elevated" style="border-radius:var(--radius-lg); padding:1.6rem;">
+        <div style="font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:.55rem; font-size:1.02rem;">${icon('lock')} প্রশাসক লগইন</div>
+        <label class="field-label">ব্যবহারকারী নির্বাচন করুন</label>
+        <select id="adminSelect" class="field-input" style="margin-bottom:1rem;">
+          ${ADMIN_USERS.map(u=>`<option value="${u.email}">${u.name} — ${roleLabel(u.role)}</option>`).join('')}
+        </select>
+        <button class="btn btn-gold" style="width:100%;" onclick="loginAdmin()">প্রবেশ করুন</button>
+      </div>
+    </div>
+  </section>`;
+}
+function loginMember(){
+  const id = document.getElementById('memberSelect').value;
+  state.currentMemberId = id; state.memberSection="dashboard";
+  const m = currentMember();
+  const forceIt = m.credentials && m.credentials.mustChangePassword;
+  state.view="member"; state.forcePwModal = !!forceIt; render();
+}
+function loginAdmin(){
+  const email = document.getElementById('adminSelect').value;
+  state.adminUser = ADMIN_USERS.find(u=>u.email===email);
+  state.view="admin"; state.adminSection="pending"; render();
+}
+
+/* ===================== APPLY WIZARD ===================== */
+const APPLY_STEPS = ["ব্যক্তিগত তথ্য","ঠিকানা","সম্পত্তি","মনোনীত ব্যক্তি","জরুরি যোগাযোগ","পেমেন্ট তথ্য","পর্যালোচনা"];
+
+function viewApply(){
+  if(state.applyStep >= APPLY_STEPS.length) return applySuccessScreen();
+  return `
+  <section style="padding:2.2rem 1.4rem 3.8rem;">
+    <div style="max-width:44rem; margin:0 auto;">
+      <button class="btn btn-ghost btn-sm" style="margin-bottom:1.3rem;" onclick="goHome()">${icon('arrowleft')} হোমে ফিরুন</button>
+      <div style="display:flex; align-items:center; gap:.4rem; overflow-x:auto; padding-bottom:.7rem; margin-bottom:1.7rem;" class="scrollbar-thin">
+        ${APPLY_STEPS.map((s,i)=>`
+          <div style="display:flex; align-items:center; gap:.4rem; flex-shrink:0;">
+            <div class="stepper-dot ${i<state.applyStep?'done':i===state.applyStep?'active':''}">${i<state.applyStep? icon('check') : bn(i+1)}</div>
+            <span style="font-size:.78rem; color:${i===state.applyStep?'var(--ink)':'var(--muted)'}; font-weight:${i===state.applyStep?700:500}; white-space:nowrap;">${s}</span>
+            ${i<APPLY_STEPS.length-1?`<div style="width:1.2rem; height:1px; background:var(--border);"></div>`:''}
+          </div>`).join('')}
+      </div>
+      <div class="surface elevated" style="border-radius:var(--radius-lg); padding:1.8rem 1.8rem 1.5rem;">
+        ${applyStepContent()}
+        <div style="display:flex; justify-content:space-between; margin-top:1.8rem; padding-top:1.3rem; border-top:1px solid var(--border-soft);">
+          <button class="btn btn-ghost" onclick="applyBack()">${icon('arrowleft')} ${state.applyStep===0?'হোমে ফিরুন':'পূর্ববর্তী'}</button>
+          <button class="btn btn-primary" onclick="applyNext()">${state.applyStep===APPLY_STEPS.length-1? 'আবেদন জমা দিন' : 'পরবর্তী'} ${state.applyStep===APPLY_STEPS.length-1? icon('check') : ''}</button>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function applyStepContent(){
+  const d = state.applyData;
+  switch(state.applyStep){
+    case 0: return `
+      <h3 class="font-display" style="font-size:1.25rem; margin:0 0 1.2rem;">ব্যক্তিগত তথ্য</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.1rem;">
+        ${textField('পূর্ণ নাম *','name',d.name)}
+        ${selectField('লিঙ্গ','gender',d.gender,['পুরুষ','মহিলা','অন্যান্য'])}
+        ${textField('পিতা/স্বামীর নাম *','fatherHusband',d.fatherHusband)}
+        ${textField('মাতার নাম *','motherName',d.motherName)}
+        ${textField('জন্ম তারিখ (YYYY-MM-DD)','dob',d.dob)}
+        ${textField('জাতীয় পরিচয়পত্র নম্বর *','nid',d.nid)}
+        ${textField('মোবাইল নম্বর *','mobile',d.mobile)}
+        ${textField('ইমেইল','email',d.email)}
+        ${textField('পেশা','occupation',d.occupation)}
+        ${fileField('ছবি আপলোড করুন','photoName',d.photoName)}
+        ${fileField('স্বাক্ষর আপলোড করুন','signatureName',d.signatureName)}
+      </div>`;
+    case 1: return `
+      <h3 class="font-display" style="font-size:1.25rem; margin:0 0 1.2rem;">ঠিকানা</h3>
+      ${textareaField('স্থায়ী ঠিকানা *','permanentAddress',d.permanentAddress)}
+      <label style="display:flex; align-items:center; gap:.55rem; margin:1rem 0; font-size:.9rem; cursor:pointer;">
+        <input type="checkbox" ${d.sameAsPermanent?'checked':''} onchange="updateApply('sameAsPermanent', this.checked)"> বর্তমান ঠিকানা স্থায়ী ঠিকানার অনুরূপ
+      </label>
+      ${!d.sameAsPermanent? textareaField('বর্তমান ঠিকানা *','currentAddress',d.currentAddress) : ''}
+      `;
+    case 2: return `
+      <h3 class="font-display" style="font-size:1.25rem; margin:0 0 .5rem;">সম্পত্তির বিবরণ</h3>
+      <p style="color:var(--muted); font-size:.85rem; margin:0 0 1.1rem;">একাধিক সম্পত্তি থাকলে সবগুলো যুক্ত করুন।</p>
+      <div style="display:flex; flex-direction:column; gap:1.1rem;">
+        ${d.properties.map((p,i)=>propertyCard(p,i)).join('') || `<div style="color:var(--muted); font-size:.88rem; padding:1.1rem; background:var(--surface-2); border-radius:var(--radius-sm); text-align:center;">এখনো কোনো সম্পত্তি যুক্ত করা হয়নি</div>`}
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:1.1rem;" onclick="addProperty()">${icon('plus')} সম্পত্তি যুক্ত করুন</button>`;
+    case 3: return `
+      <h3 class="font-display" style="font-size:1.25rem; margin:0 0 .5rem;">মনোনীত ব্যক্তি (নমিনী)</h3>
+      <div style="display:flex; flex-direction:column; gap:1.1rem; margin-top:.9rem;">
+        ${d.nominees.map((n,i)=>nomineeCard(n,i)).join('') || `<div style="color:var(--muted); font-size:.88rem; padding:1.1rem; background:var(--surface-2); border-radius:var(--radius-sm); text-align:center;">এখনো কোনো মনোনীত ব্যক্তি যুক্ত করা হয়নি</div>`}
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:1.1rem;" onclick="addNominee()">${icon('plus')} মনোনীত ব্যক্তি যুক্ত করুন</button>`;
+    case 4: return `
+      <h3 class="font-display" style="font-size:1.25rem; margin:0 0 1.2rem;">জরুরি যোগাযোগ</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.1rem;">
+        ${textField('নাম *','urgentContact.name',d.urgentContact.name)}
+        ${textField('সম্পর্ক *','urgentContact.relation',d.urgentContact.relation)}
+        ${textField('মোবাইল নম্বর *','urgentContact.mobile',d.urgentContact.mobile)}
+        ${textField('ঠিকানা','urgentContact.address',d.urgentContact.address)}
+      </div>`;
+    case 5: return `
+      <h3 class="font-display" style="font-size:1.25rem; margin:0 0 1.2rem;">পেমেন্ট তথ্য</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.1rem;">
+        ${textField('ভর্তি ফি (টাকা)','payment.admissionFee',d.payment.admissionFee)}
+        ${textField('মাসিক চাঁদা (টাকা)','payment.subscription',d.payment.subscription)}
+        ${selectField('পেমেন্ট পদ্ধতি','payment.method',d.payment.method,['নগদ','বিকাশ','ব্যাংক'])}
+        ${textField('রিসিট নম্বর','payment.receiptNo',d.payment.receiptNo)}
+        ${fileField('রিসিটের ছবি আপলোড করুন','payment.receiptPhotoName',d.payment.receiptPhotoName)}
+      </div>`;
+    case 6: return reviewStep(d);
+  }
+}
+
+function propertyCard(p,i){
+  return `<div class="surface2" style="border-radius:var(--radius-md); padding:1.1rem; position:relative;">
+    <button class="btn btn-ghost btn-sm" style="position:absolute; top:.7rem; left:.7rem; color:var(--danger);" onclick="removeProperty(${i})">${icon('trash')}</button>
+    <div style="font-weight:700; margin-bottom:.8rem;">সম্পত্তি ${bn(i+1)}</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:.85rem;">
+      ${textField('সম্পত্তির ধরন','properties.'+i+'.type',p.type)}
+      ${selectField('মালিকানার ধরন','properties.'+i+'.ownership',p.ownership,['একক মালিকানা','যৌথ মালিকানা'])}
+      ${textField('খতিয়ান নম্বর (সিএস/আরএস)','properties.'+i+'.khatian',p.khatian)}
+      ${textField('দাগ নম্বর','properties.'+i+'.dag',p.dag)}
+      ${textField('হোল্ডিং নম্বর','properties.'+i+'.holding',p.holding)}
+      ${textField('জমির পরিমাণ','properties.'+i+'.quantity',p.quantity)}
+    </div>
+    <div style="margin-top:.9rem;">
+      <div style="font-size:.85rem; font-weight:600; color:var(--ink-soft); margin-bottom:.5rem;">সহ-মালিক</div>
+      ${p.coOwners.map((c,j)=>`<div style="display:flex; gap:.5rem; margin-bottom:.5rem;">
+          <input class="field-input" placeholder="নাম" value="${c.name}" oninput="updateApply('properties.${i}.coOwners.${j}.name', this.value)">
+          <input class="field-input" placeholder="ফোন" value="${c.phone}" oninput="updateApply('properties.${i}.coOwners.${j}.phone', this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="removeCoOwner(${i},${j})">${icon('x')}</button>
+        </div>`).join('')}
+      <button class="btn btn-ghost btn-sm" onclick="addCoOwner(${i})">${icon('plus')} সহ-মালিক যুক্ত করুন</button>
+    </div>
+    <div style="margin-top:.9rem;">
+      <div style="font-size:.85rem; font-weight:600; color:var(--ink-soft); margin-bottom:.5rem;">সংযুক্ত দলিল</div>
+      <div style="display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:.5rem;">
+        ${p.docs.map((doc,j)=>`<span class="badge" style="background:var(--surface); border:1px solid var(--border); color:var(--ink-soft);">${icon('doc')} ${doc} <span style="cursor:pointer; color:var(--danger);" onclick="removeDoc(${i},${j})">✕</span></span>`).join('')}
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="addDoc(${i})">${icon('plus')} দলিল সংযুক্ত করুন (মক)</button>
+    </div>
+  </div>`;
+}
+function nomineeCard(n,i){
+  return `<div class="surface2" style="border-radius:var(--radius-md); padding:1.1rem; position:relative;">
+    <button class="btn btn-ghost btn-sm" style="position:absolute; top:.7rem; left:.7rem; color:var(--danger);" onclick="removeNominee(${i})">${icon('trash')}</button>
+    <div style="font-weight:700; margin-bottom:.8rem;">মনোনীত ব্যক্তি ${bn(i+1)}</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:.85rem;">
+      ${textField('নাম','nominees.'+i+'.name',n.name)}
+      ${textField('সম্পর্ক','nominees.'+i+'.relation',n.relation)}
+      ${textField('মোবাইল নম্বর','nominees.'+i+'.mobile',n.mobile)}
+      ${textField('ঠিকানা','nominees.'+i+'.address',n.address)}
+    </div>
+  </div>`;
+}
+function reviewStep(d){
+  const addr2 = d.sameAsPermanent ? "একই — স্থায়ী ঠিকানার অনুরূপ" : d.currentAddress;
+  return `
+  <h3 class="font-display" style="font-size:1.25rem; margin:0 0 1.2rem;">পর্যালোচনা ও নিশ্চিতকরণ</h3>
+  <div style="display:flex; flex-direction:column; gap:1.1rem;">
+    ${reviewBlock("ব্যক্তিগত তথ্য",[["নাম",d.name],["পিতা/স্বামী",d.fatherHusband],["মাতা",d.motherName],["জন্ম তারিখ",d.dob],["এনআইডি",d.nid],["মোবাইল",d.mobile],["ইমেইল",d.email||"—"],["পেশা",d.occupation||"—"]])}
+    ${reviewBlock("ঠিকানা",[["স্থায়ী ঠিকানা",d.permanentAddress],["বর্তমান ঠিকানা",addr2]])}
+    ${reviewBlock("সম্পত্তি (মোট "+bn(d.properties.length)+"টি)", d.properties.map((p,i)=>[`সম্পত্তি ${bn(i+1)}`, `${p.type} — খতিয়ান ${p.khatian}, ${p.quantity}`]))}
+    ${reviewBlock("মনোনীত ব্যক্তি", d.nominees.map(n=>[n.name||"—", `${n.relation} · ${n.mobile}`]))}
+    ${reviewBlock("জরুরি যোগাযোগ",[["নাম",d.urgentContact.name],["সম্পর্ক",d.urgentContact.relation],["মোবাইল",d.urgentContact.mobile]])}
+    ${reviewBlock("পেমেন্ট তথ্য",[["ভর্তি ফি","৳ "+d.payment.admissionFee],["মাসিক চাঁদা","৳ "+d.payment.subscription],["পদ্ধতি",d.payment.method],["রিসিট নম্বর",d.payment.receiptNo||"—"]])}
+  </div>
+  <label style="display:flex; gap:.6rem; align-items:flex-start; margin-top:1.3rem; font-size:.88rem; color:var(--ink-soft);">
+    <input type="checkbox" id="confirmTruth" style="margin-top:.25rem;"> আমি নিশ্চিত করছি যে উপরোক্ত তথ্য সত্য ও সঠিক।
+  </label>`;
+}
+function reviewBlock(title, rows){
+  return `<div class="surface2" style="border-radius:var(--radius-md); padding:1rem 1.1rem;">
+    <div style="font-weight:700; font-size:.9rem; margin-bottom:.55rem; color:var(--primary);">${title}</div>
+    ${rows.map(([k,v])=>`<div style="display:flex; justify-content:space-between; gap:1rem; font-size:.86rem; padding:.3rem 0; border-bottom:1px dashed var(--border);"><span style="color:var(--muted);">${k}</span><span style="text-align:left;">${v}</span></div>`).join('')}
+  </div>`;
+}
+function textField(label, path, val){
+  return `<div><label class="field-label">${label}</label><input class="field-input" value="${val||''}" oninput="updateApply('${path}', this.value)"></div>`;
+}
+function textareaField(label, path, val){
+  return `<div><label class="field-label">${label}</label><textarea class="field-input" rows="2" oninput="updateApply('${path}', this.value)">${val||''}</textarea></div>`;
+}
+function selectField(label, path, val, opts){
+  return `<div><label class="field-label">${label}</label><select class="field-input" onchange="updateApply('${path}', this.value)">${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select></div>`;
+}
+function fileField(label, path, val){
+  return `<div><label class="field-label">${label}</label>
+    <label class="btn btn-ghost btn-sm" style="width:100%; justify-content:center; cursor:pointer;">
+      ${icon('doc')} ${val || 'ফাইল বেছে নিন (মক)'}
+      <input type="file" style="display:none" onchange="mockFile('${path}', this.files[0])">
+    </label></div>`;
+}
+function mockFile(path, file){ updateApply(path, file? file.name : ""); }
+
+function getPath(obj, path){ return path.split('.').reduce((o,k)=>o&&o[k], obj); }
+function setPath(obj, path, val){
+  const keys = path.split('.'); let o=obj;
+  for(let i=0;i<keys.length-1;i++) o = o[keys[i]];
+  o[keys[keys.length-1]] = val;
+}
+function updateApply(path, val){ setPath(state.applyData, path, val); render(); }
+
+function addProperty(){ state.applyData.properties.push({type:"আবাসিক",khatian:"",dag:"",holding:"",quantity:"",ownership:"একক মালিকানা",coOwners:[],docs:[]}); render(); }
+function removeProperty(i){ state.applyData.properties.splice(i,1); render(); }
+function addCoOwner(i){ state.applyData.properties[i].coOwners.push({name:"",phone:""}); render(); }
+function removeCoOwner(i,j){ state.applyData.properties[i].coOwners.splice(j,1); render(); }
+function addDoc(i){ state.applyData.properties[i].docs.push("দলিল_"+(state.applyData.properties[i].docs.length+1)+".pdf"); render(); }
+function removeDoc(i,j){ state.applyData.properties[i].docs.splice(j,1); render(); }
+function addNominee(){ state.applyData.nominees.push({name:"",relation:"",mobile:"",address:""}); render(); }
+function removeNominee(i){ state.applyData.nominees.splice(i,1); render(); }
+
+function applyNext(){
+  if(state.applyStep===6){
+    const cb = document.getElementById('confirmTruth');
+    if(!cb || !cb.checked){ toast("আবেদন জমা দেওয়ার আগে তথ্যের সত্যতা নিশ্চিত করুন"); return; }
+    submitApplication(); return;
+  }
+  if(state.applyStep===0 && (!state.applyData.name || !state.applyData.mobile || !state.applyData.nid)){
+    toast("অনুগ্রহ করে চিহ্নিত (*) আবশ্যক ঘরগুলো পূরণ করুন"); return;
+  }
+  state.applyStep++; render(); window.scrollTo(0,0);
+}
+function applyBack(){ if(state.applyStep===0){ goHome(); return;} state.applyStep--; render(); window.scrollTo(0,0); }
+
+let lastRefNo = "";
+function submitApplication(){
+  const d = state.applyData;
+  const ref = nextRef(); lastRefNo = ref;
+  const record = mkMember({
+    refNo: ref, status:"PENDING", submittedAt:"২০২৬-০৯-১৭",
+    name:d.name, fatherHusband:d.fatherHusband, motherName:d.motherName, dob:d.dob, nid:d.nid, mobile:d.mobile,
+    email:d.email, gender:d.gender, occupation:d.occupation, photoName:d.photoName||"ছবি.jpg", signatureName:d.signatureName||"স্বাক্ষর.png",
+    permanentAddress:d.permanentAddress, currentAddress: d.sameAsPermanent? "একই — স্থায়ী ঠিকানার অনুরূপ" : d.currentAddress,
+    properties: JSON.parse(JSON.stringify(d.properties)), nominees: JSON.parse(JSON.stringify(d.nominees)),
+    urgentContact: JSON.parse(JSON.stringify(d.urgentContact)), payment: JSON.parse(JSON.stringify(d.payment)),
+  });
+  state.members.unshift(record);
+  state.applyStep = APPLY_STEPS.length; render(); window.scrollTo(0,0);
+}
+function applySuccessScreen(){
+  return `<section style="padding:4.4rem 1.4rem; display:flex; justify-content:center;">
+    <div class="surface elevated" style="max-width:32rem; text-align:center; border-radius:var(--radius-lg); padding:2.6rem;">
+      <div style="width:4.2rem; height:4.2rem; border-radius:999px; background:var(--success-soft); color:var(--success); display:flex; align-items:center; justify-content:center; margin:0 auto 1.3rem; font-size:1.8rem;">${icon('check')}</div>
+      <h2 class="font-display" style="font-size:1.45rem; margin:0 0 .65rem;">আবেদন সফলভাবে জমা হয়েছে</h2>
+      <p style="color:var(--ink-soft); font-size:.92rem; line-height:1.75;">আপনার আবেদন যাচাই-বাছাইয়ের জন্য কার্যনির্বাহী কমিটির কাছে পাঠানো হয়েছে। যাচাই সম্পন্ন হলে অনুমোদন সাপেক্ষে সদস্য আইডি ও লগইন তথ্য আপনার মোবাইলে জানানো হবে।</p>
+      <div class="surface2" style="border-radius:var(--radius-md); padding:1rem; margin:1.5rem 0;">
+        <div style="font-size:.8rem; color:var(--muted);">রেফারেন্স নম্বর</div>
+        <div style="font-size:1.35rem; font-weight:700; font-family:'Tiro Bangla',serif;">${lastRefNo}</div>
+      </div>
+      <button class="btn btn-primary" onclick="goHome()">হোমে ফিরুন</button>
+    </div>
+  </section>`;
+}
+
+/* ===================== ADMIN ===================== */
+function viewAdmin(){
+  const u = state.adminUser;
+  const perms = effectivePermissions(u);
+  const overrideCount = userOverrides(u.email).length;
+  return `
+  <section class="admin-grid" style="display:grid; grid-template-columns:230px 1fr; gap:0; min-height:calc(100vh - 140px);">
+    <aside style="border-left:1px solid var(--border); padding:1.5rem 1.1rem;">
+      <div class="surface2" style="border-radius:var(--radius-md); padding:.9rem; margin-bottom:1.3rem;">
+        <div style="font-weight:700; font-size:.92rem;">${u.name}</div>
+        <div style="font-size:.76rem; color:var(--muted); margin-top:.1rem;">${u.title} · ${roleLabel(u.role)}</div>
+        ${overrideCount? `<div class="badge badge-custom" style="margin-top:.5rem;">${icon('sparkle')} ${bn(overrideCount)}টি স্বতন্ত্র অনুমতি</div>` : ''}
+      </div>
+      <nav style="display:flex; flex-direction:column; gap:.3rem;">
+        <a class="nav-link ${state.adminSection==='pending'?'active':''}" href="javascript:void(0)" onclick="setAdminSection('pending')">${icon('doc')} বিচারাধীন আবেদন ${pendingBadgeCount()}</a>
+        <a class="nav-link ${state.adminSection==='members'?'active':''}" href="javascript:void(0)" onclick="setAdminSection('members')">${icon('users')} সকল সদস্য</a>
+        <a class="nav-link ${state.adminSection==='installments'?'active':''}" href="javascript:void(0)" onclick="setAdminSection('installments')">${icon('coin')} চাঁদা ব্যবস্থাপনা</a>
+        ${hasPermission(u,'role.manage') ? `<a class="nav-link ${state.adminSection==='roles'?'active':''}" href="javascript:void(0)" onclick="setAdminSection('roles')">${icon('shield')} ভূমিকা ও অনুমতি</a>` : ''}
+      </nav>
+      <div style="margin-top:1.7rem; padding:.9rem; border-radius:var(--radius-sm); background:var(--gold-soft); font-size:.76rem; color:var(--gold-strong); line-height:1.65;">
+        ভূমিকা পরিবর্তন করে (উপরে ডানদিকে) প্রতিটি অনুমতির পার্থক্য যাচাই করুন — প্রতিটি পদক্ষেপ পারমিশন কী দিয়ে যাচাই করা হয়।
+      </div>
+    </aside>
+    <div style="padding:1.7rem 1.5rem;">
+      ${state.adminSection==='pending' ? adminPending() : state.adminSection==='members' ? adminMembers() : state.adminSection==='installments' ? adminInstallments() : adminRoles()}
+    </div>
+  </section>`;
+}
+function pendingBadgeCount(){
+  const n = state.members.filter(m=>m.status==="PENDING").length;
+  return n? `<span class="badge badge-pending" style="margin-right:auto;">${bn(n)}</span>`:"";
+}
+function setAdminSection(s){ state.adminSection=s; state.selectedAppId=null; render(); }
+
+function adminPending(){
+  if(state.selectedAppId) return applicationDetail(state.members.find(m=>m.id===state.selectedAppId));
+  const list = state.members.filter(m=>m.status==="PENDING");
+  return `
+  <h2 class="font-display" style="font-size:1.35rem; margin:0 0 1.1rem;">বিচারাধীন আবেদন</h2>
+  <div class="surface elevated" style="border-radius:var(--radius-md); overflow:hidden;">
+    <table>
+      <thead><tr><th>রেফারেন্স</th><th>আবেদনকারী</th><th>মোবাইল</th><th>সম্পত্তি</th><th>জমার তারিখ</th><th></th></tr></thead>
+      <tbody>
+        ${list.map(m=>`<tr>
+          <td>${m.refNo}</td><td>${m.name}</td><td>${m.mobile}</td><td>${bn(m.properties.length)}টি</td><td>${m.submittedAt}</td>
+          <td><button class="btn btn-primary btn-sm" onclick="openApp('${m.id}')">${icon('eye')} বিস্তারিত</button></td>
+        </tr>`).join('') || `<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:1.5rem;">কোনো বিচারাধীন আবেদন নেই</td></tr>`}
+      </tbody>
+    </table>
+  </div>`;
+}
+function openApp(id){ state.selectedAppId=id; render(); }
+
+function applicationDetail(m){
+  const addr2 = m.currentAddress;
+  const canManage = hasPermission(state.adminUser,'member.manage');
+  return `
+  <button class="btn btn-ghost btn-sm" style="margin-bottom:1.1rem;" onclick="setAdminSection('pending')">${icon('arrowleft')} তালিকায় ফিরুন</button>
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.3rem; flex-wrap:wrap; gap:.6rem;">
+    <div>
+      <h2 class="font-display" style="font-size:1.4rem; margin:0 0 .25rem;">${m.name}</h2>
+      <div style="color:var(--muted); font-size:.85rem;">রেফ: ${m.refNo} · জমার তারিখ ${m.submittedAt} ${statusBadge(m.status)}</div>
+    </div>
+    ${m.status==="PENDING" ? `<div style="display:flex; gap:.6rem;">
+        <button class="btn btn-danger btn-sm" ${canManage?'':'disabled title="member.manage অনুমতি প্রয়োজন"'} onclick="openReject('${m.id}')">${icon('x')} প্রত্যাখ্যান করুন</button>
+        <button class="btn btn-primary btn-sm" ${canManage?'':'disabled title="member.manage অনুমতি প্রয়োজন"'} onclick="openApprove('${m.id}')">${icon('check')} অনুমোদন করুন</button>
+      </div>` : ''}
+  </div>
+  ${m.status==="REJECTED" ? `<div class="surface2" style="border-radius:var(--radius-md); padding:1rem 1.1rem; margin-bottom:1.3rem; border-right:3px solid var(--danger);">
+      <div style="font-weight:700; color:var(--danger); font-size:.86rem; margin-bottom:.35rem;">প্রত্যাখ্যানের কারণ</div>
+      <div style="font-size:.86rem;">${m.rejectionReason}</div>
+    </div>`:''}
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.1rem;">
+    ${reviewBlock("ব্যক্তিগত তথ্য",[["পিতা/স্বামী",m.fatherHusband],["মাতা",m.motherName],["জন্ম তারিখ",m.dob],["এনআইডি",m.nid],["মোবাইল",m.mobile],["ইমেইল",m.email||"—"],["লিঙ্গ",m.gender],["পেশা",m.occupation||"—"]])}
+    ${reviewBlock("ঠিকানা",[["স্থায়ী",m.permanentAddress],["বর্তমান",addr2]])}
+    ${reviewBlock("পেমেন্ট তথ্য",[["ভর্তি ফি","৳ "+m.payment.admissionFee],["মাসিক চাঁদা","৳ "+m.payment.subscription],["পদ্ধতি",m.payment.method],["রিসিট", (m.payment.receiptNo||'—') + " (" + (m.payment.receiptPhotoName||'সংযুক্তি নেই') + ")"]])}
+    ${reviewBlock("মনোনীত ব্যক্তি", m.nominees.length? m.nominees.map(n=>[n.name,n.relation+" · "+n.mobile]) : [["—","কোনো মনোনীত ব্যক্তি নেই"]])}
+  </div>
+  <div style="margin-top:1.1rem;">
+    <div style="font-weight:700; margin-bottom:.7rem;">সম্পত্তির বিবরণ (${bn(m.properties.length)}টি)</div>
+    <div style="display:flex; flex-direction:column; gap:.85rem;">
+      ${m.properties.map((p,i)=>`<div class="surface2" style="border-radius:var(--radius-md); padding:1rem 1.1rem; font-size:.86rem;">
+        <div style="font-weight:700; margin-bottom:.45rem;">সম্পত্তি ${bn(i+1)} — ${p.type}</div>
+        <div style="color:var(--ink-soft);">খতিয়ান: ${p.khatian} · দাগ: ${p.dag} · হোল্ডিং: ${p.holding} · পরিমাণ: ${p.quantity} · ${p.ownership}</div>
+        ${p.coOwners.length? `<div style="margin-top:.35rem; color:var(--muted);">সহ-মালিক: ${p.coOwners.map(c=>c.name+" ("+c.phone+")").join(', ')}</div>`:''}
+        ${p.docs.length? `<div style="margin-top:.45rem; display:flex; gap:.4rem; flex-wrap:wrap;">${p.docs.map(dc=>`<span class="badge" style="background:var(--surface); border:1px solid var(--border);">${icon('doc')} ${dc}</span>`).join('')}</div>`:''}
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function openApprove(id){ if(!hasPermission(state.adminUser,'member.manage')) return; state.approveModal = id; render(); }
+function openReject(id){ if(!hasPermission(state.adminUser,'member.manage')) return; state.rejectModal = id; render(); }
+function confirmApprove(id){
+  const m = state.members.find(x=>x.id===id);
+  m.status="APPROVED"; m.memberId = nextMemberId();
+  const uname = "member"+m.memberId.split('-')[2];
+  m.credentials = {username:uname, mustChangePassword:true};
+  m.reviewedBy = state.adminUser.name; m.reviewedAt = "২০২৬-০৯-১৭";
+  m.installments = makeInstallments(-1);
+  state.approveModal = null; toast(`${m.name} অনুমোদিত হয়েছেন — আইডি: ${m.memberId}`); render();
+}
+function confirmReject(id){
+  const reason = document.getElementById('rejectReason').value.trim();
+  if(!reason){ toast("প্রত্যাখ্যানের কারণ লিখুন"); return; }
+  const m = state.members.find(x=>x.id===id);
+  m.status="REJECTED"; m.rejectionReason=reason; m.reviewedBy=state.adminUser.name; m.reviewedAt="২০২৬-০৯-১৭";
+  state.rejectModal = null; toast(`${m.name} এর আবেদন প্রত্যাখ্যান করা হয়েছে`); render();
+}
+
+function adminMembers(){
+  const list = state.members.filter(m=>m.status!=="PENDING");
+  const canDelete = hasPermission(state.adminUser,'member.delete');
+  return `
+  <h2 class="font-display" style="font-size:1.35rem; margin:0 0 1.1rem;">সকল সদস্য</h2>
+  <div class="surface elevated" style="border-radius:var(--radius-md); overflow:hidden;">
+    <table>
+      <thead><tr><th>সদস্য আইডি</th><th>নাম</th><th>মোবাইল</th><th>অবস্থা</th><th>চাঁদার অবস্থা</th><th></th></tr></thead>
+      <tbody>
+        ${list.map(m=>`<tr>
+          <td>${m.memberId || '—'}</td><td>${m.name}</td><td>${m.mobile}</td><td>${statusBadge(m.status)}</td>
+          <td>${m.status==='APPROVED'? duesSummary(m) : '—'}</td>
+          <td style="display:flex; gap:.4rem;">
+            <button class="btn btn-ghost btn-sm" onclick="openApp('${m.id}'); setAdminSectionKeep()">${icon('eye')}</button>
+            <button class="btn btn-ghost btn-sm" ${canDelete?'':'disabled title="member.delete অনুমতি প্রয়োজন"'} style="color:var(--danger);" onclick="askDelete('${m.id}')">${icon('trash')}</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  ${!canDelete? `<p class="field-hint" style="margin-top:.8rem;">আপনার বর্তমান ভূমিকায় (${roleLabel(state.adminUser.role)}) সদস্য মুছে ফেলার অনুমতি (<code>member.delete</code>) নেই। সুপার অ্যাডমিন 'ভূমিকা ও অনুমতি' থেকে এটি পরিবর্তন করতে পারেন।</p>`:''}
+  `;
+}
+function setAdminSectionKeep(){ state.adminSection='pending'; }
+function askDelete(id){ if(!hasPermission(state.adminUser,'member.delete')) return; state.deleteConfirm=id; render(); }
+function confirmDelete(id){
+  state.members = state.members.filter(m=>m.id!==id); state.deleteConfirm=null; toast("সদস্যের রেকর্ড মুছে ফেলা হয়েছে"); render();
+}
+
+function adminInstallments(){
+  const canManage = hasPermission(state.adminUser,'installment.manage');
+  const members = state.members.filter(m=>m.status==="APPROVED");
+  const sel = state.selectedInstallMemberId || (members[0] && members[0].id);
+  const m = members.find(x=>x.id===sel);
+  return `
+  <h2 class="font-display" style="font-size:1.35rem; margin:0 0 1.1rem;">চাঁদা ব্যবস্থাপনা</h2>
+  <div style="display:grid; grid-template-columns:260px 1fr; gap:1.3rem;">
+    <div class="surface elevated" style="border-radius:var(--radius-md); padding:.7rem;">
+      ${members.map(x=>`<div onclick="selectInstallMember('${x.id}')" style="padding:.75rem .85rem; border-radius:9px; cursor:pointer; margin-bottom:.25rem; ${x.id===sel?'background:var(--primary-soft); color:var(--primary);':''}">
+        <div style="font-weight:600; font-size:.9rem;">${x.name}</div>
+        <div style="font-size:.76rem; color:var(--muted);">${x.memberId}</div>
+      </div>`).join('')}
+    </div>
+    <div class="surface elevated" style="border-radius:var(--radius-md); padding:1.3rem;">
+      ${m? `
+      <div style="display:flex; justify-content:space-between; margin-bottom:1.1rem;">
+        <div><div style="font-weight:700;">${m.name}</div><div style="font-size:.8rem; color:var(--muted);">${m.memberId} · ২০২৬</div></div>
+        ${duesSummary(m)}
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:.8rem;">
+        ${m.installments.map(inst=>`
+          <div class="surface2" style="border-radius:var(--radius-sm); padding:.85rem;">
+            <div style="font-weight:600; font-size:.88rem; margin-bottom:.35rem;">${MONTHS[inst.month]}</div>
+            <div style="font-size:.8rem; color:var(--muted); margin-bottom:.55rem;">৳ ${inst.amount} ${inst.status==='PAID'? '· '+inst.paidAt : ''}</div>
+            ${inst.status==='PAID' ? `<span class="badge badge-paid">${icon('check')} পরিশোধিত</span>` :
+              `<button class="btn btn-gold btn-sm" style="width:100%;" ${canManage?'':'disabled title="installment.manage অনুমতি প্রয়োজন"'} onclick="markPaid('${m.id}',${inst.month})">পরিশোধিত হিসেবে চিহ্নিত করুন</button>`}
+          </div>`).join('')}
+      </div>` : `<div style="color:var(--muted); text-align:center;">কোনো সদস্য নেই</div>`}
+    </div>
+  </div>`;
+}
+function selectInstallMember(id){ state.selectedInstallMemberId=id; render(); }
+function markPaid(id,month){
+  if(!hasPermission(state.adminUser,'installment.manage')) return;
+  const m = state.members.find(x=>x.id===id);
+  const inst = m.installments.find(i=>i.month===month);
+  inst.status="PAID"; inst.paidAt="২০২৬-০৯-১৭";
+  toast(`${MONTHS[month]} মাসের চাঁদা পরিশোধিত হিসেবে চিহ্নিত হয়েছে`); render();
+}
+
+/* ---- Role & Permission management (super_admin only) ---- */
+function adminRoles(){
+  if(!hasPermission(state.adminUser,'role.manage')){
+    return `<div style="color:var(--muted); text-align:center; padding:3rem;">এই পাতা দেখার জন্য <code>role.manage</code> অনুমতি প্রয়োজন।</div>`;
+  }
+  return `
+  <h2 class="font-display" style="font-size:1.35rem; margin:0 0 .4rem;">ভূমিকা ও অনুমতি ব্যবস্থাপনা</h2>
+  <p style="color:var(--muted); font-size:.86rem; margin:0 0 1.4rem;">প্রতিটি ভূমিকার ডিফল্ট অনুমতি নির্ধারণ করুন, অথবা কোনো নির্দিষ্ট ব্যবহারকারীর জন্য একক অনুমতি গ্রান্ট বা রিভোক করুন।</p>
+
+  <div style="display:flex; flex-direction:column; gap:1.1rem; margin-bottom:1.8rem;">
+    ${roleCard("SUPER_ADMIN")}
+    ${roleCard("EXECUTIVE_COMMITTEE")}
+    ${roleCard("ADMINISTRATOR")}
+  </div>
+
+  <h3 class="font-display" style="font-size:1.1rem; margin:1.8rem 0 .5rem;">ব্যবহারকারী-ভিত্তিক ওভাররাইড</h3>
+  <p style="color:var(--muted); font-size:.86rem; margin:0 0 1.1rem;">একজন নির্দিষ্ট ব্যবহারকারীর জন্য তার ভূমিকার ডিফল্টের বাইরে গিয়ে অতিরিক্ত অনুমতি দিন বা প্রত্যাহার করুন।</p>
+  <div class="surface elevated" style="border-radius:var(--radius-md); padding:1.2rem; margin-bottom:1.3rem;">
+    <div style="display:grid; grid-template-columns:1.2fr 1.4fr auto auto; gap:.7rem; align-items:end;">
+      <div>
+        <label class="field-label">ব্যবহারকারী</label>
+        <select class="field-input" id="ovUser">
+          ${ADMIN_USERS.filter(u=>u.role!=="SUPER_ADMIN").map(u=>`<option value="${u.email}">${u.name} (${roleLabel(u.role)})</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label class="field-label">অনুমতি</label>
+        <select class="field-input" id="ovKey">
+          ${PERMISSIONS.map(p=>`<option value="${p.key}">${p.label}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label class="field-label">কার্যক্রম</label>
+        <select class="field-input" id="ovAction">
+          <option value="grant">অতিরিক্ত গ্রান্ট করুন</option>
+          <option value="revoke">প্রত্যাহার করুন</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="addOverride()">${icon('plus')} প্রয়োগ করুন</button>
+    </div>
+  </div>
+  <div class="surface elevated" style="border-radius:var(--radius-md); overflow:hidden;">
+    <table>
+      <thead><tr><th>ব্যবহারকারী</th><th>ভূমিকা</th><th>স্বতন্ত্র অনুমতি</th><th></th></tr></thead>
+      <tbody>
+        ${ADMIN_USERS.filter(u=>u.role!=="SUPER_ADMIN").map(u=>{
+          const ov = userOverrides(u.email);
+          return `<tr>
+            <td>${u.name}</td><td>${roleLabel(u.role)}</td>
+            <td>${ov.length? ov.map(o=>{
+              const p = PERMISSIONS.find(x=>x.key===o.key);
+              return `<span class="badge ${o.granted?'badge-custom':'badge-rejected'}" style="margin:.1rem;">${o.granted? icon('plus'):icon('x')} ${p.label}</span>`;
+            }).join('') : '<span style="color:var(--muted); font-size:.84rem;">কোনো ওভাররাইড নেই</span>'}</td>
+            <td>${ov.length? `<button class="btn btn-ghost btn-sm" onclick="clearOverrides('${u.email}')">${icon('trash')} সব মুছুন</button>`:''}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+function roleCard(role){
+  const isSuper = role==="SUPER_ADMIN";
+  return `<div class="surface elevated" style="border-radius:var(--radius-md); padding:1.2rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.9rem;">
+      <div style="font-weight:700; font-size:1rem;">${roleLabel(role)}</div>
+      ${isSuper? `<span class="badge badge-approved">সকল অনুমতি — সর্বদা</span>`:''}
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:.6rem .9rem;">
+      ${PERMISSIONS.map(p=>{
+        const reserved = p.key==="role.manage" && !isSuper;
+        const on = isSuper || roleState[role].includes(p.key);
+        return `<label style="display:flex; align-items:center; gap:.6rem; font-size:.86rem; ${reserved?'opacity:.5;':'cursor:pointer;'}" title="${p.desc}${reserved?' — শুধুমাত্র সুপার অ্যাডমিন':''}">
+          <span class="switch-check ${on?'on':''}" onclick="${(isSuper||reserved)?'':`toggleRolePerm('${role}','${p.key}')`}"></span>
+          ${p.label}
+        </label>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+function toggleRolePerm(role,key){
+  const set = roleState[role];
+  const idx = set.indexOf(key);
+  if(idx>=0) set.splice(idx,1); else set.push(key);
+  render();
+}
+function addOverride(){
+  const email = document.getElementById('ovUser').value;
+  const key = document.getElementById('ovKey').value;
+  const action = document.getElementById('ovAction').value;
+  overrides = overrides.filter(o=>!(o.adminEmail===email && o.key===key));
+  overrides.push({adminEmail:email, key, granted: action==="grant"});
+  const u = ADMIN_USERS.find(x=>x.email===email); const p = PERMISSIONS.find(x=>x.key===key);
+  toast(`${u.name} এর জন্য "${p.label}" ${action==='grant'?'গ্রান্ট':'রিভোক'} করা হয়েছে`);
+  render();
+}
+function clearOverrides(email){ overrides = overrides.filter(o=>o.adminEmail!==email); render(); }
+
+/* ===================== MEMBER ===================== */
+function viewMember(){
+  const m = currentMember();
+  return `
+  <section class="admin-grid" style="display:grid; grid-template-columns:230px 1fr; gap:0; min-height:calc(100vh - 140px);">
+    <aside style="border-left:1px solid var(--border); padding:1.5rem 1.1rem;">
+      <div class="surface2" style="border-radius:var(--radius-md); padding:.9rem; margin-bottom:1.3rem; text-align:center;">
+        <div style="width:3.2rem; height:3.2rem; border-radius:999px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto .6rem; font-weight:700; font-size:1.1rem;">${m.name.charAt(0)}</div>
+        <div style="font-weight:700; font-size:.92rem;">${m.name}</div>
+        <div style="font-size:.76rem; color:var(--muted);">${m.memberId}</div>
+      </div>
+      <nav style="display:flex; flex-direction:column; gap:.3rem;">
+        <a class="nav-link ${state.memberSection==='dashboard'?'active':''}" href="javascript:void(0)" onclick="setMemberSection('dashboard')">${icon('home')} ড্যাশবোর্ড</a>
+        <a class="nav-link ${state.memberSection==='profile'?'active':''}" href="javascript:void(0)" onclick="setMemberSection('profile')">${icon('user')} প্রোফাইল</a>
+        <a class="nav-link ${state.memberSection==='installments'?'active':''}" href="javascript:void(0)" onclick="setMemberSection('installments')">${icon('coin')} চাঁদার ইতিহাস</a>
+        <a class="nav-link ${state.memberSection==='password'?'active':''}" href="javascript:void(0)" onclick="setMemberSection('password')">${icon('lock')} পাসওয়ার্ড পরিবর্তন</a>
+      </nav>
+    </aside>
+    <div style="padding:1.7rem 1.5rem;">
+      ${state.memberSection==='dashboard'? memberDashboard(m) : state.memberSection==='profile'? memberProfile(m) : state.memberSection==='installments'? memberInstallments(m) : memberPassword(m)}
+    </div>
+  </section>`;
+}
+function setMemberSection(s){ state.memberSection=s; render(); }
+function memberDashboard(m){
+  const due = m.installments.filter(i=>i.status==='DUE').length;
+  const paid = m.installments.length - due;
+  return `
+  <h2 class="font-display" style="font-size:1.35rem; margin:0 0 1.3rem;">স্বাগতম, ${m.name}</h2>
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.1rem; margin-bottom:1.5rem;">
+    <div class="surface elevated" style="border-radius:var(--radius-md); padding:1.2rem;"><div style="font-size:.8rem; color:var(--muted);">সদস্য আইডি</div><div style="font-weight:700; font-size:1.15rem; margin-top:.35rem;">${m.memberId}</div></div>
+    <div class="surface elevated" style="border-radius:var(--radius-md); padding:1.2rem;"><div style="font-size:.8rem; color:var(--muted);">পরিশোধিত মাস</div><div style="font-weight:700; font-size:1.15rem; margin-top:.35rem; color:var(--success);">${bn(paid)} / ${bn(m.installments.length)}</div></div>
+    <div class="surface elevated" style="border-radius:var(--radius-md); padding:1.2rem;"><div style="font-size:.8rem; color:var(--muted);">বকেয়া মাস</div><div style="font-weight:700; font-size:1.15rem; margin-top:.35rem; color:${due?'var(--danger)':'var(--success)'};">${bn(due)}</div></div>
+  </div>
+  <div class="surface elevated" style="border-radius:var(--radius-md); padding:1.3rem;">
+    <div style="font-weight:700; margin-bottom:.9rem;">সাম্প্রতিক চাঁদার অবস্থা</div>
+    <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+      ${m.installments.slice(-6).map(i=>`<span class="badge ${i.status==='PAID'?'badge-paid':'badge-due'}">${MONTHS[i.month]}: ${i.status==='PAID'?'পরিশোধিত':'বকেয়া'}</span>`).join('')}
+    </div>
+  </div>`;
+}
+function memberProfile(m){
+  return `
+  <h2 class="font-display" style="font-size:1.35rem; margin:0 0 1.3rem;">প্রোফাইল</h2>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.1rem;">
+    ${reviewBlock("ব্যক্তিগত তথ্য",[["নাম",m.name],["পিতা/স্বামী",m.fatherHusband],["মাতা",m.motherName],["জন্ম তারিখ",m.dob],["এনআইডি",m.nid],["মোবাইল",m.mobile],["পেশা",m.occupation||"—"]])}
+    ${reviewBlock("ঠিকানা",[["স্থায়ী",m.permanentAddress],["বর্তমান",m.currentAddress]])}
+  </div>
+  <div style="margin-top:1.1rem;">
+    <div style="font-weight:700; margin-bottom:.7rem;">সম্পত্তি</div>
+    <div style="display:flex; flex-direction:column; gap:.75rem;">
+      ${m.properties.map((p,i)=>`<div class="surface2" style="border-radius:var(--radius-md); padding:1rem; font-size:.86rem;">সম্পত্তি ${bn(i+1)} — ${p.type} · খতিয়ান ${p.khatian} · ${p.quantity}</div>`).join('')}
+    </div>
+  </div>`;
+}
+function memberInstallments(m){
+  return `
+  <h2 class="font-display" style="font-size:1.35rem; margin:0 0 1.3rem;">চাঁদার ইতিহাস — ২০২৬</h2>
+  <div class="surface elevated" style="border-radius:var(--radius-md); overflow:hidden;">
+    <table><thead><tr><th>মাস</th><th>পরিমাণ</th><th>অবস্থা</th><th>পরিশোধের তারিখ</th></tr></thead>
+      <tbody>${m.installments.map(i=>`<tr><td>${MONTHS[i.month]}</td><td>৳ ${i.amount}</td><td>${i.status==='PAID'?'<span class="badge badge-paid">পরিশোধিত</span>':'<span class="badge badge-due">বকেয়া</span>'}</td><td>${i.paidAt||'—'}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>
+  <p style="color:var(--muted); font-size:.82rem; margin-top:.9rem;">চাঁদা পরিশোধ অফিসে সরাসরি (নগদ/বিকাশ/ব্যাংক) করা হয়; প্রশাসন তা এখানে হালনাগাদ করেন।</p>`;
+}
+function memberPassword(m){
+  return `<h2 class="font-display" style="font-size:1.35rem; margin:0 0 1.3rem;">পাসওয়ার্ড পরিবর্তন</h2>
+  <div class="surface elevated" style="border-radius:var(--radius-md); padding:1.5rem; max-width:26rem;">
+    <label class="field-label">বর্তমান পাসওয়ার্ড</label><input type="password" class="field-input" style="margin-bottom:1rem;" placeholder="••••••••">
+    <label class="field-label">নতুন পাসওয়ার্ড</label><input type="password" class="field-input" style="margin-bottom:1rem;" placeholder="••••••••">
+    <label class="field-label">নতুন পাসওয়ার্ড নিশ্চিত করুন</label><input type="password" class="field-input" style="margin-bottom:1.2rem;" placeholder="••••••••">
+    <button class="btn btn-primary" style="width:100%;" onclick="toast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে')">পরিবর্তন সংরক্ষণ করুন</button>
+  </div>`;
+}
+
+/* ===================== MODALS ===================== */
+function modals(){
+  let out = "";
+  if(state.approveModal){
+    const m = state.members.find(x=>x.id===state.approveModal);
+    const previewId = `KAM-2026-${String(seq).padStart(4,'0')}`;
+    out += `<div class="modal-backdrop" onclick="if(event.target===this){ state.approveModal=null; render(); }">
+      <div class="surface modal-card" style="border-radius:var(--radius-lg); padding:1.7rem; max-width:26rem; width:100%; box-shadow:var(--shadow-lg);">
+        <h3 class="font-display" style="font-size:1.18rem; margin:0 0 .65rem;">আবেদন অনুমোদন করুন</h3>
+        <p style="font-size:.88rem; color:var(--ink-soft); margin:0 0 1.1rem;"><b>${m.name}</b> কে সদস্য হিসেবে অনুমোদন দিলে স্বয়ংক্রিয়ভাবে একটি সদস্য আইডি ও লগইন তথ্য তৈরি হবে।</p>
+        <div class="surface2" style="border-radius:var(--radius-sm); padding:.85rem 1rem; margin-bottom:1.3rem; font-size:.86rem;">
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">সদস্য আইডি</span><b>${previewId}</b></div>
+          <div style="display:flex; justify-content:space-between; margin-top:.35rem;"><span style="color:var(--muted);">ব্যবহারকারী নাম</span><b>member${previewId.split('-')[2]}</b></div>
+          <div style="display:flex; justify-content:space-between; margin-top:.35rem;"><span style="color:var(--muted);">প্রথম লগইনে</span><b>পাসওয়ার্ড পরিবর্তন আবশ্যক</b></div>
+        </div>
+        <div style="display:flex; gap:.6rem; justify-content:flex-end;">
+          <button class="btn btn-ghost btn-sm" onclick="state.approveModal=null; render()">বাতিল</button>
+          <button class="btn btn-primary btn-sm" onclick="confirmApprove('${m.id}')">নিশ্চিত করুন ও অনুমোদন করুন</button>
+        </div>
+      </div></div>`;
+  }
+  if(state.rejectModal){
+    const m = state.members.find(x=>x.id===state.rejectModal);
+    out += `<div class="modal-backdrop" onclick="if(event.target===this){ state.rejectModal=null; render(); }">
+      <div class="surface modal-card" style="border-radius:var(--radius-lg); padding:1.7rem; max-width:26rem; width:100%; box-shadow:var(--shadow-lg);">
+        <h3 class="font-display" style="font-size:1.18rem; margin:0 0 .65rem;">আবেদন প্রত্যাখ্যান করুন</h3>
+        <p style="font-size:.88rem; color:var(--ink-soft); margin:0 0 .85rem;"><b>${m.name}</b> এর আবেদন প্রত্যাখ্যানের কারণ লিখুন। এটি আবেদনকারীকে জানানো হবে।</p>
+        <textarea id="rejectReason" class="field-input" rows="4" placeholder="যেমন: প্রয়োজনীয় দলিল সংযুক্ত নেই..." style="margin-bottom:1.2rem;"></textarea>
+        <div style="display:flex; gap:.6rem; justify-content:flex-end;">
+          <button class="btn btn-ghost btn-sm" onclick="state.rejectModal=null; render()">বাতিল</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmReject('${m.id}')">প্রত্যাখ্যান নিশ্চিত করুন</button>
+        </div>
+      </div></div>`;
+  }
+  if(state.deleteConfirm){
+    const m = state.members.find(x=>x.id===state.deleteConfirm);
+    out += `<div class="modal-backdrop" onclick="if(event.target===this){ state.deleteConfirm=null; render(); }">
+      <div class="surface modal-card" style="border-radius:var(--radius-lg); padding:1.7rem; max-width:24rem; width:100%; box-shadow:var(--shadow-lg);">
+        <h3 class="font-display" style="font-size:1.12rem; margin:0 0 .65rem;">রেকর্ড মুছে ফেলুন?</h3>
+        <p style="font-size:.87rem; color:var(--ink-soft); margin:0 0 1.2rem;"><b>${m.name}</b> এর সদস্য রেকর্ড স্থায়ীভাবে মুছে যাবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।</p>
+        <div style="display:flex; gap:.6rem; justify-content:flex-end;">
+          <button class="btn btn-ghost btn-sm" onclick="state.deleteConfirm=null; render()">বাতিল</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${m.id}')">মুছে ফেলুন</button>
+        </div>
+      </div></div>`;
+  }
+  if(state.forcePwModal){
+    out += `<div class="modal-backdrop">
+      <div class="surface modal-card" style="border-radius:var(--radius-lg); padding:1.7rem; max-width:24rem; width:100%; box-shadow:var(--shadow-lg);">
+        <div style="width:2.7rem; height:2.7rem; border-radius:10px; background:var(--gold-soft); color:var(--gold-strong); display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">${icon('lock')}</div>
+        <h3 class="font-display" style="font-size:1.12rem; margin:0 0 .55rem;">প্রথম লগইন — পাসওয়ার্ড পরিবর্তন আবশ্যক</h3>
+        <p style="font-size:.86rem; color:var(--ink-soft); margin:0 0 1.2rem;">নিরাপত্তার জন্য প্রথম লগইনে নতুন পাসওয়ার্ড সেট করুন।</p>
+        <input type="password" class="field-input" placeholder="নতুন পাসওয়ার্ড" style="margin-bottom:.75rem;">
+        <input type="password" class="field-input" placeholder="নতুন পাসওয়ার্ড নিশ্চিত করুন" style="margin-bottom:1.2rem;">
+        <button class="btn btn-primary" style="width:100%;" onclick="state.forcePwModal=false; currentMember().credentials.mustChangePassword=false; toast('পাসওয়ার্ড সেট করা হয়েছে'); render()">পাসওয়ার্ড সেট করুন ও চালিয়ে যান</button>
+      </div></div>`;
+  }
+  return out;
+}
+
+/* ===================== RENDER ===================== */
+function render(){
+  const app = document.getElementById('app');
+  let inner;
+  if(state.view==="home") inner = viewHome();
+  else if(state.view==="login") inner = viewLogin();
+  else if(state.view==="apply") inner = viewApply();
+  else if(state.view==="admin") inner = viewAdmin();
+  else if(state.view==="member") inner = viewMember();
+  app.innerHTML = shell(inner);
+}
+render();
+</script>
+</body>
+</html>

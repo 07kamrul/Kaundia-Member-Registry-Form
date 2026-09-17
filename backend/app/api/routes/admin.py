@@ -145,6 +145,17 @@ async def create_installment(
     return installment
 
 
+@router.delete("/members/{member_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_member(
+    member_id: int,
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("member.manage")),
+) -> None:
+    member = await _get_member_or_404(db, member_id)
+    await db.delete(member)
+    await db.commit()
+
+
 @router.patch("/installments/{installment_id}", response_model=InstallmentOut)
 async def update_installment(
     installment_id: int,

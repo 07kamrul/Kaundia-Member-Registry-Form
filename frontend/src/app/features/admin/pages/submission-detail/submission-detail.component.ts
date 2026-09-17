@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { JsonPipe } from '@angular/common';
 import { AdminService } from '../../../../core/services/admin.service';
 import type { SubmissionDetail } from '../../../../core/models/admin.model';
+import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-submission-detail',
   standalone: true,
-  imports: [FormsModule, JsonPipe],
+  imports: [FormsModule, JsonPipe, ConfirmModalComponent],
   templateUrl: './submission-detail.component.html',
 })
 export class SubmissionDetailComponent implements OnInit {
@@ -17,7 +18,8 @@ export class SubmissionDetailComponent implements OnInit {
   error = '';
   actionError = '';
   rejectReason = '';
-  showRejectForm = false;
+  showApproveModal = false;
+  showRejectModal = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -46,7 +48,10 @@ export class SubmissionDetailComponent implements OnInit {
     this.actionError = '';
     this.adminService.approveSubmission(this.submission.id).subscribe({
       next: () => this.router.navigate(['/submissions']),
-      error: () => (this.actionError = 'অনুমোদন ব্যর্থ হয়েছে।'),
+      error: () => {
+        this.actionError = 'অনুমোদন ব্যর্থ হয়েছে।';
+        this.showApproveModal = false;
+      },
     });
   }
 
@@ -58,7 +63,10 @@ export class SubmissionDetailComponent implements OnInit {
     this.actionError = '';
     this.adminService.rejectSubmission(this.submission.id, this.rejectReason).subscribe({
       next: () => this.router.navigate(['/submissions']),
-      error: () => (this.actionError = 'বাতিল করা ব্যর্থ হয়েছে।'),
+      error: () => {
+        this.actionError = 'বাতিল করা ব্যর্থ হয়েছে।';
+        this.showRejectModal = false;
+      },
     });
   }
 }
