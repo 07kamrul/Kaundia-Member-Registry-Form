@@ -1,44 +1,70 @@
-<div class="page-with-banner" style="align-items:flex-start;padding-top:3rem">
-  <div style="max-width:60rem;width:100%;margin:0 auto">
-    <div class="card" style="padding:2.5rem;text-align:center;margin-bottom:1.5rem">
-      <img
-        src="/logo.jpeg"
-        alt="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ লোগো"
-        style="width:5.5rem;height:5.5rem;object-fit:cover;border-radius:50%;margin:0 auto 1rem"
-      />
-      <h1 style="font-size:1.8rem;margin:0 0 0.5rem">উত্তর কাউন্দিয়ার জমির মালিকদের কল্যাণ পরিষদ</h1>
-      <p style="color:var(--gray-600);font-size:1rem;line-height:1.8;max-width:34rem;margin:0 auto 1.5rem">
+<section class="hero-section">
+  <div class="hero-grid">
+    <div>
+      <span class="eyebrow">
+        <app-icon name="sparkle" [size]="14" />
+        সদস্য ব্যবস্থাপনা পোর্টাল
+      </span>
+      <h1 class="hero-heading">উত্তর কাউন্দিয়ার<br />জমির মালিকদের কল্যাণ পরিষদ</h1>
+      <p class="hero-copy">
         সদস্যপদের আবেদন থেকে শুরু করে মাসিক চাঁদা পরিশোধ পর্যন্ত — পুরো প্রক্রিয়া এখন অনলাইনে। কাগজে আবেদন করার
         ঝামেলা নেই, অফিসে বারবার যাওয়ার প্রয়োজন নেই।
       </p>
-      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-        <a routerLink="/register" class="btn btn-primary">সদস্যপদের জন্য আবেদন করুন</a>
-        <a routerLink="/login" class="btn btn-secondary">ইতিমধ্যে সদস্য? লগইন করুন</a>
+      <div class="hero-actions">
+        <a routerLink="/register" class="btn btn-primary">
+          <app-icon name="doc" [size]="16" />
+          সদস্যপদের জন্য আবেদন করুন
+        </a>
+        <a routerLink="/login" class="btn btn-ghost">
+          <app-icon name="user" [size]="16" />
+          ইতিমধ্যে সদস্য? লগইন করুন
+        </a>
       </div>
     </div>
 
-    <div class="summary-grid">
-      <div class="summary-card" style="cursor:default">
-        <div class="summary-card-body">
-          <p class="summary-card-title">আবেদন প্রক্রিয়া</p>
-          <p class="summary-card-value">ধাপে ধাপে ফর্ম</p>
-          <p class="summary-card-hint">ব্যক্তিগত তথ্য, ঠিকানা, জমির বিবরণ ও পেমেন্ট তথ্য</p>
-        </div>
+    <div class="card hero-stat-card">
+      <div class="hero-stat-title">
+        <app-icon name="shield" [size]="18" />
+        এই মুহূর্তে
       </div>
-      <div class="summary-card" style="cursor:default">
-        <div class="summary-card-body">
-          <p class="summary-card-title">কমিটির পর্যালোচনা</p>
-          <p class="summary-card-value">যাচাই ও অনুমোদন</p>
-          <p class="summary-card-hint">কার্যনির্বাহী কমিটি ও প্রশাসন প্রতিটি আবেদন যাচাই করেন</p>
-        </div>
+      <div class="hero-stat-row">
+        <span class="hero-stat-label">আবেদন যাচাই</span>
+        <span class="hero-stat-value">অনলাইনে</span>
       </div>
-      <div class="summary-card" style="cursor:default">
-        <div class="summary-card-body">
-          <p class="summary-card-title">সদস্য আইডি ও লগইন</p>
-          <p class="summary-card-value">স্বয়ংক্রিয় ইস্যু</p>
-          <p class="summary-card-hint">অনুমোদনের পর সদস্য আইডি ও লগইন তথ্য ইস্যু করা হয়</p>
-        </div>
+      <div class="hero-stat-row">
+        <span class="hero-stat-label">সদস্য আইডি</span>
+        <span class="hero-stat-value">স্বয়ংক্রিয়</span>
+      </div>
+      <div class="hero-stat-row">
+        <span class="hero-stat-label">মাসিক চাঁদা</span>
+        <span class="hero-stat-value">অনলাইনে পরিশোধ</span>
       </div>
     </div>
   </div>
-</div>
+</section>
+
+<section class="feature-section">
+  <div class="feature-grid">
+    <div class="card feature-card">
+      <div class="feature-icon"><app-icon name="doc" [size]="20" /></div>
+      <p class="feature-title">আবেদন করুন</p>
+      <p class="feature-desc">
+        ব্যক্তিগত তথ্য, ঠিকানা, জমির বিবরণ ও পেমেন্ট তথ্যসহ ধাপে ধাপে ফর্ম পূরণ করুন।
+      </p>
+    </div>
+    <div class="card feature-card">
+      <div class="feature-icon"><app-icon name="users" [size]="20" /></div>
+      <p class="feature-title">কমিটির পর্যালোচনা</p>
+      <p class="feature-desc">
+        কার্যনির্বাহী কমিটি ও প্রশাসন প্রতিটি আবেদন যাচাই করে অনুমোদন বা প্রত্যাখ্যান করেন।
+      </p>
+    </div>
+    <div class="card feature-card">
+      <div class="feature-icon"><app-icon name="coin" [size]="20" /></div>
+      <p class="feature-title">সদস্য আইডি ও লগইন</p>
+      <p class="feature-desc">
+        অনুমোদনের পর স্বয়ংক্রিয়ভাবে সদস্য আইডি তৈরি হয় এবং লগইন তথ্য ইস্যু করা হয়।
+      </p>
+    </div>
+  </div>
+</section>

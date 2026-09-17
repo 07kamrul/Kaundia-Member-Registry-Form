@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+// Font is loaded via <link> tags in index.html (matches the prototype's
+// preconnect + stylesheet approach and avoids a render-blocking @import).
 
 :root {
   /* Prototype-derived dark-green + gold palette, kept under the existing
@@ -194,10 +195,13 @@ a {
 }
 
 .page-with-banner {
-  min-height: 100vh;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('/banner.jpeg');
-  background-size: cover;
-  background-position: center;
+  // The prototype's login/register pages sit on a plain, quiet background —
+  // no photo watermark — so auth-style surfaces stay legible and consistent
+  // with the rest of the site instead of competing with a busy image behind
+  // a translucent card.
+  min-height: 100%;
+  flex: 1;
+  background: var(--gray-50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,6 +216,7 @@ a {
   font-weight: 700;
   cursor: pointer;
   font-size: 1rem;
+  text-decoration: none;
 }
 
 .btn-primary {
@@ -232,6 +237,254 @@ a {
   background: var(--surface);
   border: 1px solid var(--gray-300);
   color: var(--gray-700);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--gray-700);
+}
+
+.btn-ghost:hover {
+  background: var(--gray-50);
+}
+
+.btn-sm {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+/* Public site header/footer — shared chrome for the marketing (home),
+   registration and login pages, matching the prototype's sticky header
+   with brand mark + gold rule + nav actions and simple footer. */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--surface);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.site-header-inner {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0.9rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.6rem;
+  background: var(--emerald-800);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Tiro Bangla', serif;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px -3px rgba(31, 61, 42, 0.55);
+}
+
+.site-header-brand-name {
+  font-family: 'Tiro Bangla', 'Hind Siliguri', serif;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.site-header-brand-org {
+  font-size: 0.72rem;
+  color: var(--gray-600);
+  line-height: 1;
+}
+
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gold-rule {
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-strong), var(--gold));
+}
+
+.site-footer {
+  border-top: 1px solid var(--gray-200);
+  padding: 1.2rem 1.4rem;
+  text-align: center;
+  color: var(--gray-600);
+  font-size: 0.78rem;
+}
+
+/* Home hero — 2-column grid (copy + a live "right now" stats card) that
+   collapses to one column on narrow screens, matching the prototype. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: var(--amber-50);
+  color: var(--gold-strong);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.hero-section {
+  padding: 3.2rem 1.4rem 2.4rem;
+  max-width: 76rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2.6rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero-heading {
+  font-family: 'Tiro Bangla', 'Hind Siliguri', serif;
+  font-size: 2.5rem;
+  line-height: 1.28;
+  margin: 0.9rem 0 1.1rem;
+  color: var(--emerald-900);
+}
+
+.hero-copy {
+  color: var(--gray-600);
+  font-size: 1.02rem;
+  line-height: 1.85;
+  max-width: 38rem;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 1.8rem;
+  flex-wrap: wrap;
+}
+
+.hero-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  text-decoration: none;
+}
+
+.hero-stat-card {
+  border-radius: var(--radius-lg);
+  padding: 1.7rem;
+}
+
+.hero-stat-title {
+  font-family: 'Tiro Bangla', 'Hind Siliguri', serif;
+  font-size: 1.05rem;
+  margin-bottom: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+}
+
+.hero-stat-row + .hero-stat-row {
+  margin-top: 0.8rem;
+}
+
+.hero-stat-label {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+.hero-stat-value {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.feature-section {
+  padding: 1rem 1.4rem 3.6rem;
+  max-width: 76rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.3rem;
+}
+
+@media (max-width: 900px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feature-card {
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.feature-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 0.6rem;
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.feature-title {
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+  font-size: 1.02rem;
+}
+
+.feature-desc {
+  color: var(--gray-600);
+  font-size: 0.88rem;
+  line-height: 1.75;
 }
 
 .field {
@@ -289,6 +542,14 @@ textarea {
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-family: inherit;
+  // Explicit background/text color — without these, native controls fall
+  // back to the browser's own dark-mode widget chrome (solid black fields
+  // with barely-visible text) whenever the OS prefers dark, because `html`
+  // declares `color-scheme: light dark` independently of our own
+  // data-theme tokens. Tying colors to our tokens keeps inputs legible and
+  // in sync with light/dark toggles.
+  background: var(--surface);
+  color: var(--gray-800);
 }
 
 input:focus,

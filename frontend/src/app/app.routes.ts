@@ -7,19 +7,26 @@ import { ADMIN_ROLES } from './core/services/auth.service';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
-  },
-  {
-    path: 'register',
     loadComponent: () =>
-      import('./features/public-registration/registration-page.component').then(
-        (m) => m.RegistrationPageComponent,
-      ),
-  },
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./features/auth/pages/login/login.component').then((m) => m.LoginComponent),
+      import('./features/public-shell/public-shell.component').then((m) => m.PublicShellComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./features/public-registration/registration-page.component').then(
+            (m) => m.RegistrationPageComponent,
+          ),
+      },
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./features/auth/pages/login/login.component').then((m) => m.LoginComponent),
+      },
+    ],
   },
   {
     path: '',

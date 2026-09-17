@@ -1,0 +1,35 @@
+<div class="public-shell">
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="site-header-brand" routerLink="/" (click)="$event.preventDefault(); goHome()">
+        <div class="brand-mark">ক</div>
+        <div>
+          <div class="site-header-brand-name">কাউন্দিয়া সমিতি</div>
+          <div class="site-header-brand-org">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</div>
+        </div>
+      </a>
+      <div class="site-header-actions">
+        <a routerLink="/register" class="btn btn-ghost btn-sm">আবেদন করুন</a>
+        <a routerLink="/login" class="btn btn-primary btn-sm">লগইন</a>
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          title="থিম পরিবর্তন"
+          (click)="theme.toggle()"
+          [attr.aria-label]="theme.theme() === 'dark' ? 'হালকা থিম' : 'গাঢ় থিম'"
+        >
+          <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="16" />
+        </button>
+      </div>
+    </div>
+    <div class="gold-rule"></div>
+  </header>
+
+  <main class="public-shell-content">
+    <router-outlet />
+  </main>
+
+  <footer class="site-footer">
+    এটি একটি সদস্য ব্যবস্থাপনা পোর্টাল। © ২০২৬ উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ।
+  </footer>
+</div>
