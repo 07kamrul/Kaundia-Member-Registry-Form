@@ -10,25 +10,44 @@ import type {
   SubmissionSummary,
 } from '../models/admin.model';
 
-interface MemberSummaryApi {
+interface MemberApiModel {
   id: number;
   member_id: string | null;
   status: SubmissionStatus;
   full_name: string;
   mobile: string;
-  email: string;
-  created_at: string;
-  properties_count: number;
+  email?: string;
+  due_installments: number;
 }
 
-function toSubmissionSummary(row: MemberSummaryApi): SubmissionSummary {
+interface SubmissionSummaryApiModel {
+  id: number;
+  member_id: string | null;
+  status: SubmissionStatus;
+  full_name: string;
+  mobile: string;
+  created_at: string;
+}
+
+function toMember(api: MemberApiModel): Member {
   return {
-    id: String(row.id),
-    fullName: row.full_name,
-    mobile: row.mobile,
-    status: row.status,
-    createdAt: row.created_at,
-    propertiesCount: row.properties_count,
+    id: String(api.id),
+    memberId: api.member_id,
+    status: api.status,
+    fullName: api.full_name,
+    mobile: api.mobile,
+    email: api.email,
+    dueInstallments: api.due_installments,
+  };
+}
+
+function toSubmissionSummary(api: SubmissionSummaryApiModel): SubmissionSummary {
+  return {
+    id: String(api.id),
+    fullName: api.full_name,
+    mobile: api.mobile,
+    status: api.status,
+    createdAt: api.created_at,
   };
 }
 
@@ -41,7 +60,7 @@ export class AdminService {
   listSubmissions(status?: SubmissionStatus): Observable<SubmissionSummary[]> {
     const url = status ? `${this.base}/submissions?status=${status}` : `${this.base}/submissions`;
     return this.http
-      .get<MemberSummaryApi[]>(url)
+      .get<SubmissionSummaryApiModel[]>(url)
       .pipe(map((rows) => rows.map(toSubmissionSummary)));
   }
 
@@ -58,7 +77,13 @@ export class AdminService {
   }
 
   listMembers(): Observable<Member[]> {
-    return this.http.get<Member[]>(`${this.base}/members`);
+    return this.http
+      .get<MemberApiModel[]>(`${this.base}/members`)
+      .pipe(map((rows) => rows.map(toMember)));
+  }
+
+  getMemberInstallments(memberId: string): Observable<Installment[]> {
+    return this.http.get<Installment[]>(`${this.base}/members/${memberId}/installments`);
   }
 
   deleteMember(memberId: string): Observable<void> {

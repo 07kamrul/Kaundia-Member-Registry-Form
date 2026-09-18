@@ -1,78 +1,75 @@
 <div class="app-shell">
-  <aside
-    class="sidebar"
-    [class.sidebar-open]="sidebarOpen()"
-    [class.sidebar-collapsed]="sidebarCollapsed()"
-  >
-    <div class="sidebar-brand" [title]="'উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ'">
-      <span class="sidebar-brand-mark">ক</span>
-      <span class="sidebar-brand-text">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</span>
-    </div>
-
-    <nav class="sidebar-nav">
-      @for (item of navItems; track item.route) {
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="active"
-          class="sidebar-link"
-          [class.sidebar-link-admin]="item.adminOnly"
-          [title]="item.label"
-          (click)="closeSidebar()"
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-header-brand">
+        <button type="button" class="topbar-menu-btn" (click)="toggleSidebar()" aria-label="মেনু খুলুন">
+          <app-icon [name]="sidebarOpen() ? 'close' : 'menu'" [size]="20" />
+        </button>
+        <div class="brand-mark">ক</div>
+        <div>
+          <div class="site-header-brand-name">কাউন্দিয়া সমিতি</div>
+          <div class="site-header-brand-org">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</div>
+        </div>
+      </div>
+      <div class="site-header-actions">
+        @if (welcomeName) {
+          <span class="topbar-welcome">স্বাগতম, {{ welcomeName }}</span>
+        }
+        <button type="button" class="btn btn-ghost btn-sm btn-icon" (click)="logout()">
+          <app-icon name="logout" [size]="16" /> বের হোন
+        </button>
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          (click)="theme.toggle()"
+          [attr.aria-label]="theme.theme() === 'dark' ? 'হালকা থিম' : 'গাঢ় থিম'"
+          title="থিম পরিবর্তন"
         >
-          <app-icon [name]="item.icon" [size]="19" />
-          <span class="sidebar-link-label">{{ item.label }}</span>
-        </a>
+          <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="16" />
+        </button>
+      </div>
+    </div>
+    <div class="gold-rule"></div>
+  </header>
+
+  <div class="app-body">
+    <aside class="sidebar" [class.sidebar-open]="sidebarOpen()">
+      @if (welcomeName) {
+        <div class="card sidebar-user-card">
+          <div class="sidebar-avatar">{{ avatarInitial }}</div>
+          <p class="sidebar-user-name">{{ welcomeName }}</p>
+          @if (memberId()) {
+            <p class="sidebar-user-id">{{ memberId() }}</p>
+          }
+        </div>
       }
-    </nav>
 
-    <button
-      type="button"
-      class="sidebar-collapse-btn"
-      (click)="toggleCollapse()"
-      [attr.aria-label]="sidebarCollapsed() ? 'সাইডবার প্রসারিত করুন' : 'সাইডবার সংকুচিত করুন'"
-    >
-      <app-icon [name]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="18" />
-      <span class="sidebar-link-label">সংকুচিত করুন</span>
-    </button>
+      <nav class="sidebar-nav">
+        @for (item of navItems; track item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="sidebar-link"
+            [class.sidebar-link-admin]="item.adminOnly"
+            (click)="closeSidebar()"
+          >
+            <app-icon [name]="item.icon" [size]="19" />
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    </aside>
 
-    <button type="button" class="sidebar-logout" (click)="logout()" title="লগআউট">
-      <app-icon name="logout" [size]="19" />
-      <span class="sidebar-link-label">লগআউট</span>
-    </button>
-  </aside>
-
-  @if (sidebarOpen()) {
-    <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
-  }
-
-  <div class="app-main" [class.app-main-collapsed]="sidebarCollapsed()">
-    <header class="topbar">
-      <button type="button" class="topbar-menu-btn" (click)="toggleSidebar()" aria-label="মেনু খুলুন">
-        <app-icon [name]="sidebarOpen() ? 'close' : 'menu'" [size]="22" />
-      </button>
-      <button
-        type="button"
-        class="topbar-collapse-btn"
-        (click)="toggleCollapse()"
-        [attr.aria-label]="sidebarCollapsed() ? 'সাইডবার প্রসারিত করুন' : 'সাইডবার সংকুচিত করুন'"
-      >
-        <app-icon name="menu" [size]="20" />
-      </button>
-      <span class="topbar-title">{{ pageTitle }}</span>
-      <button
-        type="button"
-        class="theme-toggle-btn"
-        style="margin-left:auto"
-        (click)="theme.toggle()"
-        [attr.aria-label]="theme.theme() === 'dark' ? 'হালকা থিম' : 'গাঢ় থিম'"
-        title="থিম পরিবর্তন"
-      >
-        <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="18" />
-      </button>
-    </header>
+    @if (sidebarOpen()) {
+      <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+    }
 
     <main class="app-content">
       <router-outlet />
     </main>
   </div>
+
+  <footer class="site-footer">
+    এটি একটি ক্লিকযোগ্য প্রোটোটাইপ — কোনো তথ্য প্রকৃতপক্ষে সংরক্ষিত হয় না। © ২০২৬ উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ।
+  </footer>
 </div>

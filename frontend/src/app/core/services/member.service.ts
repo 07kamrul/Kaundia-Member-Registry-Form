@@ -10,8 +10,10 @@ export interface MemberProfile {
   fatherOrHusband: string;
   mother: string;
   dob: string;
+  nid?: string;
   mobile: string;
   email?: string;
+  occupation?: string;
   permanentHouse?: string;
   permanentRoad?: string;
   permanentPostOffice?: string;

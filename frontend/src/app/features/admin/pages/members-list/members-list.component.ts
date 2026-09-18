@@ -1,34 +1,27 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import type { Installment, Member } from '../../../../core/models/admin.model';
+import type { Member } from '../../../../core/models/admin.model';
 import { IconComponent } from '../../../../shared/icon/icon.component';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
-
-interface MemberWithInstallments extends Member {
-  installments: Installment[];
-  expanded: boolean;
-  newYear: number;
-  newMonth: number;
-  newAmount: number;
-}
 
 @Component({
   selector: 'app-members-list',
   standalone: true,
-  imports: [FormsModule, IconComponent, ConfirmModalComponent],
+  imports: [IconComponent, ConfirmModalComponent],
   templateUrl: './members-list.component.html',
 })
 export class MembersListComponent implements OnInit {
-  members: MemberWithInstallments[] = [];
+  members: Member[] = [];
   loading = false;
   error = '';
-  deleteTarget: MemberWithInstallments | null = null;
+  deleteTarget: Member | null = null;
   deleting = false;
 
   constructor(
     private adminService: AdminService,
+    private router: Router,
     public auth: AuthService,
   ) {}
 
@@ -36,14 +29,7 @@ export class MembersListComponent implements OnInit {
     this.loading = true;
     this.adminService.listMembers().subscribe({
       next: (data) => {
-        this.members = data.map((m) => ({
-          ...m,
-          installments: [],
-          expanded: false,
-          newYear: new Date().getFullYear(),
-          newMonth: new Date().getMonth() + 1,
-          newAmount: 0,
-        }));
+        this.members = data;
         this.loading = false;
       },
       error: () => {
@@ -53,29 +39,19 @@ export class MembersListComponent implements OnInit {
     });
   }
 
-  addInstallment(member: MemberWithInstallments): void {
-    this.adminService
-      .addInstallment(member.id, {
-        year: member.newYear,
-        month: member.newMonth,
-        amount: member.newAmount,
-      })
-      .subscribe({
-        next: (installment) => member.installments.push(installment),
-      });
+  contributionLabel(member: Member): string {
+    if (member.status !== 'approved') return '—';
+    return member.dueInstallments > 0
+      ? `${member.dueInstallments} মাস বকেয়া`
+      : 'সম্পূর্ণ পরিশোধিত';
   }
 
-  toggleStatus(member: MemberWithInstallments, installment: Installment): void {
-    const nextStatus = installment.status === 'paid' ? 'due' : 'paid';
-    this.adminService.updateInstallment(installment.id, nextStatus).subscribe({
-      next: (updated) => {
-        const idx = member.installments.findIndex((i) => i.id === installment.id);
-        if (idx >= 0) member.installments[idx] = updated;
-      },
-    });
+  viewContributions(member: Member): void {
+    if (member.status !== 'approved') return;
+    this.router.navigate(['/installments-management'], { queryParams: { memberId: member.id } });
   }
 
-  askDelete(member: MemberWithInstallments): void {
+  askDelete(member: Member): void {
     if (!this.auth.hasPermission('member.manage')) return;
     this.deleteTarget = member;
   }

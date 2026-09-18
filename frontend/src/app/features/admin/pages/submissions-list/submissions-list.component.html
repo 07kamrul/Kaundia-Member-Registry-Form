@@ -6,7 +6,7 @@
     </div>
   </div>
 
-  <div class="field" style="max-width:16rem">
+  <div class="field filter-field">
     <label>স্ট্যাটাস অনুযায়ী ফিল্টার</label>
     <select [value]="statusFilter" (change)="onFilterChange($event)">
       @for (s of statuses; track s) {
@@ -48,7 +48,7 @@
               </td>
               <td>{{ s.createdAt }}</td>
               <td>
-                <a [routerLink]="['/submissions', s.id]" class="btn-icon" style="color:var(--emerald-800);text-decoration:none;font-weight:600">
+                <a [routerLink]="['/submissions', s.id]" class="btn-icon table-link">
                   বিস্তারিত <app-icon name="chevron-right" [size]="16" />
                 </a>
               </td>

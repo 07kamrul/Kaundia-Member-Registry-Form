@@ -84,6 +84,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'installments-management',
+        canActivate: [roleGuard(ADMIN_ROLES)],
+        loadComponent: () =>
+          import(
+            './features/admin/pages/installments-management/installments-management.component'
+          ).then((m) => m.InstallmentsManagementComponent),
+      },
+      {
         path: 'roles',
         canActivate: [permissionGuard(['manage_roles'])],
         loadComponent: () =>

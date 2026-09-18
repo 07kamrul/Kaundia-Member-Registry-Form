@@ -29,6 +29,7 @@
   --red-700: #8A2F22;
   --red-800: #6E251B;
   --surface: #FFFFFF;
+  --surface-2: #F3EFE3;
   --modal-surface: #FFFFFF;
 
   --radius-sm: 0.5rem;
@@ -65,6 +66,7 @@
     --red-700: #E2917E;
     --red-800: #F3C6BA;
     --surface: #181D14;
+    --surface-2: #20261A;
     --modal-surface: #181D14;
   }
 }
@@ -94,6 +96,7 @@
   --red-700: #E2917E;
   --red-800: #F3C6BA;
   --surface: #181D14;
+  --surface-2: #20261A;
   --modal-surface: #181D14;
 }
 
@@ -241,12 +244,13 @@ a {
 
 .btn-ghost {
   background: transparent;
-  border: none;
-  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-800);
 }
 
 .btn-ghost:hover {
-  background: var(--gray-50);
+  background: var(--surface-2);
+  border-color: var(--gray-400);
 }
 
 .btn-sm {
@@ -1307,6 +1311,258 @@ textarea:focus {
   color: var(--gray-600);
   padding: 1.5rem 0;
   font-size: 0.9rem;
+}
+
+.detail-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 640px) {
+  .detail-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  }
+}
+
+.detail-card {
+  padding: 0.9rem 1rem;
+}
+
+.detail-card-title {
+  font-weight: 700;
+  color: var(--emerald-800);
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+.detail-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+  border-bottom: 1px dashed var(--gray-200);
+}
+
+.detail-card-row:last-child {
+  border-bottom: none;
+}
+
+.detail-card-label {
+  color: var(--gray-600);
+}
+
+.detail-card-value {
+  font-weight: 600;
+  color: var(--gray-800);
+  text-align: right;
+}
+
+/* Toggle switch used for per-role permission cards. */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 2.5rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-switch-track {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background: var(--gray-300);
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
+}
+
+.toggle-switch-track::before {
+  content: '';
+  position: absolute;
+  height: 1.1rem;
+  width: 1.1rem;
+  left: 0.15rem;
+  bottom: 0.15rem;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.toggle-switch input:checked + .toggle-switch-track {
+  background: var(--emerald-700);
+}
+
+.toggle-switch input:checked + .toggle-switch-track::before {
+  transform: translateX(1.1rem);
+}
+
+.toggle-switch input:disabled + .toggle-switch-track {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.role-card {
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.role-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.role-card-name {
+  font-weight: 700;
+  color: var(--emerald-900);
+  font-size: 1rem;
+}
+
+.role-card-permission {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.role-card-permission:last-child {
+  border-bottom: none;
+}
+
+.role-card-permission-label {
+  font-size: 0.85rem;
+}
+
+.role-card-permission-desc {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+/* Member dashboard stat tiles + monthly installment badge strip. */
+.stat-tile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .stat-tile-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.stat-tile {
+  padding: 1.2rem 1.35rem;
+  text-align: center;
+}
+
+.stat-tile-label {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin: 0 0 0.4rem;
+}
+
+.stat-tile-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--emerald-900);
+  margin: 0;
+}
+
+.month-badge-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.month-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  min-width: 4.5rem;
+}
+
+/* Admin installments management: member list + month-card master-detail layout. */
+.installments-master-detail {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .installments-master-detail {
+    grid-template-columns: 16rem 1fr;
+  }
+}
+
+.installments-member-list {
+  padding: 0.7rem;
+  align-self: start;
+}
+
+.installments-member-item {
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+}
+
+.installments-member-item:hover {
+  background: var(--gray-50);
+}
+
+.installments-member-item.active {
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+}
+
+.installments-member-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.installments-member-id {
+  font-size: 0.76rem;
+  color: var(--gray-600);
+}
+
+.installments-detail-panel {
+  padding: 1.3rem;
+}
+
+.installments-month-card {
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  min-width: 11rem;
+  flex: 1 1 11rem;
+}
+
+.filter-field {
+  max-width: 16rem;
+}
+
+.table-link {
+  color: var(--emerald-800);
+  text-decoration: none;
+  font-weight: 600;
 }
 
 .spinner {

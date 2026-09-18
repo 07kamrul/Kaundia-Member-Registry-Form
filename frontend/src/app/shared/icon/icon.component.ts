@@ -22,7 +22,8 @@ export type IconName =
   | 'shield'
   | 'doc'
   | 'coin'
-  | 'arrowleft';
+  | 'arrowleft'
+  | 'eye';
 
 const ICON_PATHS: Record<IconName, string> = {
   dashboard:
@@ -52,6 +53,7 @@ const ICON_PATHS: Record<IconName, string> = {
   doc: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 12h5M9.5 15.5h5"/>',
   coin: '<circle cx="12" cy="12" r="8.5"/><path d="M9.5 15.5V9.8c0-1 .8-1.8 1.8-1.8h.4c1 0 1.8.8 1.8 1.8v.2M9.5 12.3h4.5"/>',
   arrowleft: '<path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
 };
 
 @Component({

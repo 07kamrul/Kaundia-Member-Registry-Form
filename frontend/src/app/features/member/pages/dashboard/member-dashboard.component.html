@@ -1,31 +1,45 @@
 <div style="max-width:56rem;margin:0 auto">
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">সদস্য ড্যাশবোর্ড</h1>
-      <p class="page-subtitle">আপনার প্রোফাইল ও কার্যক্রমের সারসংক্ষেপ</p>
-    </div>
-  </div>
-
   @if (loading) {
     <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
-  } @else {
-    @if (profile) {
-      <p style="font-size:1.1rem;font-weight:600;margin:0 0 1rem">স্বাগতম, {{ profile.fullName }}</p>
-    }
-    <div class="summary-grid">
-      @for (card of cards; track card.route) {
-        <a [routerLink]="card.route" class="summary-card">
-          <span class="summary-card-icon"><app-icon [name]="card.icon" [size]="22" /></span>
-          <div class="summary-card-body">
-            <p class="summary-card-title">{{ card.title }}</p>
-            <p class="summary-card-value">{{ card.value }}</p>
-            <p class="summary-card-hint">{{ card.hint }}</p>
-          </div>
-          <span class="summary-card-chevron"><app-icon name="chevron-right" [size]="18" /></span>
-        </a>
-      }
+  } @else if (profile) {
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">স্বাগতম, {{ profile.fullName }}</h1>
+      </div>
     </div>
+
+    <div class="stat-tile-grid">
+      <div class="card stat-tile">
+        <p class="stat-tile-label">সদস্য আইডি</p>
+        <p class="stat-tile-value">{{ profile.memberId }}</p>
+      </div>
+      <div class="card stat-tile">
+        <p class="stat-tile-label">পরিশোধিত মাস</p>
+        <p class="stat-tile-value" style="color:var(--emerald-800)">{{ paidCount }} / {{ totalCount }}</p>
+      </div>
+      <div class="card stat-tile">
+        <p class="stat-tile-label">বকেয়া মাস</p>
+        <p class="stat-tile-value" [style.color]="dueCount ? 'var(--red-700)' : 'var(--emerald-800)'">{{ dueCount }}</p>
+      </div>
+    </div>
+
+    @if (recentInstallments.length) {
+      <div class="card" style="padding:1rem 1.1rem">
+        <p class="stat-tile-label" style="margin-bottom:0.6rem">সাম্প্রতিক চাঁদার অবস্থা</p>
+        <div class="month-badge-strip">
+          @for (installment of recentInstallments; track installment.id) {
+            <span
+              class="status-badge"
+              [class.status-paid]="installment.status === 'paid'"
+              [class.status-due]="installment.status === 'due'"
+            >
+              {{ installment.label }}: {{ installment.status === 'paid' ? 'পরিশোধিত' : 'বকেয়া' }}
+            </span>
+          }
+        </div>
+      </div>
+    }
   }
 </div>

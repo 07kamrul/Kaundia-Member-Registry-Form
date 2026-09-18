@@ -46,10 +46,12 @@ export interface SubmissionDetail extends SubmissionSummary {
 
 export interface Member {
   id: string;
-  memberId: string;
+  memberId: string | null;
+  status: SubmissionStatus;
   fullName: string;
   mobile: string;
   email?: string;
+  dueInstallments: number;
 }
 
 export interface Installment {

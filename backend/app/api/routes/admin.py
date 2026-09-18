@@ -10,7 +10,7 @@ from app.core.security import generate_temp_password, hash_password
 from app.db.session import get_db
 from app.models.admin import AdminUser
 from app.models.credential import MemberCredential
-from app.models.installment import Installment
+from app.models.installment import Installment, InstallmentStatus
 from app.models.member import Member, MemberStatus
 from app.models.property import Property
 from app.schemas.installment import InstallmentCreate, InstallmentOut, InstallmentUpdate
@@ -117,9 +117,43 @@ async def reject_submission(
 async def list_members(
     db: AsyncSession = Depends(get_db),
     _admin: AdminUser = Depends(require_permission("member.view_all")),
-) -> list[Member]:
+) -> list[MemberSummary]:
+    members_result = await db.execute(select(Member).order_by(Member.created_at.desc()))
+    members = list(members_result.scalars().all())
+
+    due_counts_result = await db.execute(
+        select(Installment.member_id, func.count())
+        .where(Installment.status == InstallmentStatus.DUE)
+        .group_by(Installment.member_id)
+    )
+    due_counts = dict(due_counts_result.all())
+
+    return [
+        MemberSummary(
+            id=member.id,
+            member_id=member.member_id,
+            status=member.status,
+            full_name=member.full_name,
+            mobile=member.mobile,
+            email=member.email,
+            created_at=member.created_at,
+            due_installments=due_counts.get(member.id, 0),
+        )
+        for member in members
+    ]
+
+
+@router.get("/members/{member_id}/installments", response_model=list[InstallmentOut])
+async def list_member_installments(
+    member_id: int,
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("member.view_all")),
+) -> list[Installment]:
+    await _get_member_or_404(db, member_id)
     result = await db.execute(
-        select(Member).where(Member.status == MemberStatus.APPROVED).order_by(Member.member_id)
+        select(Installment)
+        .where(Installment.member_id == member_id)
+        .order_by(Installment.year, Installment.month)
     )
     return list(result.scalars().all())
 
