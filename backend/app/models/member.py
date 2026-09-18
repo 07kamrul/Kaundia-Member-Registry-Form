@@ -89,6 +89,10 @@ class Member(Base):
         back_populates="member", cascade="all, delete-orphan"
     )
 
+    @property
+    def properties_count(self) -> int:
+        return len(self.properties)
+
 
 from app.models.property import Property  # noqa: E402
 from app.models.nominee import Nominee  # noqa: E402

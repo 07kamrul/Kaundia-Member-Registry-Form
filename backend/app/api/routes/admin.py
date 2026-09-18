@@ -26,7 +26,7 @@ async def list_submissions(
     db: AsyncSession = Depends(get_db),
     _admin: AdminUser = Depends(require_permission("membership.review")),
 ) -> list[Member]:
-    query = select(Member)
+    query = select(Member).options(selectinload(Member.properties))
     if status_filter is not None:
         query = query.where(Member.status == status_filter)
     result = await db.execute(query.order_by(Member.created_at.desc()))

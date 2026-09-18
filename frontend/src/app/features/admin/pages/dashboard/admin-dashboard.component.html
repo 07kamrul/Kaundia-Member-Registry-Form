@@ -1,0 +1,56 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        বিচারাধীন আবেদন
+        @if (pending.length > 0) {
+          <span class="status-badge status-pending" style="margin-left:.5rem">{{ pending.length }}</span>
+        }
+      </h1>
+      <p class="page-subtitle">নতুন সদস্যপদের আবেদনসমূহ পর্যালোচনা করুন</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else {
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>রেফারেন্স</th>
+            <th>আবেদনকারী</th>
+            <th>মোবাইল</th>
+            <th>সম্পত্তি</th>
+            <th>জমার তারিখ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of pending; track s.id) {
+            <tr>
+              <td>{{ referenceFor(s) }}</td>
+              <td>{{ s.fullName }}</td>
+              <td>{{ s.mobile }}</td>
+              <td>{{ s.propertiesCount }}টি</td>
+              <td>{{ s.createdAt | date: 'yyyy-MM-dd' }}</td>
+              <td>
+                <a
+                  [routerLink]="['/submissions', s.id]"
+                  class="btn btn-primary btn-sm"
+                  style="text-decoration:none"
+                >
+                  বিস্তারিত <app-icon name="chevron-right" [size]="16" />
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="empty-state">কোনো বিচারাধীন আবেদন নেই</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

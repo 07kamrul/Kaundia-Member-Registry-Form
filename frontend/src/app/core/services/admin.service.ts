@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import type { Observable } from 'rxjs';
+import { map, type Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
   Installment,
@@ -10,6 +10,28 @@ import type {
   SubmissionSummary,
 } from '../models/admin.model';
 
+interface MemberSummaryApi {
+  id: number;
+  member_id: string | null;
+  status: SubmissionStatus;
+  full_name: string;
+  mobile: string;
+  email: string;
+  created_at: string;
+  properties_count: number;
+}
+
+function toSubmissionSummary(row: MemberSummaryApi): SubmissionSummary {
+  return {
+    id: String(row.id),
+    fullName: row.full_name,
+    mobile: row.mobile,
+    status: row.status,
+    createdAt: row.created_at,
+    propertiesCount: row.properties_count,
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private base = `${environment.apiBaseUrl}/admin`;
@@ -18,7 +40,9 @@ export class AdminService {
 
   listSubmissions(status?: SubmissionStatus): Observable<SubmissionSummary[]> {
     const url = status ? `${this.base}/submissions?status=${status}` : `${this.base}/submissions`;
-    return this.http.get<SubmissionSummary[]>(url);
+    return this.http
+      .get<MemberSummaryApi[]>(url)
+      .pipe(map((rows) => rows.map(toSubmissionSummary)));
   }
 
   getSubmission(id: string): Observable<SubmissionDetail> {

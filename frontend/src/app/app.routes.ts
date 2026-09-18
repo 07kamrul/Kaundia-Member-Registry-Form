@@ -36,9 +36,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/member/pages/dashboard/member-dashboard.component').then(
-            (m) => m.MemberDashboardComponent,
-          ),
+          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
         path: 'profile',
