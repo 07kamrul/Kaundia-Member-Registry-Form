@@ -3,11 +3,13 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  inject,
   signal,
   ViewChild,
 } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import SignaturePad from 'signature_pad';
 import { MAX_PHOTO_BYTES } from '../../core/models/registration.model';
 import { RegistrationService } from '../../core/services/registration.service';
@@ -30,12 +32,12 @@ export interface RegistrationStep {
 }
 
 export const REGISTRATION_STEPS: RegistrationStep[] = [
-  { id: 1, title: 'সদস্যের তথ্য', shortLabel: 'সদস্য' },
-  { id: 2, title: 'সম্পত্তি ও মালিকানা', shortLabel: 'সম্পত্তি' },
-  { id: 3, title: 'জরুরি যোগাযোগ ও নমিনি', shortLabel: 'নমিনি' },
-  { id: 4, title: 'পেমেন্ট', shortLabel: 'পেমেন্ট' },
-  { id: 5, title: 'অঙ্গীকার ও স্বাক্ষর', shortLabel: 'স্বাক্ষর' },
-  { id: 6, title: 'পর্যালোচনা ও সাবমিট', shortLabel: 'পর্যালোচনা' },
+  { id: 1, title: 'registration.stepTitles.memberInfo', shortLabel: 'registration.stepShortLabels.memberInfo' },
+  { id: 2, title: 'registration.stepTitles.property', shortLabel: 'registration.stepShortLabels.property' },
+  { id: 3, title: 'registration.stepTitles.contactAndNominee', shortLabel: 'registration.stepShortLabels.nominee' },
+  { id: 4, title: 'registration.stepTitles.payment', shortLabel: 'registration.stepShortLabels.payment' },
+  { id: 5, title: 'registration.stepTitles.declarationAndSignature', shortLabel: 'registration.stepShortLabels.signature' },
+  { id: 6, title: 'registration.stepTitles.review', shortLabel: 'registration.stepShortLabels.review' },
 ];
 
 @Component({
@@ -52,6 +54,7 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
     PaymentInfoComponent,
     ConfirmationComponent,
     ReviewSummaryComponent,
+    TranslatePipe,
   ],
   templateUrl: './registration-page.component.html',
 })
@@ -69,6 +72,8 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
 
   steps = REGISTRATION_STEPS;
   currentStep = 1;
+
+  private readonly translate = inject(TranslateService);
 
   constructor(
     private fb: FormBuilder,
@@ -121,11 +126,11 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      this.serverError = 'ছবির ফাইল নির্বাচন করুন (JPG/PNG)';
+      this.serverError = this.translate.instant('registration.memberInfo.photoTypeError');
       return;
     }
     if (file.size > MAX_PHOTO_BYTES) {
-      this.serverError = 'ছবির সাইজ ৩ এমবি-এর কম হতে হবে';
+      this.serverError = this.translate.instant('registration.memberInfo.photoSizeError');
       return;
     }
 
@@ -147,20 +152,33 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     const errs: string[] = [];
     const v = this.form.value;
 
-    if (!v.fullName?.trim()) errs.push('পূর্ণ নাম আবশ্যক');
-    if (!v.fatherOrHusband?.trim()) errs.push('পিতা/স্বামী আবশ্যক');
-    if (!v.mother?.trim()) errs.push('মাতা আবশ্যক');
-    if (!v.dob) errs.push('জন্ম তারিখ আবশ্যক');
-    if (!v.mobile?.trim()) errs.push('মোবাইল আবশ্যক');
+    if (!v.fullName?.trim()) errs.push(this.translate.instant('registration.validation.fullNameRequired'));
+    if (!v.fatherOrHusband?.trim())
+      errs.push(this.translate.instant('registration.validation.fatherOrHusbandRequired'));
+    if (!v.mother?.trim()) errs.push(this.translate.instant('registration.validation.motherRequired'));
+    if (!v.dob) errs.push(this.translate.instant('registration.validation.dobRequired'));
+    if (!v.mobile?.trim()) errs.push(this.translate.instant('registration.validation.mobileRequired'));
     else if (!MOBILE_PATTERN.test(v.mobile.trim()))
-      errs.push('মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)');
-    if (!v.gender?.trim()) errs.push('লিঙ্গ নির্বাচন করুন');
-    if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) errs.push('ই-মেইল সঠিক নয়');
-    if (v.nid && !/^\d{10,17}$/.test(v.nid)) errs.push('NID নম্বর ১০-১৭ সংখ্যার হতে হবে');
+      errs.push(this.translate.instant('registration.validation.mobileInvalid'));
+    if (!v.gender?.trim()) errs.push(this.translate.instant('registration.validation.genderRequired'));
+    if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email))
+      errs.push(this.translate.instant('registration.validation.emailInvalid'));
+    if (v.nid && !/^\d{10,17}$/.test(v.nid))
+      errs.push(this.translate.instant('registration.validation.nidInvalid'));
 
-    errs.push(...this.validateAddressGroup('বর্তমান ঠিকানা', v.currentAddress));
+    errs.push(
+      ...this.validateAddressGroup(
+        this.translate.instant('registration.validation.currentAddressLabel'),
+        v.currentAddress,
+      ),
+    );
     if (this.form.get('permanentAddress')?.enabled) {
-      errs.push(...this.validateAddressGroup('স্থায়ী ঠিকানা', v.permanentAddress));
+      errs.push(
+        ...this.validateAddressGroup(
+          this.translate.instant('registration.validation.permanentAddressLabel'),
+          v.permanentAddress,
+        ),
+      );
     }
 
     return errs;
@@ -178,12 +196,18 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     },
   ): string[] {
     const errs: string[] = [];
-    if (!address.division?.trim()) errs.push(`${label}: বিভাগ আবশ্যক`);
-    if (!address.district?.trim()) errs.push(`${label}: জেলা আবশ্যক`);
-    if (!address.upazila?.trim()) errs.push(`${label}: উপজেলা/থানা আবশ্যক`);
-    if (!address.postOffice?.trim()) errs.push(`${label}: ডাকঘর আবশ্যক`);
-    if (!address.road?.trim()) errs.push(`${label}: রাস্তা/গ্রাম আবশ্যক`);
-    if (!address.house?.trim()) errs.push(`${label}: বাসা/হোল্ডিং নং আবশ্যক`);
+    if (!address.division?.trim())
+      errs.push(`${label}: ${this.translate.instant('registration.addressInfo.divisionRequired')}`);
+    if (!address.district?.trim())
+      errs.push(`${label}: ${this.translate.instant('registration.addressInfo.districtRequired')}`);
+    if (!address.upazila?.trim())
+      errs.push(`${label}: ${this.translate.instant('registration.addressInfo.upazilaRequired')}`);
+    if (!address.postOffice?.trim())
+      errs.push(`${label}: ${this.translate.instant('registration.addressInfo.postOfficeRequired')}`);
+    if (!address.road?.trim())
+      errs.push(`${label}: ${this.translate.instant('registration.addressInfo.roadRequired')}`);
+    if (!address.house?.trim())
+      errs.push(`${label}: ${this.translate.instant('registration.addressInfo.houseRequired')}`);
     return errs;
   }
 
@@ -192,36 +216,46 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     const v = this.form.value;
 
     if (!v.propertyCount) {
-      errs.push('সম্পত্তির সংখ্যা নির্বাচন করুন');
+      errs.push(this.translate.instant('registration.validation.propertyCountRequired'));
       return errs;
     }
 
     (v.properties as any[]).forEach((property, i) => {
-      const label = `সম্পত্তি #${i + 1}`;
+      const label = this.translate.instant('registration.validation.propertyLabel', { number: i + 1 });
       if (!property.propertyType || property.propertyType.length === 0) {
-        errs.push(`${label}: সম্পত্তির ধরন আবশ্যক`);
+        errs.push(`${label}: ${this.translate.instant('registration.validation.propertyTypeRequired')}`);
       }
-      if (!property.ownership) errs.push(`${label}: মালিকানা আবশ্যক`);
+      if (!property.ownership)
+        errs.push(`${label}: ${this.translate.instant('registration.validation.ownershipRequired')}`);
       if (property.ownership === 'যৌথ') {
         const hasFilledCoOwner = (property.coOwners as any[]).some(
           (co) => co.ownerName?.trim() && co.ownerPhone?.trim(),
         );
         if (!hasFilledCoOwner) {
-          errs.push(`${label}: অন্তত একজন মালিকের নাম ও মোবাইল নং আবশ্যক`);
+          errs.push(`${label}: ${this.translate.instant('registration.validation.coOwnerRequired')}`);
         } else {
           (property.coOwners as any[]).forEach((co, ci) => {
-            if (!co.ownerName?.trim()) errs.push(`${label}, মালিক #${ci + 1}: নাম আবশ্যক`);
-            if (!co.ownerPhone?.trim()) errs.push(`${label}, মালিক #${ci + 1}: মোবাইল নং আবশ্যক`);
+            const ownerLabel = this.translate.instant('registration.validation.ownerLabel', {
+              propertyLabel: label,
+              number: ci + 1,
+            });
+            if (!co.ownerName?.trim())
+              errs.push(`${ownerLabel}: ${this.translate.instant('registration.validation.nameRequired')}`);
+            if (!co.ownerPhone?.trim())
+              errs.push(`${ownerLabel}: ${this.translate.instant('registration.validation.mobileRequired')}`);
             else if (!MOBILE_PATTERN.test(co.ownerPhone.trim()))
-              errs.push(`${label}, মালিক #${ci + 1}: মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)`);
+              errs.push(`${ownerLabel}: ${this.translate.instant('registration.validation.mobileInvalid')}`);
           });
         }
       }
       if (!property.applicableDocs || property.applicableDocs.length === 0) {
-        errs.push(`${label}: প্রযোজ্য কাগজ নির্বাচন আবশ্যক`);
+        errs.push(`${label}: ${this.translate.instant('registration.validation.applicableDocsRequired')}`);
       }
       (property.applicableDocs as any[]).forEach((doc) => {
-        if (!doc.fileDataUrl) errs.push(`${label}: "${doc.type}" এর জন্য ফাইল সংযুক্ত করা আবশ্যক`);
+        if (!doc.fileDataUrl)
+          errs.push(
+            `${label}: ${this.translate.instant('registration.validation.docFileRequired', { docType: doc.type })}`,
+          );
       });
     });
 
@@ -233,17 +267,22 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     const v = this.form.value;
     const nominees = this.form.getRawValue().nominees;
 
-    if (!v.urgentContactName?.trim()) errs.push('জরুরি যোগাযোগ: নাম আবশ্যক');
-    if (!v.urgentContactMobile?.trim()) errs.push('জরুরি যোগাযোগ: মোবাইল আবশ্যক');
+    const urgentContactLabel = this.translate.instant('registration.validation.urgentContactLabel');
+    if (!v.urgentContactName?.trim())
+      errs.push(`${urgentContactLabel}: ${this.translate.instant('registration.validation.nameRequired')}`);
+    if (!v.urgentContactMobile?.trim())
+      errs.push(`${urgentContactLabel}: ${this.translate.instant('registration.validation.mobileRequired')}`);
     else if (!MOBILE_PATTERN.test(v.urgentContactMobile.trim()))
-      errs.push('জরুরি যোগাযোগ: মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)');
+      errs.push(`${urgentContactLabel}: ${this.translate.instant('registration.validation.mobileInvalid')}`);
 
     (nominees as any[]).forEach((nominee, i) => {
-      const label = `মনোনীত ব্যক্তি #${i + 1}`;
-      if (!nominee.name?.trim()) errs.push(`${label}: নাম আবশ্যক`);
-      if (!nominee.mobile?.trim()) errs.push(`${label}: মোবাইল আবশ্যক`);
+      const label = this.translate.instant('registration.validation.nomineeLabel', { number: i + 1 });
+      if (!nominee.name?.trim())
+        errs.push(`${label}: ${this.translate.instant('registration.validation.nameRequired')}`);
+      if (!nominee.mobile?.trim())
+        errs.push(`${label}: ${this.translate.instant('registration.validation.mobileRequired')}`);
       else if (!MOBILE_PATTERN.test(nominee.mobile.trim()))
-        errs.push(`${label}: মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)`);
+        errs.push(`${label}: ${this.translate.instant('registration.validation.mobileInvalid')}`);
     });
 
     return errs;
@@ -253,16 +292,17 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     const errs: string[] = [];
     const v = this.form.value;
 
-    if (!v.admissionFee) errs.push('ভর্তি ফি আবশ্যক');
-    if (!v.subscription) errs.push('চাঁদা আবশ্যক');
-    if (!v.paymentMethod) errs.push('পেমেন্ট মাধ্যম আবশ্যক');
+    if (!v.admissionFee) errs.push(this.translate.instant('registration.payment.admissionFeeRequired'));
+    if (!v.subscription) errs.push(this.translate.instant('registration.payment.subscriptionRequired'));
+    if (!v.paymentMethod) errs.push(this.translate.instant('registration.payment.paymentMethodRequired'));
 
     return errs;
   }
 
   private validateDeclarationStep(): string[] {
     const errs: string[] = [];
-    if (!this.form.value.declarationAccepted) errs.push('অঙ্গীকারনামায় সম্মতি প্রদান আবশ্যক');
+    if (!this.form.value.declarationAccepted)
+      errs.push(this.translate.instant('registration.declaration.consentRequired'));
     return errs;
   }
 
@@ -359,13 +399,13 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
         if (res.success) {
           this.success = { id: res.id ?? '', fullName: this.form.value.fullName };
         } else {
-          this.serverError = res.error ?? 'সাবমিটে সমস্যা হয়েছে';
+          this.serverError = res.error ?? this.translate.instant('registration.submit.genericError');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       },
       error: () => {
         this.submitting = false;
-        this.serverError = 'নেটওয়ার্কে সমস্যা। অনুগ্রহ করে আবার চেষ্টা করুন।';
+        this.serverError = this.translate.instant('registration.submit.networkError');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
     });

@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService } from '../../../../core/services/member.service';
 import type { Installment } from '../../../../core/models/admin.model';
-import { monthName } from '../../../../shared/constants/months';
+import { monthNameKey } from '../../../../shared/constants/months';
 
 @Component({
   selector: 'app-member-installments',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './installments.component.html',
 })
 export class InstallmentsComponent implements OnInit {
@@ -14,7 +16,10 @@ export class InstallmentsComponent implements OnInit {
   loading = false;
   error = '';
 
-  constructor(private memberService: MemberService) {}
+  constructor(
+    private memberService: MemberService,
+    private translate: TranslateService,
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -25,13 +30,13 @@ export class InstallmentsComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.error = 'কিস্তির তালিকা লোড করা যায়নি।';
+        this.error = this.translate.instant('member.installments.loadError');
         this.loading = false;
       },
     });
   }
 
   monthLabel(month: number): string {
-    return monthName(month);
+    return monthNameKey(month);
   }
 }

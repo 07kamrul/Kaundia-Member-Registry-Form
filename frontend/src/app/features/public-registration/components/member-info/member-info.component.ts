@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-member-info',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './member-info.component.html',
 })
 export class MemberInfoComponent {
@@ -14,6 +15,8 @@ export class MemberInfoComponent {
   @Output() photoChange = new EventEmitter<Event>();
   @Output() photoClear = new EventEmitter<void>();
 
+  constructor(private translate: TranslateService) {}
+
   showError(controlName: string): boolean {
     const control = this.form.get(controlName);
     return !!control && control.invalid && (control.touched || this.submitAttempted);
@@ -21,27 +24,40 @@ export class MemberInfoComponent {
 
   errorMessage(controlName: string): string {
     const control = this.form.get(controlName);
-    const messages: Record<string, string> = {
-      fullName: 'পূর্ণ নাম আবশ্যক',
-      fatherOrHusband: 'পিতা/স্বামী আবশ্যক',
-      mother: 'মাতা আবশ্যক',
-      dob: 'জন্ম তারিখ আবশ্যক',
-      gender: 'লিঙ্গ নির্বাচন করুন',
-      memberPhoto: 'সদস্যের ছবি আবশ্যক',
+    const messageKeys: Record<string, string> = {
+      fullName: 'registration.memberInfo.fullNameRequired',
+      fatherOrHusband: 'registration.memberInfo.fatherOrHusbandRequired',
+      mother: 'registration.memberInfo.motherRequired',
+      dob: 'registration.memberInfo.dobRequired',
+      gender: 'registration.memberInfo.genderRequired',
+      memberPhoto: 'registration.memberInfo.memberPhotoRequired',
     };
 
     if (controlName === 'mobile') {
-      return control?.errors?.['required'] ? 'মোবাইল আবশ্যক' : 'মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)';
+      return this.translate.instant(
+        control?.errors?.['required']
+          ? 'registration.memberInfo.mobileRequired'
+          : 'registration.memberInfo.mobileInvalid',
+      );
     }
 
     if (controlName === 'email') {
-      return control?.errors?.['required'] ? 'ই-মেইল আবশ্যক' : 'ই-মেইল সঠিক নয়';
+      return this.translate.instant(
+        control?.errors?.['required']
+          ? 'registration.memberInfo.emailRequired'
+          : 'registration.memberInfo.emailInvalid',
+      );
     }
 
     if (controlName === 'nid') {
-      return control?.errors?.['required'] ? 'NID নম্বর আবশ্যক' : 'NID নম্বর ১০-১৭ সংখ্যার হতে হবে';
+      return this.translate.instant(
+        control?.errors?.['required']
+          ? 'registration.memberInfo.nidRequired'
+          : 'registration.memberInfo.nidInvalid',
+      );
     }
 
-    return messages[controlName] ?? '';
+    const key = messageKeys[controlName];
+    return key ? this.translate.instant(key) : '';
   }
 }

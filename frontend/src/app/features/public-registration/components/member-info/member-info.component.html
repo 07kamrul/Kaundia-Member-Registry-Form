@@ -1,20 +1,20 @@
 <section [formGroup]="form">
-  <h2 class="section-title">১. সদস্যের ব্যক্তিগত তথ্য</h2>
+  <h2 class="section-title">{{ 'registration.stepTitles.memberInfo' | translate }}</h2>
 
   <div class="member-info-columns">
     <div class="member-info-column">
       <div class="member-photo-box">
         <label for="memberPhoto" class="member-photo-frame">
           @if (memberPhotoPreview) {
-            <img [src]="memberPhotoPreview" alt="সদস্যের ছবি" />
+            <img [src]="memberPhotoPreview" [attr.alt]="'registration.memberInfo.photoAlt' | translate" />
           } @else {
-            <span>সদস্যের ছবি<br />২"×২"</span>
+            <span>{{ 'registration.memberInfo.photoPlaceholder' | translate }}<br />2"×2"</span>
           }
         </label>
         <input id="memberPhoto" type="file" accept="image/*" (change)="photoChange.emit($event)" style="display:none" />
         @if (memberPhotoPreview) {
           <button type="button" (click)="photoClear.emit()" class="member-photo-clear">
-            মুছুন
+            {{ 'registration.memberInfo.clearPhotoButton' | translate }}
           </button>
         }
         @if (showError('memberPhoto')) {
@@ -24,7 +24,7 @@
 
       <div class="field">
         <div class="field-label-row">
-          <label for="fullName">পূর্ণ নাম <span class="required">*</span></label>
+          <label for="fullName">{{ 'registration.memberInfo.fullNameLabel' | translate }} <span class="required">*</span></label>
           @if (showError('fullName')) {
             <span class="field-error-inline">{{ errorMessage('fullName') }}</span>
           }
@@ -33,7 +33,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="fatherOrHusband">পিতা/স্বামী <span class="required">*</span></label>
+          <label for="fatherOrHusband">{{ 'registration.memberInfo.fatherOrHusbandLabel' | translate }} <span class="required">*</span></label>
           @if (showError('fatherOrHusband')) {
             <span class="field-error-inline">{{ errorMessage('fatherOrHusband') }}</span>
           }
@@ -42,7 +42,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="mother">মাতা <span class="required">*</span></label>
+          <label for="mother">{{ 'registration.memberInfo.motherLabel' | translate }} <span class="required">*</span></label>
           @if (showError('mother')) {
             <span class="field-error-inline">{{ errorMessage('mother') }}</span>
           }
@@ -51,7 +51,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="dob">জন্ম তারিখ <span class="required">*</span></label>
+          <label for="dob">{{ 'registration.memberInfo.dobLabel' | translate }} <span class="required">*</span></label>
           @if (showError('dob')) {
             <span class="field-error-inline">{{ errorMessage('dob') }}</span>
           }
@@ -63,16 +63,16 @@
     <div class="member-info-column">
       <div class="field">
         <div class="field-label-row">
-          <label for="nid">NID নং <span class="required">*</span></label>
+          <label for="nid">{{ 'registration.memberInfo.nidLabel' | translate }} <span class="required">*</span></label>
           @if (showError('nid')) {
             <span class="field-error-inline">{{ errorMessage('nid') }}</span>
           }
         </div>
-        <input id="nid" type="text" formControlName="nid" placeholder="১০-১৭ সংখ্যা" />
+        <input id="nid" type="text" formControlName="nid" [placeholder]="'registration.memberInfo.nidPlaceholder' | translate" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="mobile">মোবাইল (WhatsApp) <span class="required">*</span></label>
+          <label for="mobile">{{ 'registration.memberInfo.mobileLabel' | translate }} <span class="required">*</span></label>
           @if (showError('mobile')) {
             <span class="field-error-inline">{{ errorMessage('mobile') }}</span>
           }
@@ -81,7 +81,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="email">ই-মেইল <span class="required">*</span></label>
+          <label for="email">{{ 'registration.memberInfo.emailLabel' | translate }} <span class="required">*</span></label>
           @if (showError('email')) {
             <span class="field-error-inline">{{ errorMessage('email') }}</span>
           }
@@ -89,25 +89,25 @@
         <input id="email" type="email" formControlName="email" />
       </div>
       <div class="field">
-        <label for="occupation">পেশা</label>
+        <label for="occupation">{{ 'registration.memberInfo.occupationLabel' | translate }}</label>
         <input id="occupation" type="text" formControlName="occupation" />
       </div>
       <div class="field">
-        <label for="nationality">জাতীয়তা</label>
+        <label for="nationality">{{ 'registration.memberInfo.nationalityLabel' | translate }}</label>
         <input id="nationality" type="text" formControlName="nationality" />
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label>লিঙ্গ <span class="required">*</span></label>
+          <label>{{ 'registration.memberInfo.genderLabel' | translate }} <span class="required">*</span></label>
           @if (showError('gender')) {
             <span class="field-error-inline">{{ errorMessage('gender') }}</span>
           }
         </div>
-        <div class="gender-toggle" role="radiogroup" aria-label="লিঙ্গ">
+        <div class="gender-toggle" role="radiogroup" [attr.aria-label]="'registration.memberInfo.genderLabel' | translate">
           <input type="radio" id="genderMale" formControlName="gender" value="পুরুষ" />
-          <label for="genderMale">পুরুষ</label>
+          <label for="genderMale">{{ 'registration.memberInfo.genderMale' | translate }}</label>
           <input type="radio" id="genderFemale" formControlName="gender" value="মহিলা" />
-          <label for="genderFemale">মহিলা</label>
+          <label for="genderFemale">{{ 'registration.memberInfo.genderFemale' | translate }}</label>
         </div>
       </div>
     </div>

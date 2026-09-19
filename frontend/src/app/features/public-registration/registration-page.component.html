@@ -11,32 +11,32 @@
       }
 
       <div class="reg-header">
-        <img src="/logo.jpeg" alt="সংগঠনের লোগো" class="reg-logo" />
-        
+        <img src="/logo.jpeg" [attr.alt]="'registration.header.logoAlt' | translate" class="reg-logo" />
+
         <div class="reg-header-text">
           <p class="bismillah-line" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
-          <h1 class="reg-org-name">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</h1>
+          <h1 class="reg-org-name">{{ 'registration.header.orgName' | translate }}</h1>
           <p class="reg-org-subtitle">
-            (সকল জমি, বাড়ি ও ফ্ল্যাট মালিকদের ঐক্যবদ্ধ অরাজনৈতিক আবাসন সংগঠন)
+            {{ 'registration.header.orgSubtitle' | translate }}
           </p>
-          <p class="reg-org-subtitle">উত্তর কাউন্দিয়া, সাভার, ঢাকা। | স্থাপিত : ২০২৬ ইং</p>
+          <p class="reg-org-subtitle">{{ 'registration.header.orgLocation' | translate }}</p>
 
           <div class="reg-form-badge">
-            সদস্য নিবন্ধন ও মালিকানা তথ্য ফরম
+            {{ 'registration.header.formBadge' | translate }}
           </div>
         </div>
 
         <div class="reg-header-actions">
-          <a routerLink="/login" class="btn btn-primary reg-login-btn">লগইন</a>
+          <a routerLink="/login" class="btn btn-primary reg-login-btn">{{ 'registration.header.loginLink' | translate }}</a>
         </div>
       </div>
 
       <div class="field submission-date-field">
-        <label for="submissionDate">নিবন্ধনের তারিখ</label>
+        <label for="submissionDate">{{ 'registration.header.submissionDateLabel' | translate }}</label>
         <input id="submissionDate" type="date" formControlName="submissionDate" />
       </div>
 
-      <nav class="stepper" aria-label="নিবন্ধন ধাপসমূহ">
+      <nav class="stepper" [attr.aria-label]="'registration.header.stepperAriaLabel' | translate">
         @for (step of steps; track step.id; let last = $last) {
           <div class="stepper-item" [class.active]="currentStep === step.id" [class.done]="currentStep > step.id">
             <button
@@ -47,7 +47,7 @@
             >
               {{ step.id }}
             </button>
-            <span class="stepper-label">{{ step.shortLabel }}</span>
+            <span class="stepper-label">{{ step.shortLabel | translate }}</span>
           </div>
           @if (!last) {
             <div class="stepper-line" [class.done]="currentStep > step.id"></div>
@@ -86,17 +86,14 @@
       @if (currentStep === 5) {
         <div class="declaration-box">
           <p>
-            <strong>অঙ্গীকারনামা:</strong> আমি অঙ্গীকার করছি যে, উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদের গঠনতন্ত্র,
-            নিয়ম-শৃঙ্খলা ও বিধি সংক্রান্ত সিদ্ধান্তসমূহ মেনে চলবো এবং সংগঠনের উদ্দেশ্য ও স্বার্থবিরোধী কোনো কর্মকাণ্ডে অংশগ্রহণ
-            করবো না। সংগঠনের সিদ্ধান্তসমূহে সদস্যদের অধিকার, সম্পত্তির নিরাপত্তা, পারস্পরিক সহযোগিতা, সামাজিক কল্যাণ ও
-            এলাকার উন্নয়নে দায়িত্বশীলভাবে সহযোগিতা করবো। উপরোক্ত তথ্যসমূহ আমার জ্ঞান ও বিশ্বাস অনুযায়ী সঠিক।
+            <strong>{{ 'registration.declaration.title' | translate }}:</strong> {{ 'registration.declaration.text' | translate }}
           </p>
           <label class="checkbox-item">
             <input type="checkbox" [checked]="form.get('declarationAccepted')?.value" (change)="toggleDeclaration()" />
-            আমি সকল শর্তাবলীতে সম্মতি প্রদান করছি। <span class="required">*</span>
+            {{ 'registration.declaration.consentLabel' | translate }} <span class="required">*</span>
           </label>
           @if (submitAttempted && !form.get('declarationAccepted')?.value) {
-            <p class="field-error">অঙ্গীকারনামায় সম্মতি প্রদান আবশ্যক</p>
+            <p class="field-error">{{ 'registration.declaration.consentRequired' | translate }}</p>
           }
         </div>
 
@@ -118,16 +115,16 @@
 
       <div class="step-nav-row">
         @if (currentStep > 1) {
-          <button type="button" class="btn btn-secondary" (click)="prevStep()">পূর্ববর্তী</button>
+          <button type="button" class="btn btn-secondary" (click)="prevStep()">{{ 'registration.nav.previous' | translate }}</button>
         } @else {
           <span></span>
         }
 
         @if (currentStep < steps.length) {
-          <button type="button" class="btn btn-primary" (click)="nextStep()">পরবর্তী</button>
+          <button type="button" class="btn btn-primary" (click)="nextStep()">{{ 'registration.nav.next' | translate }}</button>
         } @else {
           <button type="submit" class="btn btn-primary submit-btn" [disabled]="submitting">
-            {{ submitting ? 'সাবমিট হচ্ছে...' : 'ফর্ম সাবমিট করুন' }}
+            {{ (submitting ? 'registration.nav.submitting' : 'registration.nav.submit') | translate }}
           </button>
         }
       </div>

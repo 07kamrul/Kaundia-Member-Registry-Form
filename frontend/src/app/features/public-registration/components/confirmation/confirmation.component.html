@@ -1,18 +1,18 @@
 <div style="max-width:42rem;margin:1.5rem auto;padding:1rem">
   <div class="card" style="background:var(--emerald-50);border-color:var(--emerald-200);padding:2rem;text-align:center">
     <div style="font-size:2.5rem;margin-bottom:1rem">✓</div>
-    <h2 style="color:#064e3b;margin-bottom:0.5rem">সাবমিট সফল হয়েছে!</h2>
+    <h2 style="color:#064e3b;margin-bottom:0.5rem">{{ 'registration.confirmation.title' | translate }}</h2>
     <p style="color:#065f46;margin-bottom:1rem">
-      আবেদনকারী: <strong>{{ fullName }}</strong>
+      {{ 'registration.confirmation.applicantLabel' | translate }} <strong>{{ fullName }}</strong>
     </p>
     <p style="color:#065f46;margin-bottom:1.5rem">
-      আপনার রেফারেন্স নং: <strong>{{ submissionId }}</strong>
+      {{ 'registration.confirmation.referenceLabel' | translate }} <strong>{{ submissionId }}</strong>
     </p>
     <p style="color:#374151;margin-bottom:1.5rem">
-      আপনার আবেদনটি অ্যাডমিন কর্তৃক যাচাই-বাছাইয়ের অপেক্ষায় আছে। অনুমোদিত হলে আপনাকে জানানো হবে।
+      {{ 'registration.confirmation.message' | translate }}
     </p>
     <button type="button" class="btn btn-secondary" (click)="reset.emit()">
-      নতুন ফর্ম পূরণ করুন
+      {{ 'registration.confirmation.newFormButton' | translate }}
     </button>
   </div>
 </div>

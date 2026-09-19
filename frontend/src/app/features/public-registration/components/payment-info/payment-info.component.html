@@ -1,23 +1,23 @@
 <section [formGroup]="form">
-  <h2 class="section-title">৬. সদস্যপদ ও চাঁদা</h2>
+  <h2 class="section-title">{{ 'registration.stepTitles.payment' | translate }}</h2>
   <div class="grid-2">
     <div class="field">
-      <label for="admissionFee">ভর্তি ফি (টাকা) <span class="required">*</span></label>
+      <label for="admissionFee">{{ 'registration.payment.admissionFeeLabel' | translate }} <span class="required">*</span></label>
       <input id="admissionFee" type="number" formControlName="admissionFee" />
       @if (showError('admissionFee')) {
         <p class="field-error">{{ errorMessage('admissionFee') }}</p>
       }
     </div>
     <div class="field">
-      <label for="subscription">চাঁদা (টাকা) <span class="required">*</span></label>
+      <label for="subscription">{{ 'registration.payment.subscriptionLabel' | translate }} <span class="required">*</span></label>
       <input id="subscription" type="number" formControlName="subscription" />
       @if (subscriptionBreakdown(); as b) {
         <p class="field-hint">
-          মোট {{ b.totalDecimal }} শতাংশ: প্রথম ১ শতাংশ = {{ firstDecimalRate }}৳
+          {{ 'registration.payment.totalDecimalSummary' | translate: { total: b.totalDecimal, rate: firstDecimalRate } }}
           @if (b.additionalDecimal > 0) {
-            + পরবর্তী {{ b.additionalDecimal }} শতাংশ × {{ additionalDecimalRate }}৳ = {{ b.additionalAmount }}৳
+            {{ 'registration.payment.additionalDecimalSummary' | translate: { additional: b.additionalDecimal, rate: additionalDecimalRate, amount: b.additionalAmount } }}
           }
-          = মোট {{ b.amount }}৳
+          {{ 'registration.payment.totalAmountSummary' | translate: { amount: b.amount } }}
         </p>
       }
       @if (showError('subscription')) {
@@ -25,12 +25,12 @@
       }
     </div>
     <div class="field">
-      <label for="receiptNo">রসিদ নং/Transaction ID</label>
+      <label for="receiptNo">{{ 'registration.payment.receiptNoLabel' | translate }}</label>
       <input id="receiptNo" type="text" formControlName="receiptNo" />
     </div>
   </div>
   <div class="field">
-    <label>মানি রসিদের ছবি</label>
+    <label>{{ 'registration.payment.receiptImageLabel' | translate }}</label>
     <div style="margin-top:0.5rem;max-width:24rem;width:100%">
       @if (form.get('receiptFileDataUrl')?.value) {
         <div style="display:flex;align-items:center;gap:0.75rem;border:1px solid #d1d5db;border-radius:0.5rem;padding:0.5rem">
@@ -38,19 +38,19 @@
             {{ form.get('receiptFileName')?.value }}
           </span>
           <button type="button" (click)="removeReceiptFile()" style="font-size:0.75rem;color:#dc2626;background:none;border:none;cursor:pointer">
-            মুছুন
+            {{ 'registration.payment.removeFile' | translate }}
           </button>
         </div>
       } @else {
         <label
           style="display:flex;align-items:center;justify-content:center;gap:0.5rem;border:2px dashed #d1d5db;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.75rem;cursor:pointer"
         >
-          📎 রসিদের ছবি সংযুক্ত করুন
+          📎 {{ 'registration.payment.attachReceipt' | translate }}
           <input type="file" accept="image/jpeg,image/png,application/pdf" (change)="onReceiptFileChange($event)" style="display:none" />
         </label>
       }
       <p style="font-size:0.6875rem;color:#6b7280;margin:0.25rem 0 0">
-        সর্বোচ্চ {{ maxReceiptFileMb }} এমবি (JPG/PNG/PDF)
+        {{ 'registration.payment.maxFileSizeHint' | translate: { maxMb: maxReceiptFileMb } }}
       </p>
       @if (receiptFileError) {
         <p class="field-error">{{ receiptFileError }}</p>
@@ -58,7 +58,7 @@
     </div>
   </div>
   <div class="field">
-    <label>মাধ্যম <span class="required">*</span></label>
+    <label>{{ 'registration.payment.methodLabel' | translate }} <span class="required">*</span></label>
     <div class="checkbox-row">
       @for (m of paymentMethods; track m) {
         <label class="checkbox-item">
@@ -76,16 +76,16 @@
     }
     @if (isBankSelected) {
       <div class="field-hint" style="border:1px solid #d1d5db;border-radius:0.5rem;padding:0.75rem;margin-top:0.5rem">
-        <p><strong>ব্যাংক:</strong> {{ bankInfo.bankName }}</p>
-        <p><strong>শাখা:</strong> {{ bankInfo.branch }}</p>
-        <p><strong>হিসাবের নাম:</strong> {{ bankInfo.accountName }}</p>
-        <p><strong>হিসাব নং:</strong> {{ bankInfo.accountNumber }}</p>
-        <p><strong>রাউটিং নং:</strong> {{ bankInfo.routingNumber }}</p>
+        <p><strong>{{ 'registration.payment.bankNameLabel' | translate }}:</strong> {{ bankInfo.bankName }}</p>
+        <p><strong>{{ 'registration.payment.branchLabel' | translate }}:</strong> {{ bankInfo.branch }}</p>
+        <p><strong>{{ 'registration.payment.accountNameLabel' | translate }}:</strong> {{ bankInfo.accountName }}</p>
+        <p><strong>{{ 'registration.payment.accountNumberLabel' | translate }}:</strong> {{ bankInfo.accountNumber }}</p>
+        <p><strong>{{ 'registration.payment.routingNumberLabel' | translate }}:</strong> {{ bankInfo.routingNumber }}</p>
       </div>
     }
     @if (isMfsSelected) {
       <div class="field-hint" style="border:1px solid #d1d5db;border-radius:0.5rem;padding:0.75rem;margin-top:0.5rem">
-        <p><strong>MFS নম্বর:</strong> {{ mfsInfo.number }} ({{ mfsInfo.type }})</p>
+        <p><strong>{{ 'registration.payment.mfsNumberLabel' | translate }}:</strong> {{ mfsInfo.number }} ({{ mfsInfo.type }})</p>
       </div>
     }
   </div>

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService } from '../../../../core/services/member.service';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
@@ -12,7 +13,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './change-password.component.html',
 })
 export class ChangePasswordComponent {
@@ -25,6 +26,7 @@ export class ChangePasswordComponent {
     private fb: FormBuilder,
     private memberService: MemberService,
     private router: Router,
+    private translate: TranslateService,
   ) {
     this.form = this.fb.group(
       {
@@ -49,7 +51,7 @@ export class ChangePasswordComponent {
       },
       error: () => {
         this.submitting = false;
-        this.error = 'পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে।';
+        this.error = this.translate.instant('member.changePassword.changeFailedError');
       },
     });
   }

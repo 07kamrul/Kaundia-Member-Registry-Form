@@ -9,7 +9,7 @@
         <ng-content></ng-content>
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" (click)="cancel.emit()">{{ cancelLabel }}</button>
+        <button type="button" class="btn btn-secondary" (click)="cancel.emit()">{{ resolvedCancelLabel }}</button>
         <button
           type="button"
           class="btn"
@@ -18,7 +18,7 @@
           [disabled]="confirmDisabled"
           (click)="confirm.emit()"
         >
-          {{ confirmLabel }}
+          {{ resolvedConfirmLabel }}
         </button>
       </div>
     </div>

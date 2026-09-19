@@ -1,30 +1,31 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import type { Installment, Member } from '../../../../core/models/admin.model';
 import { IconComponent } from '../../../../shared/icon/icon.component';
 
-const MONTH_NAMES = [
+const MONTH_KEYS = [
   '',
-  'জানুয়ারি',
-  'ফেব্রুয়ারি',
-  'মার্চ',
-  'এপ্রিল',
-  'মে',
-  'জুন',
-  'জুলাই',
-  'আগস্ট',
-  'সেপ্টেম্বর',
-  'অক্টোবর',
-  'নভেম্বর',
-  'ডিসেম্বর',
+  'admin.installments.months.january',
+  'admin.installments.months.february',
+  'admin.installments.months.march',
+  'admin.installments.months.april',
+  'admin.installments.months.may',
+  'admin.installments.months.june',
+  'admin.installments.months.july',
+  'admin.installments.months.august',
+  'admin.installments.months.september',
+  'admin.installments.months.october',
+  'admin.installments.months.november',
+  'admin.installments.months.december',
 ];
 
 @Component({
   selector: 'app-installments-management',
   standalone: true,
-  imports: [IconComponent],
+  imports: [IconComponent, TranslatePipe],
   templateUrl: './installments-management.component.html',
 })
 export class InstallmentsManagementComponent implements OnInit {
@@ -42,6 +43,7 @@ export class InstallmentsManagementComponent implements OnInit {
     public auth: AuthService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -57,7 +59,7 @@ export class InstallmentsManagementComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'সদস্য তালিকা লোড করা যায়নি।';
+        this.error = this.translate.instant('admin.installments.errors.loadMembersFailed');
         this.loadingMembers = false;
         this.cdr.markForCheck();
       },
@@ -69,7 +71,8 @@ export class InstallmentsManagementComponent implements OnInit {
   }
 
   monthName(month: number): string {
-    return MONTH_NAMES[month] ?? String(month);
+    const key = MONTH_KEYS[month];
+    return key ? this.translate.instant(key) : String(month);
   }
 
   selectMember(memberId: string): void {
@@ -83,7 +86,7 @@ export class InstallmentsManagementComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'কিস্তির তথ্য লোড করা যায়নি।';
+        this.error = this.translate.instant('admin.installments.errors.loadInstallmentsFailed');
         this.loadingInstallments = false;
         this.cdr.markForCheck();
       },

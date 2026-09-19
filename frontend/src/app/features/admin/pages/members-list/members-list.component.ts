@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import type { Member } from '../../../../core/models/admin.model';
@@ -9,7 +10,7 @@ import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-
 @Component({
   selector: 'app-members-list',
   standalone: true,
-  imports: [IconComponent, ConfirmModalComponent],
+  imports: [IconComponent, ConfirmModalComponent, TranslatePipe],
   templateUrl: './members-list.component.html',
 })
 export class MembersListComponent implements OnInit {
@@ -24,6 +25,7 @@ export class MembersListComponent implements OnInit {
     private router: Router,
     public auth: AuthService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -35,7 +37,7 @@ export class MembersListComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'সদস্য তালিকা লোড করা যায়নি।';
+        this.error = this.translate.instant('admin.membersList.errors.loadFailed');
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -45,8 +47,8 @@ export class MembersListComponent implements OnInit {
   contributionLabel(member: Member): string {
     if (member.status !== 'approved') return '—';
     return member.dueInstallments > 0
-      ? `${member.dueInstallments} মাস বকেয়া`
-      : 'সম্পূর্ণ পরিশোধিত';
+      ? `${member.dueInstallments} ${this.translate.instant('admin.membersList.monthsOverdue')}`
+      : this.translate.instant('admin.membersList.fullyPaid');
   }
 
   viewContributions(member: Member): void {
@@ -70,7 +72,7 @@ export class MembersListComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'সদস্য মুছে ফেলা যায়নি।';
+        this.error = this.translate.instant('admin.membersList.errors.deleteFailed');
         this.deleteTarget = null;
         this.deleting = false;
         this.cdr.markForCheck();

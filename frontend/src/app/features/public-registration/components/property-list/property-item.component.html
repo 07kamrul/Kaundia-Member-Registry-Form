@@ -1,8 +1,8 @@
 <div class="card" style="padding:1rem;margin-bottom:1rem" [formGroup]="property">
-  <h3 style="color:#064e3b;margin-top:0;margin-bottom:1rem">সম্পত্তি #{{ index + 1 }}</h3>
+  <h3 style="color:#064e3b;margin-top:0;margin-bottom:1rem">{{ 'registration.property.itemTitle' | translate }} #{{ index + 1 }}</h3>
 
   <div class="field">
-    <label>সম্পত্তির ধরন <span class="required">*</span></label>
+    <label>{{ 'registration.property.typeLabel' | translate }} <span class="required">*</span></label>
     <div class="checkbox-row">
       @for (t of propertyTypes; track t) {
         <label class="checkbox-item">
@@ -11,28 +11,28 @@
         </label>
       }
       @if (isTypeChecked('অন্যান্য')) {
-        <input type="text" formControlName="propertyTypeOther" placeholder="বিস্তারিত লিখুন" style="max-width:14rem;width:100%" />
+        <input type="text" formControlName="propertyTypeOther" [placeholder]="'registration.property.typeOtherPlaceholder' | translate" style="max-width:14rem;width:100%" />
       }
     </div>
     @if (showPropertyTypeError()) {
-      <p class="field-error">সম্পত্তির ধরন আবশ্যক</p>
+      <p class="field-error">{{ 'registration.property.typeRequired' | translate }}</p>
     }
   </div>
 
   <div class="grid-2">
     <div class="field">
-      <label [attr.for]="'prop' + index + '_khatianNo'">খতিয়ান নং <span class="required">*</span></label>
+      <label [attr.for]="'prop' + index + '_khatianNo'">{{ 'registration.property.khatianNoLabel' | translate }} <span class="required">*</span></label>
       <input [id]="'prop' + index + '_khatianNo'" type="text" formControlName="khatianNo" />
       @if (showKhatianNoError()) {
-        <p class="field-error">খতিয়ান নং আবশ্যক</p>
+        <p class="field-error">{{ 'registration.property.khatianNoRequired' | translate }}</p>
       }
     </div>
     <div class="field">
-      <label [attr.for]="'prop' + index + '_holdingNumber'">হোল্ডিং নম্বর</label>
+      <label [attr.for]="'prop' + index + '_holdingNumber'">{{ 'registration.property.holdingNumberLabel' | translate }}</label>
       <input [id]="'prop' + index + '_holdingNumber'" type="text" formControlName="holdingNumber" />
     </div>
     <div class="field" formGroupName="dagNo">
-      <label>দাগ নং <span class="required">*</span></label>
+      <label>{{ 'registration.property.dagNoLabel' | translate }} <span class="required">*</span></label>
       <div class="flex-row-wrap">
         <div style="display:flex;align-items:center;gap:0.5rem;flex:1 1 8rem">
           <label [attr.for]="'prop' + index + '_dagNoCs'" style="font-size:0.875rem;color:#4b5563">CS:</label>
@@ -44,18 +44,18 @@
         </div>
       </div>
       @if (showDagNoError('cs')) {
-        <p class="field-error">CS দাগ নং আবশ্যক</p>
+        <p class="field-error">{{ 'registration.property.dagNoCsRequired' | translate }}</p>
       }
       @if (showDagNoError('rs')) {
-        <p class="field-error">RS দাগ নং আবশ্যক</p>
+        <p class="field-error">{{ 'registration.property.dagNoRsRequired' | translate }}</p>
       }
     </div>
     <div class="field">
-      <label [attr.for]="'prop' + index + '_landQuantity'">জমির পরিমাণ</label>
-      <input [id]="'prop' + index + '_landQuantity'" type="text" formControlName="landQuantity" placeholder="যেমন: ২ শতক" />
+      <label [attr.for]="'prop' + index + '_landQuantity'">{{ 'registration.property.landQuantityLabel' | translate }}</label>
+      <input [id]="'prop' + index + '_landQuantity'" type="text" formControlName="landQuantity" [placeholder]="'registration.property.landQuantityPlaceholder' | translate" />
     </div>
     <div class="field">
-      <label>মালিকানা <span class="required">*</span></label>
+      <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>
       <div class="checkbox-row">
         @for (t of ownershipTypes; track t) {
           <label class="checkbox-item">
@@ -69,28 +69,28 @@
         }
       </div>
       @if (showOwnershipError()) {
-        <p class="field-error">মালিকানা আবশ্যক</p>
+        <p class="field-error">{{ 'registration.property.ownershipRequired' | translate }}</p>
       }
     </div>
   </div>
 
   @if (property.get('ownership')?.value === 'যৌথ') {
     <div class="field">
-      <label>যৌথ মালিকগণ <span class="required">*</span></label>
+      <label>{{ 'registration.property.coOwnersLabel' | translate }} <span class="required">*</span></label>
       @for (co of coOwners.controls; track co; let ci = $index) {
         <div [formGroup]="coOwnerGroup(ci)" class="flex-row-wrap" style="align-items:flex-end;margin-bottom:0.5rem">
           <div class="field" style="flex:1 1 10rem;margin-bottom:0">
-            <label [attr.for]="'prop' + index + '_coOwner' + ci + '_name'">মালিকের নাম <span class="required">*</span></label>
+            <label [attr.for]="'prop' + index + '_coOwner' + ci + '_name'">{{ 'registration.property.coOwnerNameLabel' | translate }} <span class="required">*</span></label>
             <input [id]="'prop' + index + '_coOwner' + ci + '_name'" type="text" formControlName="ownerName" />
             @if (showCoOwnerError('ownerName', ci)) {
-              <p class="field-error">নাম আবশ্যক</p>
+              <p class="field-error">{{ 'registration.property.coOwnerNameRequired' | translate }}</p>
             }
           </div>
           <div class="field" style="flex:1 1 10rem;margin-bottom:0">
-            <label [attr.for]="'prop' + index + '_coOwner' + ci + '_phone'">মোবাইল নং <span class="required">*</span></label>
+            <label [attr.for]="'prop' + index + '_coOwner' + ci + '_phone'">{{ 'registration.property.coOwnerPhoneLabel' | translate }} <span class="required">*</span></label>
             <input [id]="'prop' + index + '_coOwner' + ci + '_phone'" type="text" formControlName="ownerPhone" placeholder="01XXXXXXXXX" />
             @if (showCoOwnerError('ownerPhone', ci)) {
-              <p class="field-error">মোবাইল নং আবশ্যক</p>
+              <p class="field-error">{{ 'registration.property.coOwnerPhoneRequired' | translate }}</p>
             }
           </div>
           <button
@@ -103,15 +103,15 @@
         </div>
       }
       <button type="button" (click)="addCoOwner()" style="color:#065f46;background:none;border:none;cursor:pointer;font-size:0.875rem">
-        + আরো যোগ করুন
+        + {{ 'registration.property.addCoOwnerButton' | translate }}
       </button>
     </div>
   }
 
   <div class="field">
-    <label>প্রযোজ্য কাগজ <span class="required">*</span></label>
+    <label>{{ 'registration.property.applicableDocsLabel' | translate }} <span class="required">*</span></label>
     @if (showApplicableDocsError()) {
-      <p class="field-error">প্রযোজ্য কাগজ নির্বাচন আবশ্যক</p>
+      <p class="field-error">{{ 'registration.property.applicableDocsRequired' | translate }}</p>
     }
     <div style="display:flex;flex-direction:column;gap:0.75rem">
       @for (doc of documentOptions; track doc) {
@@ -128,25 +128,25 @@
                     {{ entry.get('fileName')?.value }}
                   </span>
                   <button type="button" (click)="removeDocFile(doc)" style="font-size:0.75rem;color:#dc2626;background:none;border:none;cursor:pointer">
-                    মুছুন
+                    {{ 'registration.property.removeFileButton' | translate }}
                   </button>
                 </div>
               } @else {
                 <label
                   style="display:flex;align-items:center;justify-content:center;gap:0.5rem;border:2px dashed #d1d5db;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.75rem;cursor:pointer"
                 >
-                  📎 ফাইল সংযুক্ত করুন
+                  📎 {{ 'registration.property.attachFileButton' | translate }}
                   <input type="file" accept="image/jpeg,image/png,application/pdf" (change)="onDocFileChange(doc, $event)" style="display:none" />
                 </label>
               }
               <p style="font-size:0.6875rem;color:#6b7280;margin:0.25rem 0 0">
-                সর্বোচ্চ {{ maxDocFileMb }} এমবি (JPG/PNG/PDF)
+                {{ 'registration.property.maxFileSizeNote' | translate: { maxMb: maxDocFileMb } }}
               </p>
               @if (docFileErrors[doc]) {
                 <p style="font-size:0.6875rem;color:#dc2626;margin:0.25rem 0 0">{{ docFileErrors[doc] }}</p>
               }
               @if (isDocMissing(doc) && !docFileErrors[doc]) {
-                <p style="font-size:0.6875rem;color:#dc2626;margin:0.25rem 0 0">এই কাগজের ফাইল সংযুক্ত করা আবশ্যক</p>
+                <p style="font-size:0.6875rem;color:#dc2626;margin:0.25rem 0 0">{{ 'registration.property.docFileMissing' | translate }}</p>
               }
             </div>
           }

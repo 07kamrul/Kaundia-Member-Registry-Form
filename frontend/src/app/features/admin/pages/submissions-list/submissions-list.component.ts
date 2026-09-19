@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
 import type { SubmissionStatus, SubmissionSummary } from '../../../../core/models/admin.model';
 import { IconComponent } from '../../../../shared/icon/icon.component';
@@ -7,7 +8,7 @@ import { IconComponent } from '../../../../shared/icon/icon.component';
 @Component({
   selector: 'app-submissions-list',
   standalone: true,
-  imports: [RouterLink, IconComponent],
+  imports: [RouterLink, IconComponent, TranslatePipe],
   templateUrl: './submissions-list.component.html',
 })
 export class SubmissionsListComponent implements OnInit {
@@ -21,6 +22,7 @@ export class SubmissionsListComponent implements OnInit {
   constructor(
     private adminService: AdminService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -37,7 +39,7 @@ export class SubmissionsListComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'তালিকা লোড করা যায়নি।';
+        this.error = this.translate.instant('admin.submissionsList.errors.loadFailed');
         this.loading = false;
         this.cdr.markForCheck();
       },

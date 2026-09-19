@@ -1,26 +1,26 @@
 <div style="max-width:52rem;margin:0 auto">
   <div class="page-header">
     <div>
-      <h1 class="page-title">আবেদনের বিস্তারিত</h1>
+      <h1 class="page-title">{{ 'admin.submissionDetail.title' | translate }}</h1>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else if (submission) {
     <div class="card" style="padding:1.5rem">
       <div class="grid-2">
-        <p><strong>নাম:</strong> {{ submission.fullName }}</p>
-        <p><strong>পিতা/স্বামী:</strong> {{ submission.fatherOrHusband }}</p>
-        <p><strong>মাতা:</strong> {{ submission.mother }}</p>
-        <p><strong>জন্ম তারিখ:</strong> {{ submission.dob }}</p>
-        <p><strong>মোবাইল:</strong> {{ submission.mobile }}</p>
-        <p><strong>ইমেইল:</strong> {{ submission.email }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.name' | translate }}:</strong> {{ submission.fullName }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.fatherOrHusband' | translate }}:</strong> {{ submission.fatherOrHusband }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.mother' | translate }}:</strong> {{ submission.mother }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.dob' | translate }}:</strong> {{ submission.dob }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.mobile' | translate }}:</strong> {{ submission.mobile }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.email' | translate }}:</strong> {{ submission.email }}</p>
         <p><strong>NID:</strong> {{ submission.nid }}</p>
         <p>
-          <strong>স্ট্যাটাস:</strong>
+          <strong>{{ 'admin.submissionDetail.fields.status' | translate }}:</strong>
           <span
             class="status-badge"
             [class.status-pending]="submission.status === 'pending'"
@@ -30,31 +30,31 @@
             {{ submission.status }}
           </span>
         </p>
-        <p><strong>ভর্তি ফি:</strong> {{ submission.admissionFee }}</p>
-        <p><strong>চাঁদা:</strong> {{ submission.subscription }}</p>
-        <p><strong>পেমেন্ট মাধ্যম:</strong> {{ submission.paymentMethod }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.admissionFee' | translate }}:</strong> {{ submission.admissionFee }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.subscription' | translate }}:</strong> {{ submission.subscription }}</p>
+        <p><strong>{{ 'admin.submissionDetail.fields.paymentMethod' | translate }}:</strong> {{ submission.paymentMethod }}</p>
       </div>
 
       <div class="grid-2" style="margin-top:1rem">
         <div>
-          <h3 class="section-title" style="background:var(--emerald-700)">স্থায়ী ঠিকানা</h3>
-          <p><strong>বাসা/হোল্ডিং নং:</strong> {{ submission.permanentHouse }}</p>
-          <p><strong>রাস্তা/গ্রাম:</strong> {{ submission.permanentRoad }}</p>
-          <p><strong>ডাকঘর:</strong> {{ submission.permanentPostOffice }}</p>
-          <p><strong>উপজেলা/থানা:</strong> {{ submission.permanentUpazila }}</p>
-          <p><strong>জেলা:</strong> {{ submission.permanentDistrict }}</p>
+          <h3 class="section-title" style="background:var(--emerald-700)">{{ 'admin.submissionDetail.permanentAddress' | translate }}</h3>
+          <p><strong>{{ 'admin.submissionDetail.fields.house' | translate }}:</strong> {{ submission.permanentHouse }}</p>
+          <p><strong>{{ 'admin.submissionDetail.fields.road' | translate }}:</strong> {{ submission.permanentRoad }}</p>
+          <p><strong>{{ 'admin.submissionDetail.fields.postOffice' | translate }}:</strong> {{ submission.permanentPostOffice }}</p>
+          <p><strong>{{ 'admin.submissionDetail.fields.upazila' | translate }}:</strong> {{ submission.permanentUpazila }}</p>
+          <p><strong>{{ 'admin.submissionDetail.fields.district' | translate }}:</strong> {{ submission.permanentDistrict }}</p>
         </div>
         <div>
-          <h3 class="section-title" style="background:var(--emerald-700)">বর্তমান ঠিকানা</h3>
-          <p><strong>বাসা/হোল্ডিং নং:</strong> {{ submission.currentHouse }}</p>
-          <p><strong>রাস্তা/গ্রাম:</strong> {{ submission.currentRoad }}</p>
-          <p><strong>ডাকঘর:</strong> {{ submission.currentPostOffice }}</p>
-          <p><strong>উপজেলা/থানা:</strong> {{ submission.currentUpazila }}</p>
-          <p><strong>জেলা:</strong> {{ submission.currentDistrict }}</p>
+          <h3 class="section-title" style="background:var(--emerald-700)">{{ 'admin.submissionDetail.currentAddress' | translate }}</h3>
+          <p><strong>{{ 'admin.submissionDetail.fields.house' | translate }}:</strong> {{ submission.currentHouse }}</p>
+          <p><strong>{{ 'admin.submissionDetail.fields.road' | translate }}:</strong> {{ submission.currentRoad }}</p>
+          <p><strong>{{ 'admin.submissionDetail.fields.postOffice' | translate }}:</strong> {{ submission.currentPostOffice }}</p>
+          <p><strong>{{ 'admin.submissionDetail.fields.upazila' | translate }}:</strong> {{ submission.currentUpazila }}</p>
+          <p><strong>{{ 'admin.submissionDetail.fields.district' | translate }}:</strong> {{ submission.currentDistrict }}</p>
         </div>
       </div>
 
-      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">সম্পত্তিসমূহ</h3>
+      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">{{ 'admin.submissionDetail.properties' | translate }}</h3>
       @if (propertyCards.length) {
         <div class="detail-card-grid">
           @for (propertyCard of propertyCards; track $index) {
@@ -70,10 +70,10 @@
           }
         </div>
       } @else {
-        <p class="field-hint">কোনো সম্পত্তির তথ্য দেওয়া হয়নি।</p>
+        <p class="field-hint">{{ 'admin.submissionDetail.noProperties' | translate }}</p>
       }
 
-      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">মনোনীত ব্যক্তি</h3>
+      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">{{ 'admin.submissionDetail.nominees' | translate }}</h3>
       @if (nomineeCards.length) {
         <div class="detail-card-grid">
           @for (nomineeCard of nomineeCards; track $index) {
@@ -89,7 +89,7 @@
           }
         </div>
       } @else {
-        <p class="field-hint">কোনো মনোনীত ব্যক্তির তথ্য দেওয়া হয়নি।</p>
+        <p class="field-hint">{{ 'admin.submissionDetail.noNominees' | translate }}</p>
       }
 
       @if (submission.status === 'pending') {
@@ -97,8 +97,8 @@
           <div class="error-box"><p style="margin:0">{{ actionError }}</p></div>
         }
         <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
-          <button type="button" class="btn btn-primary" (click)="showApproveModal = true">অনুমোদন করুন</button>
-          <button type="button" class="btn btn-secondary" (click)="showRejectModal = true">বাতিল করুন</button>
+          <button type="button" class="btn btn-primary" (click)="showApproveModal = true">{{ 'admin.submissionDetail.approveButton' | translate }}</button>
+          <button type="button" class="btn btn-secondary" (click)="showRejectModal = true">{{ 'admin.submissionDetail.rejectButton' | translate }}</button>
         </div>
       }
     </div>
@@ -106,23 +106,23 @@
 
   <app-confirm-modal
     [open]="showApproveModal"
-    title="আবেদন অনুমোদন করুন"
-    [message]="submission ? submission.fullName + ' কে সদস্য হিসেবে অনুমোদন দিলে স্বয়ংক্রিয়ভাবে একটি সদস্য আইডি ও লগইন তথ্য তৈরি হবে।' : ''"
-    confirmLabel="নিশ্চিত করুন ও অনুমোদন করুন"
+    [title]="'admin.submissionDetail.approveModal.title' | translate"
+    [message]="submission ? submission.fullName + ' ' + ('admin.submissionDetail.approveModal.messageSuffix' | translate) : ''"
+    [confirmLabel]="'admin.submissionDetail.approveModal.confirmLabel' | translate"
     (confirm)="approve()"
     (cancel)="showApproveModal = false"
   ></app-confirm-modal>
 
   <app-confirm-modal
     [open]="showRejectModal"
-    title="আবেদন প্রত্যাখ্যান করুন"
-    [message]="submission ? submission.fullName + ' এর আবেদন প্রত্যাখ্যানের কারণ লিখুন। এটি আবেদনকারীকে জানানো হবে।' : ''"
-    confirmLabel="প্রত্যাখ্যান নিশ্চিত করুন"
+    [title]="'admin.submissionDetail.rejectModal.title' | translate"
+    [message]="submission ? submission.fullName + ' ' + ('admin.submissionDetail.rejectModal.messageSuffix' | translate) : ''"
+    [confirmLabel]="'admin.submissionDetail.rejectModal.confirmLabel' | translate"
     [danger]="true"
     [confirmDisabled]="!rejectReason.trim()"
     (confirm)="reject()"
     (cancel)="showRejectModal = false"
   >
-    <textarea rows="3" [(ngModel)]="rejectReason" placeholder="যেমন: প্রয়োজনীয় দলিল সংযুক্ত নেই..."></textarea>
+    <textarea rows="3" [(ngModel)]="rejectReason" [placeholder]="'admin.submissionDetail.rejectModal.placeholder' | translate"></textarea>
   </app-confirm-modal>
 </div>

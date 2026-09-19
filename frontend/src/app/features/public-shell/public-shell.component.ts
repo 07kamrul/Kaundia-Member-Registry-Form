@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ThemeService } from '../../core/services/theme.service';
+import { LanguageService } from '../../core/services/language.service';
 import { IconComponent } from '../../shared/icon/icon.component';
 
 /**
@@ -12,13 +14,14 @@ import { IconComponent } from '../../shared/icon/icon.component';
 @Component({
   selector: 'app-public-shell',
   standalone: true,
-  imports: [RouterLink, RouterOutlet, IconComponent],
+  imports: [RouterLink, RouterOutlet, IconComponent, TranslatePipe],
   templateUrl: './public-shell.component.html',
   styleUrl: './public-shell.component.scss',
 })
 export class PublicShellComponent {
   constructor(
     public theme: ThemeService,
+    public lang: LanguageService,
     private router: Router,
   ) {}
 

@@ -1,33 +1,33 @@
 <div style="max-width:56rem;margin:0 auto">
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else if (profile) {
     <div class="page-header">
       <div>
-        <h1 class="page-title">স্বাগতম, {{ profile.fullName }}</h1>
+        <h1 class="page-title">{{ 'welcome' | translate: { name: profile.fullName } }}</h1>
       </div>
     </div>
 
     <div class="stat-tile-grid">
       <div class="card stat-tile">
-        <p class="stat-tile-label">সদস্য আইডি</p>
+        <p class="stat-tile-label">{{ 'member.dashboard.memberIdLabel' | translate }}</p>
         <p class="stat-tile-value">{{ profile.memberId }}</p>
       </div>
       <div class="card stat-tile">
-        <p class="stat-tile-label">পরিশোধিত মাস</p>
+        <p class="stat-tile-label">{{ 'member.dashboard.paidMonthsLabel' | translate }}</p>
         <p class="stat-tile-value" style="color:var(--emerald-800)">{{ paidCount }} / {{ totalCount }}</p>
       </div>
       <div class="card stat-tile">
-        <p class="stat-tile-label">বকেয়া মাস</p>
+        <p class="stat-tile-label">{{ 'member.dashboard.dueMonthsLabel' | translate }}</p>
         <p class="stat-tile-value" [style.color]="dueCount ? 'var(--red-700)' : 'var(--emerald-800)'">{{ dueCount }}</p>
       </div>
     </div>
 
     @if (recentInstallments.length) {
       <div class="card" style="padding:1rem 1.1rem">
-        <p class="stat-tile-label" style="margin-bottom:0.6rem">সাম্প্রতিক চাঁদার অবস্থা</p>
+        <p class="stat-tile-label" style="margin-bottom:0.6rem">{{ 'member.dashboard.recentStatusTitle' | translate }}</p>
         <div class="month-badge-strip">
           @for (installment of recentInstallments; track installment.id) {
             <span
@@ -35,7 +35,7 @@
               [class.status-paid]="installment.status === 'paid'"
               [class.status-due]="installment.status === 'due'"
             >
-              {{ installment.label }}: {{ installment.status === 'paid' ? 'পরিশোধিত' : 'বকেয়া' }}
+              {{ installment.labelKey | translate }}: {{ (installment.status === 'paid' ? 'member.dashboard.statusPaid' : 'member.dashboard.statusDue') | translate }}
             </span>
           }
         </div>

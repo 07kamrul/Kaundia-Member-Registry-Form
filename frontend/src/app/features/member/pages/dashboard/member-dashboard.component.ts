@@ -1,19 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService, type MemberProfile } from '../../../../core/services/member.service';
 import type { Installment } from '../../../../core/models/admin.model';
-import { monthName } from '../../../../shared/constants/months';
+import { monthNameKey } from '../../../../shared/constants/months';
 
 interface RecentContribution {
   id: Installment['id'];
-  label: string;
+  labelKey: string;
   status: Installment['status'];
 }
 
 @Component({
   selector: 'app-member-dashboard',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './member-dashboard.component.html',
 })
 export class MemberDashboardComponent implements OnInit {
@@ -25,7 +26,10 @@ export class MemberDashboardComponent implements OnInit {
   loading = false;
   error = '';
 
-  constructor(private memberService: MemberService) {}
+  constructor(
+    private memberService: MemberService,
+    private translate: TranslateService,
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -42,11 +46,11 @@ export class MemberDashboardComponent implements OnInit {
           .sort((a, b) => b.year - a.year || b.month - a.month)
           .slice(0, 6)
           .reverse()
-          .map((item) => ({ id: item.id, label: monthName(item.month), status: item.status }));
+          .map((item) => ({ id: item.id, labelKey: monthNameKey(item.month), status: item.status }));
         this.loading = false;
       },
       error: () => {
-        this.error = 'তথ্য লোড করা যায়নি।';
+        this.error = this.translate.instant('member.dashboard.loadError');
         this.loading = false;
       },
     });

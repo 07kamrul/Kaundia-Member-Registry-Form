@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   AdminUserDef,
   PermissionDef,
@@ -11,7 +12,7 @@ import {
 @Component({
   selector: 'app-role-management',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './role-management.component.html',
 })
 export class RoleManagementComponent implements OnInit {
@@ -43,6 +44,7 @@ export class RoleManagementComponent implements OnInit {
   constructor(
     private rbacService: RbacService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -58,14 +60,14 @@ export class RoleManagementComponent implements OnInit {
             this.cdr.markForCheck();
           },
           error: () => {
-            this.error = 'ভূমিকা তালিকা লোড করা যায়নি।';
+            this.error = this.translate.instant('admin.roleManagement.errors.loadRolesFailed');
             this.loading = false;
             this.cdr.markForCheck();
           },
         });
       },
       error: () => {
-        this.error = 'অনুমতি তালিকা লোড করা যায়নি।';
+        this.error = this.translate.instant('admin.roleManagement.errors.loadPermissionsFailed');
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -78,7 +80,7 @@ export class RoleManagementComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'ব্যবহারকারী তালিকা লোড করা যায়নি।';
+        this.error = this.translate.instant('admin.roleManagement.errors.loadUsersFailed');
         this.cdr.markForCheck();
       },
     });
@@ -101,7 +103,7 @@ export class RoleManagementComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'পরিবর্তন সংরক্ষণ করা যায়নি।';
+        this.error = this.translate.instant('admin.roleManagement.errors.saveChangeFailed');
         this.savingRoleId = null;
         this.cdr.markForCheck();
       },
@@ -134,7 +136,7 @@ export class RoleManagementComponent implements OnInit {
       .subscribe({
         next: (user) => {
           this.users = [...this.users, user];
-          this.createUserSuccess = `নতুন প্রশাসক তৈরি হয়েছে: ${user.email}`;
+          this.createUserSuccess = `${this.translate.instant('admin.roleManagement.createAdmin.successPrefix')} ${user.email}`;
           this.newUserName = '';
           this.newUserEmail = '';
           this.newUserPassword = '';
@@ -143,7 +145,7 @@ export class RoleManagementComponent implements OnInit {
         },
         error: (err) => {
           this.createUserError =
-            err?.error?.detail ?? 'নতুন প্রশাসক তৈরি করা যায়নি।';
+            err?.error?.detail ?? this.translate.instant('admin.roleManagement.errors.createUserFailed');
           this.creatingUser = false;
           this.cdr.markForCheck();
         },
@@ -161,7 +163,7 @@ export class RoleManagementComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'ভূমিকা নির্ধারণ করা যায়নি।';
+        this.error = this.translate.instant('admin.roleManagement.errors.assignRoleFailed');
         this.savingRoleAssignment = false;
         this.cdr.markForCheck();
       },
@@ -177,7 +179,7 @@ export class RoleManagementComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'স্বতন্ত্র অনুমতি লোড করা যায়নি।';
+        this.error = this.translate.instant('admin.roleManagement.errors.loadOverridesFailed');
         this.loadingOverrides = false;
         this.cdr.markForCheck();
       },
@@ -210,7 +212,7 @@ export class RoleManagementComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'স্বতন্ত্র অনুমতি সংরক্ষণ করা যায়নি।';
+        this.error = this.translate.instant('admin.roleManagement.errors.saveOverridesFailed');
         this.savingOverride = false;
         this.cdr.markForCheck();
       },

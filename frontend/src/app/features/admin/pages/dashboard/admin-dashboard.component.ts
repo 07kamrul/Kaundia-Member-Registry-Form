@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
 import type { SubmissionSummary } from '../../../../core/models/admin.model';
 import { IconComponent } from '../../../../shared/icon/icon.component';
@@ -8,7 +9,7 @@ import { IconComponent } from '../../../../shared/icon/icon.component';
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [RouterLink, IconComponent, DatePipe],
+  imports: [RouterLink, IconComponent, DatePipe, TranslatePipe],
   templateUrl: './admin-dashboard.component.html',
 })
 export class AdminDashboardComponent implements OnInit {
@@ -19,6 +20,7 @@ export class AdminDashboardComponent implements OnInit {
   constructor(
     private adminService: AdminService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -35,7 +37,7 @@ export class AdminDashboardComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'আবেদনের তালিকা লোড করা যায়নি।';
+        this.error = this.translate.instant('admin.dashboard.errors.loadFailed');
         this.loading = false;
         this.cdr.markForCheck();
       },

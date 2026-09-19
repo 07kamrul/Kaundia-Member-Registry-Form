@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   ALLOWED_DOC_MIME_TYPES,
   DOCUMENT_OPTIONS,
@@ -17,7 +18,7 @@ import {
 @Component({
   selector: 'app-property-item',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './property-item.component.html',
 })
 export class PropertyItemComponent {
@@ -32,7 +33,10 @@ export class PropertyItemComponent {
   readonly maxDocFileMb = MAX_DOC_FILE_BYTES / (1024 * 1024);
   docFileErrors: Record<string, string> = {};
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private translate: TranslateService,
+  ) {}
 
   get coOwners(): FormArray {
     return coOwnersArray(this.property);
@@ -105,14 +109,16 @@ export class PropertyItemComponent {
     if (!ALLOWED_DOC_MIME_TYPES.includes(file.type)) {
       this.docFileErrors = {
         ...this.docFileErrors,
-        [type]: 'শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য',
+        [type]: this.translate.instant('registration.property.docFileTypeError'),
       };
       return;
     }
     if (file.size > MAX_DOC_FILE_BYTES) {
       this.docFileErrors = {
         ...this.docFileErrors,
-        [type]: `ফাইলের সাইজ সর্বোচ্চ ${this.maxDocFileMb} এমবি হতে হবে`,
+        [type]: this.translate.instant('registration.property.docFileSizeError', {
+          maxMb: this.maxDocFileMb,
+        }),
       };
       return;
     }

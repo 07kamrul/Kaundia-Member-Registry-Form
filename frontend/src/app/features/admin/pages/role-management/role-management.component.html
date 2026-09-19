@@ -1,13 +1,13 @@
 <div>
   <div class="page-header">
     <div>
-      <h1 class="page-title">ভূমিকা ও অনুমতি ব্যবস্থাপনা</h1>
-      <p class="page-subtitle">প্রতিটি ভূমিকার জন্য অনুমতি নির্ধারণ করুন</p>
+      <h1 class="page-title">{{ 'admin.roleManagement.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.roleManagement.subtitle' | translate }}</p>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
@@ -18,7 +18,7 @@
           @if (savingRoleId === role.id) {
             <span class="spinner"></span>
           } @else if (role.name === 'super_admin') {
-            <span class="status-badge status-approved">সকল অনুমতি — সর্বদা</span>
+            <span class="status-badge status-approved">{{ 'admin.roleManagement.allPermissionsAlways' | translate }}</span>
           }
         </div>
         <div class="role-card-permissions-grid">
@@ -40,8 +40,8 @@
       </div>
     }
 
-    <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">নতুন প্রশাসক তৈরি করুন</h2>
-    <p class="page-subtitle" style="margin:0 0 1rem">ইমেইল ও পাসওয়ার্ড দিয়ে একজন নতুন প্রশাসক অ্যাকাউন্ট তৈরি করুন।</p>
+    <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">{{ 'admin.roleManagement.createAdmin.title' | translate }}</h2>
+    <p class="page-subtitle" style="margin:0 0 1rem">{{ 'admin.roleManagement.createAdmin.subtitle' | translate }}</p>
 
     <div class="card" style="padding:1.2rem;margin-bottom:1.3rem">
       @if (createUserError) {
@@ -52,21 +52,21 @@
       }
       <div class="grid-2">
         <div class="field">
-          <label>নাম</label>
-          <input type="text" [(ngModel)]="newUserName" placeholder="পূর্ণ নাম" />
+          <label>{{ 'admin.roleManagement.createAdmin.nameLabel' | translate }}</label>
+          <input type="text" [(ngModel)]="newUserName" [placeholder]="'admin.roleManagement.createAdmin.namePlaceholder' | translate" />
         </div>
         <div class="field">
-          <label>ইমেইল</label>
+          <label>{{ 'admin.roleManagement.createAdmin.emailLabel' | translate }}</label>
           <input type="email" [(ngModel)]="newUserEmail" placeholder="admin@example.com" />
         </div>
       </div>
       <div class="grid-2">
         <div class="field">
-          <label>পাসওয়ার্ড</label>
-          <input type="password" [(ngModel)]="newUserPassword" placeholder="পাসওয়ার্ড" />
+          <label>{{ 'admin.roleManagement.createAdmin.passwordLabel' | translate }}</label>
+          <input type="password" [(ngModel)]="newUserPassword" [placeholder]="'admin.roleManagement.createAdmin.passwordPlaceholder' | translate" />
         </div>
         <div class="field">
-          <label>ভূমিকা</label>
+          <label>{{ 'admin.roleManagement.createAdmin.roleLabel' | translate }}</label>
           <select [(ngModel)]="newUserRole">
             <option value="administrator">Administrator</option>
             <option value="executive_committee">Executive Committee</option>
@@ -75,18 +75,18 @@
         </div>
       </div>
       <button type="button" class="btn btn-primary" [disabled]="creatingUser" (click)="createUser()">
-        প্রশাসক তৈরি করুন
+        {{ 'admin.roleManagement.createAdmin.submitButton' | translate }}
       </button>
     </div>
 
-    <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">ব্যবহারকারী-ভিত্তিক ওভাররাইড</h2>
+    <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">{{ 'admin.roleManagement.userOverrides.title' | translate }}</h2>
     <p class="page-subtitle" style="margin:0 0 1rem">
-      একজন নির্দিষ্ট ব্যবহারকারীর জন্য তার ভূমিকার ডিফল্টের বাইরে গিয়ে অতিরিক্ত অনুমতি দিন বা প্রত্যাহার করুন।
+      {{ 'admin.roleManagement.userOverrides.subtitle' | translate }}
     </p>
 
     <div class="card" style="padding:1.2rem;margin-bottom:1.3rem">
       <div class="field">
-        <label>ব্যবহারকারী</label>
+        <label>{{ 'admin.roleManagement.userOverrides.userLabel' | translate }}</label>
         <select [ngModel]="selectedUserId" (ngModelChange)="onSelectUser($event)">
           @for (user of users; track user.id) {
             <option [value]="user.id">{{ user.name }} ({{ user.role }})</option>
@@ -97,7 +97,7 @@
       @if (selectedUserId) {
         <div class="grid-2" style="margin-bottom:1rem">
           <div class="field">
-            <label>ভূমিকা নির্ধারণ করুন</label>
+            <label>{{ 'admin.roleManagement.userOverrides.assignRoleLabel' | translate }}</label>
             <select [(ngModel)]="roleAssignDraft">
               <option value="administrator">Administrator</option>
               <option value="executive_committee">Executive Committee</option>
@@ -111,7 +111,7 @@
               [disabled]="savingRoleAssignment"
               (click)="assignRole()"
             >
-              ভূমিকা সংরক্ষণ করুন
+              {{ 'admin.roleManagement.userOverrides.saveRoleButton' | translate }}
             </button>
           </div>
         </div>
@@ -120,7 +120,7 @@
       @if (selectedUserId) {
         <div class="grid-2">
           <div class="field">
-            <label>অনুমতি</label>
+            <label>{{ 'admin.roleManagement.userOverrides.permissionLabel' | translate }}</label>
             <select [(ngModel)]="overrideDraftKey">
               @for (permission of permissions; track permission.key) {
                 <option [value]="permission.key">{{ permission.description }}</option>
@@ -128,19 +128,19 @@
             </select>
           </div>
           <div class="field">
-            <label>কার্যক্রম</label>
+            <label>{{ 'admin.roleManagement.userOverrides.actionLabel' | translate }}</label>
             <select [(ngModel)]="overrideDraftAction">
-              <option value="grant">অতিরিক্ত গ্রান্ট করুন</option>
-              <option value="revoke">প্রত্যাহার করুন</option>
+              <option value="grant">{{ 'admin.roleManagement.userOverrides.grantOption' | translate }}</option>
+              <option value="revoke">{{ 'admin.roleManagement.userOverrides.revokeOption' | translate }}</option>
             </select>
           </div>
         </div>
         <button type="button" class="btn btn-primary" [disabled]="savingOverride" (click)="applyOverride()">
-          প্রয়োগ করুন
+          {{ 'admin.roleManagement.userOverrides.applyButton' | translate }}
         </button>
 
         @if (loadingOverrides) {
-          <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+          <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
         } @else if (overrides.length) {
           <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.4rem">
             @for (override of overrides; track override.permission_key) {
@@ -161,7 +161,7 @@
             }
           </div>
         } @else {
-          <p class="field-hint" style="margin-top:1rem">এই ব্যবহারকারীর জন্য কোনো স্বতন্ত্র অনুমতি নেই।</p>
+          <p class="field-hint" style="margin-top:1rem">{{ 'admin.roleManagement.userOverrides.noOverrides' | translate }}</p>
         }
       }
     </div>

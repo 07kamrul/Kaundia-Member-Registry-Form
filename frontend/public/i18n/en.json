@@ -1,0 +1,341 @@
+{
+  "common": {
+    "switchToEnglish": "Switch to English",
+    "switchToBangla": "বাংলায় দেখুন",
+    "loading": "Loading...",
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "confirmModal": {
+      "confirmButton": "Confirm",
+      "cancelButton": "Cancel"
+    }
+  },
+  "nav": {
+    "openMenu": "Open menu",
+    "logout": "Logout",
+    "lightTheme": "Light theme",
+    "darkTheme": "Dark theme",
+    "changeTheme": "Change theme",
+    "register": "Register",
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "installments": "Installments",
+    "changePassword": "Change Password",
+    "submissions": "Submissions",
+    "membersList": "Members List",
+    "installmentsManagement": "Installments Management",
+    "rolesPermissions": "Roles & Permissions",
+    "admin": "Admin"
+  },
+  "welcome": "Welcome, {{name}}",
+  "brand": {
+    "name": "Uttar Kaundia Society",
+    "org": "Uttar Kaundia Housing Owners' Welfare Council"
+  },
+  "footer": {
+    "prototypeNotice": "This is a clickable prototype — no data is actually saved. © 2026 Uttar Kaundia Housing Owners' Welfare Council.",
+    "publicNotice": "This is a member management portal. © 2026 Uttar Kaundia Housing Owners' Welfare Council."
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Member Management Portal",
+      "title": "Uttar Kaundia<br />Landowners' Welfare Council",
+      "subtitle": "From membership applications to monthly subscription payments — the whole process is now online. No hassle of paper applications, no need to visit the office repeatedly.",
+      "applyButton": "Apply for Membership",
+      "loginButton": "Already a member? Log in",
+      "statCardTitle": "Right Now",
+      "applicationReviewLabel": "Application Review",
+      "onlineValue": "Online",
+      "memberIdLabel": "Member ID",
+      "automaticValue": "Automatic",
+      "monthlySubscriptionLabel": "Monthly Subscription",
+      "paidOnlineValue": "Paid Online"
+    },
+    "steps": {
+      "applyTitle": "Apply",
+      "applyDesc": "Fill out the step-by-step form including personal information, address, land details, and payment information.",
+      "reviewTitle": "Committee Review",
+      "reviewDesc": "The executive committee and administration verify each application and approve or reject it.",
+      "memberIdTitle": "Member ID & Login",
+      "memberIdDesc": "After approval, a member ID is automatically generated and login information is issued."
+    }
+  },
+  "member": {
+    "profile": {
+      "title": "Profile",
+      "personalInfoTitle": "Personal Information",
+      "nameLabel": "Name",
+      "fatherOrHusbandLabel": "Father/Husband",
+      "motherLabel": "Mother",
+      "dobLabel": "Date of Birth",
+      "nidLabel": "NID",
+      "mobileLabel": "Mobile",
+      "occupationLabel": "Occupation",
+      "addressTitle": "Address",
+      "permanentAddressLabel": "Permanent",
+      "currentAddressLabel": "Current",
+      "villageLabel": "Village",
+      "upazilaLabel": "Upazila",
+      "districtLabel": "District",
+      "sameAsPermanentAddress": "Same as permanent address",
+      "propertyTitle": "Property",
+      "noPropertyInfo": "No property information provided.",
+      "propertyItemLabel": "Property",
+      "khatianLabel": "Khatian",
+      "decimalUnit": "decimal",
+      "loadError": "Failed to load profile."
+    },
+    "installments": {
+      "title": "Subscription History",
+      "monthColumn": "Month",
+      "amountColumn": "Amount",
+      "statusColumn": "Status",
+      "paidAtColumn": "Paid On",
+      "statusPaid": "Paid",
+      "statusDue": "Due",
+      "emptyState": "No installments found",
+      "paymentNotice": "Subscription payments are made directly at the office (cash/bKash/bank); the administration updates it here.",
+      "loadError": "Failed to load installment list."
+    },
+    "dashboard": {
+      "memberIdLabel": "Member ID",
+      "paidMonthsLabel": "Paid Months",
+      "dueMonthsLabel": "Due Months",
+      "recentStatusTitle": "Recent Subscription Status",
+      "statusPaid": "Paid",
+      "statusDue": "Due",
+      "loadError": "Failed to load data."
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "successMessage": "Password changed successfully.",
+      "currentPasswordLabel": "Current Password",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "passwordMismatchError": "Passwords do not match.",
+      "savingButton": "Saving...",
+      "saveButton": "Save Change",
+      "changeFailedError": "Failed to change password."
+    }
+  },
+  "auth": {
+    "login": {
+      "logoAlt": "Uttar Kaundia Housing Owners' Welfare Council Logo",
+      "title": "Log In",
+      "subtitle": "Enter as a member or administrator",
+      "identifierLabel": "Username / Email",
+      "passwordLabel": "Password",
+      "loggingInButton": "Logging in...",
+      "submitButton": "Enter",
+      "notAMemberYet": "Not a member yet?",
+      "registerButton": "Register as a New Member",
+      "backToHome": "Back to Home",
+      "identifierRequiredError": "Username / email is required",
+      "passwordRequiredError": "Password is required",
+      "loginFailedError": "Login failed. Information is incorrect."
+    }
+  },
+  "admin": {
+    "submissionDetail": {
+      "title": "Application Details",
+      "fields": {
+        "name": "Name",
+        "fatherOrHusband": "Father/Husband",
+        "mother": "Mother",
+        "dob": "Date of Birth",
+        "mobile": "Mobile",
+        "email": "Email",
+        "status": "Status",
+        "admissionFee": "Admission Fee",
+        "subscription": "Subscription",
+        "paymentMethod": "Payment Method",
+        "house": "House/Holding No.",
+        "road": "Road/Village",
+        "postOffice": "Post Office",
+        "upazila": "Upazila/Thana",
+        "district": "District"
+      },
+      "permanentAddress": "Permanent Address",
+      "currentAddress": "Current Address",
+      "properties": "Properties",
+      "noProperties": "No property information provided.",
+      "nominees": "Nominees",
+      "noNominees": "No nominee information provided.",
+      "propertyCardTitle": "Property",
+      "nomineeCardTitle": "Nominee",
+      "approveButton": "Approve",
+      "rejectButton": "Reject",
+      "approveModal": {
+        "title": "Approve Application",
+        "messageSuffix": "will be approved as a member; a member ID and login credentials will be created automatically.",
+        "confirmLabel": "Confirm and Approve"
+      },
+      "rejectModal": {
+        "title": "Reject Application",
+        "messageSuffix": "'s application — enter the reason for rejection. This will be shown to the applicant.",
+        "confirmLabel": "Confirm Rejection",
+        "placeholder": "e.g., required documents are missing..."
+      },
+      "fieldLabels": {
+        "type": "Type",
+        "address": "Address",
+        "area": "Area",
+        "description": "Description",
+        "name": "Name",
+        "relation": "Relation",
+        "mobile": "Mobile",
+        "nid": "NID",
+        "percentage": "Percentage",
+        "dob": "Date of Birth",
+        "value": "Value"
+      },
+      "errors": {
+        "loadFailed": "Could not load application details.",
+        "approveFailed": "Approval failed.",
+        "reasonRequired": "Please enter a reason for rejection.",
+        "rejectFailed": "Rejection failed."
+      }
+    },
+    "roleManagement": {
+      "title": "Role & Permission Management",
+      "subtitle": "Set permissions for each role",
+      "allPermissionsAlways": "All Permissions — Always",
+      "createAdmin": {
+        "title": "Create New Administrator",
+        "subtitle": "Create a new administrator account with an email and password.",
+        "nameLabel": "Name",
+        "namePlaceholder": "Full name",
+        "emailLabel": "Email",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Password",
+        "roleLabel": "Role",
+        "submitButton": "Create Administrator",
+        "successPrefix": "New administrator created:"
+      },
+      "userOverrides": {
+        "title": "User-Specific Overrides",
+        "subtitle": "Grant or revoke additional permissions for a specific user, outside their role's defaults.",
+        "userLabel": "User",
+        "assignRoleLabel": "Assign Role",
+        "saveRoleButton": "Save Role",
+        "permissionLabel": "Permission",
+        "actionLabel": "Action",
+        "grantOption": "Grant Extra",
+        "revokeOption": "Revoke",
+        "applyButton": "Apply",
+        "noOverrides": "This user has no individual permissions."
+      },
+      "errors": {
+        "loadRolesFailed": "Could not load role list.",
+        "loadPermissionsFailed": "Could not load permission list.",
+        "loadUsersFailed": "Could not load user list.",
+        "saveChangeFailed": "Could not save the change.",
+        "createUserFailed": "Could not create new administrator.",
+        "assignRoleFailed": "Could not assign role.",
+        "loadOverridesFailed": "Could not load individual permissions.",
+        "saveOverridesFailed": "Could not save individual permissions."
+      }
+    },
+    "membersList": {
+      "title": "All Members",
+      "subtitle": "View members' information and subscription status",
+      "tableHeaders": {
+        "memberId": "Member ID",
+        "name": "Name",
+        "mobile": "Mobile",
+        "status": "Status",
+        "contributionStatus": "Contribution Status"
+      },
+      "viewContributionsTitle": "View contribution status",
+      "deleteMemberTitle": "Delete member",
+      "noMembers": "No members found.",
+      "monthsOverdue": "months overdue",
+      "fullyPaid": "Fully Paid",
+      "deleteModal": {
+        "title": "Delete Record?",
+        "messageSuffix": "'s member record will be permanently deleted. This action cannot be undone.",
+        "confirmLabel": "Delete"
+      },
+      "errors": {
+        "loadFailed": "Could not load member list.",
+        "deleteFailed": "Could not delete member."
+      }
+    },
+    "installments": {
+      "title": "Subscription Management",
+      "subtitle": "Select a member to view and update monthly installment status",
+      "noMembers": "No members found.",
+      "selectMember": "Select a member.",
+      "paid": "Paid",
+      "permissionRequired": "Permission required",
+      "markPaidButton": "Mark as Paid",
+      "noInstallments": "This member has no installments.",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "errors": {
+        "loadMembersFailed": "Could not load member list.",
+        "loadInstallmentsFailed": "Could not load installment data.",
+        "markPaidFailed": "Could not mark installment as paid."
+      }
+    },
+    "submissionsList": {
+      "title": "Applications",
+      "subtitle": "Review new membership applications",
+      "filterLabel": "Filter by Status",
+      "allOption": "All",
+      "tableHeaders": {
+        "name": "Name",
+        "mobile": "Mobile",
+        "status": "Status",
+        "date": "Date"
+      },
+      "detailsLink": "Details",
+      "noSubmissions": "No applications found",
+      "errors": {
+        "loadFailed": "Could not load list."
+      }
+    },
+    "dashboard": {
+      "pendingTitle": "Pending Applications",
+      "subtitle": "Review new membership applications",
+      "tableHeaders": {
+        "reference": "Reference",
+        "applicant": "Applicant",
+        "mobile": "Mobile",
+        "properties": "Properties",
+        "submittedDate": "Submitted Date"
+      },
+      "propertiesUnit": "",
+      "detailsLink": "Details",
+      "noPending": "No pending applications",
+      "errors": {
+        "loadFailed": "Could not load application list."
+      }
+    }
+  }
+}

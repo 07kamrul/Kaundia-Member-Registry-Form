@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, TranslatePipe],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
@@ -19,6 +20,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private auth: AuthService,
     private router: Router,
+    private translate: TranslateService,
   ) {
     this.form = this.fb.group({
       identifier: ['', Validators.required],
@@ -33,8 +35,8 @@ export class LoginComponent {
 
   errorMessage(controlName: string): string {
     const messages: Record<string, string> = {
-      identifier: 'ইউজারনেম / ইমেইল আবশ্যক',
-      password: 'পাসওয়ার্ড আবশ্যক',
+      identifier: this.translate.instant('auth.login.identifierRequiredError'),
+      password: this.translate.instant('auth.login.passwordRequiredError'),
     };
     return messages[controlName] ?? '';
   }
@@ -56,7 +58,7 @@ export class LoginComponent {
       },
       error: () => {
         this.submitting = false;
-        this.error = 'লগইন ব্যর্থ হয়েছে। তথ্য সঠিক নয়।';
+        this.error = this.translate.instant('auth.login.loginFailedError');
       },
     });
   }

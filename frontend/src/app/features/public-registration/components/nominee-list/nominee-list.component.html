@@ -1,34 +1,34 @@
 <div class="card" style="overflow:hidden">
-  <h2 class="section-title" style="border-radius:0;margin:0">৫. মনোনীত ব্যক্তি (Nominee)</h2>
+  <h2 class="section-title" style="border-radius:0;margin:0">{{ 'registration.stepTitles.nominee' | translate }}</h2>
   <div style="padding:0.75rem 0.75rem 0">
     <label class="checkbox-item">
       <input type="checkbox" [checked]="sameAsUrgentContact" (change)="toggleSameAsUrgentContact()" />
-      জরুরি যোগাযোগের তথ্য থেকে একই তথ্য ব্যবহার করুন
+      {{ 'registration.nominee.sameAsUrgentContactLabel' | translate }}
     </label>
   </div>
   <div style="padding:0.75rem" [formGroup]="group(0)">
     <div class="field">
-      <label for="nominee0_name">নাম <span class="required">*</span></label>
+      <label for="nominee0_name">{{ 'registration.nominee.nameLabel' | translate }} <span class="required">*</span></label>
       <input id="nominee0_name" type="text" formControlName="name" />
       @if (showError(0, 'name')) {
-        <p class="field-error">নাম আবশ্যক</p>
+        <p class="field-error">{{ 'registration.nominee.nameRequired' | translate }}</p>
       }
     </div>
     <div class="field">
-      <label for="nominee0_relation">পিতা/স্বামী / সম্পর্ক</label>
+      <label for="nominee0_relation">{{ 'registration.nominee.relationLabel' | translate }}</label>
       <input id="nominee0_relation" type="text" formControlName="relation" />
     </div>
     <div class="field">
-      <label for="nominee0_mobile">মোবাইল <span class="required">*</span></label>
+      <label for="nominee0_mobile">{{ 'registration.nominee.mobileLabel' | translate }} <span class="required">*</span></label>
       <input id="nominee0_mobile" type="text" formControlName="mobile" />
       @if (showError(0, 'mobile')) {
-        <p class="field-error">মোবাইল আবশ্যক</p>
+        <p class="field-error">{{ 'registration.nominee.mobileRequired' | translate }}</p>
       } @else if (mobileInvalid(0)) {
-        <p class="field-error">মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)</p>
+        <p class="field-error">{{ 'registration.nominee.mobileInvalid' | translate }}</p>
       }
     </div>
     <div class="field">
-      <label for="nominee0_address">ঠিকানা</label>
+      <label for="nominee0_address">{{ 'registration.nominee.addressLabel' | translate }}</label>
       <input id="nominee0_address" type="text" formControlName="address" />
     </div>
   </div>
@@ -36,39 +36,39 @@
 
 @if (nominees.length > 1) {
   <div style="margin-top:1rem">
-    <h3 style="font-size:0.9rem;color:#374151;margin-bottom:0.75rem">অতিরিক্ত মনোনীত ব্যক্তি</h3>
+    <h3 style="font-size:0.9rem;color:#374151;margin-bottom:0.75rem">{{ 'registration.nominee.additionalNomineesTitle' | translate }}</h3>
     @for (n of nominees.controls; track n; let i = $index) {
       @if (i > 0) {
         <div class="card" style="padding:1rem;margin-bottom:1rem" [formGroup]="group(i)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
-            <h4 style="margin:0;color:#374151">মনোনীত ব্যক্তি {{ i + 1 }}</h4>
+            <h4 style="margin:0;color:#374151">{{ 'registration.nominee.nomineeNumberTitle' | translate: { number: i + 1 } }}</h4>
             <button type="button" (click)="removeNominee(i)" style="color:#dc2626;background:none;border:none;cursor:pointer;font-size:0.875rem">
-              মুছুন
+              {{ 'registration.nominee.remove' | translate }}
             </button>
           </div>
           <div class="grid-2">
             <div class="field">
-              <label [attr.for]="'nominee' + i + '_name'">নাম <span class="required">*</span></label>
+              <label [attr.for]="'nominee' + i + '_name'">{{ 'registration.nominee.nameLabel' | translate }} <span class="required">*</span></label>
               <input [id]="'nominee' + i + '_name'" type="text" formControlName="name" />
               @if (showError(i, 'name')) {
-                <p class="field-error">নাম আবশ্যক</p>
+                <p class="field-error">{{ 'registration.nominee.nameRequired' | translate }}</p>
               }
             </div>
             <div class="field">
-              <label [attr.for]="'nominee' + i + '_relation'">সম্পর্ক</label>
+              <label [attr.for]="'nominee' + i + '_relation'">{{ 'registration.nominee.relationShortLabel' | translate }}</label>
               <input [id]="'nominee' + i + '_relation'" type="text" formControlName="relation" />
             </div>
             <div class="field">
-              <label [attr.for]="'nominee' + i + '_mobile'">মোবাইল <span class="required">*</span></label>
+              <label [attr.for]="'nominee' + i + '_mobile'">{{ 'registration.nominee.mobileLabel' | translate }} <span class="required">*</span></label>
               <input [id]="'nominee' + i + '_mobile'" type="text" formControlName="mobile" />
               @if (showError(i, 'mobile')) {
-                <p class="field-error">মোবাইল আবশ্যক</p>
+                <p class="field-error">{{ 'registration.nominee.mobileRequired' | translate }}</p>
               } @else if (mobileInvalid(i)) {
-                <p class="field-error">মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)</p>
+                <p class="field-error">{{ 'registration.nominee.mobileInvalid' | translate }}</p>
               }
             </div>
             <div class="field">
-              <label [attr.for]="'nominee' + i + '_address'">ঠিকানা</label>
+              <label [attr.for]="'nominee' + i + '_address'">{{ 'registration.nominee.addressLabel' | translate }}</label>
               <input [id]="'nominee' + i + '_address'" type="text" formControlName="address" />
             </div>
           </div>
@@ -80,6 +80,6 @@
 
 @if (nominees.length < 5) {
   <button type="button" (click)="addNominee()" style="color:#065f46;background:none;border:none;cursor:pointer;font-size:0.875rem;margin-top:0.5rem">
-    + আরও মনোনীত ব্যক্তি যোগ করুন
+    + {{ 'registration.nominee.addMore' | translate }}
   </button>
 }

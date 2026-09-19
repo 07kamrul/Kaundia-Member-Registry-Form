@@ -2,32 +2,46 @@
   <header class="site-header">
     <div class="site-header-inner">
       <div class="site-header-brand">
-        <button type="button" class="topbar-menu-btn" (click)="toggleSidebar()" aria-label="মেনু খুলুন">
+        <button
+          type="button"
+          class="topbar-menu-btn"
+          (click)="toggleSidebar()"
+          [attr.aria-label]="'nav.openMenu' | translate"
+        >
           <app-icon [name]="sidebarOpen() ? 'close' : 'menu'" [size]="20" />
         </button>
         <div class="brand-mark">
-          <img src="/logo.jpeg" alt="উত্তর কাউন্দিয়া সোসাইটি" class="brand-mark-logo" />
+          <img src="/logo.jpeg" [attr.alt]="'brand.name' | translate" class="brand-mark-logo" />
         </div>
         <div>
-          <div class="site-header-brand-name">উত্তর কাউন্দিয়া সোসাইটি</div>
-          <div class="site-header-brand-org">উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ</div>
+          <div class="site-header-brand-name">{{ 'brand.name' | translate }}</div>
+          <div class="site-header-brand-org">{{ 'brand.org' | translate }}</div>
         </div>
       </div>
       <div class="site-header-actions">
         @if (welcomeName) {
-          <span class="topbar-welcome">স্বাগতম, {{ welcomeName }}</span>
+          <span class="topbar-welcome">{{ 'welcome' | translate: { name: welcomeName } }}</span>
         }
         <button type="button" class="btn btn-ghost btn-sm btn-icon" (click)="logout()">
-          <app-icon name="logout" [size]="16" /> বের হোন
+          <app-icon name="logout" [size]="16" /> {{ 'nav.logout' | translate }}
         </button>
         <button
           type="button"
           class="btn btn-ghost btn-sm"
           (click)="theme.toggle()"
-          [attr.aria-label]="theme.theme() === 'dark' ? 'হালকা থিম' : 'গাঢ় থিম'"
-          title="থিম পরিবর্তন"
+          [attr.aria-label]="(theme.theme() === 'dark' ? 'nav.lightTheme' : 'nav.darkTheme') | translate"
+          [title]="'nav.changeTheme' | translate"
         >
           <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="16" />
+        </button>
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          (click)="lang.toggle()"
+          [attr.aria-label]="(lang.lang() === 'bn' ? 'common.switchToEnglish' : 'common.switchToBangla') | translate"
+          [title]="(lang.lang() === 'bn' ? 'common.switchToEnglish' : 'common.switchToBangla') | translate"
+        >
+          {{ lang.lang() === 'bn' ? 'EN' : 'অ-A' }}
         </button>
       </div>
     </div>
@@ -56,7 +70,7 @@
             (click)="closeSidebar()"
           >
             <app-icon [name]="item.icon" [size]="19" />
-            <span>{{ item.label }}</span>
+            <span>{{ item.labelKey | translate }}</span>
           </a>
         }
       </nav>
@@ -72,6 +86,6 @@
   </div>
 
   <footer class="site-footer">
-    এটি একটি ক্লিকযোগ্য প্রোটোটাইপ — কোনো তথ্য প্রকৃতপক্ষে সংরক্ষিত হয় না। © ২০২৬ উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ।
+    {{ 'footer.prototypeNotice' | translate }}
   </footer>
 </div>

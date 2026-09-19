@@ -1,12 +1,12 @@
 <div style="max-width:52rem;margin:0 auto">
   <div class="page-header">
     <div>
-      <h1 class="page-title">চাঁদার ইতিহাস @if (year) { — {{ year }} }</h1>
+      <h1 class="page-title">{{ 'member.installments.title' | translate }} @if (year) { — {{ year }} }</h1>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
@@ -14,32 +14,32 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>মাস</th>
-            <th>পরিমাণ</th>
-            <th>অবস্থা</th>
-            <th>পরিশোধের তারিখ</th>
+            <th>{{ 'member.installments.monthColumn' | translate }}</th>
+            <th>{{ 'member.installments.amountColumn' | translate }}</th>
+            <th>{{ 'member.installments.statusColumn' | translate }}</th>
+            <th>{{ 'member.installments.paidAtColumn' | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (i of installments; track i.id) {
             <tr>
-              <td>{{ monthLabel(i.month) }}</td>
+              <td>{{ monthLabel(i.month) | translate }}</td>
               <td>৳ {{ i.amount }}</td>
               <td>
                 <span class="status-badge" [class.status-paid]="i.status === 'paid'" [class.status-due]="i.status !== 'paid'">
-                  {{ i.status === 'paid' ? 'পরিশোধিত' : 'বকেয়া' }}
+                  {{ (i.status === 'paid' ? 'member.installments.statusPaid' : 'member.installments.statusDue') | translate }}
                 </span>
               </td>
               <td>{{ i.paidAt || '—' }}</td>
             </tr>
           } @empty {
-            <tr><td colspan="4" class="empty-state">কোনো কিস্তি নেই</td></tr>
+            <tr><td colspan="4" class="empty-state">{{ 'member.installments.emptyState' | translate }}</td></tr>
           }
         </tbody>
       </table>
     </div>
     <p class="page-subtitle" style="margin-top:0.75rem">
-      চাঁদা পরিশোধ অফিসে সরাসরি (নগদ/বিকাশ/ব্যাংক) করা হয়; প্রশাসন তা এখানে হালনাগাদ করেন।
+      {{ 'member.installments.paymentNotice' | translate }}
     </p>
   }
 </div>

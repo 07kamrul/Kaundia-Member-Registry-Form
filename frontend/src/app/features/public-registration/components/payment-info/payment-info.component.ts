@@ -1,4 +1,4 @@
-import { Component, DestroyRef, Input, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, Input, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -9,6 +9,8 @@ import {
   PAYMENT_METHODS,
 } from '../../../../core/models/registration.model';
 import { propertiesArray } from '../../registration-form.builder';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 
 const FIRST_DECIMAL_RATE = 50;
 const ADDITIONAL_DECIMAL_RATE = 10;
@@ -23,7 +25,7 @@ export interface SubscriptionBreakdown {
 @Component({
   selector: 'app-payment-info',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './payment-info.component.html',
 })
 export class PaymentInfoComponent implements OnInit {
@@ -37,6 +39,8 @@ export class PaymentInfoComponent implements OnInit {
   readonly bankInfo = ORG_BANK_INFO;
   readonly mfsInfo = ORG_MFS_INFO;
   receiptFileError = '';
+
+  private readonly translate = inject(TranslateService);
 
   constructor(private destroyRef: DestroyRef) {}
 
@@ -83,11 +87,13 @@ export class PaymentInfoComponent implements OnInit {
     if (!file) return;
 
     if (!ALLOWED_DOC_MIME_TYPES.includes(file.type)) {
-      this.receiptFileError = 'শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য';
+      this.receiptFileError = this.translate.instant('registration.payment.fileTypeError');
       return;
     }
     if (file.size > MAX_DOC_FILE_BYTES) {
-      this.receiptFileError = `ফাইলের সাইজ সর্বোচ্চ ${this.maxReceiptFileMb} এমবি হতে হবে`;
+      this.receiptFileError = this.translate.instant('registration.payment.fileSizeError', {
+        maxMb: this.maxReceiptFileMb,
+      });
       return;
     }
     this.receiptFileError = '';
@@ -124,11 +130,12 @@ export class PaymentInfoComponent implements OnInit {
   }
 
   errorMessage(controlName: string): string {
-    const messages: Record<string, string> = {
-      admissionFee: 'ভর্তি ফি আবশ্যক',
-      subscription: 'চাঁদা আবশ্যক',
-      paymentMethod: 'পেমেন্ট মাধ্যম আবশ্যক',
+    const keys: Record<string, string> = {
+      admissionFee: 'registration.payment.admissionFeeRequired',
+      subscription: 'registration.payment.subscriptionRequired',
+      paymentMethod: 'registration.payment.paymentMethodRequired',
     };
-    return messages[controlName] ?? '';
+    const key = keys[controlName];
+    return key ? this.translate.instant(key) : '';
   }
 }

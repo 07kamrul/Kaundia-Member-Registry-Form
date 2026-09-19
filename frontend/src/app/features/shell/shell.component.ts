@@ -1,12 +1,14 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { LanguageService } from '../../core/services/language.service';
 import { MemberService } from '../../core/services/member.service';
 import { IconComponent, type IconName } from '../../shared/icon/icon.component';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   route: string;
   icon: IconName;
   adminOnly: boolean;
@@ -15,20 +17,26 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'ড্যাশবোর্ড', route: '/dashboard', icon: 'dashboard', adminOnly: false },
-  { label: 'প্রোফাইল', route: '/profile', icon: 'user', adminOnly: false, memberOnly: true },
-  { label: 'কিস্তি', route: '/installments', icon: 'wallet', adminOnly: false, memberOnly: true },
-  { label: 'পাসওয়ার্ড পরিবর্তন', route: '/change-password', icon: 'lock', adminOnly: false },
-  { label: 'সাবমিশন', route: '/submissions', icon: 'inbox', adminOnly: true },
-  { label: 'সদস্য তালিকা', route: '/members', icon: 'users', adminOnly: true },
+  { labelKey: 'nav.dashboard', route: '/dashboard', icon: 'dashboard', adminOnly: false },
+  { labelKey: 'nav.profile', route: '/profile', icon: 'user', adminOnly: false, memberOnly: true },
   {
-    label: 'চাঁদা ব্যবস্থাপনা',
+    labelKey: 'nav.installments',
+    route: '/installments',
+    icon: 'wallet',
+    adminOnly: false,
+    memberOnly: true,
+  },
+  { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', adminOnly: false },
+  { labelKey: 'nav.submissions', route: '/submissions', icon: 'inbox', adminOnly: true },
+  { labelKey: 'nav.membersList', route: '/members', icon: 'users', adminOnly: true },
+  {
+    labelKey: 'nav.installmentsManagement',
     route: '/installments-management',
     icon: 'coin',
     adminOnly: true,
   },
   {
-    label: 'ভূমিকা ও অনুমতি',
+    labelKey: 'nav.rolesPermissions',
     route: '/roles',
     icon: 'shield',
     adminOnly: true,
@@ -39,7 +47,7 @@ const NAV_ITEMS: NavItem[] = [
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, IconComponent],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, IconComponent, TranslatePipe],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
 })
@@ -51,6 +59,7 @@ export class ShellComponent implements OnInit {
   constructor(
     public auth: AuthService,
     public theme: ThemeService,
+    public lang: LanguageService,
     private memberService: MemberService,
     private router: Router,
   ) {}
@@ -70,11 +79,15 @@ export class ShellComponent implements OnInit {
   }
 
   get avatarInitial(): string {
-    return this.welcomeName.trim().charAt(0) || 'ব';
+    return this.welcomeName.trim().charAt(0) || (this.lang.lang() === 'bn' ? 'ব' : 'A');
   }
 
   get welcomeName(): string {
-    return this.displayName() || (this.auth.isAdmin ? 'প্রশাসক' : '');
+    return this.displayName() || (this.auth.isAdmin ? this.adminLabel : '');
+  }
+
+  private get adminLabel(): string {
+    return this.lang.lang() === 'bn' ? 'প্রশাসক' : 'Admin';
   }
 
   get navItems(): NavItem[] {

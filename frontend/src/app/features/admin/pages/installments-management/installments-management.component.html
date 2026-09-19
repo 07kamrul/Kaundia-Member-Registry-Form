@@ -1,8 +1,8 @@
 <div>
   <div class="page-header">
     <div>
-      <h1 class="page-title">চাঁদা ব্যবস্থাপনা</h1>
-      <p class="page-subtitle">সদস্য নির্বাচন করে মাসিক কিস্তির অবস্থা দেখুন ও হালনাগাদ করুন</p>
+      <h1 class="page-title">{{ 'admin.installments.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.installments.subtitle' | translate }}</p>
     </div>
   </div>
 
@@ -11,7 +11,7 @@
   }
 
   @if (loadingMembers) {
-    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else {
     <div class="installments-master-detail">
       <div class="card installments-member-list">
@@ -25,13 +25,13 @@
             <div class="installments-member-id">{{ m.memberId }}</div>
           </div>
         } @empty {
-          <p class="empty-state">কোনো সদস্য পাওয়া যায়নি।</p>
+          <p class="empty-state">{{ 'admin.installments.noMembers' | translate }}</p>
         }
       </div>
 
       <div class="card installments-detail-panel">
         @if (!selectedMember) {
-          <p class="empty-state">সদস্য নির্বাচন করুন।</p>
+          <p class="empty-state">{{ 'admin.installments.selectMember' | translate }}</p>
         } @else {
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
             <div>
@@ -41,7 +41,7 @@
           </div>
 
           @if (loadingInstallments) {
-            <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+            <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
           } @else {
             <div class="month-badge-strip">
               @for (i of installments; track i.id) {
@@ -54,7 +54,7 @@
                   </div>
                   @if (i.status === 'paid') {
                     <span class="status-badge status-paid">
-                      <app-icon name="check" [size]="14" /> পরিশোধিত
+                      <app-icon name="check" [size]="14" /> {{ 'admin.installments.paid' | translate }}
                     </span>
                   } @else {
                     <button
@@ -62,15 +62,15 @@
                       class="btn btn-primary"
                       style="width:100%"
                       [disabled]="!auth.hasPermission('member.manage') || markingId === i.id"
-                      [title]="auth.hasPermission('member.manage') ? '' : 'অনুমতি প্রয়োজন'"
+                      [title]="auth.hasPermission('member.manage') ? '' : ('admin.installments.permissionRequired' | translate)"
                       (click)="markPaid(i)"
                     >
-                      পরিশোধিত হিসেবে চিহ্নিত করুন
+                      {{ 'admin.installments.markPaidButton' | translate }}
                     </button>
                   }
                 </div>
               } @empty {
-                <p class="empty-state">এই সদস্যের কোনো কিস্তি নেই।</p>
+                <p class="empty-state">{{ 'admin.installments.noInstallments' | translate }}</p>
               }
             </div>
           }

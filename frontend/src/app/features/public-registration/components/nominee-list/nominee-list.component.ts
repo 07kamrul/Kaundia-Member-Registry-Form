@@ -2,11 +2,12 @@ import { Component, Input } from '@angular/core';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { buildNomineeGroup } from '../../registration-form.builder';
 import { FormBuilder } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-nominee-list',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './nominee-list.component.html',
 })
 export class NomineeListComponent {

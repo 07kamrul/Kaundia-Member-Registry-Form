@@ -1,22 +1,22 @@
 <div>
   <div class="page-header">
     <div>
-      <h1 class="page-title">আবেদনসমূহ</h1>
-      <p class="page-subtitle">নতুন সদস্যপদের আবেদন পর্যালোচনা করুন</p>
+      <h1 class="page-title">{{ 'admin.submissionsList.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.submissionsList.subtitle' | translate }}</p>
     </div>
   </div>
 
   <div class="field filter-field">
-    <label>স্ট্যাটাস অনুযায়ী ফিল্টার</label>
+    <label>{{ 'admin.submissionsList.filterLabel' | translate }}</label>
     <select [value]="statusFilter" (change)="onFilterChange($event)">
       @for (s of statuses; track s) {
-        <option [value]="s">{{ s || 'সব' }}</option>
+        <option [value]="s">{{ s || ('admin.submissionsList.allOption' | translate) }}</option>
       }
     </select>
   </div>
 
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
@@ -24,10 +24,10 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>নাম</th>
-            <th>মোবাইল</th>
-            <th>স্ট্যাটাস</th>
-            <th>তারিখ</th>
+            <th>{{ 'admin.submissionsList.tableHeaders.name' | translate }}</th>
+            <th>{{ 'admin.submissionsList.tableHeaders.mobile' | translate }}</th>
+            <th>{{ 'admin.submissionsList.tableHeaders.status' | translate }}</th>
+            <th>{{ 'admin.submissionsList.tableHeaders.date' | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -49,12 +49,12 @@
               <td>{{ s.createdAt }}</td>
               <td>
                 <a [routerLink]="['/submissions', s.id]" class="btn-icon table-link">
-                  বিস্তারিত <app-icon name="chevron-right" [size]="16" />
+                  {{ 'admin.submissionsList.detailsLink' | translate }} <app-icon name="chevron-right" [size]="16" />
                 </a>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="5" class="empty-state">কোনো আবেদন পাওয়া যায়নি</td></tr>
+            <tr><td colspan="5" class="empty-state">{{ 'admin.submissionsList.noSubmissions' | translate }}</td></tr>
           }
         </tbody>
       </table>

@@ -1,0 +1,341 @@
+{
+  "common": {
+    "switchToEnglish": "Switch to English",
+    "switchToBangla": "বাংলায় দেখুন",
+    "loading": "লোড হচ্ছে...",
+    "months": {
+      "january": "জানুয়ারি",
+      "february": "ফেব্রুয়ারি",
+      "march": "মার্চ",
+      "april": "এপ্রিল",
+      "may": "মে",
+      "june": "জুন",
+      "july": "জুলাই",
+      "august": "আগস্ট",
+      "september": "সেপ্টেম্বর",
+      "october": "অক্টোবর",
+      "november": "নভেম্বর",
+      "december": "ডিসেম্বর"
+    },
+    "confirmModal": {
+      "confirmButton": "নিশ্চিত করুন",
+      "cancelButton": "বাতিল"
+    }
+  },
+  "nav": {
+    "openMenu": "মেনু খুলুন",
+    "logout": "বের হোন",
+    "lightTheme": "হালকা থিম",
+    "darkTheme": "গাঢ় থিম",
+    "changeTheme": "থিম পরিবর্তন",
+    "register": "আবেদন করুন",
+    "login": "লগইন",
+    "dashboard": "ড্যাশবোর্ড",
+    "profile": "প্রোফাইল",
+    "installments": "কিস্তি",
+    "changePassword": "পাসওয়ার্ড পরিবর্তন",
+    "submissions": "সাবমিশন",
+    "membersList": "সদস্য তালিকা",
+    "installmentsManagement": "চাঁদা ব্যবস্থাপনা",
+    "rolesPermissions": "ভূমিকা ও অনুমতি",
+    "admin": "প্রশাসক"
+  },
+  "welcome": "স্বাগতম, {{name}}",
+  "brand": {
+    "name": "উত্তর কাউন্দিয়া সোসাইটি",
+    "org": "উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ"
+  },
+  "footer": {
+    "prototypeNotice": "এটি একটি ক্লিকযোগ্য প্রোটোটাইপ — কোনো তথ্য প্রকৃতপক্ষে সংরক্ষিত হয় না। © ২০২৬ উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ।",
+    "publicNotice": "এটি একটি সদস্য ব্যবস্থাপনা পোর্টাল। © ২০২৬ উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ।"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "সদস্য ব্যবস্থাপনা পোর্টাল",
+      "title": "উত্তর কাউন্দিয়ার<br />জমির মালিকদের কল্যাণ পরিষদ",
+      "subtitle": "সদস্যপদের আবেদন থেকে শুরু করে মাসিক চাঁদা পরিশোধ পর্যন্ত — পুরো প্রক্রিয়া এখন অনলাইনে। কাগজে আবেদন করার ঝামেলা নেই, অফিসে বারবার যাওয়ার প্রয়োজন নেই।",
+      "applyButton": "সদস্যপদের জন্য আবেদন করুন",
+      "loginButton": "ইতিমধ্যে সদস্য? লগইন করুন",
+      "statCardTitle": "এই মুহূর্তে",
+      "applicationReviewLabel": "আবেদন যাচাই",
+      "onlineValue": "অনলাইনে",
+      "memberIdLabel": "সদস্য আইডি",
+      "automaticValue": "স্বয়ংক্রিয়",
+      "monthlySubscriptionLabel": "মাসিক চাঁদা",
+      "paidOnlineValue": "অনলাইনে পরিশোধ"
+    },
+    "steps": {
+      "applyTitle": "আবেদন করুন",
+      "applyDesc": "ব্যক্তিগত তথ্য, ঠিকানা, জমির বিবরণ ও পেমেন্ট তথ্যসহ ধাপে ধাপে ফর্ম পূরণ করুন।",
+      "reviewTitle": "কমিটির পর্যালোচনা",
+      "reviewDesc": "কার্যনির্বাহী কমিটি ও প্রশাসন প্রতিটি আবেদন যাচাই করে অনুমোদন বা প্রত্যাখ্যান করেন।",
+      "memberIdTitle": "সদস্য আইডি ও লগইন",
+      "memberIdDesc": "অনুমোদনের পর স্বয়ংক্রিয়ভাবে সদস্য আইডি তৈরি হয় এবং লগইন তথ্য ইস্যু করা হয়।"
+    }
+  },
+  "member": {
+    "profile": {
+      "title": "প্রোফাইল",
+      "personalInfoTitle": "ব্যক্তিগত তথ্য",
+      "nameLabel": "নাম",
+      "fatherOrHusbandLabel": "পিতা/স্বামী",
+      "motherLabel": "মাতা",
+      "dobLabel": "জন্ম তারিখ",
+      "nidLabel": "এনআইডি",
+      "mobileLabel": "মোবাইল",
+      "occupationLabel": "পেশা",
+      "addressTitle": "ঠিকানা",
+      "permanentAddressLabel": "স্থায়ী",
+      "currentAddressLabel": "বর্তমান",
+      "villageLabel": "গ্রাম",
+      "upazilaLabel": "উপজেলা",
+      "districtLabel": "জেলা",
+      "sameAsPermanentAddress": "একই — স্থায়ী ঠিকানার অনুরূপ",
+      "propertyTitle": "সম্পত্তি",
+      "noPropertyInfo": "কোনো সম্পত্তির তথ্য দেওয়া হয়নি।",
+      "propertyItemLabel": "সম্পত্তি",
+      "khatianLabel": "খতিয়ান",
+      "decimalUnit": "শতাংশ",
+      "loadError": "প্রোফাইল লোড করা যায়নি।"
+    },
+    "installments": {
+      "title": "চাঁদার ইতিহাস",
+      "monthColumn": "মাস",
+      "amountColumn": "পরিমাণ",
+      "statusColumn": "অবস্থা",
+      "paidAtColumn": "পরিশোধের তারিখ",
+      "statusPaid": "পরিশোধিত",
+      "statusDue": "বকেয়া",
+      "emptyState": "কোনো কিস্তি নেই",
+      "paymentNotice": "চাঁদা পরিশোধ অফিসে সরাসরি (নগদ/বিকাশ/ব্যাংক) করা হয়; প্রশাসন তা এখানে হালনাগাদ করেন।",
+      "loadError": "কিস্তির তালিকা লোড করা যায়নি।"
+    },
+    "dashboard": {
+      "memberIdLabel": "সদস্য আইডি",
+      "paidMonthsLabel": "পরিশোধিত মাস",
+      "dueMonthsLabel": "বকেয়া মাস",
+      "recentStatusTitle": "সাম্প্রতিক চাঁদার অবস্থা",
+      "statusPaid": "পরিশোধিত",
+      "statusDue": "বকেয়া",
+      "loadError": "তথ্য লোড করা যায়নি।"
+    },
+    "changePassword": {
+      "title": "পাসওয়ার্ড পরিবর্তন করুন",
+      "successMessage": "পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে।",
+      "currentPasswordLabel": "বর্তমান পাসওয়ার্ড",
+      "newPasswordLabel": "নতুন পাসওয়ার্ড",
+      "confirmPasswordLabel": "নতুন পাসওয়ার্ড নিশ্চিত করুন",
+      "passwordMismatchError": "পাসওয়ার্ড মিলছে না।",
+      "savingButton": "সংরক্ষণ হচ্ছে...",
+      "saveButton": "পরিবর্তন সংরক্ষণ করুন",
+      "changeFailedError": "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে।"
+    }
+  },
+  "auth": {
+    "login": {
+      "logoAlt": "উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ লোগো",
+      "title": "লগইন করুন",
+      "subtitle": "সদস্য অথবা প্রশাসক হিসেবে প্রবেশ করুন",
+      "identifierLabel": "ইউজারনেম / ইমেইল",
+      "passwordLabel": "পাসওয়ার্ড",
+      "loggingInButton": "লগইন হচ্ছে...",
+      "submitButton": "প্রবেশ করুন",
+      "notAMemberYet": "এখনো সদস্য নন?",
+      "registerButton": "নতুন সদস্য নিবন্ধন করুন",
+      "backToHome": "হোমে ফিরুন",
+      "identifierRequiredError": "ইউজারনেম / ইমেইল আবশ্যক",
+      "passwordRequiredError": "পাসওয়ার্ড আবশ্যক",
+      "loginFailedError": "লগইন ব্যর্থ হয়েছে। তথ্য সঠিক নয়।"
+    }
+  },
+  "admin": {
+    "submissionDetail": {
+      "title": "আবেদনের বিস্তারিত",
+      "fields": {
+        "name": "নাম",
+        "fatherOrHusband": "পিতা/স্বামী",
+        "mother": "মাতা",
+        "dob": "জন্ম তারিখ",
+        "mobile": "মোবাইল",
+        "email": "ইমেইল",
+        "status": "স্ট্যাটাস",
+        "admissionFee": "ভর্তি ফি",
+        "subscription": "চাঁদা",
+        "paymentMethod": "পেমেন্ট মাধ্যম",
+        "house": "বাসা/হোল্ডিং নং",
+        "road": "রাস্তা/গ্রাম",
+        "postOffice": "ডাকঘর",
+        "upazila": "উপজেলা/থানা",
+        "district": "জেলা"
+      },
+      "permanentAddress": "স্থায়ী ঠিকানা",
+      "currentAddress": "বর্তমান ঠিকানা",
+      "properties": "সম্পত্তিসমূহ",
+      "noProperties": "কোনো সম্পত্তির তথ্য দেওয়া হয়নি।",
+      "nominees": "মনোনীত ব্যক্তি",
+      "noNominees": "কোনো মনোনীত ব্যক্তির তথ্য দেওয়া হয়নি।",
+      "propertyCardTitle": "সম্পত্তি",
+      "nomineeCardTitle": "মনোনীত ব্যক্তি",
+      "approveButton": "অনুমোদন করুন",
+      "rejectButton": "বাতিল করুন",
+      "approveModal": {
+        "title": "আবেদন অনুমোদন করুন",
+        "messageSuffix": "কে সদস্য হিসেবে অনুমোদন দিলে স্বয়ংক্রিয়ভাবে একটি সদস্য আইডি ও লগইন তথ্য তৈরি হবে।",
+        "confirmLabel": "নিশ্চিত করুন ও অনুমোদন করুন"
+      },
+      "rejectModal": {
+        "title": "আবেদন প্রত্যাখ্যান করুন",
+        "messageSuffix": "এর আবেদন প্রত্যাখ্যানের কারণ লিখুন। এটি আবেদনকারীকে জানানো হবে।",
+        "confirmLabel": "প্রত্যাখ্যান নিশ্চিত করুন",
+        "placeholder": "যেমন: প্রয়োজনীয় দলিল সংযুক্ত নেই..."
+      },
+      "fieldLabels": {
+        "type": "ধরন",
+        "address": "ঠিকানা",
+        "area": "পরিমাণ",
+        "description": "বিবরণ",
+        "name": "নাম",
+        "relation": "সম্পর্ক",
+        "mobile": "মোবাইল",
+        "nid": "NID",
+        "percentage": "শতাংশ",
+        "dob": "জন্ম তারিখ",
+        "value": "মান"
+      },
+      "errors": {
+        "loadFailed": "আবেদনের তথ্য পাওয়া যায়নি।",
+        "approveFailed": "অনুমোদন ব্যর্থ হয়েছে।",
+        "reasonRequired": "বাতিলের কারণ লিখুন।",
+        "rejectFailed": "বাতিল করা ব্যর্থ হয়েছে।"
+      }
+    },
+    "roleManagement": {
+      "title": "ভূমিকা ও অনুমতি ব্যবস্থাপনা",
+      "subtitle": "প্রতিটি ভূমিকার জন্য অনুমতি নির্ধারণ করুন",
+      "allPermissionsAlways": "সকল অনুমতি — সর্বদা",
+      "createAdmin": {
+        "title": "নতুন প্রশাসক তৈরি করুন",
+        "subtitle": "ইমেইল ও পাসওয়ার্ড দিয়ে একজন নতুন প্রশাসক অ্যাকাউন্ট তৈরি করুন।",
+        "nameLabel": "নাম",
+        "namePlaceholder": "পূর্ণ নাম",
+        "emailLabel": "ইমেইল",
+        "passwordLabel": "পাসওয়ার্ড",
+        "passwordPlaceholder": "পাসওয়ার্ড",
+        "roleLabel": "ভূমিকা",
+        "submitButton": "প্রশাসক তৈরি করুন",
+        "successPrefix": "নতুন প্রশাসক তৈরি হয়েছে:"
+      },
+      "userOverrides": {
+        "title": "ব্যবহারকারী-ভিত্তিক ওভাররাইড",
+        "subtitle": "একজন নির্দিষ্ট ব্যবহারকারীর জন্য তার ভূমিকার ডিফল্টের বাইরে গিয়ে অতিরিক্ত অনুমতি দিন বা প্রত্যাহার করুন।",
+        "userLabel": "ব্যবহারকারী",
+        "assignRoleLabel": "ভূমিকা নির্ধারণ করুন",
+        "saveRoleButton": "ভূমিকা সংরক্ষণ করুন",
+        "permissionLabel": "অনুমতি",
+        "actionLabel": "কার্যক্রম",
+        "grantOption": "অতিরিক্ত গ্রান্ট করুন",
+        "revokeOption": "প্রত্যাহার করুন",
+        "applyButton": "প্রয়োগ করুন",
+        "noOverrides": "এই ব্যবহারকারীর জন্য কোনো স্বতন্ত্র অনুমতি নেই।"
+      },
+      "errors": {
+        "loadRolesFailed": "ভূমিকা তালিকা লোড করা যায়নি।",
+        "loadPermissionsFailed": "অনুমতি তালিকা লোড করা যায়নি।",
+        "loadUsersFailed": "ব্যবহারকারী তালিকা লোড করা যায়নি।",
+        "saveChangeFailed": "পরিবর্তন সংরক্ষণ করা যায়নি।",
+        "createUserFailed": "নতুন প্রশাসক তৈরি করা যায়নি।",
+        "assignRoleFailed": "ভূমিকা নির্ধারণ করা যায়নি।",
+        "loadOverridesFailed": "স্বতন্ত্র অনুমতি লোড করা যায়নি।",
+        "saveOverridesFailed": "স্বতন্ত্র অনুমতি সংরক্ষণ করা যায়নি।"
+      }
+    },
+    "membersList": {
+      "title": "সকল সদস্য",
+      "subtitle": "সদস্যদের তথ্য ও চাঁদার অবস্থা দেখুন",
+      "tableHeaders": {
+        "memberId": "সদস্য আইডি",
+        "name": "নাম",
+        "mobile": "মোবাইল",
+        "status": "অবস্থা",
+        "contributionStatus": "চাঁদার অবস্থা"
+      },
+      "viewContributionsTitle": "চাঁদার অবস্থা দেখুন",
+      "deleteMemberTitle": "সদস্য মুছে ফেলুন",
+      "noMembers": "কোনো সদস্য পাওয়া যায়নি।",
+      "monthsOverdue": "মাস বকেয়া",
+      "fullyPaid": "সম্পূর্ণ পরিশোধিত",
+      "deleteModal": {
+        "title": "রেকর্ড মুছে ফেলুন?",
+        "messageSuffix": "এর সদস্য রেকর্ড স্থায়ীভাবে মুছে যাবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
+        "confirmLabel": "মুছে ফেলুন"
+      },
+      "errors": {
+        "loadFailed": "সদস্য তালিকা লোড করা যায়নি।",
+        "deleteFailed": "সদস্য মুছে ফেলা যায়নি।"
+      }
+    },
+    "installments": {
+      "title": "চাঁদা ব্যবস্থাপনা",
+      "subtitle": "সদস্য নির্বাচন করে মাসিক কিস্তির অবস্থা দেখুন ও হালনাগাদ করুন",
+      "noMembers": "কোনো সদস্য পাওয়া যায়নি।",
+      "selectMember": "সদস্য নির্বাচন করুন।",
+      "paid": "পরিশোধিত",
+      "permissionRequired": "অনুমতি প্রয়োজন",
+      "markPaidButton": "পরিশোধিত হিসেবে চিহ্নিত করুন",
+      "noInstallments": "এই সদস্যের কোনো কিস্তি নেই।",
+      "months": {
+        "january": "জানুয়ারি",
+        "february": "ফেব্রুয়ারি",
+        "march": "মার্চ",
+        "april": "এপ্রিল",
+        "may": "মে",
+        "june": "জুন",
+        "july": "জুলাই",
+        "august": "আগস্ট",
+        "september": "সেপ্টেম্বর",
+        "october": "অক্টোবর",
+        "november": "নভেম্বর",
+        "december": "ডিসেম্বর"
+      },
+      "errors": {
+        "loadMembersFailed": "সদস্য তালিকা লোড করা যায়নি।",
+        "loadInstallmentsFailed": "কিস্তির তথ্য লোড করা যায়নি।",
+        "markPaidFailed": "কিস্তি পরিশোধিত হিসেবে চিহ্নিত করা যায়নি।"
+      }
+    },
+    "submissionsList": {
+      "title": "আবেদনসমূহ",
+      "subtitle": "নতুন সদস্যপদের আবেদন পর্যালোচনা করুন",
+      "filterLabel": "স্ট্যাটাস অনুযায়ী ফিল্টার",
+      "allOption": "সব",
+      "tableHeaders": {
+        "name": "নাম",
+        "mobile": "মোবাইল",
+        "status": "স্ট্যাটাস",
+        "date": "তারিখ"
+      },
+      "detailsLink": "বিস্তারিত",
+      "noSubmissions": "কোনো আবেদন পাওয়া যায়নি",
+      "errors": {
+        "loadFailed": "তালিকা লোড করা যায়নি।"
+      }
+    },
+    "dashboard": {
+      "pendingTitle": "বিচারাধীন আবেদন",
+      "subtitle": "নতুন সদস্যপদের আবেদনসমূহ পর্যালোচনা করুন",
+      "tableHeaders": {
+        "reference": "রেফারেন্স",
+        "applicant": "আবেদনকারী",
+        "mobile": "মোবাইল",
+        "properties": "সম্পত্তি",
+        "submittedDate": "জমার তারিখ"
+      },
+      "propertiesUnit": "টি",
+      "detailsLink": "বিস্তারিত",
+      "noPending": "কোনো বিচারাধীন আবেদন নেই",
+      "errors": {
+        "loadFailed": "আবেদনের তালিকা লোড করা যায়নি।"
+      }
+    }
+  }
+}

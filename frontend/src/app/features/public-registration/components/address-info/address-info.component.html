@@ -1,20 +1,20 @@
 <section [formGroup]="form">
-  <h2 class="section-title">২. ঠিকানার তথ্য</h2>
+  <h2 class="section-title">{{ 'registration.stepTitles.addressInfo' | translate }}</h2>
   <div class="grid-2">
     <div formGroupName="currentAddress">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin:0 0 0.5rem">
-        <h3 style="font-size:0.9rem;color:#374151;margin:0">বর্তমান ঠিকানা</h3>
+        <h3 style="font-size:0.9rem;color:#374151;margin:0">{{ 'registration.addressInfo.currentAddressTitle' | translate }}</h3>
 
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="currentAddress_division">বিভাগ <span class="required">*</span></label>
+          <label for="currentAddress_division">{{ 'registration.addressInfo.divisionLabel' | translate }} <span class="required">*</span></label>
           @if (showError('currentAddress', 'division')) {
             <span class="field-error-inline">{{ errorMessage('division') }}</span>
           }
         </div>
         <select id="currentAddress_division" formControlName="division">
-          <option value="" disabled>নির্বাচন করুন</option>
+          <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (division of divisions$ | async; track division.id) {
             <option [value]="division.bn_name">{{ division.bn_name }}</option>
           }
@@ -22,13 +22,13 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="currentAddress_district">জেলা <span class="required">*</span></label>
+          <label for="currentAddress_district">{{ 'registration.addressInfo.districtLabel' | translate }} <span class="required">*</span></label>
           @if (showError('currentAddress', 'district')) {
             <span class="field-error-inline">{{ errorMessage('district') }}</span>
           }
         </div>
         <select id="currentAddress_district" formControlName="district">
-          <option value="" disabled>নির্বাচন করুন</option>
+          <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (district of currentDistricts$ | async; track district.id) {
             <option [value]="district.bn_name">{{ district.bn_name }}</option>
           }
@@ -36,13 +36,13 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="currentAddress_upazila">উপজেলা/থানা <span class="required">*</span></label>
+          <label for="currentAddress_upazila">{{ 'registration.addressInfo.upazilaLabel' | translate }} <span class="required">*</span></label>
           @if (showError('currentAddress', 'upazila')) {
             <span class="field-error-inline">{{ errorMessage('upazila') }}</span>
           }
         </div>
         <select id="currentAddress_upazila" formControlName="upazila">
-          <option value="" disabled>নির্বাচন করুন</option>
+          <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (upazila of currentUpazilas$ | async; track upazila.name) {
             <option [value]="upazila.bn_name">{{ upazila.bn_name }}</option>
           }
@@ -50,7 +50,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="currentAddress_postOffice">ডাকঘর <span class="required">*</span></label>
+          <label for="currentAddress_postOffice">{{ 'registration.addressInfo.postOfficeLabel' | translate }} <span class="required">*</span></label>
           @if (showError('currentAddress', 'postOffice')) {
             <span class="field-error-inline">{{ errorMessage('postOffice') }}</span>
           }
@@ -59,7 +59,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="currentAddress_road">রাস্তা/গ্রাম <span class="required">*</span></label>
+          <label for="currentAddress_road">{{ 'registration.addressInfo.roadLabel' | translate }} <span class="required">*</span></label>
           @if (showError('currentAddress', 'road')) {
             <span class="field-error-inline">{{ errorMessage('road') }}</span>
           }
@@ -68,7 +68,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="currentAddress_house">বাসা/হোল্ডিং নং <span class="required">*</span></label>
+          <label for="currentAddress_house">{{ 'registration.addressInfo.houseLabel' | translate }} <span class="required">*</span></label>
           @if (showError('currentAddress', 'house')) {
             <span class="field-error-inline">{{ errorMessage('house') }}</span>
           }
@@ -77,24 +77,24 @@
       </div>
     </div>
     <div formGroupName="permanentAddress">
-      <h3 style="font-size:0.9rem;color:#374151;margin:0 0 0.5rem">স্থায়ী ঠিকানা</h3>
+      <h3 style="font-size:0.9rem;color:#374151;margin:0 0 0.5rem">{{ 'registration.addressInfo.permanentAddressTitle' | translate }}</h3>
         <div style="display:flex;align-items:center;gap:0.5rem">
           <input
             type="checkbox"
             id="sameAsCurrentAddress"
             [formControl]="sameAsCurrentAddress"
           />
-          <label for="sameAsCurrentAddress" style="margin:0; font-size:12px">বর্তমান ঠিকানার সাথে একই</label>
+          <label for="sameAsCurrentAddress" style="margin:0; font-size:12px">{{ 'registration.addressInfo.sameAsCurrentLabel' | translate }}</label>
         </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="permanentAddress_division">বিভাগ <span class="required">*</span></label>
+          <label for="permanentAddress_division">{{ 'registration.addressInfo.divisionLabel' | translate }} <span class="required">*</span></label>
           @if (showError('permanentAddress', 'division')) {
             <span class="field-error-inline">{{ errorMessage('division') }}</span>
           }
         </div>
         <select id="permanentAddress_division" formControlName="division">
-          <option value="" disabled>নির্বাচন করুন</option>
+          <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (division of divisions$ | async; track division.id) {
             <option [value]="division.bn_name">{{ division.bn_name }}</option>
           }
@@ -102,13 +102,13 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="permanentAddress_district">জেলা <span class="required">*</span></label>
+          <label for="permanentAddress_district">{{ 'registration.addressInfo.districtLabel' | translate }} <span class="required">*</span></label>
           @if (showError('permanentAddress', 'district')) {
             <span class="field-error-inline">{{ errorMessage('district') }}</span>
           }
         </div>
         <select id="permanentAddress_district" formControlName="district">
-          <option value="" disabled>নির্বাচন করুন</option>
+          <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (district of permanentDistricts$ | async; track district.id) {
             <option [value]="district.bn_name">{{ district.bn_name }}</option>
           }
@@ -116,13 +116,13 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="permanentAddress_upazila">উপজেলা/থানা <span class="required">*</span></label>
+          <label for="permanentAddress_upazila">{{ 'registration.addressInfo.upazilaLabel' | translate }} <span class="required">*</span></label>
           @if (showError('permanentAddress', 'upazila')) {
             <span class="field-error-inline">{{ errorMessage('upazila') }}</span>
           }
         </div>
         <select id="permanentAddress_upazila" formControlName="upazila">
-          <option value="" disabled>নির্বাচন করুন</option>
+          <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (upazila of permanentUpazilas$ | async; track upazila.name) {
             <option [value]="upazila.bn_name">{{ upazila.bn_name }}</option>
           }
@@ -130,7 +130,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="permanentAddress_postOffice">ডাকঘর <span class="required">*</span></label>
+          <label for="permanentAddress_postOffice">{{ 'registration.addressInfo.postOfficeLabel' | translate }} <span class="required">*</span></label>
           @if (showError('permanentAddress', 'postOffice')) {
             <span class="field-error-inline">{{ errorMessage('postOffice') }}</span>
           }
@@ -139,7 +139,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="permanentAddress_road">রাস্তা/গ্রাম <span class="required">*</span></label>
+          <label for="permanentAddress_road">{{ 'registration.addressInfo.roadLabel' | translate }} <span class="required">*</span></label>
           @if (showError('permanentAddress', 'road')) {
             <span class="field-error-inline">{{ errorMessage('road') }}</span>
           }
@@ -148,7 +148,7 @@
       </div>
       <div class="field">
         <div class="field-label-row">
-          <label for="permanentAddress_house">বাসা/হোল্ডিং নং <span class="required">*</span></label>
+          <label for="permanentAddress_house">{{ 'registration.addressInfo.houseLabel' | translate }} <span class="required">*</span></label>
           @if (showError('permanentAddress', 'house')) {
             <span class="field-error-inline">{{ errorMessage('house') }}</span>
           }

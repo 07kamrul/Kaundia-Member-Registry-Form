@@ -2,17 +2,17 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">
-        বিচারাধীন আবেদন
+        {{ 'admin.dashboard.pendingTitle' | translate }}
         @if (pending.length > 0) {
           <span class="status-badge status-pending" style="margin-left:.5rem">{{ pending.length }}</span>
         }
       </h1>
-      <p class="page-subtitle">নতুন সদস্যপদের আবেদনসমূহ পর্যালোচনা করুন</p>
+      <p class="page-subtitle">{{ 'admin.dashboard.subtitle' | translate }}</p>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
@@ -20,11 +20,11 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>রেফারেন্স</th>
-            <th>আবেদনকারী</th>
-            <th>মোবাইল</th>
-            <th>সম্পত্তি</th>
-            <th>জমার তারিখ</th>
+            <th>{{ 'admin.dashboard.tableHeaders.reference' | translate }}</th>
+            <th>{{ 'admin.dashboard.tableHeaders.applicant' | translate }}</th>
+            <th>{{ 'admin.dashboard.tableHeaders.mobile' | translate }}</th>
+            <th>{{ 'admin.dashboard.tableHeaders.properties' | translate }}</th>
+            <th>{{ 'admin.dashboard.tableHeaders.submittedDate' | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -34,7 +34,7 @@
               <td>{{ referenceFor(s) }}</td>
               <td>{{ s.fullName }}</td>
               <td>{{ s.mobile }}</td>
-              <td>{{ s.propertiesCount ?? '—' }}টি</td>
+              <td>{{ s.propertiesCount ?? '—' }}{{ 'admin.dashboard.propertiesUnit' | translate }}</td>
               <td>{{ s.createdAt | date: 'yyyy-MM-dd' }}</td>
               <td>
                 <a
@@ -42,12 +42,12 @@
                   class="btn btn-primary btn-sm"
                   style="text-decoration:none"
                 >
-                  বিস্তারিত <app-icon name="chevron-right" [size]="16" />
+                  {{ 'admin.dashboard.detailsLink' | translate }} <app-icon name="chevron-right" [size]="16" />
                 </a>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="6" class="empty-state">কোনো বিচারাধীন আবেদন নেই</td></tr>
+            <tr><td colspan="6" class="empty-state">{{ 'admin.dashboard.noPending' | translate }}</td></tr>
           }
         </tbody>
       </table>

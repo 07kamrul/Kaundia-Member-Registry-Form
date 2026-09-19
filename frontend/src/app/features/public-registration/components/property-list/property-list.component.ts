@@ -3,11 +3,12 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular
 import { MAX_PROPERTY_COUNT } from '../../../../core/models/registration.model';
 import { buildPropertyGroup } from '../../registration-form.builder';
 import { PropertyItemComponent } from './property-item.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-property-list',
   standalone: true,
-  imports: [ReactiveFormsModule, PropertyItemComponent],
+  imports: [ReactiveFormsModule, PropertyItemComponent, TranslatePipe],
   templateUrl: './property-list.component.html',
 })
 export class PropertyListComponent {

@@ -3,21 +3,20 @@
     <div>
       <span class="eyebrow">
         <app-icon name="sparkle" [size]="14" />
-        সদস্য ব্যবস্থাপনা পোর্টাল
+        {{ 'home.hero.eyebrow' | translate }}
       </span>
-      <h1 class="hero-heading">উত্তর কাউন্দিয়ার<br />জমির মালিকদের কল্যাণ পরিষদ</h1>
+      <h1 class="hero-heading" [innerHTML]="'home.hero.title' | translate"></h1>
       <p class="hero-copy">
-        সদস্যপদের আবেদন থেকে শুরু করে মাসিক চাঁদা পরিশোধ পর্যন্ত — পুরো প্রক্রিয়া এখন অনলাইনে। কাগজে আবেদন করার
-        ঝামেলা নেই, অফিসে বারবার যাওয়ার প্রয়োজন নেই।
+        {{ 'home.hero.subtitle' | translate }}
       </p>
       <div class="hero-actions">
         <a routerLink="/register" class="btn btn-primary">
           <app-icon name="doc" [size]="16" />
-          সদস্যপদের জন্য আবেদন করুন
+          {{ 'home.hero.applyButton' | translate }}
         </a>
         <a routerLink="/login" class="btn btn-ghost">
           <app-icon name="user" [size]="16" />
-          ইতিমধ্যে সদস্য? লগইন করুন
+          {{ 'home.hero.loginButton' | translate }}
         </a>
       </div>
     </div>
@@ -25,19 +24,19 @@
     <div class="card hero-stat-card">
       <div class="hero-stat-title">
         <app-icon name="shield" [size]="18" />
-        এই মুহূর্তে
+        {{ 'home.hero.statCardTitle' | translate }}
       </div>
       <div class="hero-stat-row">
-        <span class="hero-stat-label">আবেদন যাচাই</span>
-        <span class="hero-stat-value">অনলাইনে</span>
+        <span class="hero-stat-label">{{ 'home.hero.applicationReviewLabel' | translate }}</span>
+        <span class="hero-stat-value">{{ 'home.hero.onlineValue' | translate }}</span>
       </div>
       <div class="hero-stat-row">
-        <span class="hero-stat-label">সদস্য আইডি</span>
-        <span class="hero-stat-value">স্বয়ংক্রিয়</span>
+        <span class="hero-stat-label">{{ 'home.hero.memberIdLabel' | translate }}</span>
+        <span class="hero-stat-value">{{ 'home.hero.automaticValue' | translate }}</span>
       </div>
       <div class="hero-stat-row">
-        <span class="hero-stat-label">মাসিক চাঁদা</span>
-        <span class="hero-stat-value">অনলাইনে পরিশোধ</span>
+        <span class="hero-stat-label">{{ 'home.hero.monthlySubscriptionLabel' | translate }}</span>
+        <span class="hero-stat-value">{{ 'home.hero.paidOnlineValue' | translate }}</span>
       </div>
     </div>
   </div>
@@ -47,23 +46,23 @@
   <div class="feature-grid">
     <div class="card feature-card">
       <div class="feature-icon"><app-icon name="doc" [size]="20" /></div>
-      <p class="feature-title">আবেদন করুন</p>
+      <p class="feature-title">{{ 'home.steps.applyTitle' | translate }}</p>
       <p class="feature-desc">
-        ব্যক্তিগত তথ্য, ঠিকানা, জমির বিবরণ ও পেমেন্ট তথ্যসহ ধাপে ধাপে ফর্ম পূরণ করুন।
+        {{ 'home.steps.applyDesc' | translate }}
       </p>
     </div>
     <div class="card feature-card">
       <div class="feature-icon"><app-icon name="users" [size]="20" /></div>
-      <p class="feature-title">কমিটির পর্যালোচনা</p>
+      <p class="feature-title">{{ 'home.steps.reviewTitle' | translate }}</p>
       <p class="feature-desc">
-        কার্যনির্বাহী কমিটি ও প্রশাসন প্রতিটি আবেদন যাচাই করে অনুমোদন বা প্রত্যাখ্যান করেন।
+        {{ 'home.steps.reviewDesc' | translate }}
       </p>
     </div>
     <div class="card feature-card">
       <div class="feature-icon"><app-icon name="coin" [size]="20" /></div>
-      <p class="feature-title">সদস্য আইডি ও লগইন</p>
+      <p class="feature-title">{{ 'home.steps.memberIdTitle' | translate }}</p>
       <p class="feature-desc">
-        অনুমোদনের পর স্বয়ংক্রিয়ভাবে সদস্য আইডি তৈরি হয় এবং লগইন তথ্য ইস্যু করা হয়।
+        {{ 'home.steps.memberIdDesc' | translate }}
       </p>
     </div>
   </div>

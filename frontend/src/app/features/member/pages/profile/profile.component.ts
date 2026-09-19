@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService, type MemberProfile } from '../../../../core/services/member.service';
 
 interface ProfileProperty {
@@ -11,7 +12,7 @@ interface ProfileProperty {
 @Component({
   selector: 'app-member-profile',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit {
@@ -20,7 +21,10 @@ export class ProfileComponent implements OnInit {
   loading = false;
   error = '';
 
-  constructor(private memberService: MemberService) {}
+  constructor(
+    private memberService: MemberService,
+    private translate: TranslateService,
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -29,10 +33,10 @@ export class ProfileComponent implements OnInit {
         this.profile = data;
         this.propertySummaries = (data.properties as ProfileProperty[]).map((property) =>
           [
-            `সম্পত্তি ${property.id}`,
+            `${this.translate.instant('member.profile.propertyItemLabel')} ${property.id}`,
             property.property_type?.join('/') ?? '',
-            property.khatian_no ? `খতিয়ান ${property.khatian_no}` : '',
-            property.land_quantity ? `${property.land_quantity} শতাংশ` : '',
+            property.khatian_no ? `${this.translate.instant('member.profile.khatianLabel')} ${property.khatian_no}` : '',
+            property.land_quantity ? `${property.land_quantity} ${this.translate.instant('member.profile.decimalUnit')}` : '',
           ]
             .filter(Boolean)
             .join(' · ')
@@ -41,7 +45,7 @@ export class ProfileComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.error = 'প্রোফাইল লোড করা যায়নি।';
+        this.error = this.translate.instant('member.profile.loadError');
         this.loading = false;
       },
     });

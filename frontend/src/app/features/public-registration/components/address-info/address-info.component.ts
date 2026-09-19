@@ -3,6 +3,7 @@ import { Component, DestroyRef, inject, Input, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BehaviorSubject, Observable, switchMap } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   AddressLocationService,
   District,
@@ -10,19 +11,19 @@ import {
   Upazila,
 } from '../../services/address-location.service';
 
-const ADDRESS_FIELD_ERROR_MESSAGES: Record<string, string> = {
-  division: 'বিভাগ আবশ্যক',
-  district: 'জেলা আবশ্যক',
-  upazila: 'উপজেলা/থানা আবশ্যক',
-  postOffice: 'ডাকঘর আবশ্যক',
-  road: 'রাস্তা/গ্রাম আবশ্যক',
-  house: 'বাসা/হোল্ডিং নং আবশ্যক',
+const ADDRESS_FIELD_ERROR_KEYS: Record<string, string> = {
+  division: 'registration.addressInfo.divisionRequired',
+  district: 'registration.addressInfo.districtRequired',
+  upazila: 'registration.addressInfo.upazilaRequired',
+  postOffice: 'registration.addressInfo.postOfficeRequired',
+  road: 'registration.addressInfo.roadRequired',
+  house: 'registration.addressInfo.houseRequired',
 };
 
 @Component({
   selector: 'app-address-info',
   standalone: true,
-  imports: [ReactiveFormsModule, AsyncPipe],
+  imports: [ReactiveFormsModule, AsyncPipe, TranslatePipe],
   templateUrl: './address-info.component.html',
 })
 export class AddressInfoComponent implements OnInit {
@@ -31,6 +32,7 @@ export class AddressInfoComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly addressLocationService = inject(AddressLocationService);
+  private readonly translate = inject(TranslateService);
 
   sameAsCurrentAddress = new FormControl(false);
 
@@ -155,6 +157,7 @@ export class AddressInfoComponent implements OnInit {
   }
 
   errorMessage(controlName: string): string {
-    return ADDRESS_FIELD_ERROR_MESSAGES[controlName] ?? '';
+    const key = ADDRESS_FIELD_ERROR_KEYS[controlName];
+    return key ? this.translate.instant(key) : '';
   }
 }

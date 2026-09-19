@@ -1,13 +1,13 @@
 <div>
   <div class="page-header">
     <div>
-      <h1 class="page-title">সকল সদস্য</h1>
-      <p class="page-subtitle">সদস্যদের তথ্য ও চাঁদার অবস্থা দেখুন</p>
+      <h1 class="page-title">{{ 'admin.membersList.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.membersList.subtitle' | translate }}</p>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> লোড হচ্ছে...</div>
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
@@ -15,11 +15,11 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>সদস্য আইডি</th>
-            <th>নাম</th>
-            <th>মোবাইল</th>
-            <th>অবস্থা</th>
-            <th>চাঁদার অবস্থা</th>
+            <th>{{ 'admin.membersList.tableHeaders.memberId' | translate }}</th>
+            <th>{{ 'admin.membersList.tableHeaders.name' | translate }}</th>
+            <th>{{ 'admin.membersList.tableHeaders.mobile' | translate }}</th>
+            <th>{{ 'admin.membersList.tableHeaders.status' | translate }}</th>
+            <th>{{ 'admin.membersList.tableHeaders.contributionStatus' | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -51,7 +51,7 @@
               <td>
                 <div class="flex-row-wrap">
                   @if (m.status === 'approved') {
-                    <button type="button" class="btn btn-secondary btn-sm btn-icon" title="চাঁদার অবস্থা দেখুন" (click)="viewContributions(m)">
+                    <button type="button" class="btn btn-secondary btn-sm btn-icon" [title]="'admin.membersList.viewContributionsTitle' | translate" (click)="viewContributions(m)">
                       <app-icon name="eye" [size]="16" />
                     </button>
                   }
@@ -59,7 +59,7 @@
                     <button
                       type="button"
                       class="btn btn-danger btn-sm btn-icon"
-                      title="সদস্য মুছে ফেলুন"
+                      [title]="'admin.membersList.deleteMemberTitle' | translate"
                       (click)="askDelete(m)"
                     >
                       <app-icon name="trash" [size]="16" />
@@ -69,7 +69,7 @@
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="6" class="empty-state">কোনো সদস্য পাওয়া যায়নি।</td></tr>
+            <tr><td colspan="6" class="empty-state">{{ 'admin.membersList.noMembers' | translate }}</td></tr>
           }
         </tbody>
       </table>
@@ -78,9 +78,9 @@
 
   <app-confirm-modal
     [open]="!!deleteTarget"
-    title="রেকর্ড মুছে ফেলুন?"
-    [message]="deleteTarget ? deleteTarget.fullName + ' এর সদস্য রেকর্ড স্থায়ীভাবে মুছে যাবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।' : ''"
-    confirmLabel="মুছে ফেলুন"
+    [title]="'admin.membersList.deleteModal.title' | translate"
+    [message]="deleteTarget ? deleteTarget.fullName + ' ' + ('admin.membersList.deleteModal.messageSuffix' | translate) : ''"
+    [confirmLabel]="'admin.membersList.deleteModal.confirmLabel' | translate"
     [danger]="true"
     [confirmDisabled]="deleting"
     (confirm)="confirmDelete()"
