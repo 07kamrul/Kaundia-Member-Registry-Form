@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -41,6 +41,7 @@ export class InstallmentsManagementComponent implements OnInit {
     private adminService: AdminService,
     public auth: AuthService,
     private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -53,10 +54,12 @@ export class InstallmentsManagementComponent implements OnInit {
         const initialMember =
           this.members.find((m) => m.id === requestedMemberId) ?? this.members[0];
         if (initialMember) this.selectMember(initialMember.id);
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'সদস্য তালিকা লোড করা যায়নি।';
         this.loadingMembers = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -77,10 +80,12 @@ export class InstallmentsManagementComponent implements OnInit {
       next: (data) => {
         this.installments = data;
         this.loadingInstallments = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'কিস্তির তথ্য লোড করা যায়নি।';
         this.loadingInstallments = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -93,10 +98,12 @@ export class InstallmentsManagementComponent implements OnInit {
         const idx = this.installments.findIndex((i) => i.id === installment.id);
         if (idx >= 0) this.installments[idx] = updated;
         this.markingId = null;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'কিস্তি পরিশোধিত হিসেবে চিহ্নিত করা যায়নি।';
         this.markingId = null;
+        this.cdr.markForCheck();
       },
     });
   }

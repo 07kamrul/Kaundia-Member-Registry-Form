@@ -27,6 +27,15 @@ export interface AdminUserDef {
   name: string;
   email: string;
   role: string;
+  role_id: number | null;
+}
+
+export interface AdminUserCreate {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  role_id: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -62,5 +71,20 @@ export class RbacService {
     overrides: PermissionOverride[],
   ): Observable<PermissionOverride[]> {
     return this.http.put<PermissionOverride[]>(`${this.base}/users/${userId}/overrides`, overrides);
+  }
+
+  createUser(user: AdminUserCreate): Observable<AdminUserDef> {
+    return this.http.post<AdminUserDef>(`${this.base}/users`, user);
+  }
+
+  updateUserRole(
+    userId: number,
+    role: string,
+    roleId: number | null,
+  ): Observable<AdminUserDef> {
+    return this.http.patch<AdminUserDef>(`${this.base}/users/${userId}/role`, {
+      role,
+      role_id: roleId,
+    });
   }
 }

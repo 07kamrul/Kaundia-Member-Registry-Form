@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   AdminUserDef,
@@ -29,7 +29,21 @@ export class RoleManagementComponent implements OnInit {
   overrideDraftKey = '';
   overrideDraftAction: 'grant' | 'revoke' = 'grant';
 
-  constructor(private rbacService: RbacService) {}
+  newUserName = '';
+  newUserEmail = '';
+  newUserPassword = '';
+  newUserRole = 'administrator';
+  creatingUser = false;
+  createUserError = '';
+  createUserSuccess = '';
+
+  roleAssignDraft = '';
+  savingRoleAssignment = false;
+
+  constructor(
+    private rbacService: RbacService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -41,16 +55,19 @@ export class RoleManagementComponent implements OnInit {
           next: (roles) => {
             this.roles = roles;
             this.loading = false;
+            this.cdr.markForCheck();
           },
           error: () => {
             this.error = 'ভূমিকা তালিকা লোড করা যায়নি।';
             this.loading = false;
+            this.cdr.markForCheck();
           },
         });
       },
       error: () => {
         this.error = 'অনুমতি তালিকা লোড করা যায়নি।';
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
     this.rbacService.listUsers().subscribe({
@@ -58,9 +75,11 @@ export class RoleManagementComponent implements OnInit {
         this.users = users;
         this.selectedUserId = users[0]?.id ?? null;
         if (this.selectedUserId) this.loadOverrides(this.selectedUserId);
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'ব্যবহারকারী তালিকা লোড করা যায়নি।';
+        this.cdr.markForCheck();
       },
     });
   }
@@ -79,17 +98,74 @@ export class RoleManagementComponent implements OnInit {
       next: (updated) => {
         role.permission_keys = updated.permission_keys;
         this.savingRoleId = null;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'পরিবর্তন সংরক্ষণ করা যায়নি।';
         this.savingRoleId = null;
+        this.cdr.markForCheck();
       },
     });
   }
 
   onSelectUser(userId: string): void {
     this.selectedUserId = userId ? Number(userId) : null;
-    if (this.selectedUserId) this.loadOverrides(this.selectedUserId);
+    if (this.selectedUserId) {
+      this.loadOverrides(this.selectedUserId);
+      const user = this.users.find((u) => u.id === this.selectedUserId);
+      this.roleAssignDraft = user ? user.role : '';
+    }
+  }
+
+  createUser(): void {
+    if (!this.newUserName || !this.newUserEmail || !this.newUserPassword || !this.newUserRole) return;
+
+    this.creatingUser = true;
+    this.createUserError = '';
+    this.createUserSuccess = '';
+    this.rbacService
+      .createUser({
+        name: this.newUserName,
+        email: this.newUserEmail,
+        password: this.newUserPassword,
+        role: this.newUserRole,
+        role_id: null,
+      })
+      .subscribe({
+        next: (user) => {
+          this.users = [...this.users, user];
+          this.createUserSuccess = `নতুন প্রশাসক তৈরি হয়েছে: ${user.email}`;
+          this.newUserName = '';
+          this.newUserEmail = '';
+          this.newUserPassword = '';
+          this.creatingUser = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.createUserError =
+            err?.error?.detail ?? 'নতুন প্রশাসক তৈরি করা যায়নি।';
+          this.creatingUser = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  assignRole(): void {
+    if (!this.selectedUserId || !this.roleAssignDraft) return;
+
+    this.savingRoleAssignment = true;
+    this.rbacService.updateUserRole(this.selectedUserId, this.roleAssignDraft, null).subscribe({
+      next: (updated) => {
+        this.users = this.users.map((u) => (u.id === updated.id ? updated : u));
+        this.savingRoleAssignment = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.error = 'ভূমিকা নির্ধারণ করা যায়নি।';
+        this.savingRoleAssignment = false;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   loadOverrides(userId: number): void {
@@ -98,10 +174,12 @@ export class RoleManagementComponent implements OnInit {
       next: (overrides) => {
         this.overrides = overrides;
         this.loadingOverrides = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'স্বতন্ত্র অনুমতি লোড করা যায়নি।';
         this.loadingOverrides = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -129,10 +207,12 @@ export class RoleManagementComponent implements OnInit {
       next: (result) => {
         this.overrides = result;
         this.savingOverride = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'স্বতন্ত্র অনুমতি সংরক্ষণ করা যায়নি।';
         this.savingOverride = false;
+        this.cdr.markForCheck();
       },
     });
   }

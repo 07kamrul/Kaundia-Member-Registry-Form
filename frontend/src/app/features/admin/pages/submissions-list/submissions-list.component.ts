@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
 import type { SubmissionStatus, SubmissionSummary } from '../../../../core/models/admin.model';
@@ -18,7 +18,10 @@ export class SubmissionsListComponent implements OnInit {
 
   readonly statuses: Array<SubmissionStatus | ''> = ['', 'pending', 'approved', 'rejected'];
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -31,10 +34,12 @@ export class SubmissionsListComponent implements OnInit {
       next: (data) => {
         this.submissions = data;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'তালিকা লোড করা যায়নি।';
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }

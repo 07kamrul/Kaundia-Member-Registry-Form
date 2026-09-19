@@ -34,7 +34,7 @@
               <td>{{ referenceFor(s) }}</td>
               <td>{{ s.fullName }}</td>
               <td>{{ s.mobile }}</td>
-              <td>{{ s.propertiesCount }}টি</td>
+              <td>{{ s.propertiesCount ?? '—' }}টি</td>
               <td>{{ s.createdAt | date: 'yyyy-MM-dd' }}</td>
               <td>
                 <a

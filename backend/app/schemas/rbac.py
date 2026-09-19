@@ -34,3 +34,17 @@ class AdminUserOut(BaseModel):
     name: str
     email: str
     role: str
+    role_id: int | None = None
+
+
+class AdminUserCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str
+    role_id: int | None = None
+
+
+class AdminUserRoleUpdate(BaseModel):
+    role: str
+    role_id: int | None = None

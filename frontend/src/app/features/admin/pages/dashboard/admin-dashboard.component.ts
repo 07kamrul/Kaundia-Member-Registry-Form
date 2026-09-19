@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -16,7 +16,10 @@ export class AdminDashboardComponent implements OnInit {
   loading = false;
   error = '';
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -29,10 +32,12 @@ export class AdminDashboardComponent implements OnInit {
       next: (data) => {
         this.pending = data;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'আবেদনের তালিকা লোড করা যায়নি।';
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }

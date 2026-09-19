@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -23,6 +23,7 @@ export class MembersListComponent implements OnInit {
     private adminService: AdminService,
     private router: Router,
     public auth: AuthService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -31,10 +32,12 @@ export class MembersListComponent implements OnInit {
       next: (data) => {
         this.members = data;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'সদস্য তালিকা লোড করা যায়নি।';
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -64,11 +67,13 @@ export class MembersListComponent implements OnInit {
         this.members = this.members.filter((m) => m.id !== this.deleteTarget!.id);
         this.deleteTarget = null;
         this.deleting = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'সদস্য মুছে ফেলা যায়নি।';
         this.deleteTarget = null;
         this.deleting = false;
+        this.cdr.markForCheck();
       },
     });
   }

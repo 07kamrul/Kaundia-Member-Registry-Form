@@ -6,7 +6,7 @@ export interface SubmissionSummary {
   mobile: string;
   status: SubmissionStatus;
   createdAt: string;
-  propertiesCount: number;
+  propertiesCount?: number;
 }
 
 export interface SubmissionDetail extends SubmissionSummary {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -72,6 +72,7 @@ export class SubmissionDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private adminService: AdminService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   get propertyCards(): DetailCard[] {
@@ -94,10 +95,12 @@ export class SubmissionDetailComponent implements OnInit {
       next: (data) => {
         this.submission = data;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'আবেদনের তথ্য পাওয়া যায়নি।';
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -110,6 +113,7 @@ export class SubmissionDetailComponent implements OnInit {
       error: () => {
         this.actionError = 'অনুমোদন ব্যর্থ হয়েছে।';
         this.showApproveModal = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -125,6 +129,7 @@ export class SubmissionDetailComponent implements OnInit {
       error: () => {
         this.actionError = 'বাতিল করা ব্যর্থ হয়েছে।';
         this.showRejectModal = false;
+        this.cdr.markForCheck();
       },
     });
   }

@@ -5,11 +5,14 @@ from sqlalchemy.orm import selectinload
 
 from app.core.deps import get_current_admin
 from app.core.permissions import PERMISSION_CATALOG, get_effective_permissions, require_permission
+from app.core.security import hash_password
 from app.db.session import get_db
 from app.models.admin import AdminRole, AdminUser
 from app.models.rbac import Permission, Role, UserPermissionOverride
 from app.schemas.rbac import (
+    AdminUserCreate,
     AdminUserOut,
+    AdminUserRoleUpdate,
     PermissionOut,
     PermissionOverrideIn,
     PermissionOverrideOut,
@@ -101,9 +104,89 @@ async def list_admin_users(
 ) -> list[AdminUserOut]:
     result = await db.execute(select(AdminUser).where(AdminUser.role != AdminRole.SUPER_ADMIN))
     return [
-        AdminUserOut(id=user.id, name=user.name, email=user.email, role=user.role.value)
+        AdminUserOut(
+            id=user.id, name=user.name, email=user.email, role=user.role.value, role_id=user.role_id
+        )
         for user in result.scalars().all()
     ]
+
+
+@router.post("/users", response_model=AdminUserOut, status_code=status.HTTP_201_CREATED)
+async def create_admin_user(
+    payload: AdminUserCreate,
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("manage_users")),
+) -> AdminUserOut:
+    try:
+        role_enum = AdminRole(payload.role)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unknown role: {payload.role}"
+        )
+
+    existing_result = await db.execute(select(AdminUser).where(AdminUser.email == payload.email))
+    if existing_result.scalar_one_or_none() is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already in use")
+
+    if payload.role_id is not None:
+        role_result = await db.execute(select(Role).where(Role.id == payload.role_id))
+        if role_result.scalar_one_or_none() is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+
+    user = AdminUser(
+        name=payload.name,
+        email=payload.email,
+        password_hash=hash_password(payload.password),
+        role=role_enum,
+        role_id=payload.role_id,
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+
+    return AdminUserOut(id=user.id, name=user.name, email=user.email, role=user.role.value, role_id=user.role_id)
+
+
+@router.patch("/users/{user_id}/role", response_model=AdminUserOut)
+async def update_admin_user_role(
+    user_id: int,
+    payload: AdminUserRoleUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(require_permission("manage_users")),
+) -> AdminUserOut:
+    try:
+        role_enum = AdminRole(payload.role)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unknown role: {payload.role}"
+        )
+
+    result = await db.execute(select(AdminUser).where(AdminUser.id == user_id))
+    user = result.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if payload.role_id is not None:
+        role_result = await db.execute(select(Role).where(Role.id == payload.role_id))
+        if role_result.scalar_one_or_none() is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+
+    if user.id == admin.id and role_enum != AdminRole.SUPER_ADMIN and admin.role == AdminRole.SUPER_ADMIN:
+        count_result = await db.execute(
+            select(AdminUser).where(AdminUser.role == AdminRole.SUPER_ADMIN)
+        )
+        if len(count_result.scalars().all()) <= 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot remove the last super_admin",
+            )
+
+    user.role = role_enum
+    user.role_id = payload.role_id
+    await db.commit()
+    await db.refresh(user)
+
+    return AdminUserOut(id=user.id, name=user.name, email=user.email, role=user.role.value, role_id=user.role_id)
 
 
 @router.get("/users/{user_id}/overrides", response_model=list[PermissionOverrideOut])

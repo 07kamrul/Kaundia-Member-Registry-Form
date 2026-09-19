@@ -40,6 +40,45 @@
       </div>
     }
 
+    <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">নতুন প্রশাসক তৈরি করুন</h2>
+    <p class="page-subtitle" style="margin:0 0 1rem">ইমেইল ও পাসওয়ার্ড দিয়ে একজন নতুন প্রশাসক অ্যাকাউন্ট তৈরি করুন।</p>
+
+    <div class="card" style="padding:1.2rem;margin-bottom:1.3rem">
+      @if (createUserError) {
+        <div class="error-box"><p style="margin:0">{{ createUserError }}</p></div>
+      }
+      @if (createUserSuccess) {
+        <div class="status-badge status-approved" style="margin-bottom:0.8rem">{{ createUserSuccess }}</div>
+      }
+      <div class="grid-2">
+        <div class="field">
+          <label>নাম</label>
+          <input type="text" [(ngModel)]="newUserName" placeholder="পূর্ণ নাম" />
+        </div>
+        <div class="field">
+          <label>ইমেইল</label>
+          <input type="email" [(ngModel)]="newUserEmail" placeholder="admin@example.com" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>পাসওয়ার্ড</label>
+          <input type="password" [(ngModel)]="newUserPassword" placeholder="পাসওয়ার্ড" />
+        </div>
+        <div class="field">
+          <label>ভূমিকা</label>
+          <select [(ngModel)]="newUserRole">
+            <option value="administrator">Administrator</option>
+            <option value="executive_committee">Executive Committee</option>
+            <option value="super_admin">Super Admin</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" [disabled]="creatingUser" (click)="createUser()">
+        প্রশাসক তৈরি করুন
+      </button>
+    </div>
+
     <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">ব্যবহারকারী-ভিত্তিক ওভাররাইড</h2>
     <p class="page-subtitle" style="margin:0 0 1rem">
       একজন নির্দিষ্ট ব্যবহারকারীর জন্য তার ভূমিকার ডিফল্টের বাইরে গিয়ে অতিরিক্ত অনুমতি দিন বা প্রত্যাহার করুন।
@@ -54,6 +93,29 @@
           }
         </select>
       </div>
+
+      @if (selectedUserId) {
+        <div class="grid-2" style="margin-bottom:1rem">
+          <div class="field">
+            <label>ভূমিকা নির্ধারণ করুন</label>
+            <select [(ngModel)]="roleAssignDraft">
+              <option value="administrator">Administrator</option>
+              <option value="executive_committee">Executive Committee</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              [disabled]="savingRoleAssignment"
+              (click)="assignRole()"
+            >
+              ভূমিকা সংরক্ষণ করুন
+            </button>
+          </div>
+        </div>
+      }
 
       @if (selectedUserId) {
         <div class="grid-2">
