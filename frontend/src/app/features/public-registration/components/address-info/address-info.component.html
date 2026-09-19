@@ -16,7 +16,7 @@
         <select id="currentAddress_division" formControlName="division">
           <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (division of divisions$ | async; track division.id) {
-            <option [value]="division.bn_name">{{ division.bn_name }}</option>
+            <option [value]="division.bn_name">{{ localizedName(division) }}</option>
           }
         </select>
       </div>
@@ -30,7 +30,7 @@
         <select id="currentAddress_district" formControlName="district">
           <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (district of currentDistricts$ | async; track district.id) {
-            <option [value]="district.bn_name">{{ district.bn_name }}</option>
+            <option [value]="district.bn_name">{{ localizedName(district) }}</option>
           }
         </select>
       </div>
@@ -44,7 +44,7 @@
         <select id="currentAddress_upazila" formControlName="upazila">
           <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (upazila of currentUpazilas$ | async; track upazila.name) {
-            <option [value]="upazila.bn_name">{{ upazila.bn_name }}</option>
+            <option [value]="upazila.bn_name">{{ localizedName(upazila) }}</option>
           }
         </select>
       </div>
@@ -96,7 +96,7 @@
         <select id="permanentAddress_division" formControlName="division">
           <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (division of divisions$ | async; track division.id) {
-            <option [value]="division.bn_name">{{ division.bn_name }}</option>
+            <option [value]="division.bn_name">{{ localizedName(division) }}</option>
           }
         </select>
       </div>
@@ -110,7 +110,7 @@
         <select id="permanentAddress_district" formControlName="district">
           <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (district of permanentDistricts$ | async; track district.id) {
-            <option [value]="district.bn_name">{{ district.bn_name }}</option>
+            <option [value]="district.bn_name">{{ localizedName(district) }}</option>
           }
         </select>
       </div>
@@ -124,7 +124,7 @@
         <select id="permanentAddress_upazila" formControlName="upazila">
           <option value="" disabled>{{ 'registration.addressInfo.selectPlaceholder' | translate }}</option>
           @for (upazila of permanentUpazilas$ | async; track upazila.name) {
-            <option [value]="upazila.bn_name">{{ upazila.bn_name }}</option>
+            <option [value]="upazila.bn_name">{{ localizedName(upazila) }}</option>
           }
         </select>
       </div>

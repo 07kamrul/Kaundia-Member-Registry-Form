@@ -160,4 +160,8 @@ export class AddressInfoComponent implements OnInit {
     const key = ADDRESS_FIELD_ERROR_KEYS[controlName];
     return key ? this.translate.instant(key) : '';
   }
+
+  localizedName(item: { name: string; bn_name: string }): string {
+    return this.translate.currentLang === 'bn' ? item.bn_name : item.name;
+  }
 }
