@@ -32,12 +32,36 @@ export interface RegistrationStep {
 }
 
 export const REGISTRATION_STEPS: RegistrationStep[] = [
-  { id: 1, title: 'registration.stepTitles.memberInfo', shortLabel: 'registration.stepShortLabels.memberInfo' },
-  { id: 2, title: 'registration.stepTitles.property', shortLabel: 'registration.stepShortLabels.property' },
-  { id: 3, title: 'registration.stepTitles.contactAndNominee', shortLabel: 'registration.stepShortLabels.nominee' },
-  { id: 4, title: 'registration.stepTitles.payment', shortLabel: 'registration.stepShortLabels.payment' },
-  { id: 5, title: 'registration.stepTitles.declarationAndSignature', shortLabel: 'registration.stepShortLabels.signature' },
-  { id: 6, title: 'registration.stepTitles.review', shortLabel: 'registration.stepShortLabels.review' },
+  {
+    id: 1,
+    title: 'registration.stepTitles.memberInfo',
+    shortLabel: 'registration.stepShortLabels.memberInfo',
+  },
+  {
+    id: 2,
+    title: 'registration.stepTitles.property',
+    shortLabel: 'registration.stepShortLabels.property',
+  },
+  {
+    id: 3,
+    title: 'registration.stepTitles.contactAndNominee',
+    shortLabel: 'registration.stepShortLabels.nominee',
+  },
+  {
+    id: 4,
+    title: 'registration.stepTitles.payment',
+    shortLabel: 'registration.stepShortLabels.payment',
+  },
+  {
+    id: 5,
+    title: 'registration.stepTitles.declarationAndSignature',
+    shortLabel: 'registration.stepShortLabels.signature',
+  },
+  {
+    id: 6,
+    title: 'registration.stepTitles.review',
+    shortLabel: 'registration.stepShortLabels.review',
+  },
 ];
 
 @Component({
@@ -152,15 +176,19 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     const errs: string[] = [];
     const v = this.form.value;
 
-    if (!v.fullName?.trim()) errs.push(this.translate.instant('registration.validation.fullNameRequired'));
+    if (!v.fullName?.trim())
+      errs.push(this.translate.instant('registration.validation.fullNameRequired'));
     if (!v.fatherOrHusband?.trim())
       errs.push(this.translate.instant('registration.validation.fatherOrHusbandRequired'));
-    if (!v.mother?.trim()) errs.push(this.translate.instant('registration.validation.motherRequired'));
+    if (!v.mother?.trim())
+      errs.push(this.translate.instant('registration.validation.motherRequired'));
     if (!v.dob) errs.push(this.translate.instant('registration.validation.dobRequired'));
-    if (!v.mobile?.trim()) errs.push(this.translate.instant('registration.validation.mobileRequired'));
+    if (!v.mobile?.trim())
+      errs.push(this.translate.instant('registration.validation.mobileRequired'));
     else if (!MOBILE_PATTERN.test(v.mobile.trim()))
       errs.push(this.translate.instant('registration.validation.mobileInvalid'));
-    if (!v.gender?.trim()) errs.push(this.translate.instant('registration.validation.genderRequired'));
+    if (!v.gender?.trim())
+      errs.push(this.translate.instant('registration.validation.genderRequired'));
     if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email))
       errs.push(this.translate.instant('registration.validation.emailInvalid'));
     if (v.nid && !/^\d{10,17}$/.test(v.nid))
@@ -203,7 +231,9 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     if (!address.upazila?.trim())
       errs.push(`${label}: ${this.translate.instant('registration.addressInfo.upazilaRequired')}`);
     if (!address.postOffice?.trim())
-      errs.push(`${label}: ${this.translate.instant('registration.addressInfo.postOfficeRequired')}`);
+      errs.push(
+        `${label}: ${this.translate.instant('registration.addressInfo.postOfficeRequired')}`,
+      );
     if (!address.road?.trim())
       errs.push(`${label}: ${this.translate.instant('registration.addressInfo.roadRequired')}`);
     if (!address.house?.trim())
@@ -221,18 +251,26 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     }
 
     (v.properties as any[]).forEach((property, i) => {
-      const label = this.translate.instant('registration.validation.propertyLabel', { number: i + 1 });
+      const label = this.translate.instant('registration.validation.propertyLabel', {
+        number: i + 1,
+      });
       if (!property.propertyType || property.propertyType.length === 0) {
-        errs.push(`${label}: ${this.translate.instant('registration.validation.propertyTypeRequired')}`);
+        errs.push(
+          `${label}: ${this.translate.instant('registration.validation.propertyTypeRequired')}`,
+        );
       }
       if (!property.ownership)
-        errs.push(`${label}: ${this.translate.instant('registration.validation.ownershipRequired')}`);
+        errs.push(
+          `${label}: ${this.translate.instant('registration.validation.ownershipRequired')}`,
+        );
       if (property.ownership === 'যৌথ') {
         const hasFilledCoOwner = (property.coOwners as any[]).some(
           (co) => co.ownerName?.trim() && co.ownerPhone?.trim(),
         );
         if (!hasFilledCoOwner) {
-          errs.push(`${label}: ${this.translate.instant('registration.validation.coOwnerRequired')}`);
+          errs.push(
+            `${label}: ${this.translate.instant('registration.validation.coOwnerRequired')}`,
+          );
         } else {
           (property.coOwners as any[]).forEach((co, ci) => {
             const ownerLabel = this.translate.instant('registration.validation.ownerLabel', {
@@ -240,16 +278,24 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
               number: ci + 1,
             });
             if (!co.ownerName?.trim())
-              errs.push(`${ownerLabel}: ${this.translate.instant('registration.validation.nameRequired')}`);
+              errs.push(
+                `${ownerLabel}: ${this.translate.instant('registration.validation.nameRequired')}`,
+              );
             if (!co.ownerPhone?.trim())
-              errs.push(`${ownerLabel}: ${this.translate.instant('registration.validation.mobileRequired')}`);
+              errs.push(
+                `${ownerLabel}: ${this.translate.instant('registration.validation.mobileRequired')}`,
+              );
             else if (!MOBILE_PATTERN.test(co.ownerPhone.trim()))
-              errs.push(`${ownerLabel}: ${this.translate.instant('registration.validation.mobileInvalid')}`);
+              errs.push(
+                `${ownerLabel}: ${this.translate.instant('registration.validation.mobileInvalid')}`,
+              );
           });
         }
       }
       if (!property.applicableDocs || property.applicableDocs.length === 0) {
-        errs.push(`${label}: ${this.translate.instant('registration.validation.applicableDocsRequired')}`);
+        errs.push(
+          `${label}: ${this.translate.instant('registration.validation.applicableDocsRequired')}`,
+        );
       }
       (property.applicableDocs as any[]).forEach((doc) => {
         if (!doc.fileDataUrl)
@@ -269,14 +315,22 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
 
     const urgentContactLabel = this.translate.instant('registration.validation.urgentContactLabel');
     if (!v.urgentContactName?.trim())
-      errs.push(`${urgentContactLabel}: ${this.translate.instant('registration.validation.nameRequired')}`);
+      errs.push(
+        `${urgentContactLabel}: ${this.translate.instant('registration.validation.nameRequired')}`,
+      );
     if (!v.urgentContactMobile?.trim())
-      errs.push(`${urgentContactLabel}: ${this.translate.instant('registration.validation.mobileRequired')}`);
+      errs.push(
+        `${urgentContactLabel}: ${this.translate.instant('registration.validation.mobileRequired')}`,
+      );
     else if (!MOBILE_PATTERN.test(v.urgentContactMobile.trim()))
-      errs.push(`${urgentContactLabel}: ${this.translate.instant('registration.validation.mobileInvalid')}`);
+      errs.push(
+        `${urgentContactLabel}: ${this.translate.instant('registration.validation.mobileInvalid')}`,
+      );
 
     (nominees as any[]).forEach((nominee, i) => {
-      const label = this.translate.instant('registration.validation.nomineeLabel', { number: i + 1 });
+      const label = this.translate.instant('registration.validation.nomineeLabel', {
+        number: i + 1,
+      });
       if (!nominee.name?.trim())
         errs.push(`${label}: ${this.translate.instant('registration.validation.nameRequired')}`);
       if (!nominee.mobile?.trim())
@@ -292,9 +346,12 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     const errs: string[] = [];
     const v = this.form.value;
 
-    if (!v.admissionFee) errs.push(this.translate.instant('registration.payment.admissionFeeRequired'));
-    if (!v.subscription) errs.push(this.translate.instant('registration.payment.subscriptionRequired'));
-    if (!v.paymentMethod) errs.push(this.translate.instant('registration.payment.paymentMethodRequired'));
+    if (!v.admissionFee)
+      errs.push(this.translate.instant('registration.payment.admissionFeeRequired'));
+    if (!v.subscription)
+      errs.push(this.translate.instant('registration.payment.subscriptionRequired'));
+    if (!v.paymentMethod)
+      errs.push(this.translate.instant('registration.payment.paymentMethodRequired'));
 
     return errs;
   }
@@ -399,7 +456,8 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
         if (res.success) {
           this.success = { id: res.id ?? '', fullName: this.form.value.fullName };
         } else {
-          this.serverError = res.error ?? this.translate.instant('registration.submit.genericError');
+          this.serverError =
+            res.error ?? this.translate.instant('registration.submit.genericError');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       },

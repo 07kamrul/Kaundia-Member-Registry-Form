@@ -11,7 +11,6 @@ import {
 import { propertiesArray } from '../../registration-form.builder';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-
 const FIRST_DECIMAL_RATE = 50;
 const ADDITIONAL_DECIMAL_RATE = 10;
 

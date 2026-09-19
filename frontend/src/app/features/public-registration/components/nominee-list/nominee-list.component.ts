@@ -47,7 +47,12 @@ export class NomineeListComponent {
 
   mobileInvalid(index: number): boolean {
     const control = this.group(index).get('mobile');
-    return !!control && !!control.value?.trim() && control.invalid && (control.touched || this.submitAttempted);
+    return (
+      !!control &&
+      !!control.value?.trim() &&
+      control.invalid &&
+      (control.touched || this.submitAttempted)
+    );
   }
 
   addNominee(): void {

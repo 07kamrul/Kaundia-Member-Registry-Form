@@ -104,7 +104,7 @@ export class InstallmentsManagementComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'কিস্তি পরিশোধিত হিসেবে চিহ্নিত করা যায়নি।';
+        this.error = this.translate.instant('admin.installments.errors.markPaidFailed');
         this.markingId = null;
         this.cdr.markForCheck();
       },
