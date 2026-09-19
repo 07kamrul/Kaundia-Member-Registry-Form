@@ -10,26 +10,27 @@ interface NavItem {
   route: string;
   icon: IconName;
   adminOnly: boolean;
+  memberOnly?: boolean;
   requiredPermission?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'ড্যাশবোর্ড', route: '/dashboard', icon: 'dashboard', adminOnly: false },
-  { label: 'প্রোফাইল', route: '/profile', icon: 'user', adminOnly: false },
-  { label: 'কিস্তি', route: '/installments', icon: 'wallet', adminOnly: false },
+  { label: 'প্রোফাইল', route: '/profile', icon: 'user', adminOnly: false, memberOnly: true },
+  { label: 'কিস্তি', route: '/installments', icon: 'wallet', adminOnly: false, memberOnly: true },
   { label: 'পাসওয়ার্ড পরিবর্তন', route: '/change-password', icon: 'lock', adminOnly: false },
   { label: 'সাবমিশন', route: '/submissions', icon: 'inbox', adminOnly: true },
   { label: 'সদস্য তালিকা', route: '/members', icon: 'users', adminOnly: true },
   {
     label: 'চাঁদা ব্যবস্থাপনা',
     route: '/installments-management',
-    icon: 'wallet',
+    icon: 'coin',
     adminOnly: true,
   },
   {
     label: 'ভূমিকা ও অনুমতি',
     route: '/roles',
-    icon: 'lock',
+    icon: 'shield',
     adminOnly: true,
     requiredPermission: 'manage_roles',
   },
@@ -78,6 +79,9 @@ export class ShellComponent implements OnInit {
 
   get navItems(): NavItem[] {
     return NAV_ITEMS.filter((item) => {
+      if (item.memberOnly && this.auth.isAdmin) {
+        return false;
+      }
       if (item.requiredPermission) {
         return this.auth.hasPermission(item.requiredPermission);
       }
