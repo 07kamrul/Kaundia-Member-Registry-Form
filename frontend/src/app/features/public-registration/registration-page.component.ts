@@ -8,7 +8,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import SignaturePad from 'signature_pad';
 import { MAX_PHOTO_BYTES } from '../../core/models/registration.model';
@@ -69,7 +68,6 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    RouterLink,
     MemberInfoComponent,
     AddressInfoComponent,
     UrgentContactComponent,

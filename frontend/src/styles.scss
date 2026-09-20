@@ -878,7 +878,7 @@ textarea:focus {
 
 .reg-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 1.25rem;
   text-align: left;
@@ -894,25 +894,18 @@ textarea:focus {
   min-width: 0;
 }
 
-.reg-header-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.reg-login-btn {
-  white-space: nowrap;
-  text-decoration: none;
-}
-
 @media (max-width: 640px) {
   .reg-header {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr;
+    justify-items: center;
   }
 
-  .reg-header-actions {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
+  .reg-logo {
+    order: 2;
+  }
+
+  .reg-header-text {
+    order: 1;
   }
 }
 

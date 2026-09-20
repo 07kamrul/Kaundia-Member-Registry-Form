@@ -14,7 +14,7 @@
         <a routerLink="/register" class="btn btn-ghost btn-sm" (click)="closeMobileMenu()">{{
           'nav.register' | translate
         }}</a>
-        <a routerLink="/login" class="btn btn-primary btn-sm" (click)="closeMobileMenu()">{{
+        <a routerLink="/login" class="btn btn-ghost btn-sm" (click)="closeMobileMenu()">{{
           'nav.login' | translate
         }}</a>
         <button
@@ -48,10 +48,10 @@
       </button>
     </div>
     <div class="gold-rule"></div>
+    @if (isMobileMenuOpen) {
+      <div class="site-header-backdrop" (click)="closeMobileMenu()"></div>
+    }
   </header>
-  @if (isMobileMenuOpen) {
-    <div class="site-header-backdrop" (click)="closeMobileMenu()"></div>
-  }
 
   <main class="public-shell-content">
     <router-outlet />

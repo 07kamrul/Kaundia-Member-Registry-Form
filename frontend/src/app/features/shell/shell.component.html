@@ -23,7 +23,7 @@
           <span class="topbar-welcome">{{ 'welcome' | translate: { name: welcomeName } }}</span>
         }
         <button type="button" class="btn btn-ghost btn-sm btn-icon" (click)="logout()">
-          <app-icon name="logout" [size]="16" /> {{ 'nav.logout' | translate }}
+          <app-icon name="logout" [size]="16" /> <span class="btn-label">{{ 'nav.logout' | translate }}</span>
         </button>
         <button
           type="button"

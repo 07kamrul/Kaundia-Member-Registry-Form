@@ -166,6 +166,26 @@
   .sidebar.sidebar-open {
     transform: translateX(0);
   }
+
+  :host .site-header-actions {
+    position: static;
+    transform: none;
+    box-shadow: none;
+    background: none;
+    padding: 0;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  :host .topbar-welcome {
+    display: none;
+  }
+
+  :host .btn-label {
+    display: none;
+  }
 }
 
 @media (min-width: 900px) {
