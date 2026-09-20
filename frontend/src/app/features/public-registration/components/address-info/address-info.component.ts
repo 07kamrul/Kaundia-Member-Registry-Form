@@ -162,6 +162,6 @@ export class AddressInfoComponent implements OnInit {
   }
 
   localizedName(item: { name: string; bn_name: string }): string {
-    return this.translate.currentLang === 'bn' ? item.bn_name : item.name;
+    return this.translate.currentLang() === 'bn' ? item.bn_name : item.name;
   }
 }
