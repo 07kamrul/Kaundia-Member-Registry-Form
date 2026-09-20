@@ -19,6 +19,8 @@ import { IconComponent } from '../../shared/icon/icon.component';
   styleUrl: './public-shell.component.scss',
 })
 export class PublicShellComponent {
+  isMobileMenuOpen = false;
+
   constructor(
     public theme: ThemeService,
     public lang: LanguageService,
@@ -26,6 +28,15 @@ export class PublicShellComponent {
   ) {}
 
   goHome(): void {
+    this.closeMobileMenu();
     this.router.navigate(['/']);
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
   }
 }

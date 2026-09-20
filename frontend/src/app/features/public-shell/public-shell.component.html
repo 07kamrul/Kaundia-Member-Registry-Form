@@ -10,9 +10,13 @@
           <div class="site-header-brand-org">{{ 'brand.org' | translate }}</div>
         </div>
       </a>
-      <div class="site-header-actions">
-        <a routerLink="/register" class="btn btn-ghost btn-sm">{{ 'nav.register' | translate }}</a>
-        <a routerLink="/login" class="btn btn-primary btn-sm">{{ 'nav.login' | translate }}</a>
+      <div class="site-header-actions" [class.is-open]="isMobileMenuOpen" id="site-header-actions">
+        <a routerLink="/register" class="btn btn-ghost btn-sm" (click)="closeMobileMenu()">{{
+          'nav.register' | translate
+        }}</a>
+        <a routerLink="/login" class="btn btn-primary btn-sm" (click)="closeMobileMenu()">{{
+          'nav.login' | translate
+        }}</a>
         <button
           type="button"
           class="btn btn-ghost btn-sm"
@@ -32,9 +36,22 @@
           {{ lang.lang() === 'bn' ? 'EN' : 'অ-A' }}
         </button>
       </div>
+      <button
+        type="button"
+        class="site-header-menu-toggle btn btn-ghost btn-sm"
+        (click)="toggleMobileMenu()"
+        [attr.aria-expanded]="isMobileMenuOpen"
+        aria-controls="site-header-actions"
+        [attr.aria-label]="(isMobileMenuOpen ? 'nav.closeMenu' : 'nav.openMenu') | translate"
+      >
+        <app-icon [name]="isMobileMenuOpen ? 'close' : 'menu'" [size]="20" />
+      </button>
     </div>
     <div class="gold-rule"></div>
   </header>
+  @if (isMobileMenuOpen) {
+    <div class="site-header-backdrop" (click)="closeMobileMenu()"></div>
+  }
 
   <main class="public-shell-content">
     <router-outlet />

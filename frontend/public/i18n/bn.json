@@ -24,6 +24,7 @@
   },
   "nav": {
     "openMenu": "মেনু খুলুন",
+    "closeMenu": "মেনু বন্ধ করুন",
     "logout": "বের হোন",
     "lightTheme": "হালকা থিম",
     "darkTheme": "গাঢ় থিম",

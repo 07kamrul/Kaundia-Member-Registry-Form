@@ -24,6 +24,7 @@
   },
   "nav": {
     "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "logout": "Logout",
     "lightTheme": "Light theme",
     "darkTheme": "Dark theme",

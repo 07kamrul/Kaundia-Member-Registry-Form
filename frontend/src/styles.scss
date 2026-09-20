@@ -329,6 +329,64 @@ a {
   gap: 0.5rem;
 }
 
+.site-header-menu-toggle {
+  display: none;
+}
+
+.site-header-backdrop {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .site-header-inner {
+    padding: 0.75rem 1rem;
+    flex-wrap: nowrap;
+  }
+
+  .site-header-brand-org {
+    display: none;
+  }
+
+  .site-header-menu-toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .site-header-actions {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    width: min(78vw, 18rem);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    padding: 4.5rem 1.2rem 1.5rem;
+    background: var(--surface);
+    box-shadow: -8px 0 24px -8px rgba(0, 0, 0, 0.25);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+  }
+
+  .site-header-actions.is-open {
+    transform: translateX(0);
+  }
+
+  .site-header-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .site-header-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: rgba(0, 0, 0, 0.4);
+  }
+}
+
 .gold-rule {
   height: 3px;
   background: linear-gradient(90deg, var(--gold), var(--gold-strong), var(--gold));
