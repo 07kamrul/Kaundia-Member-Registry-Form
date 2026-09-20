@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import admin, auth, member, rbac, submissions
+from app.api.routes import admin, auth, member, public, rbac, submissions
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -25,6 +25,7 @@ app.include_router(auth.router, prefix=api_router_prefix)
 app.include_router(admin.router, prefix=api_router_prefix)
 app.include_router(member.router, prefix=api_router_prefix)
 app.include_router(rbac.router, prefix=api_router_prefix)
+app.include_router(public.router, prefix=api_router_prefix)
 
 upload_dir = Path(settings.upload_dir)
 upload_dir.mkdir(parents=True, exist_ok=True)

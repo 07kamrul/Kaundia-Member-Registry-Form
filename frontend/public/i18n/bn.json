@@ -58,12 +58,9 @@
       "applyButton": "সদস্যপদের জন্য আবেদন করুন",
       "loginButton": "ইতিমধ্যে সদস্য? লগইন করুন",
       "statCardTitle": "এই মুহূর্তে",
-      "applicationReviewLabel": "আবেদন যাচাই",
-      "onlineValue": "অনলাইনে",
-      "memberIdLabel": "সদস্য আইডি",
-      "automaticValue": "স্বয়ংক্রিয়",
-      "monthlySubscriptionLabel": "মাসিক চাঁদা",
-      "paidOnlineValue": "অনলাইনে পরিশোধ"
+      "applicationReviewLabel": "পর্যালোচনাধীন আবেদন",
+      "memberIdLabel": "নিবন্ধিত সদস্য",
+      "monthlySubscriptionLabel": "মাসিক চাঁদা"
     },
     "steps": {
       "applyTitle": "আবেদন করুন",

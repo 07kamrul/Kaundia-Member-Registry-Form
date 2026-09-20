@@ -58,12 +58,9 @@
       "applyButton": "Apply for Membership",
       "loginButton": "Already a member? Log in",
       "statCardTitle": "Right Now",
-      "applicationReviewLabel": "Application Review",
-      "onlineValue": "Online",
-      "memberIdLabel": "Member ID",
-      "automaticValue": "Automatic",
-      "monthlySubscriptionLabel": "Monthly Subscription",
-      "paidOnlineValue": "Paid Online"
+      "applicationReviewLabel": "Pending Applications",
+      "memberIdLabel": "Registered Members",
+      "monthlySubscriptionLabel": "Monthly Subscription"
     },
     "steps": {
       "applyTitle": "Apply",
