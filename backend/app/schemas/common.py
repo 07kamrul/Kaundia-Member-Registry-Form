@@ -1,4 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+
+DIGITS_ONLY_PATTERN = r"^\d+$"
+
+
+def validate_digits_only(value: str | None) -> str | None:
+    if value is not None and value != "" and not value.isdigit():
+        raise ValueError("must contain digits only")
+    return value
 
 
 class AddressDetail(BaseModel):
@@ -37,3 +45,5 @@ class PropertyIn(BaseModel):
     ownership: str | None = None
     co_owners: list[CoOwner] = []
     applicable_docs: list[ApplicableDocIn] = []
+
+    _validate_land_quantity = field_validator("land_quantity")(validate_digits_only)

@@ -2,6 +2,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 
 const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
 const NID_PATTERN = /^\d{10,17}$/;
+const DIGITS_ONLY_PATTERN = /^\d+$/;
 
 export function buildCoOwnerGroup(fb: FormBuilder): FormGroup {
   return fb.group({
@@ -25,7 +26,7 @@ export function buildPropertyGroup(fb: FormBuilder): FormGroup {
     khatianNo: ['', Validators.required],
     dagNo: fb.group({ cs: ['', Validators.required], rs: ['', Validators.required] }),
     holdingNumber: [''],
-    landQuantity: [''],
+    landQuantity: ['', Validators.pattern(DIGITS_ONLY_PATTERN)],
     ownership: ['', Validators.required],
     applicableDocs: fb.array([]),
     coOwners: fb.array([]),
