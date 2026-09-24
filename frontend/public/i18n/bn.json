@@ -164,7 +164,18 @@
         "road": "রাস্তা/গ্রাম",
         "postOffice": "ডাকঘর",
         "upazila": "উপজেলা/থানা",
-        "district": "জেলা"
+        "district": "জেলা",
+        "nationality": "জাতীয়তা",
+        "occupation": "পেশা",
+        "gender": "লিঙ্গ",
+        "receiptNo": "রশিদ নং",
+        "rejectionReason": "বাতিলের কারণ",
+        "division": "বিভাগ",
+        "relation": "সম্পর্ক",
+        "address": "ঠিকানা",
+        "memberPhoto": "সদস্যের ছবি",
+        "receiptPhoto": "রশিদের ছবি",
+        "memberSignature": "সদস্যের স্বাক্ষর"
       },
       "permanentAddress": "স্থায়ী ঠিকানা",
       "currentAddress": "বর্তমান ঠিকানা",
@@ -198,14 +209,28 @@
         "nid": "NID",
         "percentage": "শতাংশ",
         "dob": "জন্ম তারিখ",
-        "value": "মান"
+        "value": "মান",
+        "khatianNo": "খতিয়ান নং",
+        "dagNoCs": "দাগ নং (সিএস)",
+        "dagNoRs": "দাগ নং (আরএস)",
+        "holdingNumber": "হোল্ডিং নং",
+        "landQuantity": "জমির পরিমাণ (শতাংশ)",
+        "ownership": "মালিকানা"
       },
       "errors": {
         "loadFailed": "আবেদনের তথ্য পাওয়া যায়নি।",
         "approveFailed": "অনুমোদন ব্যর্থ হয়েছে।",
         "reasonRequired": "বাতিলের কারণ লিখুন।",
         "rejectFailed": "বাতিল করা ব্যর্থ হয়েছে।"
-      }
+      },
+      "attachments": "সংযুক্তি",
+      "urgentContact": "জরুরি যোগাযোগ",
+      "coOwners": "সহ-মালিক",
+      "noCoOwners": "কোনো সহ-মালিক নেই।",
+      "applicableDocs": "প্রযোজ্য দলিল",
+      "noApplicableDocs": "কোনো দলিল সংযুক্ত নেই।",
+      "noAttachment": "সংযুক্ত নেই",
+      "viewFile": "ফাইল দেখুন"
     },
     "roleManagement": {
       "title": "ভূমিকা ও অনুমতি ব্যবস্থাপনা",

@@ -164,7 +164,18 @@
         "road": "Road/Village",
         "postOffice": "Post Office",
         "upazila": "Upazila/Thana",
-        "district": "District"
+        "district": "District",
+        "nationality": "Nationality",
+        "occupation": "Occupation",
+        "gender": "Gender",
+        "receiptNo": "Receipt No.",
+        "rejectionReason": "Rejection Reason",
+        "division": "Division",
+        "relation": "Relation",
+        "address": "Address",
+        "memberPhoto": "Member Photo",
+        "receiptPhoto": "Receipt Photo",
+        "memberSignature": "Member Signature"
       },
       "permanentAddress": "Permanent Address",
       "currentAddress": "Current Address",
@@ -198,14 +209,28 @@
         "nid": "NID",
         "percentage": "Percentage",
         "dob": "Date of Birth",
-        "value": "Value"
+        "value": "Value",
+        "khatianNo": "Khatian No.",
+        "dagNoCs": "Dag No. (CS)",
+        "dagNoRs": "Dag No. (RS)",
+        "holdingNumber": "Holding No.",
+        "landQuantity": "Land Quantity (decimal)",
+        "ownership": "Ownership"
       },
       "errors": {
         "loadFailed": "Could not load application details.",
         "approveFailed": "Approval failed.",
         "reasonRequired": "Please enter a reason for rejection.",
         "rejectFailed": "Rejection failed."
-      }
+      },
+      "attachments": "Attachments",
+      "urgentContact": "Emergency Contact",
+      "coOwners": "Co-owners",
+      "noCoOwners": "No co-owners.",
+      "applicableDocs": "Applicable Documents",
+      "noApplicableDocs": "No documents attached.",
+      "noAttachment": "Not attached",
+      "viewFile": "View file"
     },
     "roleManagement": {
       "title": "Role & Permission Management",

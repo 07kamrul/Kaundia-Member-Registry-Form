@@ -9,6 +9,40 @@ export interface SubmissionSummary {
   propertiesCount?: number;
 }
 
+export interface CoOwner {
+  id: string;
+  name: string;
+  mobile: string;
+}
+
+export interface ApplicableDoc {
+  id: string;
+  docType: string;
+  fileUrl: string | null;
+}
+
+export interface SubmissionProperty {
+  id: string;
+  propertyType: string[];
+  propertyTypeOther?: string | null;
+  khatianNo?: string | null;
+  dagNoCs?: string | null;
+  dagNoRs?: string | null;
+  holdingNumber?: string | null;
+  landQuantity?: string | null;
+  ownership?: string | null;
+  coOwners: CoOwner[];
+  applicableDocs: ApplicableDoc[];
+}
+
+export interface Nominee {
+  id: string;
+  name: string;
+  relation: string;
+  mobile: string;
+  address?: string | null;
+}
+
 export interface SubmissionDetail extends SubmissionSummary {
   fatherOrHusband: string;
   mother: string;
@@ -23,23 +57,25 @@ export interface SubmissionDetail extends SubmissionSummary {
   permanentPostOffice?: string;
   permanentUpazila?: string;
   permanentDistrict?: string;
+  permanentDivision?: string;
   currentHouse?: string;
   currentRoad?: string;
   currentPostOffice?: string;
   currentUpazila?: string;
   currentDistrict?: string;
+  currentDivision?: string;
   urgentContactName?: string;
   urgentContactRelation?: string;
   urgentContactMobile?: string;
   urgentContactAddress?: string;
-  properties: unknown[];
-  nominees: unknown[];
+  properties: SubmissionProperty[];
+  nominees: Nominee[];
   admissionFee: string;
   subscription: string;
   receiptNo: string;
   paymentMethod: string;
   memberPhotoUrl?: string;
-  memberSignatureUrl?: string;
+  memberSignature?: string;
   receiptPhotoUrl?: string;
   rejectionReason?: string;
 }
