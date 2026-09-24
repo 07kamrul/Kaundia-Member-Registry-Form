@@ -1,5 +1,5 @@
 @if (success) {
-  <app-confirmation [submissionId]="success.id" [fullName]="success.fullName" (reset)="resetForm()" />
+  <app-confirmation [submissionId]="success.id" (acknowledge)="onConfirmationAcknowledged()" />
 } @else {
   <div class="page-with-banner">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card reg-card">

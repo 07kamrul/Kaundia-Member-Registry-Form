@@ -448,8 +448,9 @@
     "confirmation": {
       "title": "Submission Successful!",
       "applicantLabel": "Applicant:",
-      "referenceLabel": "Your reference number:",
-      "message": "Your application is pending admin review. You will be notified once approved.",
+      "referenceLabel": "Application no:",
+      "message": "Your application has been submitted successfully. Please wait for verification and approval.",
+      "okButton": "OK",
       "newFormButton": "Fill Out a New Form"
     },
     "payment": {

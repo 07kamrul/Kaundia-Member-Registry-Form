@@ -1,18 +1,19 @@
-<div style="max-width:42rem;margin:1.5rem auto;padding:1rem">
-  <div class="card" style="background:var(--emerald-50);border-color:var(--emerald-200);padding:2rem;text-align:center">
-    <div style="font-size:2.5rem;margin-bottom:1rem">✓</div>
-    <h2 style="color:#064e3b;margin-bottom:0.5rem">{{ 'registration.confirmation.title' | translate }}</h2>
-    <p style="color:#065f46;margin-bottom:1rem">
-      {{ 'registration.confirmation.applicantLabel' | translate }} <strong>{{ fullName }}</strong>
-    </p>
-    <p style="color:#065f46;margin-bottom:1.5rem">
-      {{ 'registration.confirmation.referenceLabel' | translate }} <strong>{{ submissionId }}</strong>
-    </p>
-    <p style="color:#374151;margin-bottom:1.5rem">
+<div class="modal-backdrop">
+  <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="confirmation-title" style="text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:0.75rem;color:var(--emerald-600,#059669)">✓</div>
+    <h3 id="confirmation-title" class="modal-title">
+      {{ 'registration.confirmation.title' | translate }}
+    </h3>
+    <p class="modal-message">
       {{ 'registration.confirmation.message' | translate }}
     </p>
-    <button type="button" class="btn btn-secondary" (click)="reset.emit()">
-      {{ 'registration.confirmation.newFormButton' | translate }}
-    </button>
+    <p class="modal-message">
+      {{ 'registration.confirmation.referenceLabel' | translate }} <strong>{{ submissionId }}</strong>
+    </p>
+    <div class="modal-actions" style="justify-content:center">
+      <button type="button" class="btn btn-primary" (click)="acknowledge.emit()">
+        {{ 'registration.confirmation.okButton' | translate }}
+      </button>
+    </div>
   </div>
 </div>

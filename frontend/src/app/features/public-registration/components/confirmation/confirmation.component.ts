@@ -9,6 +9,5 @@ import { TranslatePipe } from '@ngx-translate/core';
 })
 export class ConfirmationComponent {
   @Input({ required: true }) submissionId!: string;
-  @Input({ required: true }) fullName!: string;
-  @Output() reset = new EventEmitter<void>();
+  @Output() acknowledge = new EventEmitter<void>();
 }

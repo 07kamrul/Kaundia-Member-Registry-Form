@@ -10,6 +10,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import SignaturePad from 'signature_pad';
 import { MAX_PHOTO_BYTES } from '../../core/models/registration.model';
@@ -91,7 +92,7 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
   serverError: string | null = null;
   submitting = false;
   submitAttempted = false;
-  success: { id: string; fullName: string } | null = null;
+  success: { id: string } | null = null;
   memberPhotoPreview = signal('');
   private signaturePad?: SignaturePad;
 
@@ -108,6 +109,7 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
   constructor(
     private fb: FormBuilder,
     private registrationService: RegistrationService,
+    private router: Router,
   ) {
     this.form = buildRegistrationForm(this.fb);
   }
@@ -483,8 +485,7 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
       next: (res) => {
         this.submitting = false;
         if (res.success) {
-          this.success = { id: res.id ?? '', fullName: this.form.value.fullName };
-          this.draftService.clear();
+          this.success = { id: res.id ?? '' };
         } else {
           this.serverError =
             res.error ?? this.translate.instant('registration.submit.genericError');
@@ -501,15 +502,10 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
     });
   }
 
-  resetForm(): void {
+  onConfirmationAcknowledged(): void {
+    this.draftService.clear();
     this.success = null;
-    this.form = buildRegistrationForm(this.fb);
-    this.memberPhotoPreview.set('');
-    this.signaturePad?.clear();
-    this.submitAttempted = false;
-    this.serverError = null;
-    this.currentStep = 1;
-    this.draftService.watch(this.form, () => this.currentStep);
+    this.router.navigateByUrl('/');
   }
 
   toggleDeclaration(): void {
