@@ -150,6 +150,8 @@
   "admin": {
     "submissionDetail": {
       "title": "Application Details",
+      "personalInfo": "Personal Information",
+      "paymentSummary": "Payment & Status",
       "fields": {
         "name": "Name",
         "fatherOrHusband": "Father/Husband",

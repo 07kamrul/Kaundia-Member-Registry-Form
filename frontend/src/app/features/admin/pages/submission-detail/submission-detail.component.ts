@@ -36,6 +36,18 @@ export class SubmissionDetailComponent implements OnInit {
     return !this.loading && !this.error && this.submission !== null;
   }
 
+  /** Avatar fallback initials when no member photo is available. */
+  get applicantInitials(): string {
+    const name = this.submission?.fullName?.trim();
+    if (!name) return '?';
+    return name
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part.charAt(0))
+      .join('')
+      .toUpperCase();
+  }
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;

@@ -150,6 +150,8 @@
   "admin": {
     "submissionDetail": {
       "title": "আবেদনের বিস্তারিত",
+      "personalInfo": "ব্যক্তিগত তথ্য",
+      "paymentSummary": "পেমেন্ট ও স্ট্যাটাস",
       "fields": {
         "name": "নাম",
         "fatherOrHusband": "পিতা/স্বামী",

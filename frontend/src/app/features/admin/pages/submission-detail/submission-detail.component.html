@@ -11,44 +11,104 @@
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else if (submission) {
     <div class="card" style="padding:1.5rem">
-      <div class="grid-2">
-        <p><strong>{{ 'admin.submissionDetail.fields.name' | translate }}:</strong> {{ submission.fullName }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.fatherOrHusband' | translate }}:</strong> {{ submission.fatherOrHusband }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.mother' | translate }}:</strong> {{ submission.mother }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.dob' | translate }}:</strong> {{ submission.dob }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.nationality' | translate }}:</strong> {{ submission.nationality }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.occupation' | translate }}:</strong> {{ submission.occupation }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.gender' | translate }}:</strong> {{ submission.gender }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.mobile' | translate }}:</strong> {{ submission.mobile }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.email' | translate }}:</strong> {{ submission.email }}</p>
-        <p><strong>NID:</strong> {{ submission.nid }}</p>
-        <p>
-          <strong>{{ 'admin.submissionDetail.fields.status' | translate }}:</strong>
-          <span
-            class="status-badge"
-            [class.status-pending]="submission.status === 'pending'"
-            [class.status-approved]="submission.status === 'approved'"
-            [class.status-rejected]="submission.status === 'rejected'"
-          >
-            {{ submission.status }}
-          </span>
-        </p>
-        <p><strong>{{ 'admin.submissionDetail.fields.admissionFee' | translate }}:</strong> {{ submission.admissionFee }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.subscription' | translate }}:</strong> {{ submission.subscription }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.receiptNo' | translate }}:</strong> {{ submission.receiptNo }}</p>
-        <p><strong>{{ 'admin.submissionDetail.fields.paymentMethod' | translate }}:</strong> {{ submission.paymentMethod }}</p>
-        @if (submission.rejectionReason) {
-          <p><strong>{{ 'admin.submissionDetail.fields.rejectionReason' | translate }}:</strong> {{ submission.rejectionReason }}</p>
-        }
+      <div class="applicant-header">
+        <div class="applicant-avatar">
+          @if (submission.memberPhotoUrl) {
+            <img [src]="submission.memberPhotoUrl" [alt]="submission.fullName" />
+          } @else {
+            {{ applicantInitials }}
+          }
+        </div>
+        <div class="applicant-header-body">
+          <div class="applicant-name-row">
+            <p class="applicant-name">{{ submission.fullName }}</p>
+            <span
+              class="status-badge"
+              [class.status-pending]="submission.status === 'pending'"
+              [class.status-approved]="submission.status === 'approved'"
+              [class.status-rejected]="submission.status === 'rejected'"
+            >
+              {{ submission.status }}
+            </span>
+          </div>
+          <div class="applicant-meta-row">
+            <span class="applicant-meta-item">{{ 'admin.submissionDetail.fields.mobile' | translate }}: {{ submission.mobile }}</span>
+            <span class="applicant-meta-item">NID: {{ submission.nid }}</span>
+            <span class="applicant-meta-item">{{ submission.createdAt }}</span>
+          </div>
+        </div>
       </div>
 
-      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">{{ 'admin.submissionDetail.attachments' | translate }}</h3>
+      @if (submission.rejectionReason) {
+        <div class="error-box">
+          <p style="margin:0"><strong>{{ 'admin.submissionDetail.fields.rejectionReason' | translate }}:</strong> {{ submission.rejectionReason }}</p>
+        </div>
+      }
+
+      <h3 class="section-title">{{ 'admin.submissionDetail.personalInfo' | translate }}</h3>
+      <div class="detail-card-grid">
+        <div class="card detail-card">
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.fatherOrHusband' | translate }}</span>
+            <span class="detail-card-value">{{ submission.fatherOrHusband }}</span>
+          </div>
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.mother' | translate }}</span>
+            <span class="detail-card-value">{{ submission.mother }}</span>
+          </div>
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.dob' | translate }}</span>
+            <span class="detail-card-value">{{ submission.dob }}</span>
+          </div>
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.gender' | translate }}</span>
+            <span class="detail-card-value">{{ submission.gender }}</span>
+          </div>
+        </div>
+        <div class="card detail-card">
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.nationality' | translate }}</span>
+            <span class="detail-card-value">{{ submission.nationality }}</span>
+          </div>
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.occupation' | translate }}</span>
+            <span class="detail-card-value">{{ submission.occupation }}</span>
+          </div>
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.email' | translate }}</span>
+            <span class="detail-card-value">{{ submission.email }}</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-title">{{ 'admin.submissionDetail.paymentSummary' | translate }}</h3>
+      <div class="payment-summary-grid">
+        <div class="card payment-tile">
+          <p class="payment-tile-label">{{ 'admin.submissionDetail.fields.admissionFee' | translate }}</p>
+          <p class="payment-tile-value">{{ submission.admissionFee }}</p>
+        </div>
+        <div class="card payment-tile">
+          <p class="payment-tile-label">{{ 'admin.submissionDetail.fields.subscription' | translate }}</p>
+          <p class="payment-tile-value">{{ submission.subscription }}</p>
+        </div>
+        <div class="card payment-tile">
+          <p class="payment-tile-label">{{ 'admin.submissionDetail.fields.receiptNo' | translate }}</p>
+          <p class="payment-tile-value">{{ submission.receiptNo || '—' }}</p>
+        </div>
+        <div class="card payment-tile">
+          <p class="payment-tile-label">{{ 'admin.submissionDetail.fields.paymentMethod' | translate }}</p>
+          <p class="payment-tile-value">{{ submission.paymentMethod }}</p>
+        </div>
+      </div>
+
+      <h3 class="section-title">{{ 'admin.submissionDetail.attachments' | translate }}</h3>
       <div class="detail-card-grid">
         <div class="card detail-card">
           <p class="detail-card-title">{{ 'admin.submissionDetail.fields.memberPhoto' | translate }}</p>
           @if (submission.memberPhotoUrl) {
-            <button type="button" class="btn btn-secondary" (click)="openPreview(submission.memberPhotoUrl, 'admin.submissionDetail.fields.memberPhoto')">
-              {{ 'admin.submissionDetail.viewFile' | translate }}
+            <button type="button" class="attachment-thumb" (click)="openPreview(submission.memberPhotoUrl, 'admin.submissionDetail.fields.memberPhoto')">
+              <span class="attachment-thumb-frame"><img [src]="submission.memberPhotoUrl" alt="" /></span>
+              <span class="attachment-thumb-label">{{ 'admin.submissionDetail.viewFile' | translate }}</span>
             </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
@@ -57,8 +117,9 @@
         <div class="card detail-card">
           <p class="detail-card-title">{{ 'admin.submissionDetail.fields.receiptPhoto' | translate }}</p>
           @if (submission.receiptPhotoUrl) {
-            <button type="button" class="btn btn-secondary" (click)="openPreview(submission.receiptPhotoUrl, 'admin.submissionDetail.fields.receiptPhoto')">
-              {{ 'admin.submissionDetail.viewFile' | translate }}
+            <button type="button" class="attachment-thumb" (click)="openPreview(submission.receiptPhotoUrl, 'admin.submissionDetail.fields.receiptPhoto')">
+              <span class="attachment-thumb-frame"><img [src]="submission.receiptPhotoUrl" alt="" /></span>
+              <span class="attachment-thumb-label">{{ 'admin.submissionDetail.viewFile' | translate }}</span>
             </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
@@ -67,8 +128,9 @@
         <div class="card detail-card">
           <p class="detail-card-title">{{ 'admin.submissionDetail.fields.memberSignature' | translate }}</p>
           @if (submission.memberSignature) {
-            <button type="button" class="btn btn-secondary" (click)="openPreview(submission.memberSignature, 'admin.submissionDetail.fields.memberSignature')">
-              {{ 'admin.submissionDetail.viewFile' | translate }}
+            <button type="button" class="attachment-thumb" (click)="openPreview(submission.memberSignature, 'admin.submissionDetail.fields.memberSignature')">
+              <span class="attachment-thumb-frame"><img [src]="submission.memberSignature" alt="" /></span>
+              <span class="attachment-thumb-label">{{ 'admin.submissionDetail.viewFile' | translate }}</span>
             </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
@@ -90,38 +152,90 @@
         </div>
       }
 
-      <div class="grid-2" style="margin-top:1rem">
+      <div class="grid-2">
         <div>
-          <h3 class="section-title" style="background:var(--emerald-700)">{{ 'admin.submissionDetail.permanentAddress' | translate }}</h3>
-          <p><strong>{{ 'admin.submissionDetail.fields.house' | translate }}:</strong> {{ submission.permanentHouse }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.road' | translate }}:</strong> {{ submission.permanentRoad }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.postOffice' | translate }}:</strong> {{ submission.permanentPostOffice }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.upazila' | translate }}:</strong> {{ submission.permanentUpazila }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.district' | translate }}:</strong> {{ submission.permanentDistrict }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.division' | translate }}:</strong> {{ submission.permanentDivision }}</p>
+          <h3 class="section-title">{{ 'admin.submissionDetail.permanentAddress' | translate }}</h3>
+          <div class="card detail-card">
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.house' | translate }}</span>
+              <span class="detail-card-value">{{ submission.permanentHouse }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.road' | translate }}</span>
+              <span class="detail-card-value">{{ submission.permanentRoad }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.postOffice' | translate }}</span>
+              <span class="detail-card-value">{{ submission.permanentPostOffice }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.upazila' | translate }}</span>
+              <span class="detail-card-value">{{ submission.permanentUpazila }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.district' | translate }}</span>
+              <span class="detail-card-value">{{ submission.permanentDistrict }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.division' | translate }}</span>
+              <span class="detail-card-value">{{ submission.permanentDivision }}</span>
+            </div>
+          </div>
         </div>
         <div>
-          <h3 class="section-title" style="background:var(--emerald-700)">{{ 'admin.submissionDetail.currentAddress' | translate }}</h3>
-          <p><strong>{{ 'admin.submissionDetail.fields.house' | translate }}:</strong> {{ submission.currentHouse }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.road' | translate }}:</strong> {{ submission.currentRoad }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.postOffice' | translate }}:</strong> {{ submission.currentPostOffice }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.upazila' | translate }}:</strong> {{ submission.currentUpazila }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.district' | translate }}:</strong> {{ submission.currentDistrict }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.division' | translate }}:</strong> {{ submission.currentDivision }}</p>
+          <h3 class="section-title">{{ 'admin.submissionDetail.currentAddress' | translate }}</h3>
+          <div class="card detail-card">
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.house' | translate }}</span>
+              <span class="detail-card-value">{{ submission.currentHouse }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.road' | translate }}</span>
+              <span class="detail-card-value">{{ submission.currentRoad }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.postOffice' | translate }}</span>
+              <span class="detail-card-value">{{ submission.currentPostOffice }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.upazila' | translate }}</span>
+              <span class="detail-card-value">{{ submission.currentUpazila }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.district' | translate }}</span>
+              <span class="detail-card-value">{{ submission.currentDistrict }}</span>
+            </div>
+            <div class="detail-card-row">
+              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.division' | translate }}</span>
+              <span class="detail-card-value">{{ submission.currentDivision }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       @if (submission.urgentContactName || submission.urgentContactMobile) {
-        <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">{{ 'admin.submissionDetail.urgentContact' | translate }}</h3>
-        <div class="grid-2">
-          <p><strong>{{ 'admin.submissionDetail.fields.name' | translate }}:</strong> {{ submission.urgentContactName }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.relation' | translate }}:</strong> {{ submission.urgentContactRelation }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.mobile' | translate }}:</strong> {{ submission.urgentContactMobile }}</p>
-          <p><strong>{{ 'admin.submissionDetail.fields.address' | translate }}:</strong> {{ submission.urgentContactAddress }}</p>
+        <h3 class="section-title">{{ 'admin.submissionDetail.urgentContact' | translate }}</h3>
+        <div class="card detail-card">
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.name' | translate }}</span>
+            <span class="detail-card-value">{{ submission.urgentContactName }}</span>
+          </div>
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.relation' | translate }}</span>
+            <span class="detail-card-value">{{ submission.urgentContactRelation }}</span>
+          </div>
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.mobile' | translate }}</span>
+            <span class="detail-card-value">{{ submission.urgentContactMobile }}</span>
+          </div>
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.address' | translate }}</span>
+            <span class="detail-card-value">{{ submission.urgentContactAddress }}</span>
+          </div>
         </div>
       }
 
-      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">{{ 'admin.submissionDetail.properties' | translate }}</h3>
+      <h3 class="section-title">{{ 'admin.submissionDetail.properties' | translate }}</h3>
       @if (submission.properties.length) {
         <div class="detail-card-grid">
           @for (property of submission.properties; track property.id; let i = $index) {
@@ -192,7 +306,7 @@
         <p class="field-hint">{{ 'admin.submissionDetail.noProperties' | translate }}</p>
       }
 
-      <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">{{ 'admin.submissionDetail.nominees' | translate }}</h3>
+      <h3 class="section-title">{{ 'admin.submissionDetail.nominees' | translate }}</h3>
       @if (submission.nominees.length) {
         <div class="detail-card-grid">
           @for (nominee of submission.nominees; track nominee.id; let i = $index) {
@@ -225,7 +339,7 @@
         @if (actionError) {
           <div class="error-box"><p style="margin:0">{{ actionError }}</p></div>
         }
-        <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
+        <div class="review-action-bar">
           <button type="button" class="btn btn-primary" [disabled]="!isReviewReady" (click)="showApproveModal = true">{{ 'admin.submissionDetail.approveButton' | translate }}</button>
           <button type="button" class="btn btn-secondary" [disabled]="!isReviewReady" (click)="showRejectModal = true">{{ 'admin.submissionDetail.rejectButton' | translate }}</button>
         </div>
