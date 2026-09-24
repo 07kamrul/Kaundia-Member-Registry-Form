@@ -20,6 +20,8 @@ export class SubmissionDetailComponent implements OnInit {
   rejectReason = '';
   showApproveModal = false;
   showRejectModal = false;
+  previewImageUrl: string | null = null;
+  previewImageAlt = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +52,16 @@ export class SubmissionDetailComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  openPreview(url: string, altKey: string): void {
+    this.previewImageUrl = url;
+    this.previewImageAlt = this.translate.instant(altKey);
+  }
+
+  closePreview(): void {
+    this.previewImageUrl = null;
+    this.previewImageAlt = '';
   }
 
   approve(): void {

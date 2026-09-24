@@ -47,9 +47,9 @@
         <div class="card detail-card">
           <p class="detail-card-title">{{ 'admin.submissionDetail.fields.memberPhoto' | translate }}</p>
           @if (submission.memberPhotoUrl) {
-            <a [href]="submission.memberPhotoUrl" target="_blank" rel="noopener">
-              <img [src]="submission.memberPhotoUrl" [alt]="'admin.submissionDetail.fields.memberPhoto' | translate" style="max-width:100%;max-height:10rem;border-radius:0.5rem" />
-            </a>
+            <button type="button" class="btn btn-secondary" (click)="openPreview(submission.memberPhotoUrl, 'admin.submissionDetail.fields.memberPhoto')">
+              {{ 'admin.submissionDetail.viewFile' | translate }}
+            </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
           }
@@ -57,9 +57,9 @@
         <div class="card detail-card">
           <p class="detail-card-title">{{ 'admin.submissionDetail.fields.receiptPhoto' | translate }}</p>
           @if (submission.receiptPhotoUrl) {
-            <a [href]="submission.receiptPhotoUrl" target="_blank" rel="noopener">
-              <img [src]="submission.receiptPhotoUrl" [alt]="'admin.submissionDetail.fields.receiptPhoto' | translate" style="max-width:100%;max-height:10rem;border-radius:0.5rem" />
-            </a>
+            <button type="button" class="btn btn-secondary" (click)="openPreview(submission.receiptPhotoUrl, 'admin.submissionDetail.fields.receiptPhoto')">
+              {{ 'admin.submissionDetail.viewFile' | translate }}
+            </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
           }
@@ -67,12 +67,28 @@
         <div class="card detail-card">
           <p class="detail-card-title">{{ 'admin.submissionDetail.fields.memberSignature' | translate }}</p>
           @if (submission.memberSignature) {
-            <img [src]="submission.memberSignature" [alt]="'admin.submissionDetail.fields.memberSignature' | translate" style="max-width:100%;max-height:6rem;border-radius:0.5rem;background:#fff" />
+            <button type="button" class="btn btn-secondary" (click)="openPreview(submission.memberSignature, 'admin.submissionDetail.fields.memberSignature')">
+              {{ 'admin.submissionDetail.viewFile' | translate }}
+            </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
           }
         </div>
       </div>
+
+      @if (previewImageUrl) {
+        <div class="modal-backdrop" (click)="closePreview()">
+          <div class="modal-card" (click)="$event.stopPropagation()">
+            <h3 class="modal-title">{{ previewImageAlt }}</h3>
+            <div class="modal-body">
+              <img [src]="previewImageUrl" [alt]="previewImageAlt" style="max-width:100%;max-height:70vh;border-radius:0.5rem" />
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" (click)="closePreview()">{{ 'common.close' | translate }}</button>
+            </div>
+          </div>
+        </div>
+      }
 
       <div class="grid-2" style="margin-top:1rem">
         <div>
