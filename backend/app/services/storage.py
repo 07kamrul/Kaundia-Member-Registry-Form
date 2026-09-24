@@ -1,5 +1,6 @@
 import base64
 import re
+import unicodedata
 import uuid
 from pathlib import Path
 
@@ -27,11 +28,16 @@ _UNSAFE_PATH_CHARS_RE = re.compile(r'[\\/:*?"<>|]')
 def sanitize_path_segment(value: str) -> str:
     """Make a string safe to use as a single filesystem path segment.
 
-    Strips characters that are unsafe on Windows/Linux filesystems while
-    preserving Unicode (e.g. Bengali) text, and collapses empty results to
-    'misc' so a folder is never created with an empty or '.'/'..' name.
+    Replaces characters that are unsafe on Windows/Linux filesystems (or that
+    would otherwise be interpreted as a path separator, silently merging
+    words like "খাজনা/কর রশিদ" into "খাজনাকর রশিদ") with '-', preserves
+    Unicode (e.g. Bengali) text, normalizes to NFC so the same label always
+    maps to the same bytes on disk regardless of OS/input normalization, and
+    collapses empty results to 'misc' so a folder is never created with an
+    empty or '.'/'..' name.
     """
-    cleaned = _UNSAFE_PATH_CHARS_RE.sub("", value).strip().strip(".")
+    normalized = unicodedata.normalize("NFC", value)
+    cleaned = _UNSAFE_PATH_CHARS_RE.sub("-", normalized).strip().strip(".")
     return cleaned or "misc"
 
 
@@ -61,6 +67,7 @@ async def save_upload_file(upload_file: UploadFile, subdir: str) -> str:
             detail="File exceeds the 10 MB upload limit.",
         )
 
+    subdir = unicodedata.normalize("NFC", subdir)
     target_dir = _upload_root() / subdir
     target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -81,6 +88,7 @@ def save_data_url(data_url: str, subdir: str) -> str | None:
     mime = match.group("mime")
     extension = _MIME_EXTENSIONS.get(mime, "")
 
+    subdir = unicodedata.normalize("NFC", subdir)
     target_dir = _upload_root() / subdir
     target_dir.mkdir(parents=True, exist_ok=True)
 
