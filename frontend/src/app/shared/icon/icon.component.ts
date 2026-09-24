@@ -23,7 +23,15 @@ export type IconName =
   | 'doc'
   | 'coin'
   | 'arrowleft'
-  | 'eye';
+  | 'eye'
+  | 'phone'
+  | 'map'
+  | 'pin'
+  | 'copy'
+  | 'download'
+  | 'alert'
+  | 'chevron-down'
+  | 'check-circle';
 
 const ICON_PATHS: Record<IconName, string> = {
   dashboard:
@@ -54,6 +62,16 @@ const ICON_PATHS: Record<IconName, string> = {
   coin: '<circle cx="12" cy="12" r="8.5"/><path d="M9.5 15.5V9.8c0-1 .8-1.8 1.8-1.8h.4c1 0 1.8.8 1.8 1.8v.2M9.5 12.3h4.5"/>',
   arrowleft: '<path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+  phone:
+    '<path d="M6.5 3h3l1.5 4.5-2 1.5a12.5 12.5 0 0 0 6 6l1.5-2L21 14.5v3A2.5 2.5 0 0 1 18.5 20 15.5 15.5 0 0 1 4 5.5 2.5 2.5 0 0 1 6.5 3z"/>',
+  map: '<path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/>',
+  pin: '<path d="M12 21s-6.5-5.2-6.5-10.5a6.5 6.5 0 1 1 13 0C18.5 15.8 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.5"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  download: '<path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/>',
+  alert:
+    '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+  'check-circle': '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
 };
 
 @Component({

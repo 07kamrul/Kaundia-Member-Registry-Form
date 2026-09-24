@@ -1,4 +1,4 @@
-<div style="max-width:52rem;margin:0 auto">
+<div style="max-width: 52rem; margin: 0 auto">
   <div class="page-header">
     <div>
       <h1 class="page-title">{{ 'admin.submissionDetail.title' | translate }}</h1>
@@ -6,11 +6,15 @@
   </div>
 
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+    <div class="loading-state">
+      <span class="spinner"></span> {{ 'common.loading' | translate }}
+    </div>
   } @else if (error) {
-    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+    <div class="error-box">
+      <p style="margin: 0">{{ error }}</p>
+    </div>
   } @else if (submission) {
-    <div class="card" style="padding:1.5rem">
+    <div class="card" style="padding: 1.5rem">
       <div class="applicant-header">
         <div class="applicant-avatar">
           @if (submission.memberPhotoUrl) {
@@ -32,7 +36,10 @@
             </span>
           </div>
           <div class="applicant-meta-row">
-            <span class="applicant-meta-item">{{ 'admin.submissionDetail.fields.mobile' | translate }}: {{ submission.mobile }}</span>
+            <span class="applicant-meta-item"
+              >{{ 'admin.submissionDetail.fields.mobile' | translate }}:
+              {{ submission.mobile }}</span
+            >
             <span class="applicant-meta-item">NID: {{ submission.nid }}</span>
             <span class="applicant-meta-item">{{ submission.createdAt }}</span>
           </div>
@@ -41,7 +48,10 @@
 
       @if (submission.rejectionReason) {
         <div class="error-box">
-          <p style="margin:0"><strong>{{ 'admin.submissionDetail.fields.rejectionReason' | translate }}:</strong> {{ submission.rejectionReason }}</p>
+          <p style="margin: 0">
+            <strong>{{ 'admin.submissionDetail.fields.rejectionReason' | translate }}:</strong>
+            {{ submission.rejectionReason }}
+          </p>
         </div>
       }
 
@@ -49,33 +59,47 @@
       <div class="detail-card-grid">
         <div class="card detail-card">
           <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.fatherOrHusband' | translate }}</span>
+            <span class="detail-card-label">{{
+              'admin.submissionDetail.fields.fatherOrHusband' | translate
+            }}</span>
             <span class="detail-card-value">{{ submission.fatherOrHusband }}</span>
           </div>
           <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.mother' | translate }}</span>
+            <span class="detail-card-label">{{
+              'admin.submissionDetail.fields.mother' | translate
+            }}</span>
             <span class="detail-card-value">{{ submission.mother }}</span>
           </div>
           <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.dob' | translate }}</span>
+            <span class="detail-card-label">{{
+              'admin.submissionDetail.fields.dob' | translate
+            }}</span>
             <span class="detail-card-value">{{ submission.dob }}</span>
           </div>
           <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.gender' | translate }}</span>
+            <span class="detail-card-label">{{
+              'admin.submissionDetail.fields.gender' | translate
+            }}</span>
             <span class="detail-card-value">{{ submission.gender }}</span>
           </div>
         </div>
         <div class="card detail-card">
           <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.nationality' | translate }}</span>
+            <span class="detail-card-label">{{
+              'admin.submissionDetail.fields.nationality' | translate
+            }}</span>
             <span class="detail-card-value">{{ submission.nationality }}</span>
           </div>
           <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.occupation' | translate }}</span>
+            <span class="detail-card-label">{{
+              'admin.submissionDetail.fields.occupation' | translate
+            }}</span>
             <span class="detail-card-value">{{ submission.occupation }}</span>
           </div>
           <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.email' | translate }}</span>
+            <span class="detail-card-label">{{
+              'admin.submissionDetail.fields.email' | translate
+            }}</span>
             <span class="detail-card-value">{{ submission.email }}</span>
           </div>
         </div>
@@ -84,19 +108,27 @@
       <h3 class="section-title">{{ 'admin.submissionDetail.paymentSummary' | translate }}</h3>
       <div class="payment-summary-grid">
         <div class="card payment-tile">
-          <p class="payment-tile-label">{{ 'admin.submissionDetail.fields.admissionFee' | translate }}</p>
+          <p class="payment-tile-label">
+            {{ 'admin.submissionDetail.fields.admissionFee' | translate }}
+          </p>
           <p class="payment-tile-value">{{ submission.admissionFee }}</p>
         </div>
         <div class="card payment-tile">
-          <p class="payment-tile-label">{{ 'admin.submissionDetail.fields.subscription' | translate }}</p>
+          <p class="payment-tile-label">
+            {{ 'admin.submissionDetail.fields.subscription' | translate }}
+          </p>
           <p class="payment-tile-value">{{ submission.subscription }}</p>
         </div>
         <div class="card payment-tile">
-          <p class="payment-tile-label">{{ 'admin.submissionDetail.fields.receiptNo' | translate }}</p>
+          <p class="payment-tile-label">
+            {{ 'admin.submissionDetail.fields.receiptNo' | translate }}
+          </p>
           <p class="payment-tile-value">{{ submission.receiptNo || '—' }}</p>
         </div>
         <div class="card payment-tile">
-          <p class="payment-tile-label">{{ 'admin.submissionDetail.fields.paymentMethod' | translate }}</p>
+          <p class="payment-tile-label">
+            {{ 'admin.submissionDetail.fields.paymentMethod' | translate }}
+          </p>
           <p class="payment-tile-value">{{ submission.paymentMethod }}</p>
         </div>
       </div>
@@ -104,33 +136,75 @@
       <h3 class="section-title">{{ 'admin.submissionDetail.attachments' | translate }}</h3>
       <div class="detail-card-grid">
         <div class="card detail-card">
-          <p class="detail-card-title">{{ 'admin.submissionDetail.fields.memberPhoto' | translate }}</p>
+          <p class="detail-card-title">
+            {{ 'admin.submissionDetail.fields.memberPhoto' | translate }}
+          </p>
           @if (submission.memberPhotoUrl) {
-            <button type="button" class="attachment-thumb" (click)="openPreview(submission.memberPhotoUrl, 'admin.submissionDetail.fields.memberPhoto')">
-              <span class="attachment-thumb-frame"><img [src]="submission.memberPhotoUrl" alt="" /></span>
-              <span class="attachment-thumb-label">{{ 'admin.submissionDetail.viewFile' | translate }}</span>
+            <button
+              type="button"
+              class="attachment-thumb"
+              (click)="
+                openPreview(submission.memberPhotoUrl, 'admin.submissionDetail.fields.memberPhoto')
+              "
+            >
+              <span class="attachment-thumb-frame"
+                ><img [src]="submission.memberPhotoUrl" alt=""
+              /></span>
+              <span class="attachment-thumb-label">{{
+                'admin.submissionDetail.viewFile' | translate
+              }}</span>
             </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
           }
         </div>
         <div class="card detail-card">
-          <p class="detail-card-title">{{ 'admin.submissionDetail.fields.receiptPhoto' | translate }}</p>
+          <p class="detail-card-title">
+            {{ 'admin.submissionDetail.fields.receiptPhoto' | translate }}
+          </p>
           @if (submission.receiptPhotoUrl) {
-            <button type="button" class="attachment-thumb" (click)="openPreview(submission.receiptPhotoUrl, 'admin.submissionDetail.fields.receiptPhoto')">
-              <span class="attachment-thumb-frame"><img [src]="submission.receiptPhotoUrl" alt="" /></span>
-              <span class="attachment-thumb-label">{{ 'admin.submissionDetail.viewFile' | translate }}</span>
+            <button
+              type="button"
+              class="attachment-thumb"
+              (click)="
+                openPreview(
+                  submission.receiptPhotoUrl,
+                  'admin.submissionDetail.fields.receiptPhoto'
+                )
+              "
+            >
+              <span class="attachment-thumb-frame"
+                ><img [src]="submission.receiptPhotoUrl" alt=""
+              /></span>
+              <span class="attachment-thumb-label">{{
+                'admin.submissionDetail.viewFile' | translate
+              }}</span>
             </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
           }
         </div>
         <div class="card detail-card">
-          <p class="detail-card-title">{{ 'admin.submissionDetail.fields.memberSignature' | translate }}</p>
+          <p class="detail-card-title">
+            {{ 'admin.submissionDetail.fields.memberSignature' | translate }}
+          </p>
           @if (submission.memberSignature) {
-            <button type="button" class="attachment-thumb" (click)="openPreview(submission.memberSignature, 'admin.submissionDetail.fields.memberSignature')">
-              <span class="attachment-thumb-frame"><img [src]="submission.memberSignature" alt="" /></span>
-              <span class="attachment-thumb-label">{{ 'admin.submissionDetail.viewFile' | translate }}</span>
+            <button
+              type="button"
+              class="attachment-thumb"
+              (click)="
+                openPreview(
+                  submission.memberSignature,
+                  'admin.submissionDetail.fields.memberSignature'
+                )
+              "
+            >
+              <span class="attachment-thumb-frame"
+                ><img [src]="submission.memberSignature" alt=""
+              /></span>
+              <span class="attachment-thumb-label">{{
+                'admin.submissionDetail.viewFile' | translate
+              }}</span>
             </button>
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
@@ -140,13 +214,36 @@
 
       @if (previewImageUrl) {
         <div class="modal-backdrop" (click)="closePreview()">
-          <div class="modal-card" (click)="$event.stopPropagation()">
+          <div
+            class="modal-card modal-card-wide"
+            (click)="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            [attr.aria-label]="previewImageAlt"
+          >
             <h3 class="modal-title">{{ previewImageAlt }}</h3>
             <div class="modal-body">
-              <img [src]="previewImageUrl" [alt]="previewImageAlt" style="max-width:100%;max-height:70vh;border-radius:0.5rem" />
+              @if (previewIsImage) {
+                <img [src]="previewImageUrl" [alt]="previewImageAlt" class="preview-media" />
+              } @else {
+                <iframe
+                  [src]="previewFrameUrl"
+                  class="preview-frame"
+                  [title]="previewImageAlt"
+                ></iframe>
+              }
             </div>
             <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" (click)="closePreview()">{{ 'common.close' | translate }}</button>
+              <a
+                class="btn btn-secondary"
+                [href]="previewImageUrl"
+                target="_blank"
+                rel="noopener"
+                >{{ 'admin.submissionDetail.download' | translate }}</a
+              >
+              <button type="button" class="btn btn-primary" (click)="closePreview()">
+                {{ 'common.close' | translate }}
+              </button>
             </div>
           </div>
         </div>
@@ -157,27 +254,39 @@
           <h3 class="section-title">{{ 'admin.submissionDetail.permanentAddress' | translate }}</h3>
           <div class="card detail-card">
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.house' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.house' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.permanentHouse }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.road' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.road' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.permanentRoad }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.postOffice' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.postOffice' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.permanentPostOffice }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.upazila' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.upazila' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.permanentUpazila }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.district' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.district' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.permanentDistrict }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.division' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.division' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.permanentDivision }}</span>
             </div>
           </div>
@@ -186,162 +295,680 @@
           <h3 class="section-title">{{ 'admin.submissionDetail.currentAddress' | translate }}</h3>
           <div class="card detail-card">
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.house' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.house' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.currentHouse }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.road' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.road' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.currentRoad }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.postOffice' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.postOffice' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.currentPostOffice }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.upazila' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.upazila' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.currentUpazila }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.district' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.district' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.currentDistrict }}</span>
             </div>
             <div class="detail-card-row">
-              <span class="detail-card-label">{{ 'admin.submissionDetail.fields.division' | translate }}</span>
+              <span class="detail-card-label">{{
+                'admin.submissionDetail.fields.division' | translate
+              }}</span>
               <span class="detail-card-value">{{ submission.currentDivision }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      @if (submission.urgentContactName || submission.urgentContactMobile) {
-        <h3 class="section-title">{{ 'admin.submissionDetail.urgentContact' | translate }}</h3>
-        <div class="card detail-card">
-          <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.name' | translate }}</span>
-            <span class="detail-card-value">{{ submission.urgentContactName }}</span>
+      <!-- ========== Emergency Contact ========== -->
+      @if (emergencyContact; as emergency) {
+        <section class="ds-card" aria-labelledby="emergency-heading">
+          <header class="ds-card-header">
+            <span class="ds-card-icon" aria-hidden="true">
+              <app-icon name="phone" [size]="18"></app-icon>
+            </span>
+            <div class="ds-card-heading">
+              <h3 id="emergency-heading" class="ds-card-title">
+                {{ 'admin.submissionDetail.urgentContact' | translate }}
+              </h3>
+            </div>
+            @if (emergencyAlsoNominee) {
+              <span class="ds-tag ds-tag-green">{{
+                'admin.submissionDetail.alsoNominee' | translate
+              }}</span>
+            }
+            @if (emergencyIsApplicant) {
+              <span class="ds-tag ds-tag-gold">{{
+                'admin.submissionDetail.roleApplicant' | translate
+              }}</span>
+            }
+          </header>
+          <div class="ds-card-body">
+            <div class="emergency-hero">
+              <span class="ds-avatar" aria-hidden="true">{{ initials(emergency.name) }}</span>
+              <div class="emergency-hero-body">
+                <div class="emergency-name-row">
+                  <p class="ds-name">
+                    @if (displayValue(emergency.name); as name) {
+                      {{ name }}
+                    } @else {
+                      <span class="ds-empty">{{ emptyValue() }}</span>
+                    }
+                  </p>
+                  @if (displayValue(emergency.relation); as relation) {
+                    <span class="ds-badge">{{ relation }}</span>
+                  }
+                </div>
+                <div class="emergency-fields">
+                  <div class="ds-field">
+                    <span class="ds-field-label">{{
+                      'admin.submissionDetail.fields.mobile' | translate
+                    }}</span>
+                    @if (displayValue(emergency.mobile); as mobile) {
+                      <div class="ds-field-value-row">
+                        <a class="ds-field-value ds-mono ds-link" [href]="telHref(mobile)">{{
+                          mobile
+                        }}</a>
+                        <a
+                          class="ds-icon-btn no-print"
+                          [href]="telHref(mobile)"
+                          [attr.aria-label]="'admin.submissionDetail.call' | translate"
+                          [title]="'admin.submissionDetail.call' | translate"
+                        >
+                          <app-icon name="phone" [size]="14"></app-icon>
+                        </a>
+                        <button
+                          type="button"
+                          class="ds-icon-btn no-print"
+                          [attr.aria-label]="'admin.submissionDetail.copyValue' | translate"
+                          [title]="'admin.submissionDetail.copyValue' | translate"
+                          (click)="copyText('emergency-mobile', mobile)"
+                        >
+                          <app-icon
+                            [name]="isCopied('emergency-mobile', mobile) ? 'check-circle' : 'copy'"
+                            [size]="14"
+                          ></app-icon>
+                        </button>
+                      </div>
+                    } @else {
+                      <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                    }
+                  </div>
+                  <div class="ds-field ds-field-span">
+                    <span class="ds-field-label">{{
+                      'admin.submissionDetail.fields.address' | translate
+                    }}</span>
+                    @if (displayValue(emergency.address); as address) {
+                      <div class="ds-field-value-row">
+                        <span class="ds-leading-icon" aria-hidden="true"
+                          ><app-icon name="pin" [size]="15"></app-icon
+                        ></span>
+                        <span class="ds-field-value">{{ address }}</span>
+                      </div>
+                    } @else {
+                      <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.relation' | translate }}</span>
-            <span class="detail-card-value">{{ submission.urgentContactRelation }}</span>
-          </div>
-          <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.mobile' | translate }}</span>
-            <span class="detail-card-value">{{ submission.urgentContactMobile }}</span>
-          </div>
-          <div class="detail-card-row">
-            <span class="detail-card-label">{{ 'admin.submissionDetail.fields.address' | translate }}</span>
-            <span class="detail-card-value">{{ submission.urgentContactAddress }}</span>
-          </div>
-        </div>
+        </section>
       }
 
-      <h3 class="section-title">{{ 'admin.submissionDetail.properties' | translate }}</h3>
-      @if (submission.properties.length) {
-        <div class="detail-card-grid">
-          @for (property of submission.properties; track property.id; let i = $index) {
-            <div class="card detail-card">
-              <p class="detail-card-title">{{ 'admin.submissionDetail.propertyCardTitle' | translate }} {{ i + 1 }}</p>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.type' | translate }}</span>
-                <span class="detail-card-value">{{ property.propertyType.join(', ') }}{{ property.propertyTypeOther ? ' (' + property.propertyTypeOther + ')' : '' }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.khatianNo' | translate }}</span>
-                <span class="detail-card-value">{{ property.khatianNo }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.dagNoCs' | translate }}</span>
-                <span class="detail-card-value">{{ property.dagNoCs }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.dagNoRs' | translate }}</span>
-                <span class="detail-card-value">{{ property.dagNoRs }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.holdingNumber' | translate }}</span>
-                <span class="detail-card-value">{{ property.holdingNumber }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.landQuantity' | translate }}</span>
-                <span class="detail-card-value">{{ property.landQuantity }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.ownership' | translate }}</span>
-                <span class="detail-card-value">{{ property.ownership }}</span>
-              </div>
-
-              <p class="detail-card-title" style="margin-top:0.75rem">{{ 'admin.submissionDetail.coOwners' | translate }}</p>
-              @if (property.coOwners.length) {
-                @for (owner of property.coOwners; track owner.id; let j = $index) {
-                  <div class="detail-card-row">
-                    <span class="detail-card-label">{{ j + 1 }}. {{ owner.name }}</span>
-                    <span class="detail-card-value">{{ owner.mobile }}</span>
-                  </div>
-                }
-              } @else {
-                <p class="field-hint">{{ 'admin.submissionDetail.noCoOwners' | translate }}</p>
-              }
-
-              <p class="detail-card-title" style="margin-top:0.75rem">{{ 'admin.submissionDetail.applicableDocs' | translate }}</p>
-              @if (property.applicableDocs.length) {
-                @for (doc of property.applicableDocs; track doc.id) {
-                  <div class="detail-card-row">
-                    <span class="detail-card-label">{{ doc.docType }}</span>
-                    <span class="detail-card-value">
-                      @if (doc.fileUrl) {
-                        <a [href]="doc.fileUrl" target="_blank" rel="noopener">{{ 'admin.submissionDetail.viewFile' | translate }}</a>
-                      } @else {
-                        {{ 'admin.submissionDetail.noAttachment' | translate }}
+      <!-- ========== Properties ========== -->
+      <section class="ds-card" aria-labelledby="properties-heading">
+        <header class="ds-card-header">
+          <span class="ds-card-icon" aria-hidden="true">
+            <app-icon name="map" [size]="18"></app-icon>
+          </span>
+          <div class="ds-card-heading">
+            <h3 id="properties-heading" class="ds-card-title">
+              {{ 'admin.submissionDetail.properties' | translate }}
+            </h3>
+            @if (submission.properties.length) {
+              <p class="ds-card-sub">
+                {{
+                  'admin.submissionDetail.propertyCount'
+                    | translate: { count: submission.properties.length }
+                }}
+              </p>
+            }
+          </div>
+        </header>
+        <div class="ds-card-body">
+          @if (submission.properties.length) {
+            <div class="prop-list">
+              @for (property of submission.properties; track property.id; let i = $index) {
+                <article class="prop-item" [class.is-open]="isPropertyExpanded(property.id)">
+                  <button
+                    type="button"
+                    class="prop-item-header"
+                    (click)="toggleProperty(property.id)"
+                    [attr.aria-expanded]="isPropertyExpanded(property.id)"
+                    [attr.aria-controls]="'prop-body-' + property.id"
+                  >
+                    <span class="prop-item-title">
+                      <span class="prop-item-index"
+                        >{{ 'admin.submissionDetail.propertyCardTitle' | translate }}
+                        {{ i + 1 }}</span
+                      >
+                      @if (propertyTypeLabel(property); as typeLabel) {
+                        <span class="ds-badge">{{ typeLabel }}</span>
+                      }
+                      @if (property.ownership; as ownership) {
+                        <span
+                          class="ds-badge"
+                          [class.ds-badge-green]="ownershipKind(ownership) === 'single'"
+                          [class.ds-badge-blue]="ownershipKind(ownership) === 'joint'"
+                          >{{ ownership }}</span
+                        >
                       }
                     </span>
+                    <span class="prop-item-meta">
+                      @if (formatLandQuantity(property.landQuantity); as qty) {
+                        @if (qty.value) {
+                          <span class="prop-qty">
+                            <strong class="ds-mono">{{ qty.value }}</strong>
+                            @if (qty.unit) {
+                              <span class="prop-qty-unit">{{ qty.unit }}</span>
+                            }
+                          </span>
+                        }
+                      }
+                      <span class="prop-chevron" aria-hidden="true">
+                        <app-icon name="chevron-down" [size]="16"></app-icon>
+                      </span>
+                    </span>
+                  </button>
+
+                  <div class="prop-item-body" [id]="'prop-body-' + property.id">
+                    <p class="prop-summary" [hidden]="isPropertyExpanded(property.id)">
+                      {{ propertySummary(property) }}
+                    </p>
+                    <div class="prop-details" [hidden]="!isPropertyExpanded(property.id)">
+                      <div class="ds-field-grid ds-field-grid-4">
+                        <div class="ds-field">
+                          <span class="ds-field-label">{{
+                            'admin.submissionDetail.fieldLabels.khatianNo' | translate
+                          }}</span>
+                          @if (displayValue(property.khatianNo); as khatian) {
+                            <div class="ds-field-value-row">
+                              <span class="ds-field-value ds-mono">{{ khatian }}</span>
+                              <button
+                                type="button"
+                                class="ds-icon-btn no-print"
+                                [attr.aria-label]="'admin.submissionDetail.copyValue' | translate"
+                                [title]="'admin.submissionDetail.copyValue' | translate"
+                                (click)="copyText('khatian-' + property.id, khatian)"
+                              >
+                                <app-icon
+                                  [name]="
+                                    isCopied('khatian-' + property.id, khatian)
+                                      ? 'check-circle'
+                                      : 'copy'
+                                  "
+                                  [size]="14"
+                                ></app-icon>
+                              </button>
+                            </div>
+                          } @else {
+                            <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                          }
+                        </div>
+                        <div class="ds-field">
+                          <span class="ds-field-label">{{
+                            'admin.submissionDetail.fieldLabels.dagNoCs' | translate
+                          }}</span>
+                          @if (displayValue(property.dagNoCs); as dagCs) {
+                            <div class="ds-field-value-row">
+                              <span class="ds-field-value ds-mono">{{ dagCs }}</span>
+                              <button
+                                type="button"
+                                class="ds-icon-btn no-print"
+                                [attr.aria-label]="'admin.submissionDetail.copyValue' | translate"
+                                [title]="'admin.submissionDetail.copyValue' | translate"
+                                (click)="copyText('dag-cs-' + property.id, dagCs)"
+                              >
+                                <app-icon
+                                  [name]="
+                                    isCopied('dag-cs-' + property.id, dagCs)
+                                      ? 'check-circle'
+                                      : 'copy'
+                                  "
+                                  [size]="14"
+                                ></app-icon>
+                              </button>
+                            </div>
+                          } @else {
+                            <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                          }
+                        </div>
+                        <div class="ds-field">
+                          <span class="ds-field-label">{{
+                            'admin.submissionDetail.fieldLabels.dagNoRs' | translate
+                          }}</span>
+                          @if (displayValue(property.dagNoRs); as dagRs) {
+                            <div class="ds-field-value-row">
+                              <span class="ds-field-value ds-mono">{{ dagRs }}</span>
+                              <button
+                                type="button"
+                                class="ds-icon-btn no-print"
+                                [attr.aria-label]="'admin.submissionDetail.copyValue' | translate"
+                                [title]="'admin.submissionDetail.copyValue' | translate"
+                                (click)="copyText('dag-rs-' + property.id, dagRs)"
+                              >
+                                <app-icon
+                                  [name]="
+                                    isCopied('dag-rs-' + property.id, dagRs)
+                                      ? 'check-circle'
+                                      : 'copy'
+                                  "
+                                  [size]="14"
+                                ></app-icon>
+                              </button>
+                            </div>
+                          } @else {
+                            <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                          }
+                        </div>
+                        <div class="ds-field">
+                          <span class="ds-field-label">{{
+                            'admin.submissionDetail.fieldLabels.holdingNumber' | translate
+                          }}</span>
+                          @if (displayValue(property.holdingNumber); as holding) {
+                            <div class="ds-field-value-row">
+                              <span class="ds-field-value ds-mono">{{ holding }}</span>
+                              <button
+                                type="button"
+                                class="ds-icon-btn no-print"
+                                [attr.aria-label]="'admin.submissionDetail.copyValue' | translate"
+                                [title]="'admin.submissionDetail.copyValue' | translate"
+                                (click)="copyText('holding-' + property.id, holding)"
+                              >
+                                <app-icon
+                                  [name]="
+                                    isCopied('holding-' + property.id, holding)
+                                      ? 'check-circle'
+                                      : 'copy'
+                                  "
+                                  [size]="14"
+                                ></app-icon>
+                              </button>
+                            </div>
+                          } @else {
+                            <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Co-owners -->
+                      <div class="ds-subblock">
+                        <div class="ds-subblock-header">
+                          <h4 class="ds-subblock-title">
+                            {{ 'admin.submissionDetail.coOwners' | translate }}
+                            <span class="ds-count">{{ property.coOwners.length }}</span>
+                          </h4>
+                        </div>
+                        @if (property.coOwners.length) {
+                          <div class="ds-table-wrap">
+                            <table class="ds-table coowner-table">
+                              <thead>
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">
+                                    {{ 'admin.submissionDetail.fieldLabels.name' | translate }}
+                                  </th>
+                                  <th scope="col">
+                                    {{ 'admin.submissionDetail.fieldLabels.mobile' | translate }}
+                                  </th>
+                                  <th scope="col">
+                                    {{ 'admin.submissionDetail.roleColumn' | translate }}
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @for (owner of property.coOwners; track owner.id; let j = $index) {
+                                  <tr [class.is-applicant]="isApplicantRow(owner)">
+                                    <td class="ds-mono ds-row-num" data-label="#">{{ j + 1 }}</td>
+                                    <td
+                                      [attr.data-label]="
+                                        'admin.submissionDetail.fieldLabels.name' | translate
+                                      "
+                                    >
+                                      <span class="ds-owner-name">{{
+                                        owner.name || emptyValue()
+                                      }}</span>
+                                    </td>
+                                    <td
+                                      [attr.data-label]="
+                                        'admin.submissionDetail.fieldLabels.mobile' | translate
+                                      "
+                                    >
+                                      @if (displayValue(owner.mobile); as mobile) {
+                                        <div class="ds-mobile-cell">
+                                          <a class="ds-mono ds-link" [href]="telHref(mobile)">{{
+                                            mobile
+                                          }}</a>
+                                          @if (isDuplicateMobile(property, owner)) {
+                                            <span
+                                              class="ds-warn"
+                                              [title]="
+                                                'admin.submissionDetail.sharedMobileWarning'
+                                                  | translate
+                                              "
+                                              [attr.aria-label]="
+                                                'admin.submissionDetail.sharedMobileWarning'
+                                                  | translate
+                                              "
+                                              role="img"
+                                            >
+                                              <app-icon name="alert" [size]="14"></app-icon>
+                                            </span>
+                                          }
+                                        </div>
+                                      } @else {
+                                        <span class="ds-empty">{{ emptyValue() }}</span>
+                                      }
+                                    </td>
+                                    <td
+                                      [attr.data-label]="
+                                        'admin.submissionDetail.roleColumn' | translate
+                                      "
+                                    >
+                                      <span class="ds-role-tags">
+                                        @for (role of coOwnerRoles(owner); track role) {
+                                          <span
+                                            class="ds-tag"
+                                            [class.ds-tag-gold]="role === 'applicant'"
+                                            [class.ds-tag-green]="role === 'nominee'"
+                                            [class.ds-tag-blue]="role === 'emergency'"
+                                          >
+                                            @switch (role) {
+                                              @case ('applicant') {
+                                                {{
+                                                  'admin.submissionDetail.roleApplicant' | translate
+                                                }}
+                                              }
+                                              @case ('nominee') {
+                                                {{
+                                                  'admin.submissionDetail.roleNominee' | translate
+                                                }}
+                                              }
+                                              @case ('emergency') {
+                                                {{
+                                                  'admin.submissionDetail.roleEmergency' | translate
+                                                }}
+                                              }
+                                            }
+                                          </span>
+                                        }
+                                      </span>
+                                    </td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
+                          </div>
+                        } @else {
+                          <p class="ds-empty-block">
+                            {{ 'admin.submissionDetail.noCoOwners' | translate }}
+                          </p>
+                        }
+                      </div>
+
+                      <!-- Applicable documents -->
+                      <div class="ds-subblock">
+                        <div class="ds-subblock-header">
+                          <h4 class="ds-subblock-title">
+                            {{ 'admin.submissionDetail.applicableDocs' | translate }}
+                            <span class="ds-count">{{ property.applicableDocs.length }}</span>
+                          </h4>
+                        </div>
+                        @if (property.applicableDocs.length) {
+                          <div class="doc-grid">
+                            @for (doc of property.applicableDocs; track doc.id) {
+                              <div class="doc-tile">
+                                <span class="doc-thumb" aria-hidden="true">
+                                  @if (doc.fileUrl && docFileKind(doc) === 'image') {
+                                    <img [src]="doc.fileUrl" alt="" />
+                                  } @else {
+                                    <app-icon name="doc" [size]="20"></app-icon>
+                                  }
+                                </span>
+                                <span class="doc-meta">
+                                  <span class="doc-name" lang="bn">{{ doc.docType }}</span>
+                                  <span class="doc-sub ds-mono">{{ docFileSizeLabel(doc) }}</span>
+                                </span>
+                                <span class="doc-actions no-print">
+                                  @if (doc.fileUrl) {
+                                    <button
+                                      type="button"
+                                      class="btn btn-sm btn-secondary"
+                                      (click)="openDocPreview(doc)"
+                                    >
+                                      {{ 'admin.submissionDetail.view' | translate }}
+                                    </button>
+                                    <a
+                                      class="btn btn-sm btn-ghost"
+                                      [href]="doc.fileUrl"
+                                      download
+                                      target="_blank"
+                                      rel="noopener"
+                                    >
+                                      {{ 'admin.submissionDetail.download' | translate }}
+                                    </a>
+                                  } @else {
+                                    <span class="ds-empty">{{
+                                      'admin.submissionDetail.noAttachment' | translate
+                                    }}</span>
+                                  }
+                                </span>
+                              </div>
+                            }
+                          </div>
+                        } @else {
+                          <p class="ds-empty-block">
+                            {{ 'admin.submissionDetail.noApplicableDocs' | translate }}
+                          </p>
+                        }
+                      </div>
+                    </div>
                   </div>
-                }
-              } @else {
-                <p class="field-hint">{{ 'admin.submissionDetail.noApplicableDocs' | translate }}</p>
+                </article>
               }
             </div>
+          } @else {
+            <p class="ds-empty-block">{{ 'admin.submissionDetail.noProperties' | translate }}</p>
           }
         </div>
-      } @else {
-        <p class="field-hint">{{ 'admin.submissionDetail.noProperties' | translate }}</p>
-      }
+      </section>
 
-      <h3 class="section-title">{{ 'admin.submissionDetail.nominees' | translate }}</h3>
-      @if (submission.nominees.length) {
-        <div class="detail-card-grid">
-          @for (nominee of submission.nominees; track nominee.id; let i = $index) {
-            <div class="card detail-card">
-              <p class="detail-card-title">{{ 'admin.submissionDetail.nomineeCardTitle' | translate }} {{ i + 1 }}</p>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.name' | translate }}</span>
-                <span class="detail-card-value">{{ nominee.name }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.relation' | translate }}</span>
-                <span class="detail-card-value">{{ nominee.relation }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.mobile' | translate }}</span>
-                <span class="detail-card-value">{{ nominee.mobile }}</span>
-              </div>
-              <div class="detail-card-row">
-                <span class="detail-card-label">{{ 'admin.submissionDetail.fieldLabels.address' | translate }}</span>
-                <span class="detail-card-value">{{ nominee.address }}</span>
-              </div>
+      <!-- ========== Nominees ========== -->
+      <section class="ds-card" aria-labelledby="nominees-heading">
+        <header class="ds-card-header">
+          <span class="ds-card-icon" aria-hidden="true">
+            <app-icon name="users" [size]="18"></app-icon>
+          </span>
+          <div class="ds-card-heading">
+            <h3 id="nominees-heading" class="ds-card-title">
+              {{ 'admin.submissionDetail.nominees' | translate }}
+            </h3>
+            @if (submission.nominees.length) {
+              <p class="ds-card-sub">
+                {{
+                  'admin.submissionDetail.nomineeCount'
+                    | translate: { count: submission.nominees.length }
+                }}
+              </p>
+            }
+          </div>
+          @if (nomineeShareWarning) {
+            <span
+              class="ds-tag ds-tag-amber"
+              [title]="
+                'admin.submissionDetail.shareWarning' | translate: { value: nomineeShareTotal }
+              "
+            >
+              <app-icon name="alert" [size]="12"></app-icon>
+              {{ 'admin.submissionDetail.shareTotal' | translate: { value: nomineeShareTotal } }}
+            </span>
+          } @else if (nomineeShareDeclared) {
+            <span class="ds-tag ds-tag-green">
+              {{ 'admin.submissionDetail.shareTotal' | translate: { value: nomineeShareTotal } }}
+            </span>
+          }
+        </header>
+        <div class="ds-card-body">
+          @if (submission.nominees.length) {
+            <div class="nominee-grid">
+              @for (nominee of submission.nominees; track nominee.id; let i = $index) {
+                <article class="nominee-card">
+                  <header class="nominee-card-header">
+                    <span class="ds-avatar ds-avatar-sm" aria-hidden="true">{{
+                      initials(nominee.name)
+                    }}</span>
+                    <div class="nominee-card-id">
+                      <div class="nominee-name-row">
+                        <p class="ds-name">
+                          @if (displayValue(nominee.name); as name) {
+                            {{ name }}
+                          } @else {
+                            <span class="ds-empty">{{ emptyValue() }}</span>
+                          }
+                        </p>
+                        <span class="nominee-index">#{{ i + 1 }}</span>
+                      </div>
+                      <div class="nominee-badges">
+                        @if (displayValue(nominee.relation); as relation) {
+                          <span class="ds-badge">{{ relation }}</span>
+                        }
+                        @if (typeof nominee.sharePercentage === 'number') {
+                          <span class="ds-badge ds-badge-green"
+                            >{{ nominee.sharePercentage }}%</span
+                          >
+                        }
+                        @if (nomineeMatchesEmergency(nominee)) {
+                          <span class="ds-tag ds-tag-blue">{{
+                            'admin.submissionDetail.alsoEmergency' | translate
+                          }}</span>
+                        } @else if (nomineeMatchesApplicant(nominee)) {
+                          <span class="ds-tag ds-tag-gold">{{
+                            'admin.submissionDetail.roleApplicant' | translate
+                          }}</span>
+                        }
+                      </div>
+                    </div>
+                  </header>
+                  <div class="nominee-card-body">
+                    <div class="ds-field">
+                      <span class="ds-field-label">{{
+                        'admin.submissionDetail.fields.mobile' | translate
+                      }}</span>
+                      @if (displayValue(nominee.mobile); as mobile) {
+                        <div class="ds-field-value-row">
+                          <a class="ds-field-value ds-mono ds-link" [href]="telHref(mobile)">{{
+                            mobile
+                          }}</a>
+                          <a
+                            class="ds-icon-btn no-print"
+                            [href]="telHref(mobile)"
+                            [attr.aria-label]="'admin.submissionDetail.call' | translate"
+                            [title]="'admin.submissionDetail.call' | translate"
+                          >
+                            <app-icon name="phone" [size]="14"></app-icon>
+                          </a>
+                          <button
+                            type="button"
+                            class="ds-icon-btn no-print"
+                            [attr.aria-label]="'admin.submissionDetail.copyValue' | translate"
+                            [title]="'admin.submissionDetail.copyValue' | translate"
+                            (click)="copyText('nominee-mobile-' + nominee.id, mobile)"
+                          >
+                            <app-icon
+                              [name]="
+                                isCopied('nominee-mobile-' + nominee.id, mobile)
+                                  ? 'check-circle'
+                                  : 'copy'
+                              "
+                              [size]="14"
+                            ></app-icon>
+                          </button>
+                        </div>
+                      } @else {
+                        <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                      }
+                    </div>
+                    <div class="ds-field">
+                      <span class="ds-field-label">{{
+                        'admin.submissionDetail.fields.address' | translate
+                      }}</span>
+                      @if (displayValue(nominee.address); as address) {
+                        <div class="ds-field-value-row">
+                          <span class="ds-leading-icon" aria-hidden="true"
+                            ><app-icon name="pin" [size]="15"></app-icon
+                          ></span>
+                          <span class="ds-field-value">{{ address }}</span>
+                        </div>
+                      } @else {
+                        <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
             </div>
+            @if (nomineeShareWarning) {
+              <p class="ds-inline-warning" role="status">
+                <app-icon name="alert" [size]="14"></app-icon>
+                {{
+                  'admin.submissionDetail.shareWarning' | translate: { value: nomineeShareTotal }
+                }}
+              </p>
+            }
+          } @else {
+            <p class="ds-empty-block">{{ 'admin.submissionDetail.noNominees' | translate }}</p>
           }
         </div>
-      } @else {
-        <p class="field-hint">{{ 'admin.submissionDetail.noNominees' | translate }}</p>
-      }
+      </section>
 
       @if (submission.status === 'pending') {
         @if (actionError) {
-          <div class="error-box"><p style="margin:0">{{ actionError }}</p></div>
+          <div class="error-box">
+            <p style="margin: 0">{{ actionError }}</p>
+          </div>
         }
         <div class="review-action-bar">
-          <button type="button" class="btn btn-primary" [disabled]="!isReviewReady" (click)="showApproveModal = true">{{ 'admin.submissionDetail.approveButton' | translate }}</button>
-          <button type="button" class="btn btn-secondary" [disabled]="!isReviewReady" (click)="showRejectModal = true">{{ 'admin.submissionDetail.rejectButton' | translate }}</button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!isReviewReady"
+            (click)="showApproveModal = true"
+          >
+            {{ 'admin.submissionDetail.approveButton' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [disabled]="!isReviewReady"
+            (click)="showRejectModal = true"
+          >
+            {{ 'admin.submissionDetail.rejectButton' | translate }}
+          </button>
         </div>
       }
     </div>
@@ -350,7 +977,13 @@
   <app-confirm-modal
     [open]="showApproveModal"
     [title]="'admin.submissionDetail.approveModal.title' | translate"
-    [message]="submission ? submission.fullName + ' ' + ('admin.submissionDetail.approveModal.messageSuffix' | translate) : ''"
+    [message]="
+      submission
+        ? submission.fullName +
+          ' ' +
+          ('admin.submissionDetail.approveModal.messageSuffix' | translate)
+        : ''
+    "
     [confirmLabel]="'admin.submissionDetail.approveModal.confirmLabel' | translate"
     (confirm)="approve()"
     (cancel)="showApproveModal = false"
@@ -359,13 +992,23 @@
   <app-confirm-modal
     [open]="showRejectModal"
     [title]="'admin.submissionDetail.rejectModal.title' | translate"
-    [message]="submission ? submission.fullName + ' ' + ('admin.submissionDetail.rejectModal.messageSuffix' | translate) : ''"
+    [message]="
+      submission
+        ? submission.fullName +
+          ' ' +
+          ('admin.submissionDetail.rejectModal.messageSuffix' | translate)
+        : ''
+    "
     [confirmLabel]="'admin.submissionDetail.rejectModal.confirmLabel' | translate"
     [danger]="true"
     [confirmDisabled]="!rejectReason.trim()"
     (confirm)="reject()"
     (cancel)="showRejectModal = false"
   >
-    <textarea rows="3" [(ngModel)]="rejectReason" [placeholder]="'admin.submissionDetail.rejectModal.placeholder' | translate"></textarea>
+    <textarea
+      rows="3"
+      [(ngModel)]="rejectReason"
+      [placeholder]="'admin.submissionDetail.rejectModal.placeholder' | translate"
+    ></textarea>
   </app-confirm-modal>
 </div>

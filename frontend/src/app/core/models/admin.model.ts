@@ -19,6 +19,8 @@ export interface ApplicableDoc {
   id: string;
   docType: string;
   fileUrl: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
 }
 
 export interface SubmissionProperty {
@@ -41,7 +43,19 @@ export interface Nominee {
   relation: string;
   mobile: string;
   address?: string | null;
+  sharePercentage?: number | null;
 }
+
+export interface EmergencyContact {
+  name?: string | null;
+  relation?: string | null;
+  mobile?: string | null;
+  address?: string | null;
+}
+
+/** Friendly aliases for API-facing view models used by detail screens. */
+export type Property = SubmissionProperty;
+export type PropertyDocument = ApplicableDoc;
 
 export interface SubmissionDetail extends SubmissionSummary {
   fatherOrHusband: string;
