@@ -342,6 +342,7 @@
       "addressInfo": "2. Address Information",
       "property": "3. Housing / Property Ownership Information",
       "urgentContact": "4. Urgent Contact",
+      "nominee": "5. Nominee",
       "contactAndNominee": "Urgent Contact & Nominee",
       "declarationAndSignature": "Declaration & Signature"
     },

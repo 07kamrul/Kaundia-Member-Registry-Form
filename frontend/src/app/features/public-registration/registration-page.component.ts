@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   AfterViewChecked,
   AfterViewInit,
@@ -459,9 +460,11 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.submitting = false;
-        this.serverError = this.translate.instant('registration.submit.networkError');
+        this.serverError = this.translate.instant(
+          err.status > 0 ? 'registration.submit.genericError' : 'registration.submit.networkError',
+        );
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
     });
