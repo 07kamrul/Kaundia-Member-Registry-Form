@@ -32,6 +32,25 @@
         <input id="submissionDate" type="date" formControlName="submissionDate" />
       </div>
 
+      @if (showDraftRestoredToast) {
+        <div class="draft-toast" role="status">
+          <span>{{ 'registration.draft.draftRestoredToast' | translate }}</span>
+          <div class="draft-toast-actions">
+            <button type="button" class="link-button" (click)="discardDraft()">
+              {{ 'registration.draft.discardDraft' | translate }}
+            </button>
+            <button
+              type="button"
+              class="link-button"
+              [attr.aria-label]="'registration.draft.draftRestoredToast' | translate"
+              (click)="dismissDraftToast()"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      }
+
       <nav class="stepper" [attr.aria-label]="'registration.header.stepperAriaLabel' | translate">
         @for (step of steps; track step.id; let last = $last) {
           <div class="stepper-item" [class.active]="currentStep === step.id" [class.done]="currentStep > step.id">
@@ -50,6 +69,10 @@
           }
         }
       </nav>
+
+      @if (draftLastSaved()) {
+        <p class="draft-saved-indicator">{{ 'registration.draft.draftSaved' | translate }}</p>
+      }
 
       @if (currentStep === 1) {
         <div class="step-content-grid">

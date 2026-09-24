@@ -561,6 +561,12 @@
     "submit": {
       "genericError": "There was a problem submitting",
       "networkError": "Network issue. Please try again."
+    },
+    "draft": {
+      "draftSaved": "Draft saved",
+      "draftRestoredToast": "Your previous incomplete form was restored",
+      "discardDraft": "Discard and start fresh",
+      "reattachFilesNotice": "Please re-attach any files from the restored draft"
     }
   }
 }

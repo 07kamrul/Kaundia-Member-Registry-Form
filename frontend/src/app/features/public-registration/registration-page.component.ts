@@ -5,6 +5,7 @@ import {
   Component,
   ElementRef,
   inject,
+  OnInit,
   signal,
   ViewChild,
 } from '@angular/core';
@@ -13,6 +14,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import SignaturePad from 'signature_pad';
 import { MAX_PHOTO_BYTES } from '../../core/models/registration.model';
 import { RegistrationService } from '../../core/services/registration.service';
+import { RegistrationDraftService } from './services/registration-draft.service';
 import { MemberInfoComponent } from './components/member-info/member-info.component';
 import { AddressInfoComponent } from './components/address-info/address-info.component';
 import { UrgentContactComponent } from './components/urgent-contact/urgent-contact.component';
@@ -81,7 +83,7 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
   ],
   templateUrl: './registration-page.component.html',
 })
-export class RegistrationPageComponent implements AfterViewInit, AfterViewChecked {
+export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterViewChecked {
   @ViewChild('sigCanvas') sigCanvas?: ElementRef<HTMLCanvasElement>;
 
   form: FormGroup;
@@ -96,13 +98,40 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
   steps = REGISTRATION_STEPS;
   currentStep = 1;
 
+  showDraftRestoredToast = false;
+
   private readonly translate = inject(TranslateService);
+  private readonly draftService = inject(RegistrationDraftService);
+
+  readonly draftLastSaved = this.draftService.lastSaved;
 
   constructor(
     private fb: FormBuilder,
     private registrationService: RegistrationService,
   ) {
     this.form = buildRegistrationForm(this.fb);
+  }
+
+  ngOnInit(): void {
+    const draft = this.draftService.peekDraft();
+    if (draft) {
+      this.draftService.restore(this.form, this.fb, draft);
+      this.currentStep = draft.currentStep;
+      this.showDraftRestoredToast = true;
+    }
+    this.draftService.watch(this.form, () => this.currentStep);
+  }
+
+  dismissDraftToast(): void {
+    this.showDraftRestoredToast = false;
+  }
+
+  discardDraft(): void {
+    this.draftService.clear();
+    this.form = buildRegistrationForm(this.fb);
+    this.currentStep = 1;
+    this.showDraftRestoredToast = false;
+    this.draftService.watch(this.form, () => this.currentStep);
   }
 
   ngAfterViewInit(): void {
@@ -413,6 +442,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     }
     this.errors = [];
     this.currentStep = step;
+    this.draftService.saveNow(this.form, this.currentStep);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -454,6 +484,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
         this.submitting = false;
         if (res.success) {
           this.success = { id: res.id ?? '', fullName: this.form.value.fullName };
+          this.draftService.clear();
         } else {
           this.serverError =
             res.error ?? this.translate.instant('registration.submit.genericError');
@@ -478,6 +509,7 @@ export class RegistrationPageComponent implements AfterViewInit, AfterViewChecke
     this.submitAttempted = false;
     this.serverError = null;
     this.currentStep = 1;
+    this.draftService.watch(this.form, () => this.currentStep);
   }
 
   toggleDeclaration(): void {

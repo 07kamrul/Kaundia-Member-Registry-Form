@@ -842,6 +842,44 @@ textarea:focus {
   background: var(--emerald-600);
 }
 
+.draft-saved-indicator {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  text-align: right;
+  margin: -0.5rem 0 0.75rem;
+}
+
+.draft-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--emerald-50, #ecfdf5);
+  border: 1px solid var(--emerald-200, #a7f3d0);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--emerald-800);
+  margin-bottom: 1rem;
+}
+
+.draft-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .reg-card {
   width: min(95vw, 40rem);
   margin: 1.5rem auto;
