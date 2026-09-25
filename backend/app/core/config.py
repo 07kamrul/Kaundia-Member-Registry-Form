@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field, model_validator
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _INSECURE_JWT_DEFAULT = "insecure-dev-secret-change-me"
@@ -16,18 +16,18 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./dev.db"
 
     # JWT
-    jwt_secret_key: str = Field(default=_INSECURE_JWT_DEFAULT, validation_alias="SECRET_KEY")
+    jwt_secret_key: str = Field(default=_INSECURE_JWT_DEFAULT, validation_alias=AliasChoices("SECRET_KEY", "JWT_SECRET_KEY"))
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
 
     # Uploads
-    upload_dir: str = Field(default="uploads", validation_alias="STORAGE_BASE_DIR")
+    upload_dir: str = Field(default="uploads", validation_alias=AliasChoices("STORAGE_BASE_DIR", "UPLOAD_DIR"))
 
     # SMTP
     smtp_host: str = "localhost"
     smtp_port: int = 587
-    smtp_user: str = Field(default="", validation_alias="SMTP_USERNAME")
+    smtp_user: str = Field(default="", validation_alias=AliasChoices("SMTP_USERNAME", "SMTP_USER"))
     smtp_password: str = ""
     smtp_sender_email: str = Field(default="no-reply@example.com", validation_alias="SMTP_SENDER_EMAIL")
     smtp_sender_name: str = Field(

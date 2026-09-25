@@ -24,7 +24,8 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-kaundia}:${POSTGRES_PASSWORD:-kaundia}@postgres:5432/${POSTGRES_DB:-kaundia}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-this-to-a-long-random-secret}
-      UPLOAD_DIR: /app/uploads
+      # Must point inside the backend_uploads volume or files are lost on redeploy
+      STORAGE_BASE_DIR: /app/uploads
       SMTP_HOST: ${SMTP_HOST:-localhost}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
