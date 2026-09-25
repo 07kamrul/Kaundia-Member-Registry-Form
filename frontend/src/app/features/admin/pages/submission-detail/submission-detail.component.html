@@ -60,6 +60,11 @@
       }
 
       <h3 class="section-title">{{ 'admin.submissionDetail.personalInfo' | translate }}</h3>
+      @if (uploadError) {
+        <div class="error-box" role="alert">
+          <p style="margin: 0">{{ uploadError }}</p>
+        </div>
+      }
       <div class="detail-card-grid">
         <div class="card detail-card">
           <div class="detail-card-row">
@@ -163,6 +168,21 @@
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
           }
+          <label class="btn btn-secondary btn-sm attachment-replace">
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.pdf"
+              hidden
+              [disabled]="uploadingKind !== null"
+              (change)="replaceAttachment('member_photo', $event)"
+            />
+            {{
+              (uploadingKind === 'member_photo'
+                ? 'admin.submissionDetail.uploading'
+                : 'admin.submissionDetail.replaceFile'
+              ) | translate
+            }}
+          </label>
         </div>
         <div class="card detail-card">
           <p class="detail-card-title">
@@ -191,6 +211,21 @@
           } @else {
             <p class="field-hint">{{ 'admin.submissionDetail.noAttachment' | translate }}</p>
           }
+          <label class="btn btn-secondary btn-sm attachment-replace">
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.pdf"
+              hidden
+              [disabled]="uploadingKind !== null"
+              (change)="replaceAttachment('receipt_photo', $event)"
+            />
+            {{
+              (uploadingKind === 'receipt_photo'
+                ? 'admin.submissionDetail.uploading'
+                : 'admin.submissionDetail.replaceFile'
+              ) | translate
+            }}
+          </label>
         </div>
         <div class="card detail-card">
           <p class="detail-card-title">

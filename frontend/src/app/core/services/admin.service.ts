@@ -14,6 +14,8 @@ import type {
   SubmissionSummary,
 } from '../models/admin.model';
 
+export type AttachmentKind = 'member_photo' | 'receipt_photo';
+
 interface MemberApiModel {
   id: number;
   member_id: string | null;
@@ -234,6 +236,18 @@ export class AdminService {
   getSubmission(id: string): Observable<SubmissionDetail> {
     return this.http
       .get<SubmissionDetailApiModel>(`${this.base}/submissions/${id}`)
+      .pipe(map(toSubmissionDetail));
+  }
+
+  replaceAttachment(
+    id: string,
+    kind: AttachmentKind,
+    file: File,
+  ): Observable<SubmissionDetail> {
+    const body = new FormData();
+    body.append('file', file);
+    return this.http
+      .put<SubmissionDetailApiModel>(`${this.base}/submissions/${id}/attachments/${kind}`, body)
       .pipe(map(toSubmissionDetail));
   }
 

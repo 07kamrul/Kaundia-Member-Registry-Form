@@ -224,7 +224,8 @@
         "loadFailed": "Could not load application details.",
         "approveFailed": "Approval failed.",
         "reasonRequired": "Please enter a reason for rejection.",
-        "rejectFailed": "Rejection failed."
+        "rejectFailed": "Rejection failed.",
+        "uploadFailed": "Upload failed. Please try again."
       },
       "attachments": "Attachments",
       "urgentContact": "Emergency Contact",
@@ -235,6 +236,8 @@
       "noAttachment": "Not attached",
       "fileMissing": "The file is missing on the server. Please upload it again.",
       "viewFile": "View file",
+      "replaceFile": "Replace file",
+      "uploading": "Uploading…",
       "notProvided": "Not provided",
       "decimalUnit": "decimal",
       "propertyCount": "{{count}} total",

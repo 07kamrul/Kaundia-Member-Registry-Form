@@ -224,7 +224,8 @@
         "loadFailed": "আবেদনের তথ্য পাওয়া যায়নি।",
         "approveFailed": "অনুমোদন ব্যর্থ হয়েছে।",
         "reasonRequired": "বাতিলের কারণ লিখুন।",
-        "rejectFailed": "বাতিল করা ব্যর্থ হয়েছে।"
+        "rejectFailed": "বাতিল করা ব্যর্থ হয়েছে।",
+        "uploadFailed": "আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
       },
       "attachments": "সংযুক্তি",
       "urgentContact": "জরুরি যোগাযোগ",
@@ -235,6 +236,8 @@
       "noAttachment": "সংযুক্ত নেই",
       "fileMissing": "ফাইলটি সার্ভারে পাওয়া যায়নি। অনুগ্রহ করে আবার আপলোড করুন।",
       "viewFile": "ফাইল দেখুন",
+      "replaceFile": "ফাইল পরিবর্তন করুন",
+      "uploading": "আপলোড হচ্ছে…",
       "notProvided": "দেওয়া হয়নি",
       "decimalUnit": "শতাংশ",
       "propertyCount": "মোট {{count}}টি",

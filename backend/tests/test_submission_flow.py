@@ -47,7 +47,7 @@ def _submission_payload() -> dict:
                 "khatian_no": "123",
                 "dag_no_cs": "45",
                 "dag_no_rs": "67",
-                "land_quantity": "1.5 acre",
+                "land_quantity": "15",
                 "ownership": "একক",
                 "co_owners": [],
                 "applicable_docs": [],
@@ -188,3 +188,53 @@ async def test_reject_submission(client: AsyncClient, admin_user: AdminUser) -> 
         f"/api/admin/submissions/{member_pk}", headers=admin_headers
     )
     assert detail_response.json()["status"] == "rejected"
+
+
+async def test_admin_replaces_missing_attachment(
+    client: AsyncClient, admin_user: AdminUser, tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.services import storage
+
+    monkeypatch.setattr(storage.settings, "upload_dir", str(tmp_path))
+    response = await client.post(
+        "/api/submissions",
+        data={"payload": json.dumps(_submission_payload())},
+    )
+    member_pk = response.json()["id"]
+    login_response = await client.post(
+        "/api/admin/login", json={"email": "admin@example.com", "password": "adminpass123"}
+    )
+    admin_headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+
+    replace_response = await client.put(
+        f"/api/admin/submissions/{member_pk}/attachments/member_photo",
+        files={"file": ("photo.jpg", b"\xff\xd8fakejpeg", "image/jpeg")},
+        headers=admin_headers,
+    )
+
+    assert replace_response.status_code == 200
+    new_path = replace_response.json()["member_photo_path"]
+    assert new_path.startswith(f"photos/member_{member_pk}/")
+    assert (tmp_path / new_path).is_file()
+
+
+async def test_replace_attachment_rejects_unknown_kind(
+    client: AsyncClient, admin_user: AdminUser
+) -> None:
+    response = await client.post(
+        "/api/submissions",
+        data={"payload": json.dumps(_submission_payload())},
+    )
+    member_pk = response.json()["id"]
+    login_response = await client.post(
+        "/api/admin/login", json={"email": "admin@example.com", "password": "adminpass123"}
+    )
+    admin_headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+
+    replace_response = await client.put(
+        f"/api/admin/submissions/{member_pk}/attachments/passport",
+        files={"file": ("photo.jpg", b"\xff\xd8", "image/jpeg")},
+        headers=admin_headers,
+    )
+
+    assert replace_response.status_code == 422

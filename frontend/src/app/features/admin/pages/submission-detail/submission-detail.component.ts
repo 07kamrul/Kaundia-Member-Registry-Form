@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AdminService } from '../../../../core/services/admin.service';
+import { AdminService, type AttachmentKind } from '../../../../core/services/admin.service';
 import type {
   ApplicableDoc,
   CoOwner,
@@ -34,6 +34,9 @@ export class SubmissionDetailComponent implements OnInit {
   previewIsImage = true;
   /** File URLs that failed to load (e.g. the file is missing on the server). */
   brokenFileUrls: ReadonlySet<string> = new Set<string>();
+  /** Attachment currently being re-uploaded, if any. */
+  uploadingKind: AttachmentKind | null = null;
+  uploadError = '';
   copiedKey: string | null = null;
   expandedPropertyIds = new Set<string>();
 
@@ -377,6 +380,31 @@ export class SubmissionDetailComponent implements OnInit {
   markFileBroken(url?: string | null): void {
     if (!url || this.brokenFileUrls.has(url)) return;
     this.brokenFileUrls = new Set([...this.brokenFileUrls, url]);
+  }
+
+  /** Upload a replacement for a missing or wrong member photo / receipt. */
+  replaceAttachment(kind: AttachmentKind, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!this.submission || !file || this.uploadingKind) return;
+
+    this.uploadingKind = kind;
+    this.uploadError = '';
+    this.adminService.replaceAttachment(this.submission.id, kind, file).subscribe({
+      next: (data) => {
+        this.submission = data;
+        this.uploadingKind = null;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        const detail = typeof err?.error?.detail === 'string' ? err.error.detail : '';
+        this.uploadError =
+          detail || this.translate.instant('admin.submissionDetail.errors.uploadFailed');
+        this.uploadingKind = null;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   openPreview(url: string, altKey: string): void {

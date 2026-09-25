@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
+from enum import Enum
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -16,8 +17,21 @@ from app.models.property import Property
 from app.schemas.installment import InstallmentCreate, InstallmentOut, InstallmentUpdate
 from app.schemas.member import ApproveResponse, MemberDetail, MemberSummary, RejectRequest
 from app.services.email import send_email
+from app.services.storage import save_upload_file
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+class AttachmentKind(str, Enum):
+    MEMBER_PHOTO = "member_photo"
+    RECEIPT_PHOTO = "receipt_photo"
+
+
+# kind -> (Member column, upload subfolder); mirrors the public submission route
+_ATTACHMENT_TARGETS = {
+    AttachmentKind.MEMBER_PHOTO: ("member_photo_path", "photos"),
+    AttachmentKind.RECEIPT_PHOTO: ("receipt_photo_path", "receipts"),
+}
 
 
 @router.get("/submissions", response_model=list[MemberSummary])
@@ -41,6 +55,23 @@ async def get_submission(
 ) -> Member:
     member = await _get_member_or_404(db, member_id)
     return member
+
+
+@router.put("/submissions/{member_id}/attachments/{kind}", response_model=MemberDetail)
+async def replace_attachment(
+    member_id: int,
+    kind: AttachmentKind,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("membership.review")),
+) -> Member:
+    """Replace a member's photo or receipt, e.g. when the stored file is lost."""
+    member = await _get_member_or_404(db, member_id)
+    column, folder = _ATTACHMENT_TARGETS[kind]
+    new_path = await save_upload_file(file, f"{folder}/member_{member.id}")
+    setattr(member, column, new_path)
+    await db.commit()
+    return await _get_member_or_404(db, member_id)
 
 
 @router.post("/submissions/{member_id}/approve", response_model=ApproveResponse)
