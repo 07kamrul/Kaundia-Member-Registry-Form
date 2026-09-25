@@ -41,6 +41,7 @@ services:
     command: >
       sh -c "alembic upgrade head &&
              python -m app.seed &&
+             (python -m scripts.repair_document_paths --apply || true) &&
              uvicorn app.main:app --host 0.0.0.0 --port 9090"
 
   frontend:
