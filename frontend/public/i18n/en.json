@@ -233,6 +233,7 @@
       "applicableDocs": "Applicable Documents",
       "noApplicableDocs": "No documents attached.",
       "noAttachment": "Not attached",
+      "fileMissing": "The file is missing on the server. Please upload it again.",
       "viewFile": "View file",
       "notProvided": "Not provided",
       "decimalUnit": "decimal",

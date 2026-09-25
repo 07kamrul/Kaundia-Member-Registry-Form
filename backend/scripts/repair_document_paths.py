@@ -1,4 +1,5 @@
-"""Repair ApplicableDoc.file_path rows left broken by the doc-type slash bug.
+"""Repair stored upload paths (ApplicableDoc.file_path, Member photo/receipt) —
+rows left broken by the doc-type slash bug.
 
 Before the fix in app/services/storage.py, sanitize_path_segment() stripped
 '/' out of doc-type labels instead of replacing it, so a label like
@@ -22,10 +23,11 @@ import asyncio
 import unicodedata
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from app.core.config import get_settings
 from app.db.session import AsyncSessionLocal
+from app.models.member import Member
 from app.models.property import ApplicableDoc
 
 settings = get_settings()
@@ -39,52 +41,69 @@ def _find_by_basename(root: Path, basename: str) -> list[Path]:
     return [p for p in root.rglob(basename) if p.is_file()]
 
 
+def _resolve(root: Path, stored: str) -> tuple[bool, list[Path]]:
+    """Return (was_missing, candidates) for a stored relative path."""
+    if (root / stored).is_file():
+        return False, []
+    nfd_path = root / unicodedata.normalize("NFD", stored)
+    if nfd_path.is_file():
+        return False, [nfd_path]
+    return True, _find_by_basename(root, Path(stored).name)
+
+
+def _targets(docs, members):
+    """Yield (label, row, attribute) for every stored upload path."""
+    for doc in docs:
+        yield f"doc id={doc.id} doc_type={doc.doc_type!r}", doc, "file_path"
+    for member in members:
+        for attr in ("member_photo_path", "receipt_photo_path"):
+            if getattr(member, attr):
+                yield f"member id={member.id} {attr}", member, attr
+
+
 async def repair(apply: bool) -> None:
     root = _upload_root()
     async with AsyncSessionLocal() as db:
-        result = await db.execute(
-            select(ApplicableDoc).where(ApplicableDoc.file_path.is_not(None))
-        )
-        docs = result.scalars().all()
+        docs = (
+            await db.execute(select(ApplicableDoc).where(ApplicableDoc.file_path.is_not(None)))
+        ).scalars().all()
+        members = (
+            await db.execute(
+                select(Member).where(
+                    or_(Member.member_photo_path.is_not(None), Member.receipt_photo_path.is_not(None))
+                )
+            )
+        ).scalars().all()
 
-        missing = 0
-        fixed = 0
-        unresolved = 0
+        checked = missing = fixed = unresolved = 0
 
-        for doc in docs:
-            stored_path = root / doc.file_path
-            if stored_path.is_file():
+        for label, row, attr in _targets(docs, members):
+            checked += 1
+            stored = getattr(row, attr)
+            was_missing, candidates = _resolve(root, stored)
+            if not was_missing and not candidates:
                 continue
-            nfd_path = root / unicodedata.normalize("NFD", doc.file_path)
-            if nfd_path.is_file():
-                candidates = [nfd_path]
-            else:
-                missing += 1
-                basename = Path(doc.file_path).name
-                candidates = _find_by_basename(root, basename)
+            missing += was_missing
 
             if len(candidates) != 1:
                 unresolved += 1
                 print(
-                    f"[UNRESOLVED] doc id={doc.id} doc_type={doc.doc_type!r} "
-                    f"file_path={doc.file_path!r} -> {len(candidates)} candidate(s) found on disk"
+                    f"[UNRESOLVED] {label} path={stored!r} "
+                    f"-> {len(candidates)} candidate(s) found on disk"
                 )
                 continue
 
             new_relative = str(candidates[0].relative_to(root))
-            print(
-                f"[FIX] doc id={doc.id} doc_type={doc.doc_type!r} "
-                f"file_path={doc.file_path!r} -> {new_relative!r}"
-            )
+            print(f"[FIX] {label} path={stored!r} -> {new_relative!r}")
             if apply:
-                doc.file_path = new_relative
+                setattr(row, attr, new_relative)
                 fixed += 1
 
         if apply and fixed:
             await db.commit()
 
         print(
-            f"\n{len(docs)} document(s) checked, {missing} missing on their stored path, "
+            f"\n{checked} file path(s) checked, {missing} missing on their stored path, "
             f"{fixed if apply else 0} fixed"
             + ("" if apply else " (dry run — pass --apply to write changes)")
         )

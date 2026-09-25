@@ -233,6 +233,7 @@
       "applicableDocs": "প্রযোজ্য দলিল",
       "noApplicableDocs": "কোনো দলিল সংযুক্ত নেই।",
       "noAttachment": "সংযুক্ত নেই",
+      "fileMissing": "ফাইলটি সার্ভারে পাওয়া যায়নি। অনুগ্রহ করে আবার আপলোড করুন।",
       "viewFile": "ফাইল দেখুন",
       "notProvided": "দেওয়া হয়নি",
       "decimalUnit": "শতাংশ",

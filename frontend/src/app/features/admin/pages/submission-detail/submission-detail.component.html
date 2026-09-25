@@ -17,8 +17,12 @@
     <div class="card" style="padding: 1.5rem">
       <div class="applicant-header">
         <div class="applicant-avatar">
-          @if (submission.memberPhotoUrl) {
-            <img [src]="submission.memberPhotoUrl" [alt]="submission.fullName" />
+          @if (submission.memberPhotoUrl && !isFileBroken(submission.memberPhotoUrl)) {
+            <img
+              [src]="submission.memberPhotoUrl"
+              [alt]="submission.fullName"
+              (error)="markFileBroken(submission.memberPhotoUrl)"
+            />
           } @else {
             {{ applicantInitials }}
           }
@@ -139,7 +143,9 @@
           <p class="detail-card-title">
             {{ 'admin.submissionDetail.fields.memberPhoto' | translate }}
           </p>
-          @if (submission.memberPhotoUrl) {
+          @if (submission.memberPhotoUrl && isFileBroken(submission.memberPhotoUrl)) {
+            <p class="field-hint">{{ 'admin.submissionDetail.fileMissing' | translate }}</p>
+          } @else if (submission.memberPhotoUrl) {
             <button
               type="button"
               class="attachment-thumb"
@@ -148,7 +154,7 @@
               "
             >
               <span class="attachment-thumb-frame"
-                ><img [src]="submission.memberPhotoUrl" alt=""
+                ><img [src]="submission.memberPhotoUrl" alt="" (error)="markFileBroken(submission.memberPhotoUrl)"
               /></span>
               <span class="attachment-thumb-label">{{
                 'admin.submissionDetail.viewFile' | translate
@@ -162,7 +168,9 @@
           <p class="detail-card-title">
             {{ 'admin.submissionDetail.fields.receiptPhoto' | translate }}
           </p>
-          @if (submission.receiptPhotoUrl) {
+          @if (submission.receiptPhotoUrl && isFileBroken(submission.receiptPhotoUrl)) {
+            <p class="field-hint">{{ 'admin.submissionDetail.fileMissing' | translate }}</p>
+          } @else if (submission.receiptPhotoUrl) {
             <button
               type="button"
               class="attachment-thumb"
@@ -174,7 +182,7 @@
               "
             >
               <span class="attachment-thumb-frame"
-                ><img [src]="submission.receiptPhotoUrl" alt=""
+                ><img [src]="submission.receiptPhotoUrl" alt="" (error)="markFileBroken(submission.receiptPhotoUrl)"
               /></span>
               <span class="attachment-thumb-label">{{
                 'admin.submissionDetail.viewFile' | translate

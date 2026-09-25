@@ -32,6 +32,8 @@ export class SubmissionDetailComponent implements OnInit {
   previewImageUrl: string | null = null;
   previewImageAlt = '';
   previewIsImage = true;
+  /** File URLs that failed to load (e.g. the file is missing on the server). */
+  brokenFileUrls: ReadonlySet<string> = new Set<string>();
   copiedKey: string | null = null;
   expandedPropertyIds = new Set<string>();
 
@@ -366,6 +368,15 @@ export class SubmissionDetailComponent implements OnInit {
     this.previewImageUrl = doc.fileUrl;
     this.previewImageAlt = doc.docType;
     this.previewIsImage = this.docFileKind(doc) === 'image';
+  }
+
+  isFileBroken(url?: string | null): boolean {
+    return !!url && this.brokenFileUrls.has(url);
+  }
+
+  markFileBroken(url?: string | null): void {
+    if (!url || this.brokenFileUrls.has(url)) return;
+    this.brokenFileUrls = new Set([...this.brokenFileUrls, url]);
   }
 
   openPreview(url: string, altKey: string): void {
