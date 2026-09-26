@@ -14,6 +14,14 @@ function shareQuantityValidator(group: FormGroup): { shareExceedsTotal: boolean 
   return null;
 }
 
+function positiveQuantityValidator(control: FormControl): { notPositive: boolean } | null {
+  const raw = control.value;
+  if (raw === null || raw === undefined || String(raw).trim() === '') return null;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return null;
+  return value > 0 ? null : { notPositive: true };
+}
+
 export function buildApplicableDocGroup(fb: FormBuilder, type: string): FormGroup {
   return fb.group({
     type: [type],
@@ -30,8 +38,14 @@ export function buildPropertyGroup(fb: FormBuilder): FormGroup {
       khatianNo: ['', Validators.required],
       dagNo: fb.group({ cs: ['', Validators.required], rs: ['', Validators.required] }),
       holdingNumber: [''],
-      landQuantity: ['', [Validators.required, Validators.pattern(DECIMAL_PATTERN)]],
-      myShareQuantity: ['', [Validators.required, Validators.pattern(DECIMAL_PATTERN)]],
+      landQuantity: [
+        '',
+        [Validators.required, Validators.pattern(DECIMAL_PATTERN), positiveQuantityValidator],
+      ],
+      myShareQuantity: [
+        '',
+        [Validators.required, Validators.pattern(DECIMAL_PATTERN), positiveQuantityValidator],
+      ],
       ownership: ['', Validators.required],
       jointOwnerCount: [null],
       applicableDocs: fb.array([]),

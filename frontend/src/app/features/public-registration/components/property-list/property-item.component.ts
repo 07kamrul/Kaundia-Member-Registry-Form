@@ -163,8 +163,16 @@ export class PropertyItemComponent {
     return this.submitAttempted && !this.property.get('landQuantity')?.value?.trim();
   }
 
+  showLandQuantityNotPositiveError(): boolean {
+    return this.property.get('landQuantity')?.hasError('notPositive') ?? false;
+  }
+
   showMyShareQuantityError(): boolean {
     return this.submitAttempted && !this.property.get('myShareQuantity')?.value?.trim();
+  }
+
+  showMyShareQuantityNotPositiveError(): boolean {
+    return this.property.get('myShareQuantity')?.hasError('notPositive') ?? false;
   }
 
   showShareExceedsTotalError(): boolean {

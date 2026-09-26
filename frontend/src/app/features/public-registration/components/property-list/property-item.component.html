@@ -59,12 +59,18 @@
       @if (showLandQuantityError()) {
         <p class="field-error">{{ 'registration.property.landQuantityRequired' | translate }}</p>
       }
+      @if (showLandQuantityNotPositiveError()) {
+        <p class="field-error">{{ 'registration.property.landQuantityInvalid' | translate }}</p>
+      }
     </div>
     <div class="field">
       <label [attr.for]="'prop' + index + '_myShareQuantity'">{{ 'registration.property.myShareQuantityLabel' | translate }} <span class="required">*</span></label>
       <input [id]="'prop' + index + '_myShareQuantity'" type="text" inputmode="decimal" formControlName="myShareQuantity" [placeholder]="'registration.property.myShareQuantityPlaceholder' | translate" />
       @if (showMyShareQuantityError()) {
         <p class="field-error">{{ 'registration.property.myShareQuantityRequired' | translate }}</p>
+      }
+      @if (showMyShareQuantityNotPositiveError()) {
+        <p class="field-error">{{ 'registration.property.myShareQuantityInvalid' | translate }}</p>
       }
       @if (showShareExceedsTotalError()) {
         <p class="field-error">{{ 'registration.property.myShareQuantityExceedsTotal' | translate }}</p>

@@ -33,3 +33,47 @@ describe('buildPropertyGroup share quantity validation', () => {
     expect(group.hasError('shareExceedsTotal')).toBe(false);
   });
 });
+
+describe('buildPropertyGroup zero quantity validation', () => {
+  const fb = new FormBuilder();
+
+  it('rejects zero total land quantity', () => {
+    const group = buildPropertyGroup(fb);
+    group.patchValue({ landQuantity: '0', myShareQuantity: '1' });
+
+    expect(group.get('landQuantity')?.hasError('notPositive')).toBe(true);
+  });
+
+  it('rejects zero share quantity', () => {
+    const group = buildPropertyGroup(fb);
+    group.patchValue({ landQuantity: '6', myShareQuantity: '0' });
+
+    expect(group.get('myShareQuantity')?.hasError('notPositive')).toBe(true);
+  });
+
+  it('rejects zero formatted as decimal', () => {
+    const group = buildPropertyGroup(fb);
+    group.patchValue({ landQuantity: '0.0', myShareQuantity: '0.00' });
+
+    expect(group.get('landQuantity')?.hasError('notPositive')).toBe(true);
+    expect(group.get('myShareQuantity')?.hasError('notPositive')).toBe(true);
+  });
+
+  it('accepts positive decimal quantities', () => {
+    const group = buildPropertyGroup(fb);
+    group.patchValue({ landQuantity: '6', myShareQuantity: '1.5' });
+
+    expect(group.get('landQuantity')?.hasError('notPositive')).toBe(false);
+    expect(group.get('myShareQuantity')?.hasError('notPositive')).toBe(false);
+  });
+
+  it('leaves empty values to the required validator', () => {
+    const group = buildPropertyGroup(fb);
+    group.patchValue({ landQuantity: '', myShareQuantity: '' });
+
+    expect(group.get('landQuantity')?.hasError('notPositive')).toBe(false);
+    expect(group.get('landQuantity')?.hasError('required')).toBe(true);
+    expect(group.get('myShareQuantity')?.hasError('notPositive')).toBe(false);
+    expect(group.get('myShareQuantity')?.hasError('required')).toBe(true);
+  });
+});

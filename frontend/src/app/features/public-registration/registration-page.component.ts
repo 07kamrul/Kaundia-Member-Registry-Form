@@ -277,8 +277,28 @@ export class RegistrationPageComponent implements OnInit {
           );
         }
       }
-      const landQuantity = parseFloat(property.landQuantity);
-      const myShareQuantity = parseFloat(property.myShareQuantity);
+      const landRaw = String(property.landQuantity ?? '').trim();
+      const shareRaw = String(property.myShareQuantity ?? '').trim();
+      const landQuantity = parseFloat(landRaw);
+      const myShareQuantity = parseFloat(shareRaw);
+      if (!landRaw) {
+        errs.push(
+          `${label}: ${this.translate.instant('registration.validation.landQuantityRequired')}`,
+        );
+      } else if (!Number.isFinite(landQuantity) || landQuantity <= 0) {
+        errs.push(
+          `${label}: ${this.translate.instant('registration.validation.landQuantityInvalid')}`,
+        );
+      }
+      if (!shareRaw) {
+        errs.push(
+          `${label}: ${this.translate.instant('registration.validation.myShareQuantityRequired')}`,
+        );
+      } else if (!Number.isFinite(myShareQuantity) || myShareQuantity <= 0) {
+        errs.push(
+          `${label}: ${this.translate.instant('registration.validation.myShareQuantityInvalid')}`,
+        );
+      }
       if (
         Number.isFinite(landQuantity) &&
         Number.isFinite(myShareQuantity) &&
