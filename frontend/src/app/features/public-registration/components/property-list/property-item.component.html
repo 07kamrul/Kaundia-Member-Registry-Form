@@ -66,6 +66,9 @@
       @if (showMyShareQuantityError()) {
         <p class="field-error">{{ 'registration.property.myShareQuantityRequired' | translate }}</p>
       }
+      @if (showShareExceedsTotalError()) {
+        <p class="field-error">{{ 'registration.property.myShareQuantityExceedsTotal' | translate }}</p>
+      }
     </div>
   </div>
 

@@ -5,6 +5,15 @@ const NID_PATTERN = /^\d{10,17}$/;
 const DIGITS_ONLY_PATTERN = /^\d+$/;
 const DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
 
+function shareQuantityValidator(group: FormGroup): { shareExceedsTotal: boolean } | null {
+  const landQuantity = parseFloat(group.get('landQuantity')?.value);
+  const myShareQuantity = parseFloat(group.get('myShareQuantity')?.value);
+  if (!isNaN(landQuantity) && !isNaN(myShareQuantity) && myShareQuantity > landQuantity) {
+    return { shareExceedsTotal: true };
+  }
+  return null;
+}
+
 export function buildApplicableDocGroup(fb: FormBuilder, type: string): FormGroup {
   return fb.group({
     type: [type],
@@ -14,18 +23,21 @@ export function buildApplicableDocGroup(fb: FormBuilder, type: string): FormGrou
 }
 
 export function buildPropertyGroup(fb: FormBuilder): FormGroup {
-  return fb.group({
-    propertyType: fb.control<string[]>([]),
-    propertyTypeOther: [''],
-    khatianNo: ['', Validators.required],
-    dagNo: fb.group({ cs: ['', Validators.required], rs: ['', Validators.required] }),
-    holdingNumber: [''],
-    landQuantity: ['', [Validators.required, Validators.pattern(DECIMAL_PATTERN)]],
-    myShareQuantity: ['', [Validators.required, Validators.pattern(DECIMAL_PATTERN)]],
-    ownership: ['', Validators.required],
-    jointOwnerCount: [null],
-    applicableDocs: fb.array([]),
-  });
+  return fb.group(
+    {
+      propertyType: fb.control<string[]>([]),
+      propertyTypeOther: [''],
+      khatianNo: ['', Validators.required],
+      dagNo: fb.group({ cs: ['', Validators.required], rs: ['', Validators.required] }),
+      holdingNumber: [''],
+      landQuantity: ['', [Validators.required, Validators.pattern(DECIMAL_PATTERN)]],
+      myShareQuantity: ['', [Validators.required, Validators.pattern(DECIMAL_PATTERN)]],
+      ownership: ['', Validators.required],
+      jointOwnerCount: [null],
+      applicableDocs: fb.array([]),
+    },
+    { validators: shareQuantityValidator },
+  );
 }
 
 export function buildAddressGroup(fb: FormBuilder): FormGroup {

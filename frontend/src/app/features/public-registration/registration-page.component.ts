@@ -277,6 +277,17 @@ export class RegistrationPageComponent implements OnInit {
           );
         }
       }
+      const landQuantity = parseFloat(property.landQuantity);
+      const myShareQuantity = parseFloat(property.myShareQuantity);
+      if (
+        Number.isFinite(landQuantity) &&
+        Number.isFinite(myShareQuantity) &&
+        myShareQuantity > landQuantity
+      ) {
+        errs.push(
+          `${label}: ${this.translate.instant('registration.validation.myShareQuantityExceedsTotal')}`,
+        );
+      }
       if (!property.applicableDocs || property.applicableDocs.length === 0) {
         errs.push(
           `${label}: ${this.translate.instant('registration.validation.applicableDocsRequired')}`,

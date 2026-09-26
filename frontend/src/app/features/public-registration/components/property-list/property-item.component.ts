@@ -167,6 +167,10 @@ export class PropertyItemComponent {
     return this.submitAttempted && !this.property.get('myShareQuantity')?.value?.trim();
   }
 
+  showShareExceedsTotalError(): boolean {
+    return this.property.hasError('shareExceedsTotal');
+  }
+
   showApplicableDocsError(): boolean {
     return this.submitAttempted && this.applicableDocs.length === 0;
   }
