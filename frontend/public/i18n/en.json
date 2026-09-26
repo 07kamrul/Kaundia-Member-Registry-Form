@@ -399,7 +399,9 @@
       "urgentContact": "4. Urgent Contact",
       "nominee": "5. Nominee",
       "contactAndNominee": "Urgent Contact & Nominee",
-      "declarationAndSignature": "Declaration & Signature"
+      "payment": "Payment Information",
+      "declarationAndSignature": "Declaration & Signature",
+      "review": "Review"
     },
     "stepShortLabels": {
       "memberInfo": "Member",

@@ -399,7 +399,9 @@
       "urgentContact": "৪. জরুরি যোগাযোগ",
       "nominee": "৫. নমিনি",
       "contactAndNominee": "জরুরি যোগাযোগ ও নমিনি",
-      "declarationAndSignature": "অঙ্গীকার ও স্বাক্ষর"
+      "payment": "পেমেন্টের তথ্য",
+      "declarationAndSignature": "অঙ্গীকার ও স্বাক্ষর",
+      "review": "পর্যালোচনা"
     },
     "stepShortLabels": {
       "memberInfo": "সদস্য",
