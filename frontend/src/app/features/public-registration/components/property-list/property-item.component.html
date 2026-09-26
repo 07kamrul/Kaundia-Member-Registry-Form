@@ -69,30 +69,28 @@
     </div>
   </div>
 
-  <div class="grid-2" style="gap:0.5rem;align-items:end">
-    <div class="field" style="margin-bottom:0">
-      <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>
-      <div class="radio-group">
-        @for (t of ownershipTypes; track t) {
-          <label class="radio-item">
-            <input
-              type="radio"
-              [value]="t"
-              [checked]="property.get('ownership')?.value === t"
-              (change)="setOwnership(t)"
-              name="ownership_{{ index }}"
-            />
-            {{ t }}
-          </label>
-        }
-      </div>
-      @if (showOwnershipError()) {
-        <p class="field-error">{{ 'registration.property.ownershipRequired' | translate }}</p>
+  <div class="field" style="margin-bottom:0">
+    <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>
+    <div class="radio-group">
+      @for (t of ownershipTypes; track t) {
+        <label class="radio-item">
+          <input
+            type="radio"
+            [value]="t"
+            [checked]="property.get('ownership')?.value === t"
+            (change)="setOwnership(t)"
+            name="ownership_{{ index }}"
+          />
+          {{ t }}
+        </label>
       }
     </div>
+    @if (showOwnershipError()) {
+      <p class="field-error">{{ 'registration.property.ownershipRequired' | translate }}</p>
+    }
 
     @if (property.get('ownership')?.value === 'যৌথ') {
-      <div class="field" style="margin-bottom:0">
+      <div class="field" style="margin-top:0.5rem;margin-bottom:0">
         <label>{{ 'registration.property.jointOwnerCountLabel' | translate }} <span class="required">*</span></label>
         <input
           [id]="'prop' + index + '_jointOwnerCount'"
