@@ -76,35 +76,20 @@
 
   @if (property.get('ownership')?.value === 'যৌথ') {
     <div class="field">
-      <label>{{ 'registration.property.coOwnersLabel' | translate }} <span class="required">*</span></label>
-      @for (co of coOwners.controls; track co; let ci = $index) {
-        <div [formGroup]="coOwnerGroup(ci)" class="flex-row-wrap" style="align-items:flex-end;margin-bottom:0.5rem">
-          <div class="field" style="flex:1 1 10rem;margin-bottom:0">
-            <label [attr.for]="'prop' + index + '_coOwner' + ci + '_name'">{{ 'registration.property.coOwnerNameLabel' | translate }} <span class="required">*</span></label>
-            <input [id]="'prop' + index + '_coOwner' + ci + '_name'" type="text" formControlName="ownerName" />
-            @if (showCoOwnerError('ownerName', ci)) {
-              <p class="field-error">{{ 'registration.property.coOwnerNameRequired' | translate }}</p>
-            }
-          </div>
-          <div class="field" style="flex:1 1 10rem;margin-bottom:0">
-            <label [attr.for]="'prop' + index + '_coOwner' + ci + '_phone'">{{ 'registration.property.coOwnerPhoneLabel' | translate }} <span class="required">*</span></label>
-            <input [id]="'prop' + index + '_coOwner' + ci + '_phone'" type="text" formControlName="ownerPhone" placeholder="01XXXXXXXXX" />
-            @if (showCoOwnerError('ownerPhone', ci)) {
-              <p class="field-error">{{ 'registration.property.coOwnerPhoneRequired' | translate }}</p>
-            }
-          </div>
-          <button
-            type="button"
-            (click)="removeCoOwner(ci)"
-            style="border:1px solid #fecaca;color:#dc2626;background:#fff;border-radius:0.375rem;padding:0.5rem;cursor:pointer"
-          >
-            🗑
-          </button>
-        </div>
+      <label>{{ 'registration.property.jointOwnerCountLabel' | translate }} <span class="required">*</span></label>
+      <input
+        [id]="'prop' + index + '_jointOwnerCount'"
+        type="number"
+        formControlName="jointOwnerCount"
+        min="1"
+        step="1"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        style="max-width: 8rem; width: 100%"
+      />
+      @if (showJointOwnerCountError()) {
+        <p class="field-error">{{ 'registration.property.jointOwnerCountRequired' | translate }}</p>
       }
-      <button type="button" (click)="addCoOwner()" style="color:#065f46;background:none;border:none;cursor:pointer;font-size:0.875rem">
-        + {{ 'registration.property.addCoOwnerButton' | translate }}
-      </button>
     </div>
   }
 

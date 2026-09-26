@@ -9,12 +9,6 @@ export interface SubmissionSummary {
   propertiesCount?: number;
 }
 
-export interface CoOwner {
-  id: string;
-  name: string;
-  mobile: string;
-}
-
 export interface ApplicableDoc {
   id: string;
   docType: string;
@@ -33,7 +27,7 @@ export interface SubmissionProperty {
   holdingNumber?: string | null;
   landQuantity?: string | null;
   ownership?: string | null;
-  coOwners: CoOwner[];
+  jointOwnerCount?: number | null;
   applicableDocs: ApplicableDoc[];
 }
 

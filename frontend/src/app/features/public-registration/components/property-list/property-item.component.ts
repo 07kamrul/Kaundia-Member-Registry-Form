@@ -7,7 +7,7 @@ import {
   Output,
   inject,
 } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   ALLOWED_DOC_MIME_TYPES,
@@ -18,10 +18,10 @@ import {
 } from '../../../../core/models/registration.model';
 import {
   buildApplicableDocGroup,
-  buildCoOwnerGroup,
-  coOwnersArray,
   applicableDocsArray,
 } from '../../registration-form.builder';
+
+const DIGITS_ONLY_PATTERN = /^\d+$/;
 
 @Component({
   selector: 'app-property-item',
@@ -49,16 +49,8 @@ export class PropertyItemComponent {
     private translate: TranslateService,
   ) {}
 
-  get coOwners(): FormArray {
-    return coOwnersArray(this.property);
-  }
-
   get applicableDocs(): FormArray {
     return applicableDocsArray(this.property);
-  }
-
-  coOwnerGroup(i: number): FormGroup {
-    return this.coOwners.at(i) as FormGroup;
   }
 
   isTypeChecked(type: string): boolean {
@@ -73,21 +65,9 @@ export class PropertyItemComponent {
 
   setOwnership(ownership: string): void {
     this.property.get('ownership')?.setValue(ownership);
-    if (ownership === 'যৌথ') {
-      if (this.coOwners.length === 0) {
-        this.coOwners.push(buildCoOwnerGroup(this.fb));
-      }
-    } else {
-      this.coOwners.clear();
+    if (ownership !== 'যৌথ') {
+      this.property.get('jointOwnerCount')?.setValue(null);
     }
-  }
-
-  addCoOwner(): void {
-    this.coOwners.push(buildCoOwnerGroup(this.fb));
-  }
-
-  removeCoOwner(i: number): void {
-    this.coOwners.removeAt(i);
   }
 
   findDocEntry(type: string): FormGroup | undefined {
@@ -173,9 +153,10 @@ export class PropertyItemComponent {
     return this.submitAttempted && !control?.value?.trim();
   }
 
-  showCoOwnerError(controlName: 'ownerName' | 'ownerPhone', index: number): boolean {
-    const control = this.coOwnerGroup(index).get(controlName);
-    return this.submitAttempted && !control?.value?.trim();
+  showJointOwnerCountError(): boolean {
+    const ownership = this.property.get('ownership')?.value;
+    const count = this.property.get('jointOwnerCount')?.value;
+    return ownership === 'যৌথ' && this.submitAttempted && (count === null || count === 0 || count === '');
   }
 
   showApplicableDocsError(): boolean {

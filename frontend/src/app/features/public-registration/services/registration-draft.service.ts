@@ -4,10 +4,8 @@ import { debounceTime, Subscription } from 'rxjs';
 import {
   applicableDocsArray,
   buildApplicableDocGroup,
-  buildCoOwnerGroup,
   buildNomineeGroup,
   buildPropertyGroup,
-  coOwnersArray,
   nomineesArray,
   propertiesArray,
 } from '../registration-form.builder';
@@ -110,10 +108,6 @@ export class RegistrationDraftService {
     fb: FormBuilder,
     draftProperty: Record<string, any>,
   ): void {
-    const coOwners: FormArray = coOwnersArray(propertyGroup);
-    const draftCoOwners = Array.isArray(draftProperty['coOwners']) ? draftProperty['coOwners'] : [];
-    draftCoOwners.forEach(() => coOwners.push(buildCoOwnerGroup(fb)));
-
     const applicableDocs: FormArray = applicableDocsArray(propertyGroup);
     const draftDocs = Array.isArray(draftProperty['applicableDocs'])
       ? draftProperty['applicableDocs']

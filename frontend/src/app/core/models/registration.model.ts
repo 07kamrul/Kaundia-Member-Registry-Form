@@ -18,11 +18,6 @@ export function createEmptyAddress(): AddressDetail {
   return { house: '', road: '', postOffice: '', upazila: '', district: '', division: '' };
 }
 
-export interface CoOwner {
-  ownerName: string;
-  ownerPhone: string;
-}
-
 export interface ApplicableDocEntry {
   type: string;
   fileName: string;
@@ -43,8 +38,8 @@ export interface PropertyItem {
   holdingNumber: string;
   landQuantity: string;
   ownership: string;
+  jointOwnerCount: number | null;
   applicableDocs: ApplicableDocEntry[];
-  coOwners: CoOwner[];
 }
 
 export const DOCUMENT_OPTIONS: string[] = [
@@ -81,14 +76,9 @@ export const ALLOWED_DOC_MIME_TYPES: string[] = [
 export const MAX_DOC_FILE_BYTES = 5 * 1024 * 1024;
 export const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
 export const MAX_PROPERTY_COUNT = 9;
-export const MAX_CO_OWNER_COUNT = 5;
 
 export function createEmptyApplicableDoc(type: string): ApplicableDocEntry {
   return { type, fileName: '', fileDataUrl: '' };
-}
-
-export function createEmptyCoOwner(): CoOwner {
-  return { ownerName: '', ownerPhone: '' };
 }
 
 export function createEmptyProperty(): PropertyItem {
@@ -100,8 +90,8 @@ export function createEmptyProperty(): PropertyItem {
     holdingNumber: '',
     landQuantity: '',
     ownership: '',
+    jointOwnerCount: null,
     applicableDocs: [],
-    coOwners: [],
   };
 }
 

@@ -270,32 +270,11 @@ export class RegistrationPageComponent implements OnInit {
           `${label}: ${this.translate.instant('registration.validation.ownershipRequired')}`,
         );
       if (property.ownership === 'যৌথ') {
-        const hasFilledCoOwner = (property.coOwners as any[]).some(
-          (co) => co.ownerName?.trim() && co.ownerPhone?.trim(),
-        );
-        if (!hasFilledCoOwner) {
+        const count = property.jointOwnerCount;
+        if (!count || count < 1) {
           errs.push(
-            `${label}: ${this.translate.instant('registration.validation.coOwnerRequired')}`,
+            `${label}: ${this.translate.instant('registration.validation.jointOwnerCountRequired')}`,
           );
-        } else {
-          (property.coOwners as any[]).forEach((co, ci) => {
-            const ownerLabel = this.translate.instant('registration.validation.ownerLabel', {
-              propertyLabel: label,
-              number: ci + 1,
-            });
-            if (!co.ownerName?.trim())
-              errs.push(
-                `${ownerLabel}: ${this.translate.instant('registration.validation.nameRequired')}`,
-              );
-            if (!co.ownerPhone?.trim())
-              errs.push(
-                `${ownerLabel}: ${this.translate.instant('registration.validation.mobileRequired')}`,
-              );
-            else if (!MOBILE_PATTERN.test(co.ownerPhone.trim()))
-              errs.push(
-                `${ownerLabel}: ${this.translate.instant('registration.validation.mobileInvalid')}`,
-              );
-          });
         }
       }
       if (!property.applicableDocs || property.applicableDocs.length === 0) {

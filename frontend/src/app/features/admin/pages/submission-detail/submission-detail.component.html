@@ -678,122 +678,23 @@
                         </div>
                       </div>
 
-                      <!-- Co-owners -->
+                                            <!-- Joint Owner Count -->
                       <div class="ds-subblock">
                         <div class="ds-subblock-header">
                           <h4 class="ds-subblock-title">
-                            {{ 'admin.submissionDetail.coOwners' | translate }}
-                            <span class="ds-count">{{ property.coOwners.length }}</span>
+                            {{ 'admin.submissionDetail.jointOwnerCountLabel' | translate }}
                           </h4>
                         </div>
-                        @if (property.coOwners.length) {
-                          <div class="ds-table-wrap">
-                            <table class="ds-table coowner-table">
-                              <thead>
-                                <tr>
-                                  <th scope="col">#</th>
-                                  <th scope="col">
-                                    {{ 'admin.submissionDetail.fieldLabels.name' | translate }}
-                                  </th>
-                                  <th scope="col">
-                                    {{ 'admin.submissionDetail.fieldLabels.mobile' | translate }}
-                                  </th>
-                                  <th scope="col">
-                                    {{ 'admin.submissionDetail.roleColumn' | translate }}
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                @for (owner of property.coOwners; track owner.id; let j = $index) {
-                                  <tr [class.is-applicant]="isApplicantRow(owner)">
-                                    <td class="ds-mono ds-row-num" data-label="#">{{ j + 1 }}</td>
-                                    <td
-                                      [attr.data-label]="
-                                        'admin.submissionDetail.fieldLabels.name' | translate
-                                      "
-                                    >
-                                      <span class="ds-owner-name">{{
-                                        owner.name || emptyValue()
-                                      }}</span>
-                                    </td>
-                                    <td
-                                      [attr.data-label]="
-                                        'admin.submissionDetail.fieldLabels.mobile' | translate
-                                      "
-                                    >
-                                      @if (displayValue(owner.mobile); as mobile) {
-                                        <div class="ds-mobile-cell">
-                                          <a class="ds-mono ds-link" [href]="telHref(mobile)">{{
-                                            mobile
-                                          }}</a>
-                                          @if (isDuplicateMobile(property, owner)) {
-                                            <span
-                                              class="ds-warn"
-                                              [title]="
-                                                'admin.submissionDetail.sharedMobileWarning'
-                                                  | translate
-                                              "
-                                              [attr.aria-label]="
-                                                'admin.submissionDetail.sharedMobileWarning'
-                                                  | translate
-                                              "
-                                              role="img"
-                                            >
-                                              <app-icon name="alert" [size]="14"></app-icon>
-                                            </span>
-                                          }
-                                        </div>
-                                      } @else {
-                                        <span class="ds-empty">{{ emptyValue() }}</span>
-                                      }
-                                    </td>
-                                    <td
-                                      [attr.data-label]="
-                                        'admin.submissionDetail.roleColumn' | translate
-                                      "
-                                    >
-                                      <span class="ds-role-tags">
-                                        @for (role of coOwnerRoles(owner); track role) {
-                                          <span
-                                            class="ds-tag"
-                                            [class.ds-tag-gold]="role === 'applicant'"
-                                            [class.ds-tag-green]="role === 'nominee'"
-                                            [class.ds-tag-blue]="role === 'emergency'"
-                                          >
-                                            @switch (role) {
-                                              @case ('applicant') {
-                                                {{
-                                                  'admin.submissionDetail.roleApplicant' | translate
-                                                }}
-                                              }
-                                              @case ('nominee') {
-                                                {{
-                                                  'admin.submissionDetail.roleNominee' | translate
-                                                }}
-                                              }
-                                              @case ('emergency') {
-                                                {{
-                                                  'admin.submissionDetail.roleEmergency' | translate
-                                                }}
-                                              }
-                                            }
-                                          </span>
-                                        }
-                                      </span>
-                                    </td>
-                                  </tr>
-                                }
-                              </tbody>
-                            </table>
-                          </div>
+                        @if (property.jointOwnerCount !== null && property.jointOwnerCount !== undefined) {
+                          <p class="ds-field-value">{{ property.jointOwnerCount }}</p>
                         } @else {
                           <p class="ds-empty-block">
-                            {{ 'admin.submissionDetail.noCoOwners' | translate }}
+                            {{ 'admin.submissionDetail.notProvided' | translate }}
                           </p>
                         }
                       </div>
 
-                      <!-- Applicable documents -->
+                      <!-- Applicable documents --><!-- Applicable documents -->
                       <div class="ds-subblock">
                         <div class="ds-subblock-header">
                           <h4 class="ds-subblock-title">

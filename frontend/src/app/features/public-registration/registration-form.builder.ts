@@ -4,13 +4,6 @@ const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
 const NID_PATTERN = /^\d{10,17}$/;
 const DIGITS_ONLY_PATTERN = /^\d+$/;
 
-export function buildCoOwnerGroup(fb: FormBuilder): FormGroup {
-  return fb.group({
-    ownerName: [''],
-    ownerPhone: [''],
-  });
-}
-
 export function buildApplicableDocGroup(fb: FormBuilder, type: string): FormGroup {
   return fb.group({
     type: [type],
@@ -28,8 +21,8 @@ export function buildPropertyGroup(fb: FormBuilder): FormGroup {
     holdingNumber: [''],
     landQuantity: ['', Validators.pattern(DIGITS_ONLY_PATTERN)],
     ownership: ['', Validators.required],
+    jointOwnerCount: [null],
     applicableDocs: fb.array([]),
-    coOwners: fb.array([]),
   });
 }
 
@@ -100,10 +93,6 @@ export function propertiesArray(form: FormGroup): FormArray {
 
 export function nomineesArray(form: FormGroup): FormArray {
   return form.get('nominees') as FormArray;
-}
-
-export function coOwnersArray(propertyGroup: FormGroup): FormArray {
-  return propertyGroup.get('coOwners') as FormArray;
 }
 
 export function applicableDocsArray(propertyGroup: FormGroup): FormArray {

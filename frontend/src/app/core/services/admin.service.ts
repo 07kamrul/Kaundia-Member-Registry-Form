@@ -4,7 +4,6 @@ import { map, type Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
   ApplicableDoc,
-  CoOwner,
   Installment,
   Member,
   Nominee,
@@ -35,12 +34,6 @@ interface SubmissionSummaryApiModel {
   created_at: string;
 }
 
-interface CoOwnerApiModel {
-  id: number;
-  owner_name: string;
-  owner_phone: string;
-}
-
 interface ApplicableDocApiModel {
   id: number;
   doc_type: string;
@@ -57,7 +50,7 @@ interface SubmissionPropertyApiModel {
   holding_number: string | null;
   land_quantity: string | null;
   ownership: string | null;
-  co_owners: CoOwnerApiModel[];
+  joint_owner_count: number | null;
   applicable_docs: ApplicableDocApiModel[];
 }
 
@@ -153,10 +146,6 @@ export function toFileUrl(relativePath: string | null): string | undefined {
   return `${uploadsOrigin}/uploads/${encoded}`;
 }
 
-function toCoOwner(api: CoOwnerApiModel): CoOwner {
-  return { id: String(api.id), name: api.owner_name, mobile: api.owner_phone };
-}
-
 function toApplicableDoc(api: ApplicableDocApiModel): ApplicableDoc {
   return { id: String(api.id), docType: api.doc_type, fileUrl: toFileUrl(api.file_path) ?? null };
 }
@@ -172,7 +161,7 @@ function toSubmissionProperty(api: SubmissionPropertyApiModel): SubmissionProper
     holdingNumber: api.holding_number,
     landQuantity: api.land_quantity,
     ownership: api.ownership,
-    coOwners: api.co_owners.map(toCoOwner),
+    jointOwnerCount: api.joint_owner_count,
     applicableDocs: api.applicable_docs.map(toApplicableDoc),
   };
 }

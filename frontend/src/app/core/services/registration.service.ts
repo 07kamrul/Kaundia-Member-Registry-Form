@@ -79,10 +79,7 @@ export class RegistrationService {
         holding_number: property.holdingNumber,
         land_quantity: property.landQuantity,
         ownership: property.ownership,
-        co_owners: property.coOwners.map((coOwner) => ({
-          owner_name: coOwner.ownerName,
-          owner_phone: coOwner.ownerPhone,
-        })),
+        joint_owner_count: property.ownership === 'যৌথ' ? property.jointOwnerCount : null,
         applicable_docs: property.applicableDocs.map((doc) => ({ doc_type: doc.type })),
       })),
       nominees: formData.nominees,

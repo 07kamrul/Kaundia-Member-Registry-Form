@@ -17,7 +17,6 @@ import {
 } from '../../../../core/services/attachment.service';
 import type {
   ApplicableDoc,
-  CoOwner,
   EmergencyContact,
   Nominee,
   SubmissionDetail,
@@ -84,10 +83,6 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   private derivedShareDeclared = false;
   private derivedShareWarning = false;
   private readonly duplicateMobilesByProperty = new Map<string, Set<string>>();
-  private readonly coOwnerRolesByOwner = new Map<
-    string,
-    Array<'applicant' | 'emergency' | 'nominee'>
-  >();
   private readonly emptyValueByLang = new Map<string, string>();
   private sanitizedFrameUrl: SafeResourceUrl | null = null;
   private sanitizedFrameUrlFor: string | null | undefined = undefined;
@@ -163,7 +158,6 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
     if (this.derivedFor === this.submission) return;
     this.derivedFor = this.submission;
     this.duplicateMobilesByProperty.clear();
-    this.coOwnerRolesByOwner.clear();
 
     const submission = this.submission;
     if (!submission) {
@@ -360,34 +354,6 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  /** Role tags for a co-owner: applicant / emergency / nominee (can be several). */
-  coOwnerRoles(owner: CoOwner): Array<'applicant' | 'emergency' | 'nominee'> {
-    this.ensureDerived();
-    const cached = this.coOwnerRolesByOwner.get(owner.id);
-    if (cached) return cached;
-
-    const roles: Array<'applicant' | 'emergency' | 'nominee'> = [];
-    const submission = this.submission;
-    if (!submission) {
-      this.coOwnerRolesByOwner.set(owner.id, roles);
-      return roles;
-    }
-    if (this.samePerson(owner, { name: submission.fullName, mobile: submission.mobile })) {
-      roles.push('applicant');
-    }
-    const emergency = this.derivedEmergency;
-    if (emergency && this.samePerson(owner, emergency)) roles.push('emergency');
-    if (submission.nominees.some((nominee) => this.samePerson(owner, nominee))) {
-      roles.push('nominee');
-    }
-    this.coOwnerRolesByOwner.set(owner.id, roles);
-    return roles;
-  }
-
-  isApplicantRow(owner: CoOwner): boolean {
-    return this.coOwnerRoles(owner).includes('applicant');
-  }
-
   /** True when a nominee's details match the emergency contact. */
   nomineeMatchesEmergency(nominee: Nominee): boolean {
     const emergency = this.emergencyContact;
@@ -400,33 +366,6 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
       name: this.submission.fullName,
       mobile: this.submission.mobile,
     });
-  }
-
-  /* ---------- co-owner duplicate mobiles ---------- */
-
-  /** Mobile numbers used by more than one co-owner on this property. */
-  duplicateMobiles(property: SubmissionProperty): Set<string> {
-    this.ensureDerived();
-    const cached = this.duplicateMobilesByProperty.get(property.id);
-    if (cached) return cached;
-
-    const counts = new Map<string, number>();
-    for (const owner of property.coOwners ?? []) {
-      const key = this.normalize(owner.mobile);
-      if (!key) continue;
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    }
-    const dupes = new Set<string>();
-    for (const owner of property.coOwners ?? []) {
-      const key = this.normalize(owner.mobile);
-      if (key && (counts.get(key) ?? 0) > 1) dupes.add(key);
-    }
-    this.duplicateMobilesByProperty.set(property.id, dupes);
-    return dupes;
-  }
-
-  isDuplicateMobile(property: SubmissionProperty, owner: CoOwner): boolean {
-    return this.duplicateMobiles(property).has(this.normalize(owner.mobile));
   }
 
   /* ---------- property collapse ---------- */
