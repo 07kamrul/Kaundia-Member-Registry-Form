@@ -69,8 +69,8 @@
     </div>
   </div>
 
-  <div class="grid-2">
-    <div class="field">
+  <div class="grid-2" style="gap:0.5rem;align-items:end">
+    <div class="field" style="margin-bottom:0">
       <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>
       <div class="checkbox-row">
         @for (t of ownershipTypes; track t) {
@@ -90,7 +90,7 @@
     </div>
 
     @if (property.get('ownership')?.value === 'যৌথ') {
-      <div class="field">
+      <div class="field" style="margin-bottom:0">
         <label>{{ 'registration.property.jointOwnerCountLabel' | translate }} <span class="required">*</span></label>
         <input
           [id]="'prop' + index + '_jointOwnerCount'"
