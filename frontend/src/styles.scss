@@ -2550,6 +2550,7 @@ textarea:focus {
 
 .doc-tile {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
@@ -2609,7 +2610,13 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.doc-actions .ds-empty {
+  overflow-wrap: anywhere;
 }
 
 .doc-actions .btn {
