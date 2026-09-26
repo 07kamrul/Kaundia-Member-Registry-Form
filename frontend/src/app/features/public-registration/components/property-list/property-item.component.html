@@ -72,13 +72,15 @@
   <div class="grid-2" style="gap:0.5rem;align-items:end">
     <div class="field" style="margin-bottom:0">
       <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>
-      <div class="checkbox-row">
+      <div class="radio-group">
         @for (t of ownershipTypes; track t) {
-          <label class="checkbox-item">
+          <label class="radio-item">
             <input
-              type="checkbox"
+              type="radio"
+              [value]="t"
               [checked]="property.get('ownership')?.value === t"
               (change)="setOwnership(t)"
+              name="ownership_{{ index }}"
             />
             {{ t }}
           </label>
