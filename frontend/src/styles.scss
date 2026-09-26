@@ -815,24 +815,28 @@ textarea:focus {
   appearance: none;
   -webkit-appearance: none;
   background-color: #ffffff;
-  border: 1px solid currentColor;
+  border: 1.5px solid #000000;
   width: 1rem;
   height: 1rem;
+  display: inline-block;
+  box-sizing: border-box;
+  border-radius: 2px;
   position: relative;
   flex-shrink: 0;
 }
 
 .checkbox-item input[type="checkbox"]:checked {
   background-color: #ffffff;
+  border: 1.5px solid #000000;
 }
 
 .checkbox-item input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
-  left: 0.25rem;
-  top: 0.05rem;
-  width: 0.35rem;
-  height: 0.6rem;
+  left: 3px;
+  top: 0px;
+  width: 4px;
+  height: 8px;
   border: solid #000000;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
