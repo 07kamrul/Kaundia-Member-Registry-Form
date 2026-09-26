@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -55,6 +56,21 @@ class Settings(BaseSettings):
     @property
     def smtp_from(self) -> str:
         return f"{self.smtp_sender_name} <{self.smtp_sender_email}>"
+
+    @property
+    def upload_root(self) -> Path:
+        """Absolute directory uploads are written to and served from.
+
+        `upload_dir` may be relative (default `uploads`), which resolves
+        against the process working directory - so two components resolving it
+        at different moments could disagree. Resolving it in one place, always
+        to an absolute path, keeps save logs, serve logs and the static mount
+        directly comparable.
+        """
+        path = Path(self.upload_dir).expanduser()
+        if not path.is_absolute():
+            path = Path.cwd() / path
+        return path.resolve()
 
     @property
     def cors_origins_list(self) -> list[str]:

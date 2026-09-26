@@ -1,22 +1,32 @@
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from starlette.middleware.gzip import GZipMiddleware
 
 from app.api.routes import admin, auth, member, public, rbac, submissions
 from app.core.config import get_settings
 from app.db.session import engine
+from app.services.storage import UploadStaticFiles
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
+
+# uvicorn attaches handlers only to its own loggers; without a root handler the
+# upload save/serve paths logged by app.services.storage would be dropped, and
+# comparing them is how a "file exists but /uploads 404s" report gets diagnosed.
+if not logging.root.handlers:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    # Uploads are written and served from this exact directory; printing it on
+    # startup makes "file saved here, server looking there" mismatches obvious.
+    logger.info("[uploads] serving directory: %s", settings.upload_root)
     # Warm the pool so the first request doesn't pay connection setup (remote
     # Postgres handshakes dominate first-hit latency), then release everything
     # cleanly on shutdown so the process exits without dangling connections.
@@ -56,9 +66,7 @@ app.include_router(member.router, prefix=api_router_prefix)
 app.include_router(rbac.router, prefix=api_router_prefix)
 app.include_router(public.router, prefix=api_router_prefix)
 
-upload_dir = Path(settings.upload_dir)
-upload_dir.mkdir(parents=True, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(upload_dir)), name="uploads")
+app.mount("/uploads", UploadStaticFiles(), name="uploads")
 
 
 @app.get("/health")

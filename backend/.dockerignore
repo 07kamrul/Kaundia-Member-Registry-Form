@@ -3,8 +3,13 @@ __pycache__/
 *.pyc
 .env
 dev.db
+dev.db-shm
+dev.db-wal
 uploads/*
 !uploads/.gitkeep
+# Never bake local member uploads into the image; the container writes to the
+# backend_uploads volume at STORAGE_BASE_DIR=/app/uploads instead.
+storage/
 tests/
 .pytest_cache/
 .git/

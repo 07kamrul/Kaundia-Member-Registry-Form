@@ -3,5 +3,10 @@ __pycache__/
 *.pyc
 .env
 dev.db
+dev.db-shm
+dev.db-wal
 uploads/*
 !uploads/.gitkeep
+# Local uploads (also produced by STORAGE_BASE_DIR=storage/kaundia/uploads):
+# member photos/documents must never be committed or baked into an image.
+storage/

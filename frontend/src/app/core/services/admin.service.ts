@@ -137,9 +137,20 @@ function toSubmissionSummary(api: SubmissionSummaryApiModel): SubmissionSummary 
 /** Origin the backend serves `/uploads/*` static files from (apiBaseUrl without the `/api` suffix). */
 const uploadsOrigin = environment.apiBaseUrl.replace(/\/api\/?$/, '');
 
-function toFileUrl(relativePath: string | null): string | undefined {
+/**
+ * Absolute URL for a stored relative upload path.
+ *
+ * Every path segment is percent-encoded individually: stored paths can contain
+ * Bengali labels and spaces (`documents/member_1/খাজনা-কর রশিদ/x.pdf`), and
+ * leaving encoding to the browser silently breaks on `#`, `?` and `%`.
+ */
+export function toFileUrl(relativePath: string | null): string | undefined {
   if (!relativePath) return undefined;
-  return `${uploadsOrigin}/uploads/${relativePath}`;
+  const encoded = relativePath
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+  return `${uploadsOrigin}/uploads/${encoded}`;
 }
 
 function toCoOwner(api: CoOwnerApiModel): CoOwner {

@@ -143,6 +143,11 @@
       </div>
 
       <h3 class="section-title">{{ 'admin.submissionDetail.attachments' | translate }}</h3>
+      @if (attachmentError) {
+        <div class="error-box" role="alert">
+          <p style="margin: 0">{{ attachmentError }}</p>
+        </div>
+      }
       <div class="detail-card-grid">
         <div class="card detail-card">
           <p class="detail-card-title">
@@ -255,7 +260,7 @@
         </div>
       </div>
 
-      @if (previewImageUrl) {
+      @if (previewImageUrl || previewLoading || previewError) {
         <div class="modal-backdrop" (click)="closePreview()">
           <div
             class="modal-card modal-card-wide"
@@ -266,8 +271,21 @@
           >
             <h3 class="modal-title">{{ previewImageAlt }}</h3>
             <div class="modal-body">
-              @if (previewIsImage) {
-                <img [src]="previewImageUrl" [alt]="previewImageAlt" class="preview-media" />
+              @if (previewLoading) {
+                <div class="loading-state">
+                  <span class="spinner"></span> {{ 'common.loading' | translate }}
+                </div>
+              } @else if (previewError) {
+                <div class="error-box" role="alert">
+                  <p style="margin: 0">{{ previewError }}</p>
+                </div>
+              } @else if (previewIsImage) {
+                <img
+                  [src]="previewImageUrl"
+                  [alt]="previewImageAlt"
+                  class="preview-media"
+                  (error)="onPreviewImageError()"
+                />
               } @else {
                 <iframe
                   [src]="previewFrameUrl"
@@ -277,13 +295,11 @@
               }
             </div>
             <div class="modal-actions">
-              <a
-                class="btn btn-secondary"
-                [href]="previewImageUrl"
-                target="_blank"
-                rel="noopener"
-                >{{ 'admin.submissionDetail.download' | translate }}</a
-              >
+              @if (!previewError && !previewLoading) {
+                <button type="button" class="btn btn-secondary" (click)="downloadPreview()">
+                  {{ 'admin.submissionDetail.download' | translate }}
+                </button>
+              }
               <button type="button" class="btn btn-primary" (click)="closePreview()">
                 {{ 'common.close' | translate }}
               </button>
@@ -783,12 +799,25 @@
                           </h4>
                         </div>
                         @if (property.applicableDocs.length) {
+                          @if (attachmentError) {
+                            <div class="error-box" role="alert">
+                              <p style="margin: 0">{{ attachmentError }}</p>
+                            </div>
+                          }
                           <div class="doc-grid">
                             @for (doc of property.applicableDocs; track doc.id) {
                               <div class="doc-tile">
                                 <span class="doc-thumb" aria-hidden="true">
-                                  @if (doc.fileUrl && docFileKind(doc) === 'image') {
-                                    <img [src]="doc.fileUrl" alt="" />
+                                  @if (
+                                    doc.fileUrl &&
+                                    docFileKind(doc) === 'image' &&
+                                    !isFileBroken(doc.fileUrl)
+                                  ) {
+                                    <img
+                                      [src]="doc.fileUrl"
+                                      alt=""
+                                      (error)="markFileBroken(doc.fileUrl)"
+                                    />
                                   } @else {
                                     <app-icon name="doc" [size]="20"></app-icon>
                                   }
@@ -798,7 +827,15 @@
                                   <span class="doc-sub ds-mono">{{ docFileSizeLabel(doc) }}</span>
                                 </span>
                                 <span class="doc-actions no-print">
-                                  @if (doc.fileUrl) {
+                                  @if (!doc.fileUrl) {
+                                    <span class="ds-empty">{{
+                                      'admin.submissionDetail.noAttachment' | translate
+                                    }}</span>
+                                  } @else if (isFileBroken(doc.fileUrl)) {
+                                    <span class="ds-empty">{{
+                                      'admin.submissionDetail.fileMissing' | translate
+                                    }}</span>
+                                  } @else {
                                     <button
                                       type="button"
                                       class="btn btn-sm btn-secondary"
@@ -806,19 +843,13 @@
                                     >
                                       {{ 'admin.submissionDetail.view' | translate }}
                                     </button>
-                                    <a
+                                    <button
+                                      type="button"
                                       class="btn btn-sm btn-ghost"
-                                      [href]="doc.fileUrl"
-                                      download
-                                      target="_blank"
-                                      rel="noopener"
+                                      (click)="downloadDoc(doc)"
                                     >
                                       {{ 'admin.submissionDetail.download' | translate }}
-                                    </a>
-                                  } @else {
-                                    <span class="ds-empty">{{
-                                      'admin.submissionDetail.noAttachment' | translate
-                                    }}</span>
+                                    </button>
                                   }
                                 </span>
                               </div>

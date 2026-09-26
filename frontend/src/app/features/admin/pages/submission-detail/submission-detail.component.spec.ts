@@ -4,6 +4,10 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AdminService } from '../../../../core/services/admin.service';
+import {
+  AttachmentMissingError,
+  AttachmentService,
+} from '../../../../core/services/attachment.service';
 import type { SubmissionDetail } from '../../../../core/models/admin.model';
 import { SubmissionDetailComponent } from './submission-detail.component';
 
@@ -55,6 +59,20 @@ const submission: SubmissionDetail = {
 };
 
 describe('SubmissionDetailComponent (OnPush + memoized derived values)', () => {
+  const attachmentLoad = vi.fn();
+  const attachmentDownload = vi.fn();
+
+  beforeAll(() => {
+    // jsdom has no blob object URLs; previews created from fetched files need one.
+    (URL as unknown as Record<string, unknown>)['createObjectURL'] = vi.fn(() => 'blob:preview');
+    (URL as unknown as Record<string, unknown>)['revokeObjectURL'] = vi.fn();
+  });
+
+  beforeEach(() => {
+    attachmentLoad.mockReset();
+    attachmentDownload.mockReset();
+  });
+
   function create() {
     TestBed.configureTestingModule({
       imports: [SubmissionDetailComponent],
@@ -66,6 +84,10 @@ describe('SubmissionDetailComponent (OnPush + memoized derived values)', () => {
         },
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: AdminService, useValue: { getSubmission: () => of(submission) } },
+        {
+          provide: AttachmentService,
+          useValue: { load: attachmentLoad, download: attachmentDownload },
+        },
       ],
     });
     const fixture = TestBed.createComponent(SubmissionDetailComponent);
@@ -121,15 +143,69 @@ describe('SubmissionDetailComponent (OnPush + memoized derived values)', () => {
     expect(component.coOwnerRoles(property.coOwners[2])).toEqual([]);
   });
 
-  it('sanitizes the preview frame URL only once per preview target', () => {
+  it('sanitizes the preview frame URL only once per preview target', async () => {
+    attachmentLoad.mockResolvedValue(new Blob(['%PDF'], { type: 'application/pdf' }));
     const component = create().componentInstance;
     const first = component.previewFrameUrl;
     expect(component.previewFrameUrl).toBe(first);
 
     component.openDocPreview({ id: 'd1', docType: 'deed', fileUrl: '/uploads/a.pdf' });
+    await vi.waitFor(() => expect(component.previewImageUrl).toBe('blob:preview'));
+
     const next = component.previewFrameUrl;
     expect(next).not.toBe(first);
     expect(component.previewFrameUrl).toBe(next);
+  });
+
+  it('shows the app error UI when a PDF preview is missing, instead of the raw 404', async () => {
+    const url = 'https://api.example.com/uploads/documents/member_1/missing.pdf';
+    attachmentLoad.mockRejectedValue(new AttachmentMissingError(url));
+    const component = create().componentInstance;
+
+    component.openDocPreview({ id: 'd1', docType: 'deed', fileUrl: url });
+    expect(component.previewLoading).toBe(true);
+
+    await vi.waitFor(() => expect(component.previewError).not.toBe(''));
+    expect(component.previewImageUrl).toBeNull();
+    expect(component.isFileBroken(url)).toBe(true);
+  });
+
+  it('keeps image previews on <img> and reports a broken one through the error UI', () => {
+    const url = 'https://api.example.com/uploads/photos/member_1/photo.jpg';
+    const component = create().componentInstance;
+
+    component.openDocPreview({ id: 'd1', docType: 'photo', fileUrl: url });
+    expect(component.previewImageUrl).toBe(url);
+    // Images never wait on a fetch: the <img> error event is the 404 signal.
+    expect(attachmentLoad).not.toHaveBeenCalled();
+
+    component.onPreviewImageError();
+    expect(component.previewImageUrl).toBeNull();
+    expect(component.previewError).not.toBe('');
+    expect(component.isFileBroken(url)).toBe(true);
+  });
+
+  it('downloads through the attachment service and falls back in-app on a missing file', async () => {
+    const url = 'https://api.example.com/uploads/documents/member_1/abc.pdf';
+    attachmentDownload.mockRejectedValue(new AttachmentMissingError(url));
+    const component = create().componentInstance;
+
+    component.downloadDoc({ id: 'd1', docType: 'খাজনা/কর রশিদ', fileUrl: url });
+    expect(attachmentDownload).toHaveBeenCalledWith(url, 'খাজনা-কর রশিদ.pdf');
+
+    await vi.waitFor(() => expect(component.attachmentError).not.toBe(''));
+    expect(component.isFileBroken(url)).toBe(true);
+  });
+
+  it('clears a previous attachment error when a new download starts', async () => {
+    const component = create().componentInstance;
+    attachmentDownload.mockRejectedValueOnce(new AttachmentMissingError('https://a/x.pdf'));
+    component.downloadDoc({ id: 'd1', docType: 'deed', fileUrl: 'https://a/x.pdf' });
+    await vi.waitFor(() => expect(component.attachmentError).not.toBe(''));
+
+    attachmentDownload.mockResolvedValue(undefined);
+    component.downloadDoc({ id: 'd1', docType: 'deed', fileUrl: 'https://a/x.pdf' });
+    expect(component.attachmentError).toBe('');
   });
 
   it('collapses and re-expands a property without recomputing derived state', () => {

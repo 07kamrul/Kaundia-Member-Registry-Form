@@ -10,6 +10,10 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService, type AttachmentKind } from '../../../../core/services/admin.service';
+import {
+  AttachmentMissingError,
+  AttachmentService,
+} from '../../../../core/services/attachment.service';
 import type {
   ApplicableDoc,
   CoOwner,
@@ -39,6 +43,12 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   previewImageUrl: string | null = null;
   previewImageAlt = '';
   previewIsImage = true;
+  /** In-app error shown instead of a preview that is missing on the server. */
+  previewError = '';
+  /** True while a non-image preview is fetched (a missing file must not reach the iframe). */
+  previewLoading = false;
+  /** In-app error shown after a failed download; never navigate to a dead file URL. */
+  attachmentError = '';
   /** File URLs that failed to load (e.g. the file is missing on the server). */
   brokenFileUrls: ReadonlySet<string> = new Set<string>();
   /** Attachment currently being re-uploaded, if any. */
@@ -48,6 +58,12 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   expandedPropertyIds = new Set<string>();
 
   private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Object URL backing a blob preview; revoked when the preview closes. */
+  private previewObjectUrl: string | null = null;
+  /** Bumped whenever the preview target changes, to ignore stale loads. */
+  private previewRequestId = 0;
+  /** What the modal's download button should fetch, and under which name. */
+  private previewTarget: { url: string; filename: string } | null = null;
 
   /* ---------- derived-value caches ----------
    *
@@ -79,6 +95,7 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private adminService: AdminService,
+    private attachments: AttachmentService,
     private cdr: ChangeDetectorRef,
     private translate: TranslateService,
     private sanitizer: DomSanitizer,
@@ -217,6 +234,7 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.copyResetTimer) clearTimeout(this.copyResetTimer);
+    this.revokePreviewObjectUrl();
   }
 
   /* ---------- shared field helpers ---------- */
@@ -466,9 +484,12 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
 
   openDocPreview(doc: ApplicableDoc): void {
     if (!doc.fileUrl) return;
-    this.previewImageUrl = doc.fileUrl;
-    this.previewImageAlt = doc.docType;
-    this.previewIsImage = this.docFileKind(doc) === 'image';
+    this.startPreview({
+      url: doc.fileUrl,
+      alt: doc.docType,
+      isImage: this.docFileKind(doc) === 'image',
+      filename: this.attachmentFilename(doc.docType, doc.fileUrl),
+    });
   }
 
   isFileBroken(url?: string | null): boolean {
@@ -478,6 +499,8 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   markFileBroken(url?: string | null): void {
     if (!url || this.brokenFileUrls.has(url)) return;
     this.brokenFileUrls = new Set([...this.brokenFileUrls, url]);
+    // The (error) handlers that call us run outside Angular's zone under OnPush.
+    this.cdr.markForCheck();
   }
 
   /** Upload a replacement for a missing or wrong member photo / receipt. */
@@ -506,15 +529,118 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   }
 
   openPreview(url: string, altKey: string): void {
-    this.previewImageUrl = url;
-    this.previewImageAlt = this.translate.instant(altKey);
-    this.previewIsImage = /\.(png|jpe?g|gif|webp|svg|avif)(\?|$)/i.test(url);
+    const alt = this.translate.instant(altKey);
+    this.startPreview({
+      url,
+      alt,
+      isImage: /\.(png|jpe?g|gif|webp|svg|avif)(\?|$)/i.test(url) || /^data:image\//i.test(url),
+      filename: this.attachmentFilename(alt, url),
+    });
   }
 
   closePreview(): void {
+    this.resetPreview();
+  }
+
+  /** The modal's <img> failed: replace it with the app's missing-file message. */
+  onPreviewImageError(): void {
+    if (!this.previewImageUrl) return;
+    this.markFileBroken(this.previewImageUrl);
+    this.previewError = this.translate.instant('admin.submissionDetail.fileMissing');
+    this.previewImageUrl = null;
+    this.cdr.markForCheck();
+  }
+
+  /** Modal download button: fetch as a blob instead of navigating to the URL. */
+  downloadPreview(): void {
+    if (this.previewTarget) this.download(this.previewTarget.url, this.previewTarget.filename);
+  }
+
+  downloadDoc(doc: ApplicableDoc): void {
+    if (!doc.fileUrl) return;
+    this.download(doc.fileUrl, this.attachmentFilename(doc.docType, doc.fileUrl));
+  }
+
+  /**
+   * Open the preview modal for a file URL.
+   *
+   * Images are handed straight to `<img>` (its `error` handler reports a 404);
+   * every other type is fetched into a blob first so a file that no longer
+   * exists shows the app's error UI instead of the backend's raw JSON inside
+   * an iframe.
+   */
+  private startPreview(target: {
+    url: string;
+    alt: string;
+    isImage: boolean;
+    filename: string;
+  }): void {
+    this.resetPreview();
+    const requestId = this.previewRequestId;
+    this.previewTarget = { url: target.url, filename: target.filename };
+    this.previewImageAlt = target.alt;
+    this.previewIsImage = target.isImage;
+
+    if (target.isImage) {
+      this.previewImageUrl = target.url;
+      return;
+    }
+
+    this.previewLoading = true;
+    this.attachments.load(target.url).then(
+      (blob) => {
+        if (requestId !== this.previewRequestId) return; // preview moved on
+        this.previewObjectUrl = URL.createObjectURL(blob);
+        this.previewImageUrl = this.previewObjectUrl;
+        this.previewLoading = false;
+        this.cdr.markForCheck();
+      },
+      () => {
+        if (requestId !== this.previewRequestId) return;
+        this.previewLoading = false;
+        this.previewError = this.translate.instant('admin.submissionDetail.fileMissing');
+        this.markFileBroken(target.url);
+        this.cdr.markForCheck();
+      },
+    );
+  }
+
+  private resetPreview(): void {
+    this.revokePreviewObjectUrl();
+    this.previewRequestId++;
     this.previewImageUrl = null;
     this.previewImageAlt = '';
     this.previewIsImage = true;
+    this.previewError = '';
+    this.previewLoading = false;
+    this.previewTarget = null;
+  }
+
+  private revokePreviewObjectUrl(): void {
+    if (!this.previewObjectUrl) return;
+    URL.revokeObjectURL(this.previewObjectUrl);
+    this.previewObjectUrl = null;
+  }
+
+  private download(url: string, filename: string): void {
+    this.attachmentError = '';
+    this.attachments.download(url, filename).catch((err: unknown) => {
+      this.attachmentError = this.translate.instant(
+        err instanceof AttachmentMissingError
+          ? 'admin.submissionDetail.fileMissing'
+          : 'admin.submissionDetail.errors.downloadFailed',
+      );
+      if (err instanceof AttachmentMissingError) this.markFileBroken(url);
+      this.cdr.markForCheck();
+    });
+  }
+
+  /** Download name: the Bengali label stays readable, path-hostile characters go. */
+  private attachmentFilename(label: string, url: string): string {
+    const base = label.replace(/[\\/:*?"<>|]/g, '-').trim() || 'attachment';
+    const ext =
+      /^data:image\/([a-z0-9.+-]+);/i.exec(url)?.[1] ?? /\.([a-z0-9]{1,8})(?:$|\?)/i.exec(url)?.[1];
+    return ext ? `${base}.${ext.toLowerCase()}` : base;
   }
 
   approve(): void {

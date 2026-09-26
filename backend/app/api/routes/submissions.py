@@ -10,7 +10,7 @@ from app.models.property import ApplicableDoc, CoOwner, Property
 from app.models.nominee import Nominee
 from app.schemas.member import SubmissionCreateResponse
 from app.schemas.submission import SubmissionPayload
-from app.services.storage import sanitize_path_segment, save_upload_file
+from app.services.storage import save_upload_file, slugify_path_segment
 
 router = APIRouter(tags=["submissions"])
 
@@ -101,7 +101,9 @@ async def create_submission(
             doc_file = next(doc_file_iter, None)
             file_path = None
             if doc_file is not None and doc_file.filename:
-                doc_type_dir = sanitize_path_segment(doc_in.doc_type)
+                # Folder name is an ASCII slug; the Bengali display label stays
+                # in `ApplicableDoc.doc_type` only.
+                doc_type_dir = slugify_path_segment(doc_in.doc_type)
                 file_path = await save_upload_file(doc_file, f"documents/{member_dir}/{doc_type_dir}")
             paths.append(file_path)
         doc_paths.append(paths)
