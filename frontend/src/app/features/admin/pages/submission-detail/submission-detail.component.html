@@ -45,7 +45,10 @@
               {{ submission.mobile }}</span
             >
             <span class="applicant-meta-item">NID: {{ submission.nid }}</span>
-            <span class="applicant-meta-item">{{ submission.createdAt }}</span>
+            <span class="applicant-meta-item">
+              Date: {{ submission.createdAt | date: 'dd/MM/yyyy' }}
+              Time: {{ submission.createdAt | date: 'HH:mm:ss' }}
+            </span>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -29,7 +30,7 @@ import { IconComponent } from '../../../../shared/icon/icon.component';
   selector: 'app-submission-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ConfirmModalComponent, TranslatePipe, IconComponent],
+  imports: [FormsModule, ConfirmModalComponent, TranslatePipe, IconComponent, DatePipe],
   templateUrl: './submission-detail.component.html',
 })
 export class SubmissionDetailComponent implements OnInit, OnDestroy {
