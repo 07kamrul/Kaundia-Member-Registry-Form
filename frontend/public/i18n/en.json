@@ -516,7 +516,7 @@
       "paymentMethodRequired": "Payment method is required",
       "admissionFeeLabel": "Admission Fee (Taka)",
       "subscriptionLabel": "Subscription (Taka)",
-      "totalDecimalSummary": "Total {{total}} decimal: first 1 decimal = {{rate}} Tk",
+      "totalDecimalSummary": "My share total {{total}} decimal: first 1 decimal = {{rate}} Tk",
       "additionalDecimalSummary": "+ next {{additional}} decimal × {{rate}} Tk = {{amount}} Tk",
       "totalAmountSummary": "= Total {{amount}} Tk",
       "receiptNoLabel": "Receipt No./Transaction ID",

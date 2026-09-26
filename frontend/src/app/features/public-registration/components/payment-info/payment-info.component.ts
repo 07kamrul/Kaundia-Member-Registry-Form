@@ -68,7 +68,7 @@ export class PaymentInfoComponent implements OnInit {
 
   private recalculateSubscription(properties: FormArray): void {
     const totalDecimal = properties.controls.reduce((sum, property) => {
-      const value = parseFloat(property.get('landQuantity')?.value);
+      const value = parseFloat(property.get('myShareQuantity')?.value);
       return sum + (Number.isFinite(value) && value > 0 ? value : 0);
     }, 0);
 

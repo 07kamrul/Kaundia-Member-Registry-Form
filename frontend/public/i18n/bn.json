@@ -516,7 +516,7 @@
       "paymentMethodRequired": "পেমেন্ট মাধ্যম আবশ্যক",
       "admissionFeeLabel": "ভর্তি ফি (টাকা)",
       "subscriptionLabel": "চাঁদা (টাকা)",
-      "totalDecimalSummary": "মোট {{total}} শতাংশ: প্রথম ১ শতাংশ = {{rate}}৳",
+      "totalDecimalSummary": "আমার অংশ মোট {{total}} শতাংশ: প্রথম ১ শতাংশ = {{rate}}৳",
       "additionalDecimalSummary": "+ পরবর্তী {{additional}} শতাংশ × {{rate}}৳ = {{amount}}৳",
       "totalAmountSummary": "= মোট {{amount}}৳",
       "receiptNoLabel": "রসিদ নং/Transaction ID",
