@@ -703,6 +703,18 @@ textarea:focus {
   }
 }
 
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
 .member-info-columns {
   display: grid;
   grid-template-columns: 1fr;

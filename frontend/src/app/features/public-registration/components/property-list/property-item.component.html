@@ -31,6 +31,9 @@
       <label [attr.for]="'prop' + index + '_holdingNumber'">{{ 'registration.property.holdingNumberLabel' | translate }}</label>
       <input [id]="'prop' + index + '_holdingNumber'" type="text" formControlName="holdingNumber" />
     </div>
+  </div>
+
+  <div class="grid-3">
     <div class="field" formGroupName="dagNo">
       <label>{{ 'registration.property.dagNoLabel' | translate }} <span class="required">*</span></label>
       <div class="flex-row-wrap">
@@ -51,13 +54,22 @@
       }
     </div>
     <div class="field">
-      <label [attr.for]="'prop' + index + '_landQuantity'">{{ 'registration.property.landQuantityLabel' | translate }}</label>
+      <label [attr.for]="'prop' + index + '_landQuantity'">{{ 'registration.property.landQuantityLabel' | translate }} <span class="required">*</span></label>
       <input [id]="'prop' + index + '_landQuantity'" type="text" inputmode="decimal" formControlName="landQuantity" [placeholder]="'registration.property.landQuantityPlaceholder' | translate" />
+      @if (showLandQuantityError()) {
+        <p class="field-error">{{ 'registration.property.landQuantityRequired' | translate }}</p>
+      }
     </div>
     <div class="field">
-      <label [attr.for]="'prop' + index + '_myShareQuantity'">{{ 'registration.property.myShareQuantityLabel' | translate }}</label>
+      <label [attr.for]="'prop' + index + '_myShareQuantity'">{{ 'registration.property.myShareQuantityLabel' | translate }} <span class="required">*</span></label>
       <input [id]="'prop' + index + '_myShareQuantity'" type="text" inputmode="decimal" formControlName="myShareQuantity" [placeholder]="'registration.property.myShareQuantityPlaceholder' | translate" />
+      @if (showMyShareQuantityError()) {
+        <p class="field-error">{{ 'registration.property.myShareQuantityRequired' | translate }}</p>
+      }
     </div>
+  </div>
+
+  <div class="grid-2">
     <div class="field">
       <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>
       <div class="checkbox-row">
@@ -76,26 +88,26 @@
         <p class="field-error">{{ 'registration.property.ownershipRequired' | translate }}</p>
       }
     </div>
-  </div>
 
-  @if (property.get('ownership')?.value === 'যৌথ') {
-    <div class="field">
-      <label>{{ 'registration.property.jointOwnerCountLabel' | translate }} <span class="required">*</span></label>
-      <input
-        [id]="'prop' + index + '_jointOwnerCount'"
-        type="number"
-        formControlName="jointOwnerCount"
-        min="1"
-        step="1"
-        inputmode="numeric"
-        pattern="[0-9]*"
-        style="max-width: 8rem; width: 100%"
-      />
-      @if (showJointOwnerCountError()) {
-        <p class="field-error">{{ 'registration.property.jointOwnerCountRequired' | translate }}</p>
-      }
-    </div>
-  }
+    @if (property.get('ownership')?.value === 'যৌথ') {
+      <div class="field">
+        <label>{{ 'registration.property.jointOwnerCountLabel' | translate }} <span class="required">*</span></label>
+        <input
+          [id]="'prop' + index + '_jointOwnerCount'"
+          type="number"
+          formControlName="jointOwnerCount"
+          min="1"
+          step="1"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          style="max-width: 8rem; width: 100%"
+        />
+        @if (showJointOwnerCountError()) {
+          <p class="field-error">{{ 'registration.property.jointOwnerCountRequired' | translate }}</p>
+        }
+      </div>
+    }
+  </div>
 
   <div class="field">
     <label>{{ 'registration.property.applicableDocsLabel' | translate }} <span class="required">*</span></label>

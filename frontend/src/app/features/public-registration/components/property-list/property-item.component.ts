@@ -159,6 +159,14 @@ export class PropertyItemComponent {
     return ownership === 'যৌথ' && this.submitAttempted && (count === null || count === 0 || count === '');
   }
 
+  showLandQuantityError(): boolean {
+    return this.submitAttempted && !this.property.get('landQuantity')?.value?.trim();
+  }
+
+  showMyShareQuantityError(): boolean {
+    return this.submitAttempted && !this.property.get('myShareQuantity')?.value?.trim();
+  }
+
   showApplicableDocsError(): boolean {
     return this.submitAttempted && this.applicableDocs.length === 0;
   }
