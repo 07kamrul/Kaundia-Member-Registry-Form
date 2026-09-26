@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
@@ -12,6 +12,7 @@ import {
 @Component({
   selector: 'app-role-management',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, TranslatePipe],
   templateUrl: './role-management.component.html',
 })
@@ -120,7 +121,8 @@ export class RoleManagementComponent implements OnInit {
   }
 
   createUser(): void {
-    if (!this.newUserName || !this.newUserEmail || !this.newUserPassword || !this.newUserRole) return;
+    if (!this.newUserName || !this.newUserEmail || !this.newUserPassword || !this.newUserRole)
+      return;
 
     this.creatingUser = true;
     this.createUserError = '';
@@ -145,7 +147,8 @@ export class RoleManagementComponent implements OnInit {
         },
         error: (err) => {
           this.createUserError =
-            err?.error?.detail ?? this.translate.instant('admin.roleManagement.errors.createUserFailed');
+            err?.error?.detail ??
+            this.translate.instant('admin.roleManagement.errors.createUserFailed');
           this.creatingUser = false;
           this.cdr.markForCheck();
         },
@@ -193,7 +196,10 @@ export class RoleManagementComponent implements OnInit {
   applyOverride(): void {
     if (!this.selectedUserId || !this.overrideDraftKey) return;
     const next = this.overrides.filter((o) => o.permission_key !== this.overrideDraftKey);
-    next.push({ permission_key: this.overrideDraftKey, granted: this.overrideDraftAction === 'grant' });
+    next.push({
+      permission_key: this.overrideDraftKey,
+      granted: this.overrideDraftAction === 'grant',
+    });
     this.saveOverrides(this.selectedUserId, next);
   }
 

@@ -62,6 +62,7 @@ export const routes: Routes = [
       {
         path: 'submissions',
         canActivate: [roleGuard(ADMIN_ROLES)],
+        data: { requiresAdmin: true },
         loadComponent: () =>
           import('./features/admin/pages/submissions-list/submissions-list.component').then(
             (m) => m.SubmissionsListComponent,
@@ -70,6 +71,7 @@ export const routes: Routes = [
       {
         path: 'submissions/:id',
         canActivate: [roleGuard(ADMIN_ROLES)],
+        data: { requiresAdmin: true },
         loadComponent: () =>
           import('./features/admin/pages/submission-detail/submission-detail.component').then(
             (m) => m.SubmissionDetailComponent,
@@ -78,6 +80,7 @@ export const routes: Routes = [
       {
         path: 'members',
         canActivate: [roleGuard(ADMIN_ROLES)],
+        data: { requiresAdmin: true },
         loadComponent: () =>
           import('./features/admin/pages/members-list/members-list.component').then(
             (m) => m.MembersListComponent,
@@ -86,14 +89,16 @@ export const routes: Routes = [
       {
         path: 'installments-management',
         canActivate: [roleGuard(ADMIN_ROLES)],
+        data: { requiresAdmin: true },
         loadComponent: () =>
-          import(
-            './features/admin/pages/installments-management/installments-management.component'
-          ).then((m) => m.InstallmentsManagementComponent),
+          import('./features/admin/pages/installments-management/installments-management.component').then(
+            (m) => m.InstallmentsManagementComponent,
+          ),
       },
       {
         path: 'roles',
         canActivate: [permissionGuard(['manage_roles'])],
+        data: { requiresAdmin: true },
         loadComponent: () =>
           import('./features/admin/pages/role-management/role-management.component').then(
             (m) => m.RoleManagementComponent,

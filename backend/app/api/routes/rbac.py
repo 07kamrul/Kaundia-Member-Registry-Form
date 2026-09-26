@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import load_only, selectinload
 
 from app.core.deps import get_current_admin
-from app.core.permissions import PERMISSION_CATALOG, get_effective_permissions, require_permission
-from app.core.security import hash_password
+from app.core.permissions import (
+    PERMISSION_CATALOG,
+    get_effective_permissions,
+    invalidate_permission_cache,
+    require_permission,
+)
+from app.core.security import hash_password_async
 from app.db.session import get_db
 from app.models.admin import AdminRole, AdminUser
 from app.models.rbac import Permission, Role, UserPermissionOverride
@@ -46,7 +51,9 @@ async def list_roles(
     db: AsyncSession = Depends(get_db),
     _admin: AdminUser = Depends(require_permission("manage_roles")),
 ) -> list[RoleOut]:
-    result = await db.execute(select(Role).options(selectinload(Role.permissions)))
+    result = await db.execute(
+        select(Role).options(selectinload(Role.permissions).options(load_only(Permission.key)))
+    )
     roles = result.scalars().all()
     return [
         RoleOut(
@@ -87,7 +94,9 @@ async def update_role_permissions(
 
     role.permissions = list(permissions)
     await db.commit()
-    await db.refresh(role, attribute_names=["permissions"])
+    # expire_on_commit=False keeps the collection we just assigned intact, and
+    # every cached effective-permission set for this role is now stale.
+    invalidate_permission_cache()
 
     return RoleOut(
         id=role.id,
@@ -102,7 +111,11 @@ async def list_admin_users(
     db: AsyncSession = Depends(get_db),
     _admin: AdminUser = Depends(require_permission("manage_users")),
 ) -> list[AdminUserOut]:
-    result = await db.execute(select(AdminUser).where(AdminUser.role != AdminRole.SUPER_ADMIN))
+    result = await db.execute(
+        select(AdminUser)
+        .where(AdminUser.role != AdminRole.SUPER_ADMIN)
+        .options(load_only(AdminUser.id, AdminUser.name, AdminUser.email, AdminUser.role, AdminUser.role_id))
+    )
     return [
         AdminUserOut(
             id=user.id, name=user.name, email=user.email, role=user.role.value, role_id=user.role_id
@@ -136,13 +149,12 @@ async def create_admin_user(
     user = AdminUser(
         name=payload.name,
         email=payload.email,
-        password_hash=hash_password(payload.password),
+        password_hash=await hash_password_async(payload.password),
         role=role_enum,
         role_id=payload.role_id,
     )
     db.add(user)
     await db.commit()
-    await db.refresh(user)
 
     return AdminUserOut(id=user.id, name=user.name, email=user.email, role=user.role.value, role_id=user.role_id)
 
@@ -172,10 +184,10 @@ async def update_admin_user_role(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
 
     if user.id == admin.id and role_enum != AdminRole.SUPER_ADMIN and admin.role == AdminRole.SUPER_ADMIN:
-        count_result = await db.execute(
-            select(AdminUser).where(AdminUser.role == AdminRole.SUPER_ADMIN)
+        count_result = await db.scalar(
+            select(func.count()).select_from(AdminUser).where(AdminUser.role == AdminRole.SUPER_ADMIN)
         )
-        if len(count_result.scalars().all()) <= 1:
+        if (count_result or 0) <= 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot remove the last super_admin",
@@ -184,7 +196,7 @@ async def update_admin_user_role(
     user.role = role_enum
     user.role_id = payload.role_id
     await db.commit()
-    await db.refresh(user)
+    invalidate_permission_cache()
 
     return AdminUserOut(id=user.id, name=user.name, email=user.email, role=user.role.value, role_id=user.role_id)
 
@@ -217,12 +229,6 @@ async def set_user_overrides(
     if user_result.scalar_one_or_none() is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    existing_result = await db.execute(
-        select(UserPermissionOverride).where(UserPermissionOverride.user_id == user_id)
-    )
-    for existing in existing_result.scalars().all():
-        await db.delete(existing)
-
     perm_result = await db.execute(
         select(Permission).where(Permission.key.in_([item.permission_key for item in payload]))
     )
@@ -234,6 +240,11 @@ async def set_user_overrides(
             detail=f"Unknown permission keys: {sorted(missing)}",
         )
 
+    # Single set-based DELETE - the old loop issued one round-trip per row.
+    await db.execute(
+        delete(UserPermissionOverride).where(UserPermissionOverride.user_id == user_id)
+    )
+
     for item in payload:
         db.add(
             UserPermissionOverride(
@@ -243,6 +254,7 @@ async def set_user_overrides(
             )
         )
     await db.commit()
+    invalidate_permission_cache()
 
     return [
         PermissionOverrideOut(permission_key=item.permission_key, granted=item.granted)

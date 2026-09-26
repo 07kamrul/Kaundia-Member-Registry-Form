@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -20,20 +20,23 @@ def _parse_amount(value: str | None) -> float:
 
 @router.get("/stats", response_model=PublicStatsOut)
 async def get_public_stats(db: AsyncSession = Depends(get_db)) -> PublicStatsOut:
-    pending_count = await db.scalar(
-        select(func.count()).select_from(Member).where(Member.status == MemberStatus.PENDING)
-    )
-    approved_count = await db.scalar(
-        select(func.count()).select_from(Member).where(Member.status == MemberStatus.APPROVED)
-    )
+    # Single pass over two narrow columns. The previous version ran three
+    # sequential queries (two COUNTs, then a scan of every approved member's
+    # subscription) to produce the same three numbers.
+    rows = await db.execute(select(Member.status, Member.subscription))
 
-    approved_subscriptions = await db.scalars(
-        select(Member.subscription).where(Member.status == MemberStatus.APPROVED)
-    )
-    monthly_subscription_total = sum(_parse_amount(value) for value in approved_subscriptions)
+    pending_count = 0
+    approved_count = 0
+    monthly_subscription_total = 0.0
+    for row_status, subscription in rows:
+        if row_status == MemberStatus.APPROVED:
+            approved_count += 1
+            monthly_subscription_total += _parse_amount(subscription)
+        elif row_status == MemberStatus.PENDING:
+            pending_count += 1
 
     return PublicStatsOut(
-        pending_count=pending_count or 0,
-        approved_count=approved_count or 0,
+        pending_count=pending_count,
+        approved_count=approved_count,
         monthly_subscription_total=monthly_subscription_total,
     )

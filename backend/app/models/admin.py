@@ -31,7 +31,7 @@ class AdminUser(Base):
         server_default=AdminRole.ADMINISTRATOR.value,
     )
     role_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("roles.id", ondelete="SET NULL"), nullable=True
+        Integer, ForeignKey("roles.id", ondelete="SET NULL"), nullable=True, index=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

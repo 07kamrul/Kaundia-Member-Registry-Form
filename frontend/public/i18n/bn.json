@@ -144,7 +144,9 @@
       "backToHome": "হোমে ফিরুন",
       "identifierRequiredError": "ইউজারনেম / ইমেইল আবশ্যক",
       "passwordRequiredError": "পাসওয়ার্ড আবশ্যক",
-      "loginFailedError": "লগইন ব্যর্থ হয়েছে। তথ্য সঠিক নয়।"
+      "loginFailedError": "লগইন ব্যর্থ হয়েছে। তথ্য সঠিক নয়।",
+      "showPassword": "পাসওয়ার্ড দেখুন",
+      "hidePassword": "পাসওয়ার্ড লুকান"
     }
   },
   "admin": {

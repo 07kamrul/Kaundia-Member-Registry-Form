@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
@@ -18,10 +24,11 @@ import { IconComponent } from '../../../../shared/icon/icon.component';
 @Component({
   selector: 'app-submission-detail',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, ConfirmModalComponent, TranslatePipe, IconComponent],
   templateUrl: './submission-detail.component.html',
 })
-export class SubmissionDetailComponent implements OnInit {
+export class SubmissionDetailComponent implements OnInit, OnDestroy {
   submission: SubmissionDetail | null = null;
   loading = false;
   error = '';
@@ -42,6 +49,32 @@ export class SubmissionDetailComponent implements OnInit {
 
   private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /* ---------- derived-value caches ----------
+   *
+   * The template for this page is large and re-reads these helpers on every
+   * change-detection pass. They used to rebuild objects, rescan nominees and
+   * re-run the URL sanitizer on each read. Everything below is computed once
+   * per submission (or per preview URL) and invalidated when the source
+   * changes, so a render pass costs map lookups instead of array scans.
+   */
+
+  private derivedFor: SubmissionDetail | null | undefined = undefined;
+  private derivedInitials = '';
+  private derivedEmergency: EmergencyContact | null = null;
+  private derivedEmergencyAlsoNominee = false;
+  private derivedEmergencyIsApplicant = false;
+  private derivedShareTotal = 0;
+  private derivedShareDeclared = false;
+  private derivedShareWarning = false;
+  private readonly duplicateMobilesByProperty = new Map<string, Set<string>>();
+  private readonly coOwnerRolesByOwner = new Map<
+    string,
+    Array<'applicant' | 'emergency' | 'nominee'>
+  >();
+  private readonly emptyValueByLang = new Map<string, string>();
+  private sanitizedFrameUrl: SafeResourceUrl | null = null;
+  private sanitizedFrameUrlFor: string | null | undefined = undefined;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -53,7 +86,13 @@ export class SubmissionDetailComponent implements OnInit {
 
   /** Sanitized URL for embedding non-image previews (e.g. PDF) in an iframe. */
   get previewFrameUrl(): SafeResourceUrl {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(this.previewImageUrl ?? '');
+    if (this.sanitizedFrameUrlFor !== this.previewImageUrl) {
+      this.sanitizedFrameUrlFor = this.previewImageUrl;
+      this.sanitizedFrameUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+        this.previewImageUrl ?? '',
+      );
+    }
+    return this.sanitizedFrameUrl as SafeResourceUrl;
   }
 
   /** Only allow review actions once the submission has finished loading without error. */
@@ -63,57 +102,95 @@ export class SubmissionDetailComponent implements OnInit {
 
   /** Avatar fallback initials when no member photo is available. */
   get applicantInitials(): string {
-    return this.initials(this.submission?.fullName);
+    this.ensureDerived();
+    return this.derivedInitials;
   }
 
   /** Typed view of the emergency-contact fields on the submission. */
   get emergencyContact(): EmergencyContact | null {
-    if (!this.submission) return null;
-    const { urgentContactName, urgentContactRelation, urgentContactMobile, urgentContactAddress } =
-      this.submission;
-    if (!urgentContactName && !urgentContactMobile && !urgentContactAddress) return null;
-    return {
-      name: urgentContactName,
-      relation: urgentContactRelation,
-      mobile: urgentContactMobile,
-      address: urgentContactAddress,
-    };
+    this.ensureDerived();
+    return this.derivedEmergency;
   }
 
   /** True when the emergency contact is also listed as a nominee. */
   get emergencyAlsoNominee(): boolean {
-    const emergency = this.emergencyContact;
-    if (!emergency || !this.submission) return false;
-    return this.submission.nominees.some((nominee) => this.samePerson(emergency, nominee));
+    this.ensureDerived();
+    return this.derivedEmergencyAlsoNominee;
   }
 
   /** True when the emergency contact matches the applicant themself. */
   get emergencyIsApplicant(): boolean {
-    const emergency = this.emergencyContact;
-    if (!emergency || !this.submission) return false;
-    return this.samePerson(emergency, {
-      name: this.submission.fullName,
-      mobile: this.submission.mobile,
-    });
+    this.ensureDerived();
+    return this.derivedEmergencyIsApplicant;
   }
 
   /** Sum of nominee share percentages (only nominees that declare one). */
   get nomineeShareTotal(): number {
-    if (!this.submission) return 0;
-    return this.submission.nominees.reduce(
-      (sum, nominee) =>
-        sum + (typeof nominee.sharePercentage === 'number' ? nominee.sharePercentage : 0),
-      0,
-    );
+    this.ensureDerived();
+    return this.derivedShareTotal;
   }
 
   get nomineeShareDeclared(): boolean {
-    if (!this.submission) return false;
-    return this.submission.nominees.some((nominee) => typeof nominee.sharePercentage === 'number');
+    this.ensureDerived();
+    return this.derivedShareDeclared;
   }
 
   get nomineeShareWarning(): boolean {
-    return this.nomineeShareDeclared && Math.round(this.nomineeShareTotal) !== 100;
+    this.ensureDerived();
+    return this.derivedShareWarning;
+  }
+
+  /** Recomputes the cached submission-derived values if the submission changed. */
+  private ensureDerived(): void {
+    if (this.derivedFor === this.submission) return;
+    this.derivedFor = this.submission;
+    this.duplicateMobilesByProperty.clear();
+    this.coOwnerRolesByOwner.clear();
+
+    const submission = this.submission;
+    if (!submission) {
+      this.derivedInitials = '';
+      this.derivedEmergency = null;
+      this.derivedEmergencyAlsoNominee = false;
+      this.derivedEmergencyIsApplicant = false;
+      this.derivedShareTotal = 0;
+      this.derivedShareDeclared = false;
+      this.derivedShareWarning = false;
+      return;
+    }
+
+    this.derivedInitials = this.initials(submission.fullName);
+
+    const { urgentContactName, urgentContactRelation, urgentContactMobile, urgentContactAddress } =
+      submission;
+    const emergency =
+      urgentContactName || urgentContactMobile || urgentContactAddress
+        ? ({
+            name: urgentContactName,
+            relation: urgentContactRelation,
+            mobile: urgentContactMobile,
+            address: urgentContactAddress,
+          } as EmergencyContact)
+        : null;
+    this.derivedEmergency = emergency;
+    this.derivedEmergencyAlsoNominee = emergency
+      ? submission.nominees.some((nominee) => this.samePerson(emergency, nominee))
+      : false;
+    this.derivedEmergencyIsApplicant = emergency
+      ? this.samePerson(emergency, { name: submission.fullName, mobile: submission.mobile })
+      : false;
+
+    let shareTotal = 0;
+    let shareDeclared = false;
+    for (const nominee of submission.nominees) {
+      if (typeof nominee.sharePercentage === 'number') {
+        shareDeclared = true;
+        shareTotal += nominee.sharePercentage;
+      }
+    }
+    this.derivedShareTotal = shareTotal;
+    this.derivedShareDeclared = shareDeclared;
+    this.derivedShareWarning = shareDeclared && Math.round(shareTotal) !== 100;
   }
 
   ngOnInit(): void {
@@ -138,6 +215,10 @@ export class SubmissionDetailComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    if (this.copyResetTimer) clearTimeout(this.copyResetTimer);
+  }
+
   /* ---------- shared field helpers ---------- */
 
   initials(name?: string | null): string {
@@ -159,7 +240,12 @@ export class SubmissionDetailComponent implements OnInit {
 
   /** Muted placeholder for empty values (em dash / "Not provided"). */
   emptyValue(): string {
-    return this.translate.instant('admin.submissionDetail.notProvided');
+    const lang = this.translate.currentLang() ?? '';
+    const cached = this.emptyValueByLang.get(lang);
+    if (cached !== undefined) return cached;
+    const value = this.translate.instant('admin.submissionDetail.notProvided');
+    this.emptyValueByLang.set(lang, value);
+    return value;
   }
 
   formatLandQuantity(quantity?: string | null): { value: string; unit: string } {
@@ -257,18 +343,25 @@ export class SubmissionDetailComponent implements OnInit {
 
   /** Role tags for a co-owner: applicant / emergency / nominee (can be several). */
   coOwnerRoles(owner: CoOwner): Array<'applicant' | 'emergency' | 'nominee'> {
+    this.ensureDerived();
+    const cached = this.coOwnerRolesByOwner.get(owner.id);
+    if (cached) return cached;
+
     const roles: Array<'applicant' | 'emergency' | 'nominee'> = [];
-    if (!this.submission) return roles;
-    if (
-      this.samePerson(owner, { name: this.submission.fullName, mobile: this.submission.mobile })
-    ) {
+    const submission = this.submission;
+    if (!submission) {
+      this.coOwnerRolesByOwner.set(owner.id, roles);
+      return roles;
+    }
+    if (this.samePerson(owner, { name: submission.fullName, mobile: submission.mobile })) {
       roles.push('applicant');
     }
-    const emergency = this.emergencyContact;
+    const emergency = this.derivedEmergency;
     if (emergency && this.samePerson(owner, emergency)) roles.push('emergency');
-    if (this.submission.nominees.some((nominee) => this.samePerson(owner, nominee))) {
+    if (submission.nominees.some((nominee) => this.samePerson(owner, nominee))) {
       roles.push('nominee');
     }
+    this.coOwnerRolesByOwner.set(owner.id, roles);
     return roles;
   }
 
@@ -294,6 +387,10 @@ export class SubmissionDetailComponent implements OnInit {
 
   /** Mobile numbers used by more than one co-owner on this property. */
   duplicateMobiles(property: SubmissionProperty): Set<string> {
+    this.ensureDerived();
+    const cached = this.duplicateMobilesByProperty.get(property.id);
+    if (cached) return cached;
+
     const counts = new Map<string, number>();
     for (const owner of property.coOwners ?? []) {
       const key = this.normalize(owner.mobile);
@@ -305,6 +402,7 @@ export class SubmissionDetailComponent implements OnInit {
       const key = this.normalize(owner.mobile);
       if (key && (counts.get(key) ?? 0) > 1) dupes.add(key);
     }
+    this.duplicateMobilesByProperty.set(property.id, dupes);
     return dupes;
   }
 

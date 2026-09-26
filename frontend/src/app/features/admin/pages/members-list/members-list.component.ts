@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -10,6 +10,7 @@ import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-
 @Component({
   selector: 'app-members-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IconComponent, ConfirmModalComponent, TranslatePipe],
   templateUrl: './members-list.component.html',
 })

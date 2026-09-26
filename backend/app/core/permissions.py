@@ -3,6 +3,7 @@
 Routes must gate on permission keys (`require_permission("manage_notices")`), never on role
 names, so permissions can be recomposed per role or per user without touching route code.
 """
+import time
 from dataclasses import dataclass
 
 from fastapi import Depends, HTTPException, status
@@ -14,6 +15,24 @@ from app.core.deps import get_current_admin
 from app.db.session import get_db
 from app.models.admin import AdminRole, AdminUser
 from app.models.rbac import Permission, Role, UserPermissionOverride
+
+# Effective permissions change only when an admin edits a role or a user's
+# overrides - both rare, explicit, admin-driven events - yet they were
+# recomputed with 2 queries on *every* gated request. A short-lived process
+# cache keyed by (user id, role, role id) removes those round-trips; the TTL
+# bounds staleness for out-of-band edits (e.g. a second app instance), and
+# every in-process RBAC mutation calls `invalidate_permission_cache()`.
+_PERMISSION_CACHE_TTL_SECONDS = 60.0
+_permission_cache: dict[tuple[int, str, int | None], tuple[float, frozenset[str]]] = {}
+
+
+def invalidate_permission_cache() -> None:
+    """Drop cached effective permissions after an RBAC mutation."""
+    _permission_cache.clear()
+
+
+def _cache_key(admin: AdminUser) -> tuple[int, str, int | None]:
+    return (admin.id, admin.role.value, admin.role_id)
 
 
 @dataclass(frozen=True)
@@ -110,11 +129,8 @@ def is_super_admin(admin: AdminUser) -> bool:
     return admin.role == AdminRole.SUPER_ADMIN
 
 
-async def get_effective_permissions(db: AsyncSession, admin: AdminUser) -> set[str]:
+async def _load_effective_permissions(db: AsyncSession, admin: AdminUser) -> set[str]:
     """role's permissions ∪ granted overrides − revoked overrides."""
-    if is_super_admin(admin):
-        return set(PERMISSION_KEYS)
-
     granted: set[str] = set()
     role = None
     if admin.role_id is not None:
@@ -142,6 +158,22 @@ async def get_effective_permissions(db: AsyncSession, admin: AdminUser) -> set[s
             granted.discard(key)
 
     return granted
+
+
+async def get_effective_permissions(db: AsyncSession, admin: AdminUser) -> set[str]:
+    """role's permissions ∪ granted overrides − revoked overrides."""
+    if is_super_admin(admin):
+        return set(PERMISSION_KEYS)
+
+    key = _cache_key(admin)
+    cached = _permission_cache.get(key)
+    now = time.monotonic()
+    if cached is not None and now - cached[0] < _PERMISSION_CACHE_TTL_SECONDS:
+        return set(cached[1])
+
+    effective = frozenset(await _load_effective_permissions(db, admin))
+    _permission_cache[key] = (now, effective)
+    return set(effective)
 
 
 async def can(db: AsyncSession, admin: AdminUser, permission_key: str) -> bool:

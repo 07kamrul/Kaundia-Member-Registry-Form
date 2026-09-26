@@ -1,5 +1,12 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, DestroyRef, inject, Input, OnInit } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BehaviorSubject, Observable, switchMap } from 'rxjs';
@@ -23,6 +30,7 @@ const ADDRESS_FIELD_ERROR_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-address-info',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, AsyncPipe, TranslatePipe],
   templateUrl: './address-info.component.html',
 })

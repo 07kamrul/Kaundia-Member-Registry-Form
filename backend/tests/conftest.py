@@ -7,6 +7,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
+from app.core.permissions import invalidate_permission_cache
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
@@ -14,6 +15,15 @@ from app.core.security import hash_password
 from app.models.admin import AdminRole, AdminUser
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+
+@pytest.fixture(autouse=True)
+def _clear_permission_cache():
+    """The process-wide effective-permission cache is keyed by user id + role,
+    which repeats across the fresh in-memory databases each test builds."""
+    invalidate_permission_cache()
+    yield
+    invalidate_permission_cache()
 
 
 @pytest_asyncio.fixture
@@ -32,11 +42,12 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 
     app.dependency_overrides[get_db] = override_get_db
 
-    async with session_maker() as session:
-        yield session
-
-    app.dependency_overrides.clear()
-    await engine.dispose()
+    try:
+        async with session_maker() as session:
+            yield session
+    finally:
+        app.dependency_overrides.clear()
+        await engine.dispose()
 
 
 @pytest_asyncio.fixture

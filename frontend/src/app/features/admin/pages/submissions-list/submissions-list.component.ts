@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -8,6 +8,7 @@ import { IconComponent } from '../../../../shared/icon/icon.component';
 @Component({
   selector: 'app-submissions-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, IconComponent, TranslatePipe],
   templateUrl: './submissions-list.component.html',
 })

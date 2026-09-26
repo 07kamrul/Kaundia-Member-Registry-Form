@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.permissions import ROLE_DEFAULT_PERMISSIONS, get_effective_permissions
-from app.core.security import create_access_token, create_refresh_token, verify_password
+from app.core.security import create_access_token, create_refresh_token, verify_password_async
 from app.db.session import get_db
 from app.models.admin import AdminUser
 from app.models.credential import MemberCredential
@@ -28,14 +28,14 @@ async def _admin_token_response(db: AsyncSession, admin: AdminUser) -> TokenResp
 async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
     admin_result = await db.execute(select(AdminUser).where(AdminUser.email == payload.identifier))
     admin = admin_result.scalar_one_or_none()
-    if admin is not None and verify_password(payload.password, admin.password_hash):
+    if admin is not None and await verify_password_async(payload.password, admin.password_hash):
         return await _admin_token_response(db, admin)
 
     credential_result = await db.execute(
         select(MemberCredential).where(MemberCredential.username == payload.identifier)
     )
     credential = credential_result.scalar_one_or_none()
-    if credential is not None and verify_password(payload.password, credential.password_hash):
+    if credential is not None and await verify_password_async(payload.password, credential.password_hash):
         return TokenResponse(
             access_token=create_access_token(str(credential.member_id), "member"),
             refresh_token=create_refresh_token(str(credential.member_id), "member"),
@@ -51,7 +51,7 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> To
 async def admin_login(payload: AdminLoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
     result = await db.execute(select(AdminUser).where(AdminUser.email == payload.email))
     admin = result.scalar_one_or_none()
-    if admin is None or not verify_password(payload.password, admin.password_hash):
+    if admin is None or not await verify_password_async(payload.password, admin.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     return await _admin_token_response(db, admin)
@@ -63,7 +63,7 @@ async def member_login(payload: MemberLoginRequest, db: AsyncSession = Depends(g
         select(MemberCredential).where(MemberCredential.username == payload.username)
     )
     credential = result.scalar_one_or_none()
-    if credential is None or not verify_password(payload.password, credential.password_hash):
+    if credential is None or not await verify_password_async(payload.password, credential.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     return TokenResponse(

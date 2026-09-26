@@ -1,4 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  inject,
+} from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService, type MemberProfile } from '../../../../core/services/member.service';
@@ -14,6 +20,7 @@ interface RecentContribution {
 @Component({
   selector: 'app-member-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslatePipe],
   templateUrl: './member-dashboard.component.html',
 })
@@ -25,6 +32,8 @@ export class MemberDashboardComponent implements OnInit {
   dueCount = 0;
   loading = false;
   error = '';
+
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(
     private memberService: MemberService,
@@ -46,12 +55,18 @@ export class MemberDashboardComponent implements OnInit {
           .sort((a, b) => b.year - a.year || b.month - a.month)
           .slice(0, 6)
           .reverse()
-          .map((item) => ({ id: item.id, labelKey: monthNameKey(item.month), status: item.status }));
+          .map((item) => ({
+            id: item.id,
+            labelKey: monthNameKey(item.month),
+            status: item.status,
+          }));
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = this.translate.instant('member.dashboard.loadError');
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }

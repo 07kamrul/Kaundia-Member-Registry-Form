@@ -144,7 +144,9 @@
       "backToHome": "Back to Home",
       "identifierRequiredError": "Username / email is required",
       "passwordRequiredError": "Password is required",
-      "loginFailedError": "Login failed. Information is incorrect."
+      "loginFailedError": "Login failed. Information is incorrect.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     }
   },
   "admin": {

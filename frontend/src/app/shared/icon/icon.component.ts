@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 
 export type IconName =
@@ -24,6 +24,7 @@ export type IconName =
   | 'coin'
   | 'arrowleft'
   | 'eye'
+  | 'eye-off'
   | 'phone'
   | 'map'
   | 'pin'
@@ -62,6 +63,8 @@ const ICON_PATHS: Record<IconName, string> = {
   coin: '<circle cx="12" cy="12" r="8.5"/><path d="M9.5 15.5V9.8c0-1 .8-1.8 1.8-1.8h.4c1 0 1.8.8 1.8 1.8v.2M9.5 12.3h4.5"/>',
   arrowleft: '<path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+  'eye-off':
+    '<path d="M3 3l18 18"/><path d="M10.6 5.2A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.9 17.9 0 0 1-3.6 4.5"/><path d="M6.6 6.7C3.9 8.5 2 12 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
   phone:
     '<path d="M6.5 3h3l1.5 4.5-2 1.5a12.5 12.5 0 0 0 6 6l1.5-2L21 14.5v3A2.5 2.5 0 0 1 18.5 20 15.5 15.5 0 0 1 4 5.5 2.5 2.5 0 0 1 6.5 3z"/>',
   map: '<path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/>',
@@ -74,9 +77,12 @@ const ICON_PATHS: Record<IconName, string> = {
   'check-circle': '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
 };
 
+const SAFE_ICON_HTML = new Map<IconName, SafeHtml>();
+
 @Component({
   selector: 'app-icon',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <svg
       [attr.width]="size"
@@ -95,7 +101,7 @@ export class IconComponent {
   @Input() name: IconName = 'dashboard';
   @Input() size = 20;
 
-  constructor(private sanitizer: DomSanitizer) {}
+  private readonly sanitizer = inject(DomSanitizer);
 
   // The SVG path data is a fixed, hardcoded lookup table (ICON_PATHS above),
   // never user input, so trusting it here is safe. Angular's default HTML
@@ -103,7 +109,20 @@ export class IconComponent {
   // binding (they aren't in its safe-HTML allowlist), which silently
   // rendered every icon as an empty box — bypassing sanitization for this
   // known-static markup is what actually makes icons paint.
+  //
+  // The sanitized value is memoized per icon name so the [innerHTML] binding
+  // sees a stable reference. Previously the getter re-sanitized on every
+  // change-detection pass, so Angular saw a fresh object each time and
+  // rewrote the SVG subtree — one wasted DOM write per icon per pass
+  // (dozens per template).
   get path(): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(ICON_PATHS[this.name]);
+    let cached = SAFE_ICON_HTML.get(this.name);
+    if (!cached) {
+      cached = this.sanitizer.bypassSecurityTrustHtml(
+        ICON_PATHS[this.name] ?? ICON_PATHS.dashboard,
+      );
+      SAFE_ICON_HTML.set(this.name, cached);
+    }
+    return cached;
   }
 }

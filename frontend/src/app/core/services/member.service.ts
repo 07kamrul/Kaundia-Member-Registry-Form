@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import type { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type { Installment } from '../models/admin.model';
 
@@ -31,6 +31,7 @@ export interface MemberProfile {
 @Injectable({ providedIn: 'root' })
 export class MemberService {
   private base = `${environment.apiBaseUrl}/member`;
+  private profileCache: Observable<MemberProfile> | null = null;
 
   constructor(private http: HttpClient) {}
 
@@ -42,7 +43,16 @@ export class MemberService {
   }
 
   getProfile(): Observable<MemberProfile> {
-    return this.http.get<MemberProfile>(`${this.base}/me`);
+    if (!this.profileCache) {
+      this.profileCache = this.http
+        .get<MemberProfile>(`${this.base}/me`)
+        .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    }
+    return this.profileCache;
+  }
+
+  clearProfileCache(): void {
+    this.profileCache = null;
   }
 
   getInstallments(): Observable<Installment[]> {

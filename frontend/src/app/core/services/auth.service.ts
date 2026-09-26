@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { MemberService } from './member.service';
 
 export type UserRole = 'super_admin' | 'executive_committee' | 'administrator' | 'member';
 
@@ -44,6 +45,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
+    private memberService: MemberService,
   ) {}
 
   get token(): string | null {
@@ -79,6 +81,7 @@ export class AuthService {
 
   private storeSession(res: TokenResponse, role: UserRole): void {
     const permissions = res.permissions ?? [];
+    this.memberService.clearProfileCache();
     this.accessToken.set(res.access_token);
     this.refreshTokenValue.set(res.refresh_token);
     this.roleValue.set(role);
@@ -91,6 +94,7 @@ export class AuthService {
   }
 
   logout(): void {
+    this.memberService.clearProfileCache();
     this.accessToken.set(null);
     this.refreshTokenValue.set(null);
     this.roleValue.set(null);

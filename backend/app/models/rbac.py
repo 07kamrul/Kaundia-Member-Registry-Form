@@ -65,7 +65,7 @@ class UserPermissionOverride(Base):
         Integer, ForeignKey("admin_users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     permission_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("permissions.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("permissions.id", ondelete="CASCADE"), nullable=False, index=True
     )
     granted: Mapped[bool] = mapped_column(Boolean, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

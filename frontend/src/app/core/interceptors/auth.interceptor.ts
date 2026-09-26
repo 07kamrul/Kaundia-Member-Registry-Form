@@ -13,7 +13,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authorizedReq).pipe(
     catchError((error: unknown) => {
-      if (error instanceof Object && 'status' in error && (error as { status: number }).status === 401) {
+      if (
+        error instanceof Object &&
+        'status' in error &&
+        (error as { status: number }).status === 401
+      ) {
         auth.handleUnauthorized();
       }
       return throwError(() => error);

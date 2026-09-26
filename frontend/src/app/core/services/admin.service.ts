@@ -239,11 +239,7 @@ export class AdminService {
       .pipe(map(toSubmissionDetail));
   }
 
-  replaceAttachment(
-    id: string,
-    kind: AttachmentKind,
-    file: File,
-  ): Observable<SubmissionDetail> {
+  replaceAttachment(id: string, kind: AttachmentKind, file: File): Observable<SubmissionDetail> {
     const body = new FormData();
     body.append('file', file);
     return this.http

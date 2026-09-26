@@ -56,12 +56,7 @@ export const DOCUMENT_OPTIONS: string[] = [
 
 export const PROPERTY_TYPES: string[] = ['জমি', 'বাড়ি', 'ফ্ল্যাট', 'প্লট', 'অন্যান্য'];
 export const OWNERSHIP_TYPES: string[] = ['একক', 'যৌথ'];
-export const PAYMENT_METHODS: string[] = [
-  'ক্যাশ',
-  'ব্যাংক',
-  'MFS (বিকাশ/নগদ/রকেট)',
-  'অন্যান্য',
-];
+export const PAYMENT_METHODS: string[] = ['ক্যাশ', 'ব্যাংক', 'MFS (বিকাশ/নগদ/রকেট)', 'অন্যান্য'];
 
 export const ORG_BANK_INFO = {
   bankName: 'ব্র্যাক ব্যাংক পিএলসি',

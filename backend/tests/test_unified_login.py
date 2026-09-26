@@ -12,7 +12,7 @@ async def test_unified_login_with_admin_email(client: AsyncClient, admin_user: A
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["role"] == "admin"
+    assert body["role"] == "executive_committee"
     assert body["access_token"]
 
 

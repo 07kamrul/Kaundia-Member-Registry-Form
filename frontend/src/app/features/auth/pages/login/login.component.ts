@@ -1,13 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { IconComponent } from '../../../../shared/icon/icon.component';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, ReactiveFormsModule, TranslatePipe, IconComponent],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
@@ -15,6 +17,9 @@ export class LoginComponent {
   error = '';
   submitting = false;
   submitAttempted = false;
+  passwordVisible = false;
+
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(
     private fb: FormBuilder,
@@ -26,6 +31,10 @@ export class LoginComponent {
       identifier: ['', Validators.required],
       password: ['', Validators.required],
     });
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
   }
 
   showError(controlName: string): boolean {
@@ -55,10 +64,12 @@ export class LoginComponent {
         } else {
           this.router.navigate(['/dashboard']);
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.submitting = false;
         this.error = this.translate.instant('auth.login.loginFailedError');
+        this.cdr.markForCheck();
       },
     });
   }

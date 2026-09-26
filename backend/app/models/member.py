@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -15,11 +15,17 @@ class MemberStatus(str, enum.Enum):
 
 class Member(Base):
     __tablename__ = "members"
+    # Admin lists sort by `created_at DESC` (optionally filtered by `status`);
+    # without these the whole table is sorted on every page load.
+    __table_args__ = (
+        Index("ix_members_created_at", "created_at"),
+        Index("ix_members_status_created_at", "status", "created_at"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     member_id: Mapped[str | None] = mapped_column(String(32), unique=True, nullable=True, index=True)
     status: Mapped[MemberStatus] = mapped_column(
-        Enum(MemberStatus, name="member_status"), default=MemberStatus.PENDING, nullable=False
+        Enum(MemberStatus, name="member_status"), default=MemberStatus.PENDING, nullable=False, index=True
     )
 
     # Member info

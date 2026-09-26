@@ -8,7 +8,9 @@ class Property(Base):
     __tablename__ = "properties"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    member_id: Mapped[int] = mapped_column(ForeignKey("members.id", ondelete="CASCADE"), nullable=False)
+    member_id: Mapped[int] = mapped_column(
+        ForeignKey("members.id", ondelete="CASCADE"), nullable=False, index=True
+    )
 
     property_type: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
     property_type_other: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -33,7 +35,7 @@ class CoOwner(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     property_id: Mapped[int] = mapped_column(
-        ForeignKey("properties.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("properties.id", ondelete="CASCADE"), nullable=False, index=True
     )
     owner_name: Mapped[str] = mapped_column(String(255), nullable=False)
     owner_phone: Mapped[str] = mapped_column(String(32), nullable=False)
@@ -46,7 +48,7 @@ class ApplicableDoc(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     property_id: Mapped[int] = mapped_column(
-        ForeignKey("properties.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("properties.id", ondelete="CASCADE"), nullable=False, index=True
     )
     doc_type: Mapped[str] = mapped_column(String(255), nullable=False)
     file_path: Mapped[str | None] = mapped_column(String(512), nullable=True)

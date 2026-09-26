@@ -1,18 +1,17 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
-  AfterViewChecked,
-  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
-  ElementRef,
+  DestroyRef,
   inject,
   OnInit,
   signal,
-  ViewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import SignaturePad from 'signature_pad';
 import { MAX_PHOTO_BYTES } from '../../core/models/registration.model';
 import { RegistrationService } from '../../core/services/registration.service';
 import { RegistrationDraftService } from './services/registration-draft.service';
@@ -70,6 +69,7 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
 @Component({
   selector: 'app-registration-page',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     MemberInfoComponent,
@@ -84,9 +84,7 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
   ],
   templateUrl: './registration-page.component.html',
 })
-export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterViewChecked {
-  @ViewChild('sigCanvas') sigCanvas?: ElementRef<HTMLCanvasElement>;
-
+export class RegistrationPageComponent implements OnInit {
   form: FormGroup;
   errors: string[] = [];
   serverError: string | null = null;
@@ -94,7 +92,6 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
   submitAttempted = false;
   success: { id: string } | null = null;
   memberPhotoPreview = signal('');
-  private signaturePad?: SignaturePad;
 
   steps = REGISTRATION_STEPS;
   currentStep = 1;
@@ -103,6 +100,8 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
 
   private readonly translate = inject(TranslateService);
   private readonly draftService = inject(RegistrationDraftService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly draftLastSaved = this.draftService.lastSaved;
 
@@ -122,6 +121,7 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
       this.showDraftRestoredToast = true;
     }
     this.draftService.watch(this.form, () => this.currentStep);
+    this.destroyRef.onDestroy(() => this.draftService.unwatch());
   }
 
   dismissDraftToast(): void {
@@ -136,30 +136,6 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
     this.draftService.watch(this.form, () => this.currentStep);
   }
 
-  ngAfterViewInit(): void {
-    this.setupSignaturePad();
-  }
-
-  ngAfterViewChecked(): void {
-    if (!this.sigCanvas) {
-      this.signaturePad = undefined;
-    } else if (!this.signaturePad) {
-      this.setupSignaturePad();
-    }
-  }
-
-  private setupSignaturePad(): void {
-    if (this.sigCanvas) {
-      this.signaturePad = new SignaturePad(this.sigCanvas.nativeElement, {
-        backgroundColor: 'rgb(255,255,255)',
-      });
-      const existing = this.form.get('memberSignature')?.value;
-      if (existing) {
-        this.signaturePad.fromDataURL(existing);
-      }
-    }
-  }
-
   get properties(): FormArray {
     return propertiesArray(this.form);
   }
@@ -169,7 +145,6 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
   }
 
   clearSignature(): void {
-    this.signaturePad?.clear();
     this.form.get('memberSignature')?.setValue('');
   }
 
@@ -193,6 +168,7 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
       const dataUrl = reader.result as string;
       this.form.get('memberPhoto')?.setValue(dataUrl);
       this.memberPhotoPreview.set(dataUrl);
+      this.cdr.markForCheck();
     };
     reader.readAsDataURL(file);
   }
@@ -476,11 +452,8 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
       return;
     }
 
-    if (this.signaturePad && !this.signaturePad.isEmpty()) {
-      this.form.get('memberSignature')?.setValue(this.signaturePad.toDataURL());
-    }
-
     this.submitting = true;
+    this.cdr.markForCheck();
     this.registrationService.submit(this.form.getRawValue()).subscribe({
       next: (res) => {
         this.submitting = false;
@@ -491,6 +464,7 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
             res.error ?? this.translate.instant('registration.submit.genericError');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+        this.cdr.markForCheck();
       },
       error: (err: HttpErrorResponse) => {
         this.submitting = false;
@@ -498,6 +472,7 @@ export class RegistrationPageComponent implements OnInit, AfterViewInit, AfterVi
           err.status > 0 ? 'registration.submit.genericError' : 'registration.submit.networkError',
         );
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.cdr.markForCheck();
       },
     });
   }

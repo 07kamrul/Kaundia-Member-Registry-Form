@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
-from app.core.deps import get_current_member
-from app.core.security import hash_password, verify_password
+from app.core.deps import get_current_member, get_current_member_detail
+from app.core.security import hash_password_async, verify_password_async
 from app.db.session import get_db
 from app.models.credential import MemberCredential
 from app.models.installment import Installment
 from app.models.member import Member
-from app.models.property import Property
 from app.schemas.auth import ChangePasswordRequest
 from app.schemas.installment import InstallmentOut
 from app.schemas.member import MemberDetail
@@ -19,19 +17,12 @@ router = APIRouter(prefix="/member", tags=["member"])
 
 @router.get("/me", response_model=MemberDetail)
 async def get_my_profile(
-    member: Member = Depends(get_current_member),
-    db: AsyncSession = Depends(get_db),
+    member: Member = Depends(get_current_member_detail),
 ) -> Member:
-    result = await db.execute(
-        select(Member)
-        .options(
-            selectinload(Member.properties).selectinload(Property.co_owners),
-            selectinload(Member.properties).selectinload(Property.applicable_docs),
-            selectinload(Member.nominees),
-        )
-        .where(Member.id == member.id)
-    )
-    return result.scalar_one()
+    # The dependency already authenticated *and* eager-loaded the detail graph
+    # in a single query set; re-selecting the member here used to double the
+    # round-trips for the most frequently hit member endpoint.
+    return member
 
 
 @router.get("/installments", response_model=list[InstallmentOut])
@@ -57,9 +48,9 @@ async def change_password(
         select(MemberCredential).where(MemberCredential.member_id == member.id)
     )
     credential = result.scalar_one_or_none()
-    if credential is None or not verify_password(payload.current_password, credential.password_hash):
+    if credential is None or not await verify_password_async(payload.current_password, credential.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid current password")
 
-    credential.password_hash = hash_password(payload.new_password)
+    credential.password_hash = await hash_password_async(payload.new_password)
     credential.must_change_password = False
     await db.commit()

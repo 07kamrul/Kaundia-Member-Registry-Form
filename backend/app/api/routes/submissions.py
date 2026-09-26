@@ -10,7 +10,7 @@ from app.models.property import ApplicableDoc, CoOwner, Property
 from app.models.nominee import Nominee
 from app.schemas.member import SubmissionCreateResponse
 from app.schemas.submission import SubmissionPayload
-from app.services.storage import sanitize_path_segment, save_data_url, save_upload_file
+from app.services.storage import sanitize_path_segment, save_upload_file
 
 router = APIRouter(tags=["submissions"])
 
@@ -70,6 +70,11 @@ async def create_submission(
         payment_method=data.payment_method,
         member_signature=data.member_signature,
         submission_date=data.submission_date,
+        # Seed both collections so they read as already-loaded: after the
+        # flush below the member is persistent, and appending to an unloaded
+        # collection on a persistent object would trigger a lazy SELECT.
+        properties=[],
+        nominees=[],
     )
 
     db.add(member)
@@ -77,6 +82,11 @@ async def create_submission(
 
     member_dir = f"member_{member.id}"
 
+    # --- Pass 1: every disk write, with no database work interleaved. -------
+    # Uploads can be up to 10 MB each; doing them before the object graph is
+    # built keeps the connection checked out for the shortest window that the
+    # `member_{id}` folder naming allows, and keeps all blocking file work out
+    # of the insert path.
     if member_photo is not None and member_photo.filename:
         member.member_photo_path = await save_upload_file(member_photo, f"photos/{member_dir}")
 
@@ -84,44 +94,48 @@ async def create_submission(
         member.receipt_photo_path = await save_upload_file(receipt_photo, f"receipts/{member_dir}")
 
     doc_file_iter = iter(doc_files)
-
+    doc_paths: list[list[str | None]] = []
     for property_in in data.properties:
-        property_row = Property(
-            member_id=member.id,
-            property_type=property_in.property_type,
-            property_type_other=property_in.property_type_other,
-            khatian_no=property_in.khatian_no,
-            dag_no_cs=property_in.dag_no_cs,
-            dag_no_rs=property_in.dag_no_rs,
-            holding_number=property_in.holding_number,
-            land_quantity=property_in.land_quantity,
-            ownership=property_in.ownership,
-        )
-        db.add(property_row)
-        await db.flush()  # assigns property_row.id for co_owners/applicable_docs FKs
-
-        for co_owner_in in property_in.co_owners:
-            db.add(
-                CoOwner(
-                    property_id=property_row.id,
-                    owner_name=co_owner_in.owner_name,
-                    owner_phone=co_owner_in.owner_phone,
-                )
-            )
+        paths: list[str | None] = []
         for doc_in in property_in.applicable_docs:
             doc_file = next(doc_file_iter, None)
             file_path = None
             if doc_file is not None and doc_file.filename:
                 doc_type_dir = sanitize_path_segment(doc_in.doc_type)
                 file_path = await save_upload_file(doc_file, f"documents/{member_dir}/{doc_type_dir}")
-            db.add(
-                ApplicableDoc(property_id=property_row.id, doc_type=doc_in.doc_type, file_path=file_path)
+            paths.append(file_path)
+        doc_paths.append(paths)
+
+    # --- Pass 2: build the whole object graph, then commit once. ------------
+    # Children hang off their parents' relationships instead of carrying a
+    # pre-assigned foreign key, so SQLAlchemy orders the inserts itself. That
+    # removes the old per-property `flush()` - one round-trip per property -
+    # in favour of a single flush at commit.
+    for property_in, paths in zip(data.properties, doc_paths, strict=True):
+        member.properties.append(
+            Property(
+                property_type=property_in.property_type,
+                property_type_other=property_in.property_type_other,
+                khatian_no=property_in.khatian_no,
+                dag_no_cs=property_in.dag_no_cs,
+                dag_no_rs=property_in.dag_no_rs,
+                holding_number=property_in.holding_number,
+                land_quantity=property_in.land_quantity,
+                ownership=property_in.ownership,
+                co_owners=[
+                    CoOwner(owner_name=co_owner_in.owner_name, owner_phone=co_owner_in.owner_phone)
+                    for co_owner_in in property_in.co_owners
+                ],
+                applicable_docs=[
+                    ApplicableDoc(doc_type=doc_in.doc_type, file_path=file_path)
+                    for doc_in, file_path in zip(property_in.applicable_docs, paths, strict=True)
+                ],
             )
+        )
 
     for nominee_in in data.nominees:
-        db.add(
+        member.nominees.append(
             Nominee(
-                member_id=member.id,
                 name=nominee_in.name,
                 relation=nominee_in.relation,
                 mobile=nominee_in.mobile,
@@ -130,6 +144,6 @@ async def create_submission(
         )
 
     await db.commit()
-    await db.refresh(member)
-
+    # No refresh: `id` is populated by the flush, `status` comes from a
+    # Python-side default, and expire_on_commit=False leaves both intact.
     return SubmissionCreateResponse(id=member.id, status=member.status)

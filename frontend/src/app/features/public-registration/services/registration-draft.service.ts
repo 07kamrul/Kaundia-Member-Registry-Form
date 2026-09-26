@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
-import { debounceTime, Subject, Subscription } from 'rxjs';
+import { debounceTime, Subscription } from 'rxjs';
 import {
   applicableDocsArray,
   buildApplicableDocGroup,
@@ -27,17 +27,25 @@ export interface RegistrationDraft {
 export class RegistrationDraftService {
   readonly lastSaved = signal<string | null>(null);
 
-  private autosaveSubject = new Subject<void>();
-  private autosaveSubscription?: Subscription;
+  private watchSubscription?: Subscription;
 
-  /** Wires debounced autosave to form value changes; call once per form instance. */
+  /**
+   * Wires debounced autosave to form value changes; call once per form instance.
+   * Replaces any previous watcher so the old form (e.g. after discarding a
+   * draft) stops being observed — the root-provided service would otherwise
+   * keep every abandoned form subscription alive for the whole session.
+   */
   watch(form: FormGroup, getCurrentStep: () => number): void {
-    this.autosaveSubscription?.unsubscribe();
-    this.autosaveSubscription = this.autosaveSubject
+    this.unwatch();
+    this.watchSubscription = form.valueChanges
       .pipe(debounceTime(AUTOSAVE_DEBOUNCE_MS))
       .subscribe(() => this.save(form, getCurrentStep()));
+  }
 
-    form.valueChanges.subscribe(() => this.autosaveSubject.next());
+  /** Stops observing the currently watched form. */
+  unwatch(): void {
+    this.watchSubscription?.unsubscribe();
+    this.watchSubscription = undefined;
   }
 
   saveNow(form: FormGroup, currentStep: number): void {

@@ -8,6 +8,9 @@ from app.core.config import get_settings
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+# Bounds how long a slow/unreachable SMTP server can hold a request open.
+SMTP_TIMEOUT_SECONDS = 10
+
 
 async def send_email(to: str, subject: str, html_body: str) -> bool:
     """Send an HTML email. Logs and swallows errors instead of raising,
@@ -22,6 +25,8 @@ async def send_email(to: str, subject: str, html_body: str) -> bool:
     message.add_alternative(html_body, subtype="html")
 
     try:
+        # A bounded timeout keeps a hung SMTP server from pinning the request
+        # (and its checked-out DB connection) until the OS gives up on TCP.
         await aiosmtplib.send(
             message,
             hostname=settings.smtp_host,
@@ -29,6 +34,7 @@ async def send_email(to: str, subject: str, html_body: str) -> bool:
             username=settings.smtp_user or None,
             password=settings.smtp_password or None,
             start_tls=settings.smtp_port == 587,
+            timeout=_SMTP_TIMEOUT_SECONDS,
         )
         return True
     except Exception:

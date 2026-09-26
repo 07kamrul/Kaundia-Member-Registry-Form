@@ -606,6 +606,31 @@ a {
   font-size: 0.8rem;
 }
 
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--gray-500);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--gray-700);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gray-400);
+    outline-offset: 1px;
+  }
+}
+
 input[type='text'],
 input[type='date'],
 input[type='email'],

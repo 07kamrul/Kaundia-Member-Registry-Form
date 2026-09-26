@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  inject,
+} from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
@@ -18,6 +26,7 @@ import {
 @Component({
   selector: 'app-property-item',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './property-item.component.html',
 })
@@ -32,6 +41,8 @@ export class PropertyItemComponent {
   readonly documentOptions = DOCUMENT_OPTIONS;
   readonly maxDocFileMb = MAX_DOC_FILE_BYTES / (1024 * 1024);
   docFileErrors: Record<string, string> = {};
+
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(
     private fb: FormBuilder,
@@ -129,6 +140,7 @@ export class PropertyItemComponent {
     reader.onload = () => {
       const group = this.findDocEntry(type);
       group?.patchValue({ fileName: file.name, fileDataUrl: reader.result as string });
+      this.cdr.markForCheck();
     };
     reader.readAsDataURL(file);
   }

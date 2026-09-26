@@ -1,4 +1,13 @@
-import { Component, DestroyRef, inject, Input, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -24,6 +33,7 @@ export interface SubscriptionBreakdown {
 @Component({
   selector: 'app-payment-info',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './payment-info.component.html',
 })
@@ -40,6 +50,7 @@ export class PaymentInfoComponent implements OnInit {
   receiptFileError = '';
 
   private readonly translate = inject(TranslateService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(private destroyRef: DestroyRef) {}
 
@@ -103,6 +114,7 @@ export class PaymentInfoComponent implements OnInit {
         receiptFileName: file.name,
         receiptFileDataUrl: reader.result as string,
       });
+      this.cdr.markForCheck();
     };
     reader.readAsDataURL(file);
   }

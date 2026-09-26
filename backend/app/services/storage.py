@@ -1,4 +1,4 @@
-import base64
+import asyncio
 import re
 import unicodedata
 import uuid
@@ -10,17 +10,9 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-_DATA_URL_RE = re.compile(r"^data:(?P<mime>[\w/+.-]+);base64,(?P<data>.+)$", re.DOTALL)
-
-_MIME_EXTENSIONS = {
-    "image/jpeg": ".jpg",
-    "image/jpg": ".jpg",
-    "image/png": ".png",
-    "application/pdf": ".pdf",
-}
-
 _ALLOWED_UPLOAD_EXTENSIONS = {".jpg", ".jpeg", ".png", ".pdf"}
 _MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+_READ_CHUNK_BYTES = 1024 * 1024
 
 _UNSAFE_PATH_CHARS_RE = re.compile(r'[\\/:*?"<>|]')
 
@@ -41,10 +33,26 @@ def sanitize_path_segment(value: str) -> str:
     return cleaned or "misc"
 
 
-def _upload_root() -> Path:
-    root = Path(settings.upload_dir)
-    root.mkdir(parents=True, exist_ok=True)
-    return root
+async def _read_capped(upload_file: UploadFile) -> bytes:
+    """Read the upload in 1 MB chunks, aborting as soon as the cap is passed.
+
+    The old single `read()` materialised the whole (up to 10 MB) body in memory
+    before the size check could reject it.
+    """
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await upload_file.read(_READ_CHUNK_BYTES)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > _MAX_UPLOAD_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="File exceeds the 10 MB upload limit.",
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 async def save_upload_file(upload_file: UploadFile, subdir: str) -> str:
@@ -60,46 +68,19 @@ async def save_upload_file(upload_file: UploadFile, subdir: str) -> str:
             detail=f"Unsupported file type '{suffix or 'unknown'}'. Allowed: jpg, jpeg, png, pdf.",
         )
 
-    contents = await upload_file.read()
-    if len(contents) > _MAX_UPLOAD_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail="File exceeds the 10 MB upload limit.",
-        )
+    contents = await _read_capped(upload_file)
 
     subdir = unicodedata.normalize("NFC", subdir)
-    target_dir = _upload_root() / subdir
-    target_dir.mkdir(parents=True, exist_ok=True)
-
     filename = f"{uuid.uuid4().hex}{suffix}"
-    target_path = target_dir / filename
+    target_path = Path(settings.upload_dir) / subdir / filename
+
+    # File writes are blocking; running them on the loop would stall every
+    # other in-flight request for the duration of the write.
+    await asyncio.to_thread(_write_file, target_path, contents)
+
+    return str(Path(subdir) / filename)
+
+
+def _write_file(target_path: Path, contents: bytes) -> None:
+    target_path.parent.mkdir(parents=True, exist_ok=True)
     target_path.write_bytes(contents)
-
-    return str(Path(subdir) / filename)
-
-
-def save_data_url(data_url: str, subdir: str) -> str | None:
-    """Save a base64 data: URL (e.g. member photo) to disk and return its
-    relative path, or None if the input is not a valid data URL."""
-    match = _DATA_URL_RE.match(data_url)
-    if not match:
-        return None
-
-    mime = match.group("mime")
-    extension = _MIME_EXTENSIONS.get(mime, "")
-
-    subdir = unicodedata.normalize("NFC", subdir)
-    target_dir = _upload_root() / subdir
-    target_dir.mkdir(parents=True, exist_ok=True)
-
-    filename = f"{uuid.uuid4().hex}{extension}"
-    target_path = target_dir / filename
-    target_path.write_bytes(base64.b64decode(match.group("data")))
-
-    return str(Path(subdir) / filename)
-
-
-def resolve_upload_path(relative_path: str) -> Path:
-    """Resolve a path previously returned by save_upload_file/save_data_url
-    (relative to the upload root's parent, e.g. 'uploads/photos/x.jpg')."""
-    return Path(settings.upload_dir).parent / relative_path

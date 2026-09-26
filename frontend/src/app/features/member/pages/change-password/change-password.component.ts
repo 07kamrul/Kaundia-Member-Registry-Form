@@ -1,5 +1,12 @@
-import { Component } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService } from '../../../../core/services/member.service';
@@ -13,6 +20,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-change-password',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './change-password.component.html',
 })
@@ -21,6 +29,8 @@ export class ChangePasswordComponent {
   error = '';
   success = false;
   submitting = false;
+
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(
     private fb: FormBuilder,
@@ -47,11 +57,13 @@ export class ChangePasswordComponent {
       next: () => {
         this.submitting = false;
         this.success = true;
-        setTimeout(() => this.router.navigate(['/dashboard']), 1200);
+        setTimeout(() => this.router.navigate(['/dashboard']), 400);
+        this.cdr.markForCheck();
       },
       error: () => {
         this.submitting = false;
         this.error = this.translate.instant('member.changePassword.changeFailedError');
+        this.cdr.markForCheck();
       },
     });
   }

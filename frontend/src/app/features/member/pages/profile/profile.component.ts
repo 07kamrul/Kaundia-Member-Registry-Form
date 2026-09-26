@@ -1,4 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  inject,
+} from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService, type MemberProfile } from '../../../../core/services/member.service';
 
@@ -12,6 +18,7 @@ interface ProfileProperty {
 @Component({
   selector: 'app-member-profile',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslatePipe],
   templateUrl: './profile.component.html',
 })
@@ -20,6 +27,8 @@ export class ProfileComponent implements OnInit {
   propertySummaries: string[] = [];
   loading = false;
   error = '';
+
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(
     private memberService: MemberService,
@@ -35,18 +44,24 @@ export class ProfileComponent implements OnInit {
           [
             `${this.translate.instant('member.profile.propertyItemLabel')} ${property.id}`,
             property.property_type?.join('/') ?? '',
-            property.khatian_no ? `${this.translate.instant('member.profile.khatianLabel')} ${property.khatian_no}` : '',
-            property.land_quantity ? `${property.land_quantity} ${this.translate.instant('member.profile.decimalUnit')}` : '',
+            property.khatian_no
+              ? `${this.translate.instant('member.profile.khatianLabel')} ${property.khatian_no}`
+              : '',
+            property.land_quantity
+              ? `${property.land_quantity} ${this.translate.instant('member.profile.decimalUnit')}`
+              : '',
           ]
             .filter(Boolean)
             .join(' · ')
             .replace(' · ', ' — '),
         );
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = this.translate.instant('member.profile.loadError');
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }

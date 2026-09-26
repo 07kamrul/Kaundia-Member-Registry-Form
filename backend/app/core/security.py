@@ -1,3 +1,4 @@
+import asyncio
 import secrets
 import string
 from datetime import datetime, timedelta, timezone
@@ -30,6 +31,19 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
         return bcrypt.checkpw(truncated, password_hash.encode("utf-8"))
     except ValueError:
         return False
+
+
+# bcrypt costs ~200ms per call; running it inside an async handler would freeze
+# the whole event loop (stalling every other in-flight request). Route handlers
+# must use these coroutine variants instead of the sync functions above.
+
+
+async def hash_password_async(password: str) -> str:
+    return await asyncio.to_thread(hash_password, password)
+
+
+async def verify_password_async(plain_password: str, password_hash: str) -> bool:
+    return await asyncio.to_thread(verify_password, plain_password, password_hash)
 
 
 def generate_temp_password(length: int = 10) -> str:

@@ -77,11 +77,7 @@ export class RbacService {
     return this.http.post<AdminUserDef>(`${this.base}/users`, user);
   }
 
-  updateUserRole(
-    userId: number,
-    role: string,
-    roleId: number | null,
-  ): Observable<AdminUserDef> {
+  updateUserRole(userId: number, role: string, roleId: number | null): Observable<AdminUserDef> {
     return this.http.patch<AdminUserDef>(`${this.base}/users/${userId}/role`, {
       role,
       role_id: roleId,
