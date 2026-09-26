@@ -52,7 +52,11 @@
     </div>
     <div class="field">
       <label [attr.for]="'prop' + index + '_landQuantity'">{{ 'registration.property.landQuantityLabel' | translate }}</label>
-      <input [id]="'prop' + index + '_landQuantity'" type="text" inputmode="numeric" pattern="[0-9]*" formControlName="landQuantity" [placeholder]="'registration.property.landQuantityPlaceholder' | translate" />
+      <input [id]="'prop' + index + '_landQuantity'" type="text" inputmode="decimal" formControlName="landQuantity" [placeholder]="'registration.property.landQuantityPlaceholder' | translate" />
+    </div>
+    <div class="field">
+      <label [attr.for]="'prop' + index + '_myShareQuantity'">{{ 'registration.property.myShareQuantityLabel' | translate }}</label>
+      <input [id]="'prop' + index + '_myShareQuantity'" type="text" inputmode="decimal" formControlName="myShareQuantity" [placeholder]="'registration.property.myShareQuantityPlaceholder' | translate" />
     </div>
     <div class="field">
       <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>

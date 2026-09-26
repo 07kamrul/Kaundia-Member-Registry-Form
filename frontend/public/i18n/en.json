@@ -219,7 +219,8 @@
         "dagNoCs": "Dag No. (CS)",
         "dagNoRs": "Dag No. (RS)",
         "holdingNumber": "Holding No.",
-        "landQuantity": "Land Quantity (decimal)",
+        "landQuantity": "Total Land Quantity (Decimal)",
+        "myShareQuantity": "My Share Quantity (Decimal)",
         "ownership": "Ownership"
       },
       "errors": {
@@ -471,8 +472,10 @@
       "dagNoLabel": "Dag No.",
       "dagNoCsRequired": "CS dag no. is required",
       "dagNoRsRequired": "RS dag no. is required",
-      "landQuantityLabel": "Land Quantity (Decimal)",
-      "landQuantityPlaceholder": "e.g., 2",
+      "landQuantityLabel": "Total Land Quantity (Decimal):",
+      "landQuantityPlaceholder": "e.g., 2.5",
+      "myShareQuantityLabel": "My Share Quantity (Decimal):",
+      "myShareQuantityPlaceholder": "e.g., 1.25",
       "ownershipLabel": "Ownership",
       "ownershipRequired": "Ownership is required",
       "jointOwnerCountLabel": "Joint Owner Count",

@@ -49,6 +49,7 @@ interface SubmissionPropertyApiModel {
   dag_no_rs: string | null;
   holding_number: string | null;
   land_quantity: string | null;
+  my_share_quantity: string | null;
   ownership: string | null;
   joint_owner_count: number | null;
   applicable_docs: ApplicableDocApiModel[];
@@ -160,6 +161,7 @@ function toSubmissionProperty(api: SubmissionPropertyApiModel): SubmissionProper
     dagNoRs: api.dag_no_rs,
     holdingNumber: api.holding_number,
     landQuantity: api.land_quantity,
+    myShareQuantity: api.my_share_quantity,
     ownership: api.ownership,
     jointOwnerCount: api.joint_owner_count,
     applicableDocs: api.applicable_docs.map(toApplicableDoc),

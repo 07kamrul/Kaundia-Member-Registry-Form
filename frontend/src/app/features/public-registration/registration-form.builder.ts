@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
 const NID_PATTERN = /^\d{10,17}$/;
 const DIGITS_ONLY_PATTERN = /^\d+$/;
+const DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
 
 export function buildApplicableDocGroup(fb: FormBuilder, type: string): FormGroup {
   return fb.group({
@@ -19,7 +20,8 @@ export function buildPropertyGroup(fb: FormBuilder): FormGroup {
     khatianNo: ['', Validators.required],
     dagNo: fb.group({ cs: ['', Validators.required], rs: ['', Validators.required] }),
     holdingNumber: [''],
-    landQuantity: ['', Validators.pattern(DIGITS_ONLY_PATTERN)],
+    landQuantity: ['', Validators.pattern(DECIMAL_PATTERN)],
+    myShareQuantity: ['', Validators.pattern(DECIMAL_PATTERN)],
     ownership: ['', Validators.required],
     jointOwnerCount: [null],
     applicableDocs: fb.array([]),

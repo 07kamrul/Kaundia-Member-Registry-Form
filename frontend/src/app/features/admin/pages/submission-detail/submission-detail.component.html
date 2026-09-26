@@ -648,7 +648,7 @@
                             <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
                           }
                         </div>
-                        <div class="ds-field">
+<div class="ds-field">
                           <span class="ds-field-label">{{
                             'admin.submissionDetail.fieldLabels.holdingNumber' | translate
                           }}</span>
@@ -676,9 +676,65 @@
                             <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
                           }
                         </div>
+                        <div class="ds-field">
+                          <span class="ds-field-label">{{
+                            'admin.submissionDetail.fieldLabels.landQuantity' | translate
+                          }}</span>
+                          @if (displayValue(property.landQuantity); as landQty) {
+                            <div class="ds-field-value-row">
+                              <span class="ds-field-value ds-mono">{{ landQty }}</span>
+                              <button
+                                type="button"
+                                class="ds-icon-btn no-print"
+                                [attr.aria-label]="'admin.submissionDetail.copyValue' | translate"
+                                [title]="'admin.submissionDetail.copyValue' | translate"
+                                (click)="copyText('land-qty-' + property.id, landQty)"
+                              >
+                                <app-icon
+                                  [name]="
+                                    isCopied('land-qty-' + property.id, landQty)
+                                      ? 'check-circle'
+                                      : 'copy'
+                                  "
+                                  [size]="14"
+                                ></app-icon>
+                              </button>
+                            </div>
+                          } @else {
+                            <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                          }
+                        </div>
+                        <div class="ds-field">
+                          <span class="ds-field-label">{{
+                            'admin.submissionDetail.fieldLabels.myShareQuantity' | translate
+                          }}</span>
+                          @if (displayValue(property.myShareQuantity); as myShareQty) {
+                            <div class="ds-field-value-row">
+                              <span class="ds-field-value ds-mono">{{ myShareQty }}</span>
+                              <button
+                                type="button"
+                                class="ds-icon-btn no-print"
+                                [attr.aria-label]="'admin.submissionDetail.copyValue' | translate"
+                                [title]="'admin.submissionDetail.copyValue' | translate"
+                                (click)="copyText('my-share-qty-' + property.id, myShareQty)"
+                              >
+                                <app-icon
+                                  [name]="
+                                    isCopied('my-share-qty-' + property.id, myShareQty)
+                                      ? 'check-circle'
+                                      : 'copy'
+                                  "
+                                  [size]="14"
+                                ></app-icon>
+                              </button>
+                            </div>
+                          } @else {
+                            <span class="ds-field-value ds-empty">{{ emptyValue() }}</span>
+                          }
+                        </div>
                       </div>
 
-                                            <!-- Joint Owner Count -->
+                                              <!-- Joint Owner Count -->
                       <div class="ds-subblock">
                         <div class="ds-subblock-header">
                           <h4 class="ds-subblock-title">

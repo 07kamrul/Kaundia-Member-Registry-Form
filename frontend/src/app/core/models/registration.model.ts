@@ -37,6 +37,7 @@ export interface PropertyItem {
   dagNo: DagNo;
   holdingNumber: string;
   landQuantity: string;
+  myShareQuantity: string;
   ownership: string;
   jointOwnerCount: number | null;
   applicableDocs: ApplicableDocEntry[];
@@ -89,6 +90,7 @@ export function createEmptyProperty(): PropertyItem {
     dagNo: { cs: '', rs: '' },
     holdingNumber: '',
     landQuantity: '',
+    myShareQuantity: '',
     ownership: '',
     jointOwnerCount: null,
     applicableDocs: [],

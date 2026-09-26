@@ -78,6 +78,7 @@ export class RegistrationService {
         dag_no_rs: property.dagNo.rs,
         holding_number: property.holdingNumber,
         land_quantity: property.landQuantity,
+        my_share_quantity: property.myShareQuantity,
         ownership: property.ownership,
         joint_owner_count: property.ownership === 'যৌথ' ? property.jointOwnerCount : null,
         applicable_docs: property.applicableDocs.map((doc) => ({ doc_type: doc.type })),

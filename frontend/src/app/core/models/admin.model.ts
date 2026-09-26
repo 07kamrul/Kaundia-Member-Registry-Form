@@ -26,6 +26,7 @@ export interface SubmissionProperty {
   dagNoRs?: string | null;
   holdingNumber?: string | null;
   landQuantity?: string | null;
+  myShareQuantity?: string | null;
   ownership?: string | null;
   jointOwnerCount?: number | null;
   applicableDocs: ApplicableDoc[];

@@ -219,7 +219,8 @@
         "dagNoCs": "দাগ নং (সিএস)",
         "dagNoRs": "দাগ নং (আরএস)",
         "holdingNumber": "হোল্ডিং নং",
-        "landQuantity": "জমির পরিমাণ (শতাংশ)",
+        "landQuantity": "মোট জমির পরিমাণ (শতাংশ)",
+        "myShareQuantity": "আমার অংশের পরিমাণ (শতাংশ)",
         "ownership": "মালিকানা"
       },
       "errors": {
@@ -471,8 +472,10 @@
       "dagNoLabel": "দাগ নং",
       "dagNoCsRequired": "CS দাগ নং আবশ্যক",
       "dagNoRsRequired": "RS দাগ নং আবশyek",
-      "landQuantityLabel": "জমির পরিমাণ (শতাংশ)",
-      "landQuantityPlaceholder": "যেমন: ২",
+      "landQuantityLabel": "মোট জমির পরিমাণ (শতাংশ):",
+      "landQuantityPlaceholder": "যেমন: ২.৫",
+      "myShareQuantityLabel": "আমার অংশের পরিমাণ (শতাংশ):",
+      "myShareQuantityPlaceholder": "যেমন: ১.২৫",
       "ownershipLabel": "মালিকানা",
       "ownershipRequired": "মালিকানা আবশ্যক",
       "jointOwnerCountLabel": "যৌথ মালিকগণের সংখ্যা",
