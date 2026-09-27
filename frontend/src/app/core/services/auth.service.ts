@@ -7,7 +7,35 @@ import { MemberService } from './member.service';
 
 export type UserRole = 'super_admin' | 'executive_committee' | 'administrator' | 'member';
 
-export const ADMIN_ROLES: UserRole[] = ['super_admin', 'executive_committee', 'administrator'];
+export type LandingTier = 'super_admin' | 'management' | 'member';
+
+// Mirrors backend/app/core/permissions.py ROLE_DEFAULT_PERMISSIONS: these keys
+// exist only in the Super Admin's full-catalog tuple, so holding any of them
+// is a permission-based (not role-name) way to detect Super Admin tier.
+export const SUPER_ADMIN_AREA_PERMISSIONS = ['manage_users', 'manage_roles', 'view_audit_log'];
+
+// Union of EXECUTIVE_COMMITTEE + ADMINISTRATOR default tuples - holding any
+// of these means "management tier or above" for area-guard/landing purposes.
+export const MANAGEMENT_AREA_PERMISSIONS = [
+  'member.view_all',
+  'member.manage',
+  'property.view_all',
+  'property.review',
+  'membership.review',
+  'approve_membership',
+  'complaint.view_all',
+  'complaint.review',
+  'manage_notices',
+  'report.view',
+  'manage_fee_settings',
+  'manage_system_config',
+  'member.register',
+  'member.verify',
+  'document.verify',
+  'complaint.view_assigned',
+  'complaint.process',
+  'report.view_operational',
+];
 
 interface TokenResponse {
   access_token: string;
@@ -60,9 +88,10 @@ export class AuthService {
     return this.permissionsValue();
   }
 
-  get isAdmin(): boolean {
-    const role = this.roleValue();
-    return role !== null && ADMIN_ROLES.includes(role);
+  landingTier(): LandingTier {
+    if (this.hasAnyPermission(SUPER_ADMIN_AREA_PERMISSIONS)) return 'super_admin';
+    if (this.hasAnyPermission(MANAGEMENT_AREA_PERMISSIONS)) return 'management';
+    return 'member';
   }
 
   hasPermission(permissionKey: string): boolean {

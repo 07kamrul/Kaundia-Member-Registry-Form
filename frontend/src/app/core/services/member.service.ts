@@ -1,16 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, shareReplay } from 'rxjs';
+import { map, Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type { Installment } from '../models/admin.model';
 
 export interface MemberProfile {
   memberId: string;
+  status: string;
   fullName: string;
   fatherOrHusband: string;
   mother: string;
   dob: string;
+  nationality?: string;
   nid?: string;
+  gender?: string;
   mobile: string;
   email?: string;
   occupation?: string;
@@ -19,13 +22,116 @@ export interface MemberProfile {
   permanentPostOffice?: string;
   permanentUpazila?: string;
   permanentDistrict?: string;
+  permanentDivision?: string;
   currentHouse?: string;
   currentRoad?: string;
   currentPostOffice?: string;
   currentUpazila?: string;
   currentDistrict?: string;
+  currentDivision?: string;
+  urgentContactName?: string;
+  urgentContactRelation?: string;
+  urgentContactMobile?: string;
+  urgentContactAddress?: string;
   properties: unknown[];
   nominees: unknown[];
+}
+
+interface MemberProfileApiModel {
+  member_id: string | null;
+  status: string;
+  full_name: string;
+  father_or_husband: string;
+  mother: string;
+  dob: string;
+  nationality?: string;
+  nid?: string;
+  gender?: string;
+  mobile: string;
+  email?: string;
+  occupation?: string;
+  permanent_house?: string;
+  permanent_road?: string;
+  permanent_post_office?: string;
+  permanent_upazila?: string;
+  permanent_district?: string;
+  permanent_division?: string;
+  current_house?: string;
+  current_road?: string;
+  current_post_office?: string;
+  current_upazila?: string;
+  current_district?: string;
+  current_division?: string;
+  urgent_contact_name?: string;
+  urgent_contact_relation?: string;
+  urgent_contact_mobile?: string;
+  urgent_contact_address?: string;
+  properties: unknown[];
+  nominees: unknown[];
+}
+
+function toMemberProfile(api: MemberProfileApiModel): MemberProfile {
+  return {
+    memberId: api.member_id ?? '',
+    status: api.status,
+    fullName: api.full_name,
+    fatherOrHusband: api.father_or_husband,
+    mother: api.mother,
+    dob: api.dob,
+    nationality: api.nationality,
+    nid: api.nid,
+    gender: api.gender,
+    mobile: api.mobile,
+    email: api.email,
+    occupation: api.occupation,
+    permanentHouse: api.permanent_house,
+    permanentRoad: api.permanent_road,
+    permanentPostOffice: api.permanent_post_office,
+    permanentUpazila: api.permanent_upazila,
+    permanentDistrict: api.permanent_district,
+    permanentDivision: api.permanent_division,
+    currentHouse: api.current_house,
+    currentRoad: api.current_road,
+    currentPostOffice: api.current_post_office,
+    currentUpazila: api.current_upazila,
+    currentDistrict: api.current_district,
+    currentDivision: api.current_division,
+    urgentContactName: api.urgent_contact_name,
+    urgentContactRelation: api.urgent_contact_relation,
+    urgentContactMobile: api.urgent_contact_mobile,
+    urgentContactAddress: api.urgent_contact_address,
+    properties: api.properties,
+    nominees: api.nominees,
+  };
+}
+
+export interface MemberProfileUpdatePayload {
+  fullName?: string;
+  fatherOrHusband?: string;
+  mother?: string;
+  dob?: string;
+  nationality?: string;
+  occupation?: string;
+  nid?: string;
+  gender?: string;
+  permanentHouse?: string;
+  permanentRoad?: string;
+  permanentPostOffice?: string;
+  permanentUpazila?: string;
+  permanentDistrict?: string;
+  permanentDivision?: string;
+  currentHouse?: string;
+  currentRoad?: string;
+  currentPostOffice?: string;
+  currentUpazila?: string;
+  currentDistrict?: string;
+  currentDivision?: string;
+  mobile?: string;
+  email?: string;
+  urgentContactName?: string;
+  urgentContactRelation?: string;
+  urgentContactMobile?: string;
+  urgentContactAddress?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -45,14 +151,27 @@ export class MemberService {
   getProfile(): Observable<MemberProfile> {
     if (!this.profileCache) {
       this.profileCache = this.http
-        .get<MemberProfile>(`${this.base}/me`)
-        .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+        .get<MemberProfileApiModel>(`${this.base}/me`)
+        .pipe(map(toMemberProfile), shareReplay({ bufferSize: 1, refCount: false }));
     }
     return this.profileCache;
   }
 
   clearProfileCache(): void {
     this.profileCache = null;
+  }
+
+  updateProfile(payload: MemberProfileUpdatePayload): Observable<MemberProfile> {
+    const body: Record<string, string> = {};
+    for (const [key, value] of Object.entries(payload)) {
+      if (value === undefined) continue;
+      const snakeKey = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      body[snakeKey] = value;
+    }
+    this.clearProfileCache();
+    return this.http
+      .patch<MemberProfileApiModel>(`${this.base}/profile`, body)
+      .pipe(map(toMemberProfile));
   }
 
   getInstallments(): Observable<Installment[]> {

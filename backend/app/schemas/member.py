@@ -11,6 +11,40 @@ class SubmissionCreateResponse(BaseModel):
     status: MemberStatus
 
 
+class MemberProfileUpdate(BaseModel):
+    # Core (identity/address) fields - editing any of these on an already
+    # approved member re-queues the member for review (see CORE_PROFILE_FIELDS
+    # in app/api/routes/member.py).
+    full_name: str | None = None
+    father_or_husband: str | None = None
+    mother: str | None = None
+    dob: str | None = None
+    nationality: str | None = None
+    occupation: str | None = None
+    nid: str | None = None
+    gender: str | None = None
+    permanent_house: str | None = None
+    permanent_road: str | None = None
+    permanent_post_office: str | None = None
+    permanent_upazila: str | None = None
+    permanent_district: str | None = None
+    permanent_division: str | None = None
+    current_house: str | None = None
+    current_road: str | None = None
+    current_post_office: str | None = None
+    current_upazila: str | None = None
+    current_district: str | None = None
+    current_division: str | None = None
+
+    # Non-core (contact) fields - applied immediately, no re-review.
+    mobile: str | None = None
+    email: str | None = None
+    urgent_contact_name: str | None = None
+    urgent_contact_relation: str | None = None
+    urgent_contact_mobile: str | None = None
+    urgent_contact_address: str | None = None
+
+
 class ApplicableDocOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

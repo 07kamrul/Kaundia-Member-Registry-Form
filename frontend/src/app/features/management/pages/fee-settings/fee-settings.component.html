@@ -1,0 +1,110 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.feeSettings.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.feeSettings.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  }
+
+  <div class="card" style="margin-bottom:1.5rem">
+    <h2 style="font-size:1rem;margin-top:0">{{ 'admin.feeSettings.addVersion' | translate }}</h2>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end">
+      <div>
+        <label>{{ 'admin.feeSettings.form.key' | translate }}</label><br />
+        <input type="text" [(ngModel)]="draftKey" name="draftKey" [disabled]="!auth.hasPermission('manage_fee_settings')" />
+      </div>
+      <div>
+        <label>{{ 'admin.feeSettings.form.value' | translate }}</label><br />
+        <input type="number" [(ngModel)]="draftValue" name="draftValue" [disabled]="!auth.hasPermission('manage_fee_settings')" />
+      </div>
+      <div>
+        <label>{{ 'admin.feeSettings.form.unit' | translate }}</label><br />
+        <input type="text" [(ngModel)]="draftUnit" name="draftUnit" [disabled]="!auth.hasPermission('manage_fee_settings')" />
+      </div>
+      <div>
+        <label>{{ 'admin.feeSettings.form.startDate' | translate }}</label><br />
+        <input type="date" [(ngModel)]="draftStartDate" name="draftStartDate" [disabled]="!auth.hasPermission('manage_fee_settings')" />
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!auth.hasPermission('manage_fee_settings') || saving || !draftKey || draftValue === null"
+        (click)="createVersion()"
+      >
+        {{ 'admin.feeSettings.form.submit' | translate }}
+      </button>
+    </div>
+    @if (saveError) {
+      <p class="error-box" style="margin-top:0.75rem">{{ saveError }}</p>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else {
+    <div class="card">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="text-align:left">{{ 'admin.feeSettings.table.key' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.feeSettings.table.value' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.feeSettings.table.unit' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.feeSettings.table.startDate' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of active; track row.id) {
+            <tr>
+              <td>{{ row.key }}</td>
+              <td>{{ row.value }}</td>
+              <td>{{ row.unit }}</td>
+              <td>{{ row.startDate }}</td>
+              <td>
+                <button type="button" class="btn btn-secondary" (click)="toggleHistory(row.key)">
+                  {{ (expandedKey === row.key ? 'admin.feeSettings.hideHistory' : 'admin.feeSettings.viewHistory') | translate }}
+                </button>
+              </td>
+            </tr>
+            @if (expandedKey === row.key) {
+              <tr>
+                <td colspan="5">
+                  @if (loadingHistory) {
+                    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+                  } @else {
+                    <table style="width:100%;border-collapse:collapse">
+                      <thead>
+                        <tr>
+                          <th style="text-align:left">{{ 'admin.feeSettings.table.value' | translate }}</th>
+                          <th style="text-align:left">{{ 'admin.feeSettings.table.startDate' | translate }}</th>
+                          <th style="text-align:left">{{ 'admin.feeSettings.table.endDate' | translate }}</th>
+                          <th style="text-align:left">{{ 'admin.feeSettings.table.status' | translate }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (h of history; track h.id) {
+                          <tr>
+                            <td>{{ h.value }}</td>
+                            <td>{{ h.startDate }}</td>
+                            <td>{{ h.endDate ?? '-' }}</td>
+                            <td>{{ h.status === 1 ? ('admin.feeSettings.active' | translate) : ('admin.feeSettings.inactive' | translate) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                </td>
+              </tr>
+            }
+          } @empty {
+            <tr><td colspan="5" class="empty-state">{{ 'admin.feeSettings.noSettings' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

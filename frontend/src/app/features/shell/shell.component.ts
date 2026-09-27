@@ -11,36 +11,62 @@ interface NavItem {
   labelKey: string;
   route: string;
   icon: IconName;
-  adminOnly: boolean;
-  memberOnly?: boolean;
-  requiredPermission?: string;
+  // Absent = visible to any authenticated user (member-tier baseline).
+  // Present = visible only if the user holds at least one of these keys.
+  requiredPermission?: string[];
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { labelKey: 'nav.dashboard', route: '/dashboard', icon: 'dashboard', adminOnly: false },
-  { labelKey: 'nav.profile', route: '/profile', icon: 'user', adminOnly: false, memberOnly: true },
+  { labelKey: 'nav.dashboard', route: '/dashboard', icon: 'dashboard' },
+  { labelKey: 'nav.profile', route: '/profile', icon: 'user', requiredPermission: ['profile.view_own'] },
   {
     labelKey: 'nav.installments',
     route: '/installments',
     icon: 'wallet',
-    adminOnly: false,
-    memberOnly: true,
+    requiredPermission: ['profile.view_own'],
   },
-  { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', adminOnly: false },
-  { labelKey: 'nav.submissions', route: '/submissions', icon: 'inbox', adminOnly: true },
-  { labelKey: 'nav.membersList', route: '/members', icon: 'users', adminOnly: true },
+  { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
+  {
+    labelKey: 'nav.submissions',
+    route: '/submissions',
+    icon: 'inbox',
+    requiredPermission: ['membership.review'],
+  },
+  {
+    labelKey: 'nav.membersList',
+    route: '/members',
+    icon: 'users',
+    requiredPermission: ['member.view_all'],
+  },
   {
     labelKey: 'nav.installmentsManagement',
     route: '/installments-management',
     icon: 'coin',
-    adminOnly: true,
+    requiredPermission: ['member.view_all'],
   },
   {
     labelKey: 'nav.rolesPermissions',
     route: '/roles',
     icon: 'shield',
-    adminOnly: true,
-    requiredPermission: 'manage_roles',
+    requiredPermission: ['manage_roles', 'manage_users'],
+  },
+  {
+    labelKey: 'nav.feeSettings',
+    route: '/fee-settings',
+    icon: 'coin',
+    requiredPermission: ['manage_fee_settings'],
+  },
+  {
+    labelKey: 'nav.auditLog',
+    route: '/audit-log',
+    icon: 'shield',
+    requiredPermission: ['view_audit_log'],
+  },
+  {
+    labelKey: 'nav.configLists',
+    route: '/config-lists',
+    icon: 'inbox',
+    requiredPermission: ['manage_system_config'],
   },
 ];
 
@@ -65,7 +91,11 @@ export class ShellComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (!this.auth.isAdmin) {
+    // Not a permission check: /api/member/me only exists for actual Member-role
+    // accounts (member JWTs), regardless of which permissions a role holds -
+    // an Executive Committee/Administrator/Super Admin account has no member
+    // profile row to fetch, so this stays an account-type check.
+    if (this.auth.role === 'member') {
       this.memberService.getProfile().subscribe({
         next: (profile) => {
           this.displayName.set(profile.fullName);
@@ -83,7 +113,7 @@ export class ShellComponent implements OnInit {
   }
 
   get welcomeName(): string {
-    return this.displayName() || (this.auth.isAdmin ? this.adminLabel : '');
+    return this.displayName() || (this.auth.landingTier() !== 'member' ? this.adminLabel : '');
   }
 
   private get adminLabel(): string {
@@ -91,15 +121,9 @@ export class ShellComponent implements OnInit {
   }
 
   get navItems(): NavItem[] {
-    return NAV_ITEMS.filter((item) => {
-      if (item.memberOnly && this.auth.isAdmin) {
-        return false;
-      }
-      if (item.requiredPermission) {
-        return this.auth.hasPermission(item.requiredPermission);
-      }
-      return !item.adminOnly || this.auth.isAdmin;
-    });
+    return NAV_ITEMS.filter(
+      (item) => !item.requiredPermission || this.auth.hasAnyPermission(item.requiredPermission),
+    );
   }
 
   toggleSidebar(): void {

@@ -14,6 +14,7 @@ from app.core.security import hash_password_async
 from app.db.session import get_db
 from app.models.admin import AdminRole, AdminUser
 from app.models.rbac import Permission, Role, UserPermissionOverride
+from app.services.audit import record_audit
 from app.schemas.rbac import (
     AdminUserCreate,
     AdminUserOut,
@@ -71,7 +72,7 @@ async def update_role_permissions(
     role_id: int,
     payload: RolePermissionsUpdate,
     db: AsyncSession = Depends(get_db),
-    _admin: AdminUser = Depends(require_permission("manage_roles")),
+    admin: AdminUser = Depends(require_permission("manage_roles")),
 ) -> RoleOut:
     result = await db.execute(
         select(Role).where(Role.id == role_id).options(selectinload(Role.permissions))
@@ -93,6 +94,14 @@ async def update_role_permissions(
         )
 
     role.permissions = list(permissions)
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="role.update_permissions",
+        entity_type="role",
+        entity_id=str(role.id),
+        detail=f"permission_keys={sorted(payload.permission_keys)}",
+    )
     await db.commit()
     # expire_on_commit=False keeps the collection we just assigned intact, and
     # every cached effective-permission set for this role is now stale.
@@ -195,6 +204,14 @@ async def update_admin_user_role(
 
     user.role = role_enum
     user.role_id = payload.role_id
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="user.update_role",
+        entity_type="admin_user",
+        entity_id=str(user.id),
+        detail=f"role={role_enum.value} role_id={payload.role_id}",
+    )
     await db.commit()
     invalidate_permission_cache()
 
@@ -223,7 +240,7 @@ async def set_user_overrides(
     user_id: int,
     payload: list[PermissionOverrideIn],
     db: AsyncSession = Depends(get_db),
-    _admin: AdminUser = Depends(require_permission("manage_users")),
+    admin: AdminUser = Depends(require_permission("manage_users")),
 ) -> list[PermissionOverrideOut]:
     user_result = await db.execute(select(AdminUser).where(AdminUser.id == user_id))
     if user_result.scalar_one_or_none() is None:
@@ -253,6 +270,14 @@ async def set_user_overrides(
                 granted=item.granted,
             )
         )
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="user.set_overrides",
+        entity_type="admin_user",
+        entity_id=str(user_id),
+        detail=f"overrides={[(i.permission_key, i.granted) for i in payload]}",
+    )
     await db.commit()
     invalidate_permission_cache()
 

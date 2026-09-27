@@ -1,9 +1,14 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
+from app.models.config_list_item import ConfigListItem
+from app.models.fee_settings import FeeSetting
 from app.models.member import Member, MemberStatus
+from app.schemas.config_list import ConfigListItemOut
 from app.schemas.public import PublicStatsOut
 
 router = APIRouter(prefix="/public", tags=["public"])
@@ -40,3 +45,27 @@ async def get_public_stats(db: AsyncSession = Depends(get_db)) -> PublicStatsOut
         approved_count=approved_count,
         monthly_subscription_total=monthly_subscription_total,
     )
+
+
+@router.get("/fee-settings")
+async def get_public_fee_settings(db: AsyncSession = Depends(get_db)) -> dict[str, float]:
+    today = date.today()
+    result = await db.execute(
+        select(FeeSetting.key, FeeSetting.value).where(
+            FeeSetting.start_date <= today,
+            or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= today),
+        )
+    )
+    return {key: float(value) for key, value in result.all()}
+
+
+@router.get("/config-lists/{category}", response_model=list[ConfigListItemOut])
+async def get_public_config_list(
+    category: str, db: AsyncSession = Depends(get_db)
+) -> list[ConfigListItem]:
+    result = await db.execute(
+        select(ConfigListItem)
+        .where(ConfigListItem.category == category, ConfigListItem.is_active == 1)
+        .order_by(ConfigListItem.sort_order)
+    )
+    return list(result.scalars().all())

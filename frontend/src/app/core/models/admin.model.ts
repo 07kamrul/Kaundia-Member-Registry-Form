@@ -107,3 +107,22 @@ export interface Installment {
   status: 'paid' | 'due';
   paidAt?: string;
 }
+
+export interface ConfigListItem {
+  id: string;
+  category: string;
+  value: string;
+  label: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface FeeSetting {
+  id: string;
+  key: string;
+  value: number;
+  unit?: string;
+  startDate: string;
+  endDate?: string;
+  status: number;
+}

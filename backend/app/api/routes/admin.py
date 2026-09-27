@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from enum import Enum
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
@@ -11,11 +11,18 @@ from app.core.security import generate_temp_password, hash_password_async
 from app.db.session import get_db
 from app.models.admin import AdminUser
 from app.models.credential import MemberCredential
+from app.models.config_list_item import ConfigListItem
+from app.models.fee_settings import FeeSetting
 from app.models.installment import Installment, InstallmentStatus
 from app.models.member import Member, MemberStatus
 from app.models.nominee import Nominee
 from app.models.property import ApplicableDoc, CoOwner, Property
+from app.schemas.audit_log import AuditLogOut
+from app.schemas.config_list import ConfigListItemCreate, ConfigListItemOut, ConfigListItemUpdate
+from app.schemas.fee_settings import FeeSettingCreate, FeeSettingOut
 from app.schemas.installment import InstallmentCreate, InstallmentOut, InstallmentUpdate
+from app.models.audit_log import AuditLog
+from app.services.audit import record_audit
 from app.schemas.member import ApproveResponse, MemberDetail, MemberSummary, RejectRequest
 from app.services.email import send_email
 from app.services.storage import save_upload_file
@@ -112,15 +119,48 @@ async def approve_submission(
     if member.status == MemberStatus.APPROVED:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Already approved")
 
-    generated_member_id = await _generate_member_id(db)
-    temp_password = generate_temp_password()
-    username = generated_member_id.lower()
+    # A member re-queued to PENDING by their own core-field edit (see
+    # app/api/routes/member.py's re-approval workflow) already has a
+    # member_id and MemberCredential from their original approval - only a
+    # first-time approval needs a freshly generated id/credential/temp password.
+    credential_result = await db.execute(
+        select(MemberCredential).where(MemberCredential.member_id == member.id)
+    )
+    existing_credential = credential_result.scalar_one_or_none()
+    is_reapproval = existing_credential is not None
 
-    member.member_id = generated_member_id
     member.status = MemberStatus.APPROVED
     member.reviewed_at = datetime.now(timezone.utc)
     member.reviewed_by = admin.id
     member.rejection_reason = None
+
+    if is_reapproval:
+        generated_member_id = member.member_id
+        record_audit(
+            db,
+            actor_admin_id=admin.id,
+            action="member.reapprove",
+            entity_type="member",
+            entity_id=str(member.id),
+            detail=f"reapproved {generated_member_id}",
+        )
+        await db.commit()
+
+        email_sent = await send_email(
+            to=member.email,
+            subject="Kaundia Member Registry - Membership Re-approved",
+            html_body=(
+                f"<p>Dear {member.full_name},</p>"
+                "<p>Your membership has been reviewed and re-approved. "
+                "Your existing member ID and login remain unchanged.</p>"
+            ),
+        )
+        return ApproveResponse(member_id=generated_member_id, email_sent=email_sent)
+
+    generated_member_id = await _generate_member_id(db)
+    temp_password = generate_temp_password()
+    username = generated_member_id.lower()
+    member.member_id = generated_member_id
 
     credential = MemberCredential(
         member_id=member.id,
@@ -129,6 +169,14 @@ async def approve_submission(
         must_change_password=True,
     )
     db.add(credential)
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="member.approve",
+        entity_type="member",
+        entity_id=str(member.id),
+        detail=f"approved as {generated_member_id}",
+    )
     await db.commit()
 
     email_sent = await send_email(
@@ -159,6 +207,14 @@ async def reject_submission(
     member.reviewed_at = datetime.now(timezone.utc)
     member.reviewed_by = admin.id
     member.rejection_reason = payload.reason
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="member.reject",
+        entity_type="member",
+        entity_id=str(member.id),
+        detail=payload.reason,
+    )
     await db.commit()
 
     await send_email(
@@ -296,6 +352,167 @@ async def update_installment(
     # expire_on_commit=False: every field InstallmentOut reads is already loaded
     # or just assigned, so an extra SELECT here would only add a round-trip.
     return installment
+
+
+@router.get("/fee-settings", response_model=list[FeeSettingOut])
+async def list_active_fee_settings(
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("manage_fee_settings")),
+) -> list[FeeSetting]:
+    result = await db.execute(select(FeeSetting).where(FeeSetting.status == 1).order_by(FeeSetting.key))
+    return list(result.scalars().all())
+
+
+@router.get("/fee-settings/{key}/history", response_model=list[FeeSettingOut])
+async def get_fee_setting_history(
+    key: str,
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("manage_fee_settings")),
+) -> list[FeeSetting]:
+    result = await db.execute(
+        select(FeeSetting).where(FeeSetting.key == key).order_by(FeeSetting.start_date.desc())
+    )
+    return list(result.scalars().all())
+
+
+@router.post("/fee-settings", response_model=FeeSettingOut, status_code=status.HTTP_201_CREATED)
+async def create_fee_setting_version(
+    payload: FeeSettingCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(require_permission("manage_fee_settings")),
+) -> FeeSetting:
+    # Close out the current active version for this key (never leave two
+    # active rows, or the two writes racing/half-committed would leave zero).
+    result = await db.execute(
+        select(FeeSetting).where(FeeSetting.key == payload.key, FeeSetting.status == 1)
+    )
+    current = result.scalar_one_or_none()
+    new_start_date = payload.start_date or date.today()
+    if current is not None:
+        current.end_date = date.today()
+        current.status = 0
+
+    new_version = FeeSetting(
+        key=payload.key,
+        value=payload.value,
+        unit=payload.unit,
+        start_date=new_start_date,
+        end_date=None,
+        status=1,
+        created_by=admin.id,
+    )
+    db.add(new_version)
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="fee_settings.new_version",
+        entity_type="fee_settings",
+        entity_id=payload.key,
+        detail=f"value={payload.value} start_date={new_start_date}",
+    )
+    await db.commit()
+    await db.refresh(new_version)
+    return new_version
+
+
+@router.get("/audit-log", response_model=list[AuditLogOut])
+async def list_audit_log(
+    limit: int = Query(default=100, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("view_audit_log")),
+) -> list[AuditLog]:
+    result = await db.execute(
+        select(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit).offset(offset)
+    )
+    return list(result.scalars().all())
+
+
+@router.get("/config-lists", response_model=list[ConfigListItemOut])
+async def list_config_list_items(
+    category: str | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("manage_system_config")),
+) -> list[ConfigListItem]:
+    query = select(ConfigListItem).order_by(ConfigListItem.category, ConfigListItem.sort_order)
+    if category:
+        query = query.where(ConfigListItem.category == category)
+    result = await db.execute(query)
+    return list(result.scalars().all())
+
+
+@router.post(
+    "/config-lists", response_model=ConfigListItemOut, status_code=status.HTTP_201_CREATED
+)
+async def create_config_list_item(
+    payload: ConfigListItemCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(require_permission("manage_system_config")),
+) -> ConfigListItem:
+    existing = await db.execute(
+        select(ConfigListItem).where(
+            ConfigListItem.category == payload.category, ConfigListItem.value == payload.value
+        )
+    )
+    if existing.scalar_one_or_none() is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"'{payload.value}' already exists in category '{payload.category}'",
+        )
+
+    item = ConfigListItem(
+        category=payload.category,
+        value=payload.value,
+        label=payload.label,
+        sort_order=payload.sort_order,
+    )
+    db.add(item)
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="config_list.create",
+        entity_type="config_list_item",
+        entity_id=f"{payload.category}:{payload.value}",
+        detail=f"label={payload.label}",
+    )
+    await db.commit()
+    await db.refresh(item)
+    return item
+
+
+@router.patch("/config-lists/{item_id}", response_model=ConfigListItemOut)
+async def update_config_list_item(
+    item_id: int,
+    payload: ConfigListItemUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(require_permission("manage_system_config")),
+) -> ConfigListItem:
+    result = await db.execute(select(ConfigListItem).where(ConfigListItem.id == item_id))
+    item = result.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Config list item not found")
+
+    updates = payload.model_dump(exclude_unset=True)
+    if "is_active" in updates:
+        updates["is_active"] = 1 if updates["is_active"] else 0
+    for field, value in updates.items():
+        setattr(item, field, value)
+
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="config_list.update",
+        entity_type="config_list_item",
+        entity_id=f"{item.category}:{item.value}",
+        detail=f"updates={updates}",
+    )
+    await db.commit()
+    # unlike installment/fee_settings updates above, `updated_at` here is a
+    # server-side `onupdate` value the ORM hasn't seen - refresh to load it
+    # instead of letting response serialization trigger an implicit (illegal
+    # in async) lazy load.
+    await db.refresh(item)
+    return item
 
 
 async def _get_member_or_404(db: AsyncSession, member_id: int, *, eager: bool = True) -> Member:

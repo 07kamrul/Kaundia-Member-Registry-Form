@@ -1,0 +1,43 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.auditLog.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.auditLog.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  }
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else {
+    <div class="card">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="text-align:left">{{ 'admin.auditLog.table.time' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.auditLog.table.actor' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.auditLog.table.action' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.auditLog.table.entity' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.auditLog.table.detail' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of entries; track e.id) {
+            <tr>
+              <td>{{ e.createdAt }}</td>
+              <td>{{ e.actorAdminId ?? '—' }}</td>
+              <td>{{ e.action }}</td>
+              <td>{{ e.entityType }} #{{ e.entityId }}</td>
+              <td>{{ e.detail ?? '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="empty-state">{{ 'admin.auditLog.noEntries' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

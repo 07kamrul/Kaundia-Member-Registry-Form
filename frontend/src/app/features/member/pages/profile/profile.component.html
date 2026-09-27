@@ -10,6 +10,61 @@
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else if (profile) {
+    @if (profile.status === 'pending') {
+      <div class="error-box" style="margin-bottom:1rem"><p style="margin:0">{{ 'member.profile.pendingReviewNotice' | translate }}</p></div>
+    }
+
+    @if (!editing) {
+      <div style="margin-bottom:1rem">
+        <button type="button" class="btn btn-secondary" (click)="startEdit()">
+          {{ 'member.profile.editButton' | translate }}
+        </button>
+      </div>
+    }
+
+    @if (editing) {
+      <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+        <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.editTitle' | translate }}</h3>
+        @if (willRequeue) {
+          <div class="error-box" style="margin-bottom:0.75rem"><p style="margin:0">{{ 'member.profile.requeueWarning' | translate }}</p></div>
+        }
+        <div class="detail-card-grid">
+          <label>{{ 'member.profile.nameLabel' | translate }}<br />
+            <input type="text" [(ngModel)]="draft.fullName" name="fullName" (ngModelChange)="checkRequeue()" />
+          </label>
+          <label>{{ 'member.profile.fatherOrHusbandLabel' | translate }}<br />
+            <input type="text" [(ngModel)]="draft.fatherOrHusband" name="fatherOrHusband" (ngModelChange)="checkRequeue()" />
+          </label>
+          <label>{{ 'member.profile.motherLabel' | translate }}<br />
+            <input type="text" [(ngModel)]="draft.mother" name="mother" (ngModelChange)="checkRequeue()" />
+          </label>
+          <label>{{ 'member.profile.dobLabel' | translate }}<br />
+            <input type="text" [(ngModel)]="draft.dob" name="dob" (ngModelChange)="checkRequeue()" />
+          </label>
+          <label>{{ 'member.profile.nidLabel' | translate }}<br />
+            <input type="text" [(ngModel)]="draft.nid" name="nid" (ngModelChange)="checkRequeue()" />
+          </label>
+          <label>{{ 'member.profile.occupationLabel' | translate }}<br />
+            <input type="text" [(ngModel)]="draft.occupation" name="occupation" (ngModelChange)="checkRequeue()" />
+          </label>
+          <label>{{ 'member.profile.mobileLabel' | translate }}<br />
+            <input type="text" [(ngModel)]="draft.mobile" name="mobile" />
+          </label>
+        </div>
+        @if (saveError) {
+          <p class="error-box" style="margin-top:0.75rem">{{ saveError }}</p>
+        }
+        <div style="margin-top:1rem;display:flex;gap:0.75rem">
+          <button type="button" class="btn btn-primary" [disabled]="saving" (click)="saveProfile()">
+            {{ 'member.profile.saveButton' | translate }}
+          </button>
+          <button type="button" class="btn btn-secondary" [disabled]="saving" (click)="cancelEdit()">
+            {{ 'member.profile.cancelButton' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+
     <div class="detail-card-grid">
       <div class="card" style="padding:1.25rem">
         <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.personalInfoTitle' | translate }}</h3>

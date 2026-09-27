@@ -48,6 +48,7 @@ PERMISSION_CATALOG: tuple[PermissionDef, ...] = (
     PermissionDef("manage_users", "user", "manage", "Create/update/deactivate users, assign roles"),
     PermissionDef("manage_roles", "role", "manage", "Manage roles and role permission assignments"),
     PermissionDef("manage_system_config", "system", "manage", "Manage system configuration"),
+    PermissionDef("manage_fee_settings", "fee_settings", "manage", "Manage fee settings versions"),
     PermissionDef("manage_organization", "organization", "manage", "Manage organization settings"),
     PermissionDef("view_audit_log", "audit", "view", "View audit/access logs"),
     # Members
@@ -100,6 +101,8 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "complaint.review",
         "manage_notices",
         "report.view",
+        "manage_fee_settings",
+        "manage_system_config",
     ),
     AdminRole.ADMINISTRATOR.value: (
         "member.register",
@@ -110,6 +113,7 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "complaint.view_assigned",
         "complaint.process",
         "report.view_operational",
+        "manage_system_config",
     ),
     "member": (
         "profile.view_own",

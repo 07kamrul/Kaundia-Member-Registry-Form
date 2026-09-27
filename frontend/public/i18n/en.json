@@ -40,7 +40,15 @@
     "membersList": "Members List",
     "installmentsManagement": "Installments Management",
     "rolesPermissions": "Roles & Permissions",
+    "feeSettings": "Fee Settings",
+    "auditLog": "Audit Log",
+    "configLists": "Config Lists",
     "admin": "Admin"
+  },
+  "forbidden": {
+    "title": "Access Denied",
+    "message": "You don't have permission to view this page.",
+    "backToDashboard": "Back to Dashboard"
   },
   "welcome": "Welcome, {{name}}",
   "brand": {
@@ -95,7 +103,14 @@
       "propertyItemLabel": "Property",
       "khatianLabel": "Khatian",
       "decimalUnit": "decimal",
-      "loadError": "Failed to load profile."
+      "loadError": "Failed to load profile.",
+      "pendingReviewNotice": "Your membership is currently under review due to a recent profile update. Approved status will resume once reviewed.",
+      "editButton": "Edit Profile",
+      "editTitle": "Edit Profile",
+      "requeueWarning": "Changing this information will send your membership back for review by the management committee.",
+      "saveButton": "Save Changes",
+      "cancelButton": "Cancel",
+      "saveError": "Failed to save profile changes."
     },
     "installments": {
       "title": "Subscription History",
@@ -354,6 +369,81 @@
         "loadMembersFailed": "Could not load member list.",
         "loadInstallmentsFailed": "Could not load installment data.",
         "markPaidFailed": "Could not mark installment as paid."
+      }
+    },
+    "feeSettings": {
+      "title": "Fee Settings",
+      "subtitle": "Manage versioned fee rates with effective date ranges",
+      "addVersion": "Add New Version",
+      "form": {
+        "key": "Key",
+        "value": "Value",
+        "unit": "Unit",
+        "startDate": "Start Date (optional)",
+        "submit": "Save New Version"
+      },
+      "table": {
+        "key": "Key",
+        "value": "Value",
+        "unit": "Unit",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "status": "Status"
+      },
+      "viewHistory": "View History",
+      "hideHistory": "Hide History",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noSettings": "No fee settings configured yet.",
+      "errors": {
+        "loadFailed": "Could not load fee settings.",
+        "loadHistoryFailed": "Could not load fee setting history.",
+        "saveFailed": "Could not save the new fee setting version."
+      }
+    },
+    "auditLog": {
+      "title": "Audit Log",
+      "subtitle": "Who approved, rejected, or changed what, and when",
+      "table": {
+        "time": "Time",
+        "actor": "Admin ID",
+        "action": "Action",
+        "entity": "Entity",
+        "detail": "Detail"
+      },
+      "noEntries": "No audit log entries yet.",
+      "errors": {
+        "loadFailed": "Could not load the audit log."
+      }
+    },
+    "configLists": {
+      "title": "Config Lists",
+      "subtitle": "Manage option lists used across the registration form and other screens",
+      "categories": {
+        "property_type": "Property Types",
+        "document_type": "Document Types",
+        "notice_category": "Notice Categories",
+        "event_category": "Event Categories"
+      },
+      "addItem": "Add New Item",
+      "form": {
+        "value": "Value",
+        "label": "Label (optional)",
+        "submit": "Add Item"
+      },
+      "table": {
+        "value": "Value",
+        "label": "Label",
+        "status": "Status"
+      },
+      "active": "Active",
+      "inactive": "Inactive",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "noItems": "No items in this category yet.",
+      "errors": {
+        "loadFailed": "Could not load config list items.",
+        "saveFailed": "Could not save the change."
       }
     },
     "submissionsList": {

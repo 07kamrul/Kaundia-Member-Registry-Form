@@ -4,6 +4,8 @@ import { map, type Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
   ApplicableDoc,
+  ConfigListItem,
+  FeeSetting,
   Installment,
   Member,
   Nominee,
@@ -23,6 +25,25 @@ interface MemberApiModel {
   mobile: string;
   email?: string;
   due_installments: number;
+}
+
+interface FeeSettingApiModel {
+  id: number;
+  key: string;
+  value: number;
+  unit?: string | null;
+  start_date: string;
+  end_date?: string | null;
+  status: number;
+}
+
+interface ConfigListItemApiModel {
+  id: number;
+  category: string;
+  value: string;
+  label: string;
+  sort_order: number;
+  is_active: number;
 }
 
 interface SubmissionSummaryApiModel {
@@ -115,6 +136,29 @@ function toMember(api: MemberApiModel): Member {
     mobile: api.mobile,
     email: api.email,
     dueInstallments: api.due_installments,
+  };
+}
+
+function toFeeSetting(api: FeeSettingApiModel): FeeSetting {
+  return {
+    id: String(api.id),
+    key: api.key,
+    value: api.value,
+    unit: api.unit ?? undefined,
+    startDate: api.start_date,
+    endDate: api.end_date ?? undefined,
+    status: api.status,
+  };
+}
+
+function toConfigListItem(api: ConfigListItemApiModel): ConfigListItem {
+  return {
+    id: String(api.id),
+    category: api.category,
+    value: api.value,
+    label: api.label,
+    sortOrder: api.sort_order,
+    isActive: api.is_active === 1,
   };
 }
 
@@ -283,5 +327,71 @@ export class AdminService {
 
   updateInstallment(id: string, status: 'paid' | 'due'): Observable<Installment> {
     return this.http.patch<Installment>(`${this.base}/installments/${id}`, { status });
+  }
+
+  getActiveFeeSettings(): Observable<FeeSetting[]> {
+    return this.http
+      .get<FeeSettingApiModel[]>(`${this.base}/fee-settings`)
+      .pipe(map((rows) => rows.map(toFeeSetting)));
+  }
+
+  getFeeSettingHistory(key: string): Observable<FeeSetting[]> {
+    return this.http
+      .get<FeeSettingApiModel[]>(`${this.base}/fee-settings/${key}/history`)
+      .pipe(map((rows) => rows.map(toFeeSetting)));
+  }
+
+  createFeeSettingVersion(payload: {
+    key: string;
+    value: number;
+    unit?: string;
+    startDate?: string;
+  }): Observable<FeeSetting> {
+    return this.http
+      .post<FeeSettingApiModel>(`${this.base}/fee-settings`, {
+        key: payload.key,
+        value: payload.value,
+        unit: payload.unit,
+        start_date: payload.startDate,
+      })
+      .pipe(map(toFeeSetting));
+  }
+
+  listConfigListItems(category?: string): Observable<ConfigListItem[]> {
+    const url = category
+      ? `${this.base}/config-lists?category=${encodeURIComponent(category)}`
+      : `${this.base}/config-lists`;
+    return this.http
+      .get<ConfigListItemApiModel[]>(url)
+      .pipe(map((rows) => rows.map(toConfigListItem)));
+  }
+
+  createConfigListItem(payload: {
+    category: string;
+    value: string;
+    label: string;
+    sortOrder?: number;
+  }): Observable<ConfigListItem> {
+    return this.http
+      .post<ConfigListItemApiModel>(`${this.base}/config-lists`, {
+        category: payload.category,
+        value: payload.value,
+        label: payload.label,
+        sort_order: payload.sortOrder ?? 0,
+      })
+      .pipe(map(toConfigListItem));
+  }
+
+  updateConfigListItem(
+    id: string,
+    payload: { label?: string; sortOrder?: number; isActive?: boolean },
+  ): Observable<ConfigListItem> {
+    return this.http
+      .patch<ConfigListItemApiModel>(`${this.base}/config-lists/${id}`, {
+        label: payload.label,
+        sort_order: payload.sortOrder,
+        is_active: payload.isActive,
+      })
+      .pipe(map(toConfigListItem));
   }
 }

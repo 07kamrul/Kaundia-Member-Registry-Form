@@ -4,6 +4,7 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnInit,
   Output,
   inject,
 } from '@angular/core';
@@ -16,10 +17,8 @@ import {
   OWNERSHIP_TYPES,
   PROPERTY_TYPES,
 } from '../../../../core/models/registration.model';
-import {
-  buildApplicableDocGroup,
-  applicableDocsArray,
-} from '../../registration-form.builder';
+import { ConfigListService } from '../../../../core/services/config-list.service';
+import { buildApplicableDocGroup, applicableDocsArray } from '../../registration-form.builder';
 
 const DIGITS_ONLY_PATTERN = /^\d+$/;
 
@@ -30,15 +29,18 @@ const DIGITS_ONLY_PATTERN = /^\d+$/;
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './property-item.component.html',
 })
-export class PropertyItemComponent {
+export class PropertyItemComponent implements OnInit {
   @Input({ required: true }) property!: FormGroup;
   @Input({ required: true }) index = 0;
   @Input() submitAttempted = false;
   @Output() removeProperty = new EventEmitter<void>();
 
-  readonly propertyTypes = PROPERTY_TYPES;
+  // Seeded with the static defaults so the form renders immediately; replaced
+  // by the admin-editable config-list values once ngOnInit's fetch resolves
+  // (falls back to these same defaults if that request fails).
+  propertyTypes: string[] = PROPERTY_TYPES;
   readonly ownershipTypes = OWNERSHIP_TYPES;
-  readonly documentOptions = DOCUMENT_OPTIONS;
+  documentOptions: string[] = DOCUMENT_OPTIONS;
   readonly maxDocFileMb = MAX_DOC_FILE_BYTES / (1024 * 1024);
   docFileErrors: Record<string, string> = {};
 
@@ -47,7 +49,19 @@ export class PropertyItemComponent {
   constructor(
     private fb: FormBuilder,
     private translate: TranslateService,
+    private configListService: ConfigListService,
   ) {}
+
+  ngOnInit(): void {
+    this.configListService.getValues('property_type', PROPERTY_TYPES).subscribe((values) => {
+      this.propertyTypes = values;
+      this.cdr.markForCheck();
+    });
+    this.configListService.getValues('document_type', DOCUMENT_OPTIONS).subscribe((values) => {
+      this.documentOptions = values;
+      this.cdr.markForCheck();
+    });
+  }
 
   get applicableDocs(): FormArray {
     return applicableDocsArray(this.property);
@@ -156,7 +170,9 @@ export class PropertyItemComponent {
   showJointOwnerCountError(): boolean {
     const ownership = this.property.get('ownership')?.value;
     const count = this.property.get('jointOwnerCount')?.value;
-    return ownership === 'যৌথ' && this.submitAttempted && (count === null || count === 0 || count === '');
+    return (
+      ownership === 'যৌথ' && this.submitAttempted && (count === null || count === 0 || count === '')
+    );
   }
 
   showLandQuantityError(): boolean {

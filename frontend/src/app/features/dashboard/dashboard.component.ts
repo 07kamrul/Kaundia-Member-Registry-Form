@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
-import { AdminDashboardComponent } from '../admin/pages/dashboard/admin-dashboard.component';
+import { AdminDashboardComponent } from '../management/pages/dashboard/admin-dashboard.component';
 import { MemberDashboardComponent } from '../member/pages/dashboard/member-dashboard.component';
 
 @Component({
@@ -9,10 +9,10 @@ import { MemberDashboardComponent } from '../member/pages/dashboard/member-dashb
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AdminDashboardComponent, MemberDashboardComponent],
   template: `
-    @if (auth.isAdmin) {
-      <app-admin-dashboard />
-    } @else {
+    @if (auth.landingTier() === 'member') {
       <app-member-dashboard />
+    } @else {
+      <app-admin-dashboard />
     }
   `,
 })

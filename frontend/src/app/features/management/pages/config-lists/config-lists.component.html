@@ -1,0 +1,89 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.configLists.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.configLists.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  }
+
+  <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
+    @for (c of categories; track c) {
+      <button
+        type="button"
+        class="btn"
+        [class.btn-primary]="c === selectedCategory"
+        [class.btn-secondary]="c !== selectedCategory"
+        (click)="selectCategory(c)"
+      >
+        {{ 'admin.configLists.categories.' + c | translate }}
+      </button>
+    }
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem">
+    <h2 style="font-size:1rem;margin-top:0">{{ 'admin.configLists.addItem' | translate }}</h2>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end">
+      <div>
+        <label>{{ 'admin.configLists.form.value' | translate }}</label><br />
+        <input type="text" [(ngModel)]="draftValue" name="draftValue" [disabled]="!auth.hasPermission('manage_system_config')" />
+      </div>
+      <div>
+        <label>{{ 'admin.configLists.form.label' | translate }}</label><br />
+        <input type="text" [(ngModel)]="draftLabel" name="draftLabel" [placeholder]="draftValue" [disabled]="!auth.hasPermission('manage_system_config')" />
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!auth.hasPermission('manage_system_config') || saving || !draftValue.trim()"
+        (click)="addItem()"
+      >
+        {{ 'admin.configLists.form.submit' | translate }}
+      </button>
+    </div>
+    @if (saveError) {
+      <p class="error-box" style="margin-top:0.75rem">{{ saveError }}</p>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else {
+    <div class="card">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="text-align:left">{{ 'admin.configLists.table.value' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.configLists.table.label' | translate }}</th>
+            <th style="text-align:left">{{ 'admin.configLists.table.status' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items; track item.id) {
+            <tr>
+              <td>{{ item.value }}</td>
+              <td>{{ item.label }}</td>
+              <td>{{ item.isActive ? ('admin.configLists.active' | translate) : ('admin.configLists.inactive' | translate) }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  [disabled]="!auth.hasPermission('manage_system_config') || togglingId === item.id"
+                  (click)="toggleActive(item)"
+                >
+                  {{ (item.isActive ? 'admin.configLists.deactivate' : 'admin.configLists.activate') | translate }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="empty-state">{{ 'admin.configLists.noItems' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

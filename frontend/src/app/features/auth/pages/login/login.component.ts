@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IconComponent } from '../../../../shared/icon/icon.component';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -25,6 +25,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private auth: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private translate: TranslateService,
   ) {
     this.form = this.fb.group({
@@ -59,8 +60,11 @@ export class LoginComponent {
     this.auth.login(identifier, password).subscribe({
       next: (res) => {
         this.submitting = false;
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         if (res.must_change_password) {
           this.router.navigate(['/change-password']);
+        } else if (returnUrl) {
+          this.router.navigateByUrl(returnUrl);
         } else {
           this.router.navigate(['/dashboard']);
         }
