@@ -11,6 +11,12 @@
         </div>
       </a>
       <div class="site-header-actions" [class.is-open]="isMobileMenuOpen" id="site-header-actions">
+        <a routerLink="/notices" class="btn btn-ghost btn-sm" (click)="closeMobileMenu()">{{
+          'nav.notices' | translate
+        }}</a>
+        <a routerLink="/events" class="btn btn-ghost btn-sm" (click)="closeMobileMenu()">{{
+          'nav.events' | translate
+        }}</a>
         <a routerLink="/register" class="btn btn-ghost btn-sm" (click)="closeMobileMenu()">{{
           'nav.register' | translate
         }}</a>

@@ -14,8 +14,38 @@ import type {
   SubmissionStatus,
   SubmissionSummary,
 } from '../models/admin.model';
+import {
+  toEventItem,
+  toNotice,
+  type EventApiModel,
+  type EventItem,
+  type Notice,
+  type NoticeApiModel,
+} from '../models/content.model';
 
 export type AttachmentKind = 'member_photo' | 'receipt_photo';
+
+/** Fields a notice is created/edited with. Dates are ISO instants (UTC). */
+export interface NoticeInput {
+  title: string;
+  body: string;
+  categoryId?: string | null;
+  isPublished?: boolean;
+  isMembersOnly?: boolean;
+  publishAt?: string | null;
+}
+
+/** Fields an event is created/edited with. Dates are ISO instants (UTC). */
+export interface EventInput {
+  title: string;
+  description?: string | null;
+  location?: string | null;
+  categoryId?: string | null;
+  startAt: string;
+  endAt?: string | null;
+  isPublished?: boolean;
+  isMembersOnly?: boolean;
+}
 
 interface MemberApiModel {
   id: number;
@@ -393,5 +423,79 @@ export class AdminService {
         is_active: payload.isActive,
       })
       .pipe(map(toConfigListItem));
+  }
+
+  listNotices(options?: { published?: boolean; categoryId?: string }): Observable<Notice[]> {
+    const params: string[] = [];
+    if (options?.published !== undefined) params.push(`published=${options.published}`);
+    if (options?.categoryId) params.push(`category_id=${encodeURIComponent(options.categoryId)}`);
+    const url = params.length ? `${this.base}/notices?${params.join('&')}` : `${this.base}/notices`;
+    return this.http.get<NoticeApiModel[]>(url).pipe(map((rows) => rows.map(toNotice)));
+  }
+
+  createNotice(payload: NoticeInput): Observable<Notice> {
+    return this.http
+      .post<NoticeApiModel>(`${this.base}/notices`, this.noticeBody(payload))
+      .pipe(map(toNotice));
+  }
+
+  updateNotice(id: string, payload: NoticeInput): Observable<Notice> {
+    return this.http
+      .patch<NoticeApiModel>(`${this.base}/notices/${id}`, this.noticeBody(payload))
+      .pipe(map(toNotice));
+  }
+
+  deleteNotice(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/notices/${id}`);
+  }
+
+  listEvents(options?: { published?: boolean; categoryId?: string }): Observable<EventItem[]> {
+    const params: string[] = [];
+    if (options?.published !== undefined) params.push(`published=${options.published}`);
+    if (options?.categoryId) params.push(`category_id=${encodeURIComponent(options.categoryId)}`);
+    const url = params.length ? `${this.base}/events?${params.join('&')}` : `${this.base}/events`;
+    return this.http.get<EventApiModel[]>(url).pipe(map((rows) => rows.map(toEventItem)));
+  }
+
+  createEvent(payload: EventInput): Observable<EventItem> {
+    return this.http
+      .post<EventApiModel>(`${this.base}/events`, this.eventBody(payload))
+      .pipe(map(toEventItem));
+  }
+
+  updateEvent(id: string, payload: EventInput): Observable<EventItem> {
+    return this.http
+      .patch<EventApiModel>(`${this.base}/events/${id}`, this.eventBody(payload))
+      .pipe(map(toEventItem));
+  }
+
+  deleteEvent(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/events/${id}`);
+  }
+
+  // The form always sends the complete record (never a sparse patch), so an
+  // emptied category/date round-trips as null instead of being dropped.
+  private noticeBody(payload: NoticeInput): Record<string, unknown> {
+    return {
+      title: payload.title,
+      body: payload.body,
+      category_id: payload.categoryId != null ? Number(payload.categoryId) : null,
+      is_published: payload.isPublished ?? false,
+      is_members_only: payload.isMembersOnly ?? false,
+      publish_at: payload.publishAt ?? null,
+    };
+  }
+
+  private eventBody(payload: EventInput): Record<string, unknown> {
+    return {
+      title: payload.title,
+      description: payload.description ?? null,
+      location: payload.location ?? null,
+      category_id: payload.categoryId != null ? Number(payload.categoryId) : null,
+      start_at: payload.startAt,
+      end_at: payload.endAt ?? null,
+      is_published: payload.isPublished ?? false,
+      is_members_only: payload.isMembersOnly ?? false,
+    };
   }
 }

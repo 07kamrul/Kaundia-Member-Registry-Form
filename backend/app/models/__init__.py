@@ -8,6 +8,8 @@ from app.models.rbac import Permission, Role, UserPermissionOverride, role_permi
 from app.models.fee_settings import FeeSetting
 from app.models.audit_log import AuditLog
 from app.models.config_list_item import ConfigListItem
+from app.models.event import Event
+from app.models.notice import Notice
 
 __all__ = [
     "Member",
@@ -23,6 +25,8 @@ __all__ = [
     "FeeSetting",
     "AuditLog",
     "ConfigListItem",
+    "Notice",
+    "Event",
     "Role",
     "Permission",
     "UserPermissionOverride",

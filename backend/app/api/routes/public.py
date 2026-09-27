@@ -1,14 +1,18 @@
-from datetime import date
+from datetime import date, datetime, timezone
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import or_, select
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import case, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.models.config_list_item import ConfigListItem
+from app.models.event import Event
 from app.models.fee_settings import FeeSetting
 from app.models.member import Member, MemberStatus
+from app.models.notice import Notice
 from app.schemas.config_list import ConfigListItemOut
+from app.schemas.event import EventOut
+from app.schemas.notice import NoticeOut
 from app.schemas.public import PublicStatsOut
 
 router = APIRouter(prefix="/public", tags=["public"])
@@ -68,4 +72,56 @@ async def get_public_config_list(
         .where(ConfigListItem.category == category, ConfigListItem.is_active == 1)
         .order_by(ConfigListItem.sort_order)
     )
+    return list(result.scalars().all())
+
+
+# No auth on either endpoint: a notice/event is public once published, unless
+# it was explicitly marked members-only - those rows are filtered out here
+# (there is no member-only consumer yet; see app/models/notice.py).
+@router.get("/notices", response_model=list[NoticeOut])
+async def list_public_notices(
+    limit: int | None = Query(default=None, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    db: AsyncSession = Depends(get_db),
+) -> list[Notice]:
+    now = datetime.now(timezone.utc)
+    query = (
+        select(Notice)
+        .where(
+            Notice.is_published.is_(True),
+            or_(Notice.publish_at.is_(None), Notice.publish_at <= now),
+            Notice.is_members_only.is_(False),
+        )
+        .order_by(Notice.created_at.desc(), Notice.id.desc())
+    )
+    if offset:
+        query = query.offset(offset)
+    if limit is not None:
+        query = query.limit(limit)
+    result = await db.execute(query)
+    return list(result.scalars().all())
+
+
+@router.get("/events", response_model=list[EventOut])
+async def list_public_events(
+    limit: int | None = Query(default=None, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    db: AsyncSession = Depends(get_db),
+) -> list[Event]:
+    # Upcoming first (soonest first), then past (most recent first), in one
+    # ORDER BY - the page splits the response into its two sections as-is.
+    now = datetime.now(timezone.utc)
+    is_upcoming = case((Event.start_at >= now, 0), else_=1)
+    upcoming_start = case((Event.start_at >= now, Event.start_at), else_=None)
+    past_start = case((Event.start_at < now, Event.start_at), else_=None)
+    query = (
+        select(Event)
+        .where(Event.is_published.is_(True), Event.is_members_only.is_(False))
+        .order_by(is_upcoming.asc(), upcoming_start.asc(), past_start.desc())
+    )
+    if offset:
+        query = query.offset(offset)
+    if limit is not None:
+        query = query.limit(limit)
+    result = await db.execute(query)
     return list(result.scalars().all())

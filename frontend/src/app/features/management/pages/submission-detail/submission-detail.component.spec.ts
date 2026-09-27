@@ -40,11 +40,7 @@ const submission: SubmissionDetail = {
       holdingNumber: null,
       landQuantity: '1.5',
       ownership: 'যৌথ',
-      coOwners: [
-        { id: 'c1', name: 'Jane Doe', mobile: '01711111111' },
-        { id: 'c2', name: 'John Doe', mobile: '01711111111' },
-        { id: 'c3', name: 'Other', mobile: '01822222222' },
-      ],
+      jointOwnerCount: 3,
       applicableDocs: [],
     },
   ],
@@ -121,26 +117,10 @@ describe('SubmissionDetailComponent (OnPush + memoized derived values)', () => {
     const first = component.emergencyContact;
     expect(component.emergencyContact).toBe(first);
     expect(component.nomineeShareTotal).toBe(component.nomineeShareTotal);
+    expect(component.nomineeShareTotal).toBe(100);
 
     const property = component.submission!.properties[0];
-    expect(component.duplicateMobiles(property)).toBe(component.duplicateMobiles(property));
-    expect(component.coOwnerRoles(property.coOwners[0])).toBe(
-      component.coOwnerRoles(property.coOwners[0]),
-    );
-  });
-
-  it('flags the mobile shared by two co-owners but not the unique one', () => {
-    const component = create().componentInstance;
-    const property = component.submission!.properties[0];
-    expect(component.isDuplicateMobile(property, property.coOwners[0])).toBe(true);
-    expect(component.isDuplicateMobile(property, property.coOwners[1])).toBe(true);
-    expect(component.isDuplicateMobile(property, property.coOwners[2])).toBe(false);
-    expect(component.coOwnerRoles(property.coOwners[0])).toEqual([
-      'applicant',
-      'emergency',
-      'nominee',
-    ]);
-    expect(component.coOwnerRoles(property.coOwners[2])).toEqual([]);
+    expect(component.propertySummary(property)).toBe(component.propertySummary(property));
   });
 
   it('sanitizes the preview frame URL only once per preview target', async () => {

@@ -1,0 +1,231 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.events.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.events.subtitle' | translate }}</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openCreate()">
+      {{ 'admin.events.create' | translate }}
+    </button>
+  </div>
+
+  @if (error) {
+    <div class="error-box">
+      <p style="margin: 0">{{ error }}</p>
+    </div>
+  }
+
+  <div
+    style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center"
+  >
+    @for (filter of statusFilters; track filter) {
+      <button
+        type="button"
+        class="btn"
+        [class.btn-primary]="statusFilter === filter"
+        [class.btn-secondary]="statusFilter !== filter"
+        (click)="setStatusFilter(filter)"
+      >
+        {{ 'admin.events.filters.' + filter | translate }}
+      </button>
+    }
+    <select
+      [(ngModel)]="categoryFilter"
+      (ngModelChange)="onCategoryFilter()"
+      style="max-width: 16rem"
+      [attr.aria-label]="'admin.events.filters.category' | translate"
+    >
+      <option value="">{{ 'admin.events.filters.allCategories' | translate }}</option>
+      @for (category of categories; track category.id) {
+        <option [value]="category.id">{{ category.label }}</option>
+      }
+    </select>
+  </div>
+
+  @if (formOpen) {
+    <div class="card" style="margin-bottom: 1.5rem">
+      <h2 style="font-size: 1rem; margin-top: 0">
+        {{
+          (editingId ? 'admin.events.form.editTitle' : 'admin.events.form.createTitle') | translate
+        }}
+      </h2>
+
+      <div class="field">
+        <label for="event-title"
+          >{{ 'admin.events.form.title' | translate }}<span class="required">*</span></label
+        >
+        <input id="event-title" type="text" [(ngModel)]="formTitle" name="formTitle" />
+      </div>
+
+      <div class="field">
+        <label for="event-description">{{ 'admin.events.form.description' | translate }}</label>
+        <textarea
+          id="event-description"
+          rows="4"
+          [(ngModel)]="formDescription"
+          name="formDescription"
+        ></textarea>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="event-location">{{ 'admin.events.form.location' | translate }}</label>
+          <input id="event-location" type="text" [(ngModel)]="formLocation" name="formLocation" />
+        </div>
+        <div class="field">
+          <label for="event-category">{{ 'admin.events.form.category' | translate }}</label>
+          <select id="event-category" [(ngModel)]="formCategoryId" name="formCategoryId">
+            <option value="">{{ 'admin.events.form.noCategory' | translate }}</option>
+            @for (category of categories; track category.id) {
+              <option [value]="category.id">{{ category.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="event-start-at"
+            >{{ 'admin.events.form.startAt' | translate }}<span class="required">*</span></label
+          >
+          <input
+            id="event-start-at"
+            type="datetime-local"
+            [(ngModel)]="formStartAt"
+            name="formStartAt"
+          />
+        </div>
+        <div class="field">
+          <label for="event-end-at">{{ 'admin.events.form.endAt' | translate }}</label>
+          <input id="event-end-at" type="datetime-local" [(ngModel)]="formEndAt" name="formEndAt" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label style="display: flex; align-items: center; gap: 0.5rem">
+          <input
+            type="checkbox"
+            [(ngModel)]="formPublished"
+            name="formPublished"
+            style="width: auto"
+          />
+          {{ 'admin.events.form.published' | translate }}
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem">
+          <input
+            type="checkbox"
+            [(ngModel)]="formMembersOnly"
+            name="formMembersOnly"
+            style="width: auto"
+          />
+          {{ 'admin.events.form.membersOnly' | translate }}
+        </label>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="saving || !formTitle.trim() || !formStartAt"
+          (click)="save()"
+        >
+          {{
+            (saving ? 'common.loading' : editingId ? 'common.save' : 'admin.events.form.create')
+              | translate
+          }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelForm()">
+          {{ 'common.cancel' | translate }}
+        </button>
+      </div>
+      @if (saveError) {
+        <p class="error-box" style="margin-top: 0.75rem">{{ saveError }}</p>
+      }
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">
+      <span class="spinner"></span> {{ 'common.loading' | translate }}
+    </div>
+  } @else {
+    <div class="card">
+      <table style="width: 100%; border-collapse: collapse">
+        <thead>
+          <tr>
+            <th style="text-align: left">{{ 'admin.events.table.title' | translate }}</th>
+            <th style="text-align: left">{{ 'admin.events.table.when' | translate }}</th>
+            <th style="text-align: left">{{ 'admin.events.table.location' | translate }}</th>
+            <th style="text-align: left">{{ 'admin.events.table.category' | translate }}</th>
+            <th style="text-align: left">{{ 'admin.events.table.status' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of events; track row.id) {
+            <tr>
+              <td>{{ row.title }}</td>
+              <td>
+                {{ row.startAt | date: 'MMM d, y, HH:mm' }}
+                @if (row.endAt) {
+                  <br />{{ 'admin.events.table.until' | translate }}
+                  {{ row.endAt | date: 'MMM d, y, HH:mm' }}
+                }
+              </td>
+              <td>{{ row.location ?? '—' }}</td>
+              <td>{{ categoryLabel(row.categoryId) }}</td>
+              <td>
+                <span class="status-badge" [class.status-approved]="row.isPublished">
+                  {{
+                    (row.isPublished
+                      ? 'admin.events.status.published'
+                      : 'admin.events.status.draft'
+                    ) | translate
+                  }}
+                </span>
+              </td>
+              <td style="white-space: nowrap">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="edit(row)">
+                  {{ 'common.edit' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  [disabled]="togglingId === row.id"
+                  (click)="togglePublished(row)"
+                >
+                  {{
+                    (row.isPublished ? 'admin.events.unpublish' : 'admin.events.publish')
+                      | translate
+                  }}
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" (click)="askDelete(row)">
+                  {{ 'common.delete' | translate }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-state">{{ 'admin.events.noItems' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-confirm-modal
+    [open]="!!deleteTarget"
+    [title]="'admin.events.deleteModal.title' | translate"
+    [message]="
+      deleteTarget
+        ? deleteTarget.title + ' ' + ('admin.events.deleteModal.messageSuffix' | translate)
+        : ''
+    "
+    [confirmLabel]="'admin.events.deleteModal.confirmLabel' | translate"
+    [danger]="true"
+    [confirmDisabled]="deleting"
+    (confirm)="confirmDelete()"
+    (cancel)="deleteTarget = null"
+  ></app-confirm-modal>
+</div>

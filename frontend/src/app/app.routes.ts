@@ -31,6 +31,34 @@ export const routes: Routes = [
           import('./features/auth/pages/login/login.component').then((m) => m.LoginComponent),
       },
       {
+        path: 'notices',
+        loadComponent: () =>
+          import('./features/public-pages/notices/notices-page.component').then(
+            (m) => m.NoticesPageComponent,
+          ),
+      },
+      {
+        path: 'notices/:id',
+        loadComponent: () =>
+          import('./features/public-pages/notices/notice-detail-page.component').then(
+            (m) => m.NoticeDetailPageComponent,
+          ),
+      },
+      {
+        path: 'events',
+        loadComponent: () =>
+          import('./features/public-pages/events/events-page.component').then(
+            (m) => m.EventsPageComponent,
+          ),
+      },
+      {
+        path: 'events/:id',
+        loadComponent: () =>
+          import('./features/public-pages/events/event-detail-page.component').then(
+            (m) => m.EventDetailPageComponent,
+          ),
+      },
+      {
         path: '403',
         loadComponent: () =>
           import('./core/pages/forbidden/forbidden.component').then((m) => m.ForbiddenComponent),
@@ -132,6 +160,24 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/management/pages/config-lists/config-lists.component').then(
                 (m) => m.ConfigListsComponent,
+              ),
+          },
+          // `-management` suffix mirrors installments-management: the public
+          // /notices and /events routes already own the unsuffixed paths.
+          {
+            path: 'notices-management',
+            canActivate: [permissionGuard(['manage_notices'])],
+            loadComponent: () =>
+              import('./features/management/pages/notices/notices.component').then(
+                (m) => m.NoticesComponent,
+              ),
+          },
+          {
+            path: 'events-management',
+            canActivate: [permissionGuard(['manage_notices'])],
+            loadComponent: () =>
+              import('./features/management/pages/events/events.component').then(
+                (m) => m.EventsComponent,
               ),
           },
         ],

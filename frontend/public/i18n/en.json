@@ -21,7 +21,11 @@
     "confirmModal": {
       "confirmButton": "Confirm",
       "cancelButton": "Cancel"
-    }
+    },
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "nav": {
     "openMenu": "Open menu",
@@ -43,7 +47,11 @@
     "feeSettings": "Fee Settings",
     "auditLog": "Audit Log",
     "configLists": "Config Lists",
-    "admin": "Admin"
+    "admin": "Admin",
+    "notices": "Notices",
+    "events": "Events",
+    "noticesManagement": "Manage Notices",
+    "eventsManagement": "Manage Events"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -78,6 +86,34 @@
       "reviewDesc": "The executive committee and administration verify each application and approve or reject it.",
       "memberIdTitle": "Member ID & Login",
       "memberIdDesc": "After approval, a member ID is automatically generated and login information is issued."
+    }
+  },
+  "notices": {
+    "title": "Notices",
+    "subtitle": "Announcements from the Uttar Kaundia Housing Owners' Welfare Council",
+    "empty": "No notices have been published yet.",
+    "backToList": "All notices",
+    "notFound": "This notice is no longer available.",
+    "errors": {
+      "loadFailed": "Could not load notices."
+    }
+  },
+  "events": {
+    "title": "Events",
+    "subtitle": "Meetings, programmes and gatherings of the council",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "noUpcoming": "No upcoming events.",
+    "noPast": "No past events.",
+    "backToList": "All events",
+    "notFound": "This event is no longer available.",
+    "detail": {
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "location": "Location"
+    },
+    "errors": {
+      "loadFailed": "Could not load events."
     }
   },
   "member": {
@@ -478,6 +514,106 @@
       "noPending": "No pending applications",
       "errors": {
         "loadFailed": "Could not load application list."
+      }
+    },
+    "notices": {
+      "title": "Notices",
+      "subtitle": "Write and publish bulletins to members and visitors",
+      "create": "New Notice",
+      "filters": {
+        "all": "All",
+        "published": "Published",
+        "draft": "Drafts",
+        "category": "Category filter",
+        "allCategories": "All categories"
+      },
+      "form": {
+        "createTitle": "New notice",
+        "editTitle": "Edit notice",
+        "title": "Title",
+        "body": "Body",
+        "category": "Category",
+        "noCategory": "No category",
+        "publishAt": "Publish at",
+        "publishAtHint": "Optional. A scheduled notice stays hidden until this time passes.",
+        "published": "Published",
+        "membersOnly": "Members only (hidden from the public feed)",
+        "create": "Create"
+      },
+      "table": {
+        "title": "Title",
+        "category": "Category",
+        "status": "Status",
+        "publishAt": "Publish at"
+      },
+      "status": {
+        "published": "Published",
+        "scheduled": "Scheduled",
+        "draft": "Draft"
+      },
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "noItems": "No notices yet.",
+      "deleteModal": {
+        "title": "Delete notice",
+        "messageSuffix": "will be permanently deleted.",
+        "confirmLabel": "Delete"
+      },
+      "errors": {
+        "loadFailed": "Could not load notices.",
+        "saveFailed": "Could not save the notice.",
+        "deleteFailed": "Could not delete the notice."
+      }
+    },
+    "events": {
+      "title": "Events",
+      "subtitle": "Schedule the council's programme and publish it",
+      "create": "New Event",
+      "filters": {
+        "all": "All",
+        "published": "Published",
+        "draft": "Drafts",
+        "category": "Category filter",
+        "allCategories": "All categories"
+      },
+      "form": {
+        "createTitle": "New event",
+        "editTitle": "Edit event",
+        "title": "Title",
+        "description": "Description",
+        "location": "Location",
+        "category": "Category",
+        "noCategory": "No category",
+        "startAt": "Starts",
+        "endAt": "Ends",
+        "published": "Published",
+        "membersOnly": "Members only (hidden from the public feed)",
+        "create": "Create"
+      },
+      "table": {
+        "title": "Title",
+        "when": "When",
+        "until": "until",
+        "location": "Location",
+        "category": "Category",
+        "status": "Status"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "noItems": "No events yet.",
+      "deleteModal": {
+        "title": "Delete event",
+        "messageSuffix": "will be permanently deleted.",
+        "confirmLabel": "Delete"
+      },
+      "errors": {
+        "loadFailed": "Could not load events.",
+        "saveFailed": "Could not save the event.",
+        "deleteFailed": "Could not delete the event."
       }
     }
   },

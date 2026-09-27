@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from starlette.middleware.gzip import GZipMiddleware
 
-from app.api.routes import admin, auth, member, public, rbac, submissions
+from app.api.routes import admin, auth, member, notices, public, rbac, submissions
 from app.core.config import get_settings
 from app.db.session import engine
 from app.services.storage import UploadStaticFiles
@@ -62,6 +62,7 @@ api_router_prefix = "/api"
 app.include_router(submissions.router, prefix=api_router_prefix)
 app.include_router(auth.router, prefix=api_router_prefix)
 app.include_router(admin.router, prefix=api_router_prefix)
+app.include_router(notices.router, prefix=api_router_prefix)
 app.include_router(member.router, prefix=api_router_prefix)
 app.include_router(rbac.router, prefix=api_router_prefix)
 app.include_router(public.router, prefix=api_router_prefix)

@@ -1,0 +1,53 @@
+<div class="public-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'notices.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'notices.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-box">
+      <p style="margin: 0">{{ error }}</p>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">
+      <span class="spinner"></span> {{ 'common.loading' | translate }}
+    </div>
+  } @else {
+    <div style="display: flex; flex-direction: column; gap: 1rem">
+      @for (notice of notices; track notice.id) {
+        <a
+          class="card"
+          routerLink="/notices/{{ notice.id }}"
+          style="display: block; text-decoration: none; color: inherit"
+        >
+          <div
+            style="
+              display: flex;
+              gap: 0.75rem;
+              flex-wrap: wrap;
+              align-items: center;
+              margin-bottom: 0.5rem;
+            "
+          >
+            @if (categoryLabel(notice.categoryId)) {
+              <span class="ds-badge ds-badge-blue">{{ categoryLabel(notice.categoryId) }}</span>
+            }
+            <span style="color: var(--gray-600); font-size: 0.85rem">
+              {{ notice.publishAt ?? notice.createdAt | date: 'MMM d, y' }}
+            </span>
+          </div>
+          <p style="margin: 0; font-weight: 700">{{ notice.title }}</p>
+          <p style="margin: 0.35rem 0 0; color: var(--gray-600); font-size: 0.9rem">
+            {{ notice.body.length > 160 ? (notice.body | slice: 0 : 160) + '…' : notice.body }}
+          </p>
+        </a>
+      } @empty {
+        <div class="card empty-state">{{ 'notices.empty' | translate }}</div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,91 @@
+<div class="public-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'events.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'events.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-box">
+      <p style="margin: 0">{{ error }}</p>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">
+      <span class="spinner"></span> {{ 'common.loading' | translate }}
+    </div>
+  } @else {
+    <h2 class="section-title" style="margin-bottom: 0.75rem">
+      {{ 'events.upcoming' | translate }}
+    </h2>
+    <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem">
+      @for (event of upcoming; track event.id) {
+        <a
+          class="card"
+          routerLink="/events/{{ event.id }}"
+          style="display: block; text-decoration: none; color: inherit"
+        >
+          <div
+            style="
+              display: flex;
+              gap: 0.75rem;
+              flex-wrap: wrap;
+              align-items: center;
+              margin-bottom: 0.5rem;
+            "
+          >
+            @if (categoryLabel(event.categoryId)) {
+              <span class="ds-badge ds-badge-blue">{{ categoryLabel(event.categoryId) }}</span>
+            }
+            <span style="color: var(--gray-600); font-size: 0.85rem">
+              {{ event.startAt | date: 'EEEE, MMM d, y, h:mm a' }}
+            </span>
+          </div>
+          <p style="margin: 0; font-weight: 700">{{ event.title }}</p>
+          @if (event.location) {
+            <p style="margin: 0.35rem 0 0; color: var(--gray-600); font-size: 0.9rem">
+              {{ event.location }}
+            </p>
+          }
+        </a>
+      } @empty {
+        <div class="card empty-state">{{ 'events.noUpcoming' | translate }}</div>
+      }
+    </div>
+
+    <h2 class="section-title" style="margin-bottom: 0.75rem">{{ 'events.past' | translate }}</h2>
+    <div style="display: flex; flex-direction: column; gap: 1rem">
+      @for (event of past; track event.id) {
+        <a
+          class="card"
+          routerLink="/events/{{ event.id }}"
+          style="display: block; text-decoration: none; color: inherit; opacity: 0.75"
+        >
+          <div
+            style="
+              display: flex;
+              gap: 0.75rem;
+              flex-wrap: wrap;
+              align-items: center;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <span style="color: var(--gray-600); font-size: 0.85rem">
+              {{ event.startAt | date: 'MMM d, y' }}
+            </span>
+          </div>
+          <p style="margin: 0; font-weight: 700">{{ event.title }}</p>
+          @if (event.location) {
+            <p style="margin: 0.35rem 0 0; color: var(--gray-600); font-size: 0.9rem">
+              {{ event.location }}
+            </p>
+          }
+        </a>
+      } @empty {
+        <div class="card empty-state">{{ 'events.noPast' | translate }}</div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,61 @@
+<div class="public-page">
+  <a routerLink="/events" class="btn btn-ghost btn-sm" style="margin-bottom: 1rem">
+    ← {{ 'events.backToList' | translate }}
+  </a>
+
+  @if (loading) {
+    <div class="loading-state">
+      <span class="spinner"></span> {{ 'common.loading' | translate }}
+    </div>
+  } @else if (notFound || !event) {
+    <div class="card empty-state">{{ 'events.notFound' | translate }}</div>
+  } @else {
+    <article class="card">
+      <div
+        style="
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+          align-items: center;
+          margin-bottom: 0.5rem;
+        "
+      >
+        @if (categoryLabel) {
+          <span class="ds-badge ds-badge-blue">{{ categoryLabel }}</span>
+        }
+        @if (isPast) {
+          <span class="ds-badge">{{ 'events.past' | translate }}</span>
+        }
+      </div>
+
+      <h1 class="page-title" style="margin-bottom: 0.75rem">{{ event.title }}</h1>
+
+      <div class="detail-card" style="margin-bottom: 1rem">
+        <div class="detail-card-row">
+          <span class="detail-card-label">{{ 'events.detail.startsAt' | translate }}</span>
+          <span class="detail-card-value">{{
+            event.startAt | date: 'EEEE, MMM d, y, h:mm a'
+          }}</span>
+        </div>
+        @if (event.endAt) {
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'events.detail.endsAt' | translate }}</span>
+            <span class="detail-card-value">{{
+              event.endAt | date: 'EEEE, MMM d, y, h:mm a'
+            }}</span>
+          </div>
+        }
+        @if (event.location) {
+          <div class="detail-card-row">
+            <span class="detail-card-label">{{ 'events.detail.location' | translate }}</span>
+            <span class="detail-card-value">{{ event.location }}</span>
+          </div>
+        }
+      </div>
+
+      @if (event.description) {
+        <p style="white-space: pre-line; margin: 0; line-height: 1.7">{{ event.description }}</p>
+      }
+    </article>
+  }
+</div>

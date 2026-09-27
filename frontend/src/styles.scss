@@ -515,6 +515,15 @@ a {
   width: 100%;
 }
 
+/* Long-form public pages (notices/events) - narrower than the marketing
+   sections, same gutters. */
+.public-page {
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2.4rem 1.4rem 3.6rem;
+}
+
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -633,6 +642,7 @@ a {
 
 input[type='text'],
 input[type='date'],
+input[type='datetime-local'],
 input[type='email'],
 input[type='number'],
 input[type='password'],

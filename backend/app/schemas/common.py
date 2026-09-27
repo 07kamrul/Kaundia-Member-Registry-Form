@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from pydantic import BaseModel, field_validator
 
 DIGITS_ONLY_PATTERN = r"^\d+$"
@@ -7,6 +9,21 @@ def validate_digits_only(value: str | None) -> str | None:
     if value is not None and value != "" and not value.isdigit():
         raise ValueError("must contain digits only")
     return value
+
+
+def as_utc(value: datetime | None) -> datetime | None:
+    """Normalise a client's datetime to UTC.
+
+    `publish_at`/`start_at` are compared against `now()` on the server, so a
+    naive value would otherwise be interpreted in whatever timezone the
+    process happens to run in, and an offset other than UTC would be stored
+    with its local fields (SQLite has no tz support and drops the offset).
+    """
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
 
 
 class AddressDetail(BaseModel):

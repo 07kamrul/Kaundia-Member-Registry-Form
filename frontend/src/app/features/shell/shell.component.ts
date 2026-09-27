@@ -26,6 +26,19 @@ const NAV_ITEMS: NavItem[] = [
     requiredPermission: ['profile.view_own'],
   },
   { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
+  // Published notices/events - the same public pages logged-out visitors read.
+  {
+    labelKey: 'nav.notices',
+    route: '/notices',
+    icon: 'doc',
+    requiredPermission: ['notice.view'],
+  },
+  {
+    labelKey: 'nav.events',
+    route: '/events',
+    icon: 'pin',
+    requiredPermission: ['event.view'],
+  },
   {
     labelKey: 'nav.submissions',
     route: '/submissions',
@@ -67,6 +80,18 @@ const NAV_ITEMS: NavItem[] = [
     route: '/config-lists',
     icon: 'inbox',
     requiredPermission: ['manage_system_config'],
+  },
+  {
+    labelKey: 'nav.noticesManagement',
+    route: '/notices-management',
+    icon: 'doc',
+    requiredPermission: ['manage_notices'],
+  },
+  {
+    labelKey: 'nav.eventsManagement',
+    route: '/events-management',
+    icon: 'pin',
+    requiredPermission: ['manage_notices'],
   },
 ];
 
