@@ -502,13 +502,10 @@ export class RegistrationPageComponent implements OnInit {
     this.registrationService.submit(this.form.getRawValue()).subscribe({
       next: (res) => {
         this.submitting = false;
-        if (res.success) {
-          this.success = { id: res.id ?? '' };
-        } else {
-          this.serverError =
-            res.error ?? this.translate.instant('registration.submit.genericError');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        // Reaching `next` means a 2xx response, which for POST /submissions
+        // is a created submission - the backend body carries `id`/`status`,
+        // not a `success` flag.
+        this.success = { id: res.id != null ? String(res.id) : '' };
         this.cdr.markForCheck();
       },
       error: (err: HttpErrorResponse) => {

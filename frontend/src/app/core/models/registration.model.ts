@@ -144,7 +144,8 @@ export interface FormDataModel {
 }
 
 export interface SubmissionResult {
-  success: boolean;
-  id?: string;
-  error?: string;
+  // Body of the 201 response from POST /submissions — no `success` flag;
+  // HTTP status carries the outcome.
+  id?: number;
+  status?: string;
 }

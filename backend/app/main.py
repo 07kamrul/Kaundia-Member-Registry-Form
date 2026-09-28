@@ -4,8 +4,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from starlette.middleware.gzip import GZipMiddleware
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.api.routes import admin, auth, member, notices, public, rbac, submissions
 from app.core.config import get_settings
@@ -42,6 +44,38 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ API", lifespan=lifespan)
+
+
+class CorsSafeErrorMiddleware:
+    """Catches unhandled exceptions and returns a JSON 500.
+
+    Registering an exception_handler(Exception) is not enough: Starlette wires
+    that onto ServerErrorMiddleware, which sits OUTSIDE CORSMiddleware, so the
+    500 it produces carries no Access-Control-Allow-Origin and the browser
+    reports a misleading CORS failure instead of the real server error. As a
+    user middleware this runs inside CORS, so its response keeps the headers
+    and the frontend's error handling sees an actual status code."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        try:
+            await self.app(scope, receive, send)
+        except Exception:
+            logger.exception("Unhandled error on %s %s", scope.get("method"), scope.get("path"))
+            response = JSONResponse(status_code=500, content={"detail": "Internal server error"})
+            await response(scope, receive, send)
+
+
+# Added BEFORE CORS so it runs INSIDE it (first-added middleware is outermost
+# here): its error responses must pass back through CORSMiddleware to gain the
+# Access-Control-Allow-* headers, otherwise the browser reports a misleading
+# CORS failure instead of the real 500.
+app.add_middleware(CorsSafeErrorMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
