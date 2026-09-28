@@ -58,6 +58,7 @@
               [disabled]="!auth.hasPermission('manage_fee_settings')"
               required
             />
+            <p class="field-hint">{{ 'admin.feeSettings.form.additionalRateHint' | translate }}</p>
           </div>
           <div class="field">
             <label for="draftBaseThreshold">{{ 'admin.feeSettings.form.baseThreshold' | translate }}</label>
@@ -146,6 +147,12 @@
           </p>
         </div>
       </div>
+    </div>
+  }
+
+  @if (!loading && !picnicConfigured) {
+    <div class="error-box" style="margin-bottom:1rem">
+      <p style="margin:0">{{ 'admin.feeSettings.picnicNotConfigured' | translate }}</p>
     </div>
   }
 
@@ -246,6 +253,11 @@
               <td>
                 {{ 'admin.feeSettings.keys.' + row.key | translate }}
                 <span class="cell-secondary">{{ row.key }}</span>
+                @if (isPicnicKey(row.key) && !picnicConfigured) {
+                  <span class="status-badge status-inactive" style="margin-left:0.5rem">
+                    {{ 'admin.feeSettings.picnicNotConfigured' | translate }}
+                  </span>
+                }
               </td>
               <td>{{ row.value }}</td>
               <td>{{ row.unit ?? '—' }}</td>

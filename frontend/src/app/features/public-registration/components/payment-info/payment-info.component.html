@@ -43,8 +43,8 @@
       } @else if (subscriptionQuote(); as q) {
         <p class="field-hint">
           {{ 'registration.payment.subscriptionBaseSummary' | translate: { amount: q.base } }}
-          @if (q.extraDecimals > 0) {
-            {{ 'registration.payment.subscriptionExtraSummary' | translate: { extra: q.extraDecimals, amount: q.extraAmount } }}
+          @if (q.extraUnits > 0) {
+            {{ 'registration.payment.subscriptionExtraSummary' | translate: { extra: q.extraUnits, amount: q.extraAmount } }}
           }
           {{ 'registration.payment.totalAmountSummary' | translate: { amount: q.total } }}
         </p>

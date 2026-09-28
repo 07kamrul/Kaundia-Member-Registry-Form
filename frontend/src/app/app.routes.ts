@@ -1,7 +1,12 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { permissionGuard } from './core/guards/permission.guard';
-import { MANAGEMENT_AREA_PERMISSIONS, SUPER_ADMIN_AREA_PERMISSIONS } from './core/services/auth.service';
+import { roleGuard } from './core/guards/role.guard';
+import {
+  MANAGEMENT_AREA_PERMISSIONS,
+  MEMBER_PAYMENT_ROLES,
+  SUPER_ADMIN_AREA_PERMISSIONS,
+} from './core/services/auth.service';
 
 // Member-area baseline permission - see auth.service.ts's landingTier()/area
 // guards for why this, not role name, is the right check (Super Admin's full
@@ -92,6 +97,9 @@ export const routes: Routes = [
           },
           {
             path: 'picnic-payment',
+            // Member payers only (MEMBER_PAYMENT_ROLES): fee managers are
+            // redirected to Fee Settings, never shown the payment form.
+            canActivate: [roleGuard(MEMBER_PAYMENT_ROLES)],
             loadComponent: () =>
               import(
                 './features/member/pages/picnic-payment/picnic-payment.component'

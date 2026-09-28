@@ -20,7 +20,8 @@ export function createEmptyAddress(): AddressDetail {
 
 export interface SubscriptionQuote {
   base: number;
-  extraDecimals: number;
+  extraUnits: number;
+  extraRate: number;
   extraAmount: number;
   total: number;
   unit: string;

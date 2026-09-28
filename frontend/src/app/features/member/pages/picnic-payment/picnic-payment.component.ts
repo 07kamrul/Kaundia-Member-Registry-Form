@@ -8,9 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { FEE_MANAGER_PERMISSION, AuthService } from '../../../../core/services/auth.service';
 import { MemberService } from '../../../../core/services/member.service';
 import type {
   PicnicPayment,
@@ -29,7 +27,7 @@ type ErrorKind = 'not_configured' | 'access' | 'generic' | null;
   selector: 'app-member-picnic-payment',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, RouterLink, DatePickerComponent],
+  imports: [FormsModule, TranslatePipe, DatePickerComponent],
   templateUrl: './picnic-payment.component.html',
 })
 export class PicnicPaymentComponent implements OnInit {
@@ -58,12 +56,6 @@ export class PicnicPaymentComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly translate = inject(TranslateService);
   private readonly memberService = inject(MemberService);
-  private readonly auth = inject(AuthService);
-
-  // Fee managers (Super Admin, Executive Committee, Administrator - anyone
-  // holding the shared fee permission) get the "Go to Fee Settings" shortcut;
-  // ordinary members only see the "contact the committee" message.
-  readonly canManageFees = computed(() => this.auth.hasPermission(FEE_MANAGER_PERMISSION));
 
   readonly breakdown = computed(() => {
     const rates = this.rates();

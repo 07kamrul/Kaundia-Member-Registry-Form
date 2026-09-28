@@ -6,23 +6,11 @@
     </div>
   </div>
 
-  <!-- ONE error banner for the rate-loading state, message depends on cause. -->
+  <!-- ONE error banner for the rate-loading state, message depends on cause.
+       Fee managers never reach this page (guarded + backend 403), so the
+       not-configured message is always the member-facing one. -->
   @if (ratesError === 'not_configured') {
-    <div class="error-box">
-      <p style="margin:0">
-        {{ (canManageFees() ? 'member.picnic.notConfiguredManager' : 'member.picnic.notConfigured') | translate }}
-      </p>
-      @if (canManageFees()) {
-        <a
-          routerLink="/fee-settings"
-          [queryParams]="{ key: 'picnic_head_fee' }"
-          class="btn btn-secondary"
-          style="display:inline-block;margin-top:0.5rem"
-        >
-          {{ 'member.picnic.goToFeeSettings' | translate }}
-        </a>
-      }
-    </div>
+    <div class="error-box"><p style="margin:0">{{ 'member.picnic.notConfigured' | translate }}</p></div>
   } @else if (ratesError === 'access') {
     <div class="error-box"><p style="margin:0">{{ 'member.picnic.accessDenied' | translate }}</p></div>
   } @else if (ratesError === 'generic') {

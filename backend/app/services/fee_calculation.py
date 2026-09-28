@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_CEILING, Decimal
 
 from fastapi import HTTPException, status
 from sqlalchemy import or_, select
@@ -29,7 +29,8 @@ PICNIC_MAX_ADDITIONAL_HEADS = 20
 @dataclass(frozen=True)
 class MonthlySubscriptionBreakdown:
     base: Decimal
-    extra_decimals: Decimal
+    extra_units: int
+    extra_rate: Decimal
     extra_amount: Decimal
     total: Decimal
     unit: str = "taka"
@@ -150,8 +151,9 @@ async def calculate_monthly_subscription(
     db: AsyncSession, land_size_decimal: Decimal, billing_date: date
 ) -> MonthlySubscriptionBreakdown:
     """Tiered monthly subscription fee for a land size (in decimal, the land
-    area unit): `base_amount` covers up to `base_threshold` decimals, and each
-    decimal beyond that costs `additional_rate`, proportionally for fractions.
+    area unit): `base_amount` covers up to `base_threshold` decimals, and every
+    decimal beyond that - including any partial fraction of a decimal - is
+    charged in full at `additional_rate`, rounded up to the next whole decimal.
     """
     versions = await resolve_active_fee_versions(
         db, MONTHLY_SUBSCRIPTION_FEE_KEYS, billing_date
@@ -169,27 +171,31 @@ async def calculate_monthly_subscription(
     effective_from = max(row.start_date for row in versions.values())
     unit = versions[MONTHLY_SUBSCRIPTION_BASE_AMOUNT_KEY].unit or "taka"
 
-    if land_size_decimal < 0:
+    if land_size_decimal <= 0:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Land size must not be negative",
+            detail="Land size must be greater than zero",
         )
 
     if land_size_decimal <= base_threshold:
         return MonthlySubscriptionBreakdown(
             base=base_amount,
-            extra_decimals=Decimal("0"),
+            extra_units=0,
+            extra_rate=additional_rate,
             extra_amount=Decimal("0"),
             total=base_amount,
             unit=unit,
             effective_from=effective_from,
         )
 
-    extra_decimals = land_size_decimal - base_threshold
-    extra_amount = extra_decimals * additional_rate
+    extra_units = int(
+        (land_size_decimal - base_threshold).to_integral_value(rounding=ROUND_CEILING)
+    )
+    extra_amount = extra_units * additional_rate
     return MonthlySubscriptionBreakdown(
         base=base_amount,
-        extra_decimals=extra_decimals,
+        extra_units=extra_units,
+        extra_rate=additional_rate,
         extra_amount=extra_amount,
         total=base_amount + extra_amount,
         unit=unit,

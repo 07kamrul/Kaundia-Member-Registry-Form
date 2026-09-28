@@ -46,13 +46,17 @@ async def _seed_tier(
 @pytest.mark.parametrize(
     "land_size,expected_total",
     [
-        ("0.33", "100"),
-        ("0.5", "100"),
         ("1", "100"),
+        ("0.3", "100"),
+        ("0.001", "100"),
+        ("2", "110"),
         ("3", "120"),
+        ("1.5", "110"),
+        ("1.3", "110"),
+        ("2.006", "120"),
+        ("2.7", "120"),
+        ("12.5", "220"),
         ("10", "190"),
-        ("0", "100"),
-        ("1.0001", "100.001"),
     ],
 )
 @pytest.mark.asyncio
@@ -77,15 +81,39 @@ async def test_calculate_monthly_subscription_rejects_negative_size(db_session: 
 
 
 @pytest.mark.asyncio
+async def test_calculate_monthly_subscription_rejects_zero_size(db_session: AsyncSession) -> None:
+    await _seed_tier(db_session)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await calculate_monthly_subscription(db_session, Decimal("0"), date(2026, 1, 1))
+
+    assert exc_info.value.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_calculate_monthly_subscription_returns_breakdown(db_session: AsyncSession) -> None:
     await _seed_tier(db_session)
 
     breakdown = await calculate_monthly_subscription(db_session, Decimal("3"), date(2026, 1, 1))
 
     assert breakdown.base == Decimal("100")
-    assert breakdown.extra_decimals == Decimal("2")
+    assert breakdown.extra_units == 2
+    assert breakdown.extra_rate == Decimal("10")
     assert breakdown.extra_amount == Decimal("20")
     assert breakdown.total == Decimal("120")
+
+
+@pytest.mark.asyncio
+async def test_calculate_monthly_subscription_rounds_partial_decimal_up(
+    db_session: AsyncSession,
+) -> None:
+    await _seed_tier(db_session)
+
+    breakdown = await calculate_monthly_subscription(db_session, Decimal("1.5"), date(2026, 1, 1))
+
+    assert breakdown.extra_units == 1
+    assert breakdown.extra_amount == Decimal("10")
+    assert breakdown.total == Decimal("110")
 
 
 @pytest.mark.asyncio

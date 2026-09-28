@@ -19,6 +19,13 @@ export const SUPER_ADMIN_AREA_PERMISSIONS = ['manage_users', 'manage_roles', 'vi
 // full permission catalog includes it, so no role-name checks are needed.
 export const FEE_MANAGER_PERMISSION = 'manage_fee_settings';
 
+// The one shared gate for the member payment page (Picnic Fee): only roles
+// that pay as members see it - in the sidebar, the route guard, and the
+// backend's member payment endpoints (which 403 fee managers, see
+// backend/app/api/routes/member.py). Management-tier roles configure fees in
+// Fee Settings and review all payments under Picnic Payments instead.
+export const MEMBER_PAYMENT_ROLES: readonly UserRole[] = ['member'];
+
 // Union of EXECUTIVE_COMMITTEE + ADMINISTRATOR default tuples - holding any
 // of these means "management tier or above" for area-guard/landing purposes.
 export const MANAGEMENT_AREA_PERMISSIONS = [
@@ -105,6 +112,11 @@ export class AuthService {
 
   hasAnyPermission(permissionKeys: string[]): boolean {
     return permissionKeys.some((key) => this.hasPermission(key));
+  }
+
+  canPayAsMember(): boolean {
+    const role = this.roleValue();
+    return role !== null && MEMBER_PAYMENT_ROLES.includes(role);
   }
 
   login(identifier: string, password: string): Observable<TokenResponse> {

@@ -215,8 +215,6 @@
       "saveSuccess": "পরিশোধ সংরক্ষিত হয়েছে। মোট: ৳ {{total}}",
       "saveError": "পরিশোধ সংরক্ষণ করা যায়নি।",
       "notConfigured": "পিকনিক ফি এখনও নির্ধারণ করা হয়নি। কমিটির সাথে যোগাযোগ করুন।",
-      "notConfiguredManager": "পিকনিক ফি এখনও নির্ধারণ করা হয়নি।",
-      "goToFeeSettings": "ফি সেটিংসে যান",
       "accessDenied": "আপনার পিকনিক পরিশোধে প্রবেশাধিকার নেই।",
       "taka": "টাকা",
       "saving": "সংরক্ষণ হচ্ছে…",
@@ -483,6 +481,7 @@
         "submit": "সংরক্ষণ করুন",
         "baseAmount": "বেস পরিমাণ",
         "additionalRate": "প্রতি অতিরিক্ত ডেসিমেলে হার",
+        "additionalRateHint": "প্রতিটি অতিরিক্ত ডেসিমেল, অথবা ডেসিমেলের অংশ, সম্পূর্ণ হিসেবে চার্জ করা হয়।",
         "baseThreshold": "বেস থ্রেশহোল্ড (ডেসিমেল)"
       },
       "confirmTitle": "নতুন ভার্সন নিশ্চিত করুন",
@@ -500,12 +499,13 @@
       "active": "সক্রিয়",
       "inactive": "নিষ্ক্রিয়",
       "noSettings": "এখনো কোনো ফি সেটিংস কনফিগার করা হয়নি।",
+      "picnicNotConfigured": "পিকনিক ফি এখনও সম্পূর্ণভাবে নির্ধারিত হয়নি - উভয় পিকনিক রেটের সক্রিয় সংস্করণ না থাকলে সদস্যরা পেমেন্ট করতে পারবেন না।",
       "errors": {
         "loadFailed": "ফি সেটিংস লোড করা যায়নি।",
         "loadHistoryFailed": "ফি সেটিংসের ইতিহাস লোড করা যায়নি।",
         "saveFailed": "নতুন ফি সেটিংস ভার্সন সংরক্ষণ করা যায়নি।"
       },
-      "tieredSummary": "প্রথম {{threshold}} ডেসিমেলের জন্য {{base}} টাকা + প্রতি অতিরিক্ত ডেসিমেলে {{rate}} টাকা",
+      "tieredSummary": "প্রথম {{threshold}} ডেসিমেল পর্যন্ত {{base}} টাকা + প্রতি অতিরিক্ত ডেসিমেলে {{rate}} টাকা (আংশিক ডেসিমেলও পূর্ণ ধরা হয়)",
       "calculator": {
         "title": "ফি ক্যালকুলেটর",
         "landSize": "জমির আয়তন (ডেসিমেল)",
@@ -888,7 +888,7 @@
       "subscriptionLoadFailed": "চাঁদার পরিমাণ হিসাব করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
       "subscriptionRetry": "পুনরায় চেষ্টা",
       "subscriptionBaseSummary": "ভিত্তি: {{amount}} টাকা",
-      "subscriptionExtraSummary": "+ অতিরিক্ত {{extra}} শতাংশ × হার = {{amount}} টাকা",
+      "subscriptionExtraSummary": "+ অতিরিক্ত {{extra}}টি শতাংশ (আংশিক শতাংশও পূর্ণ ধরা হয়) = {{amount}} টাকা",
       "totalAmountSummary": "= মোট {{amount}}৳",
       "receiptNoLabel": "রসিদ নং/Transaction ID",
       "receiptImageLabel": "মানি রসিদের ছবি",

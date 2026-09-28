@@ -10,7 +10,7 @@ from app.core.deps import (
     get_current_member,
     get_current_member_detail,
 )
-from app.core.security import hash_password_async, verify_password_async
+from app.core.security import ADMIN_ROLES, hash_password_async, verify_password_async
 from app.db.session import get_db
 from app.models.credential import MemberCredential
 from app.models.installment import Installment
@@ -27,6 +27,20 @@ from app.services.fee_calculation import calculate_picnic_fee, resolve_picnic_ra
 from fastapi import Query
 
 router = APIRouter(prefix="/member", tags=["member"])
+
+FEE_MANAGER_PAYMENT_MESSAGE = "Fee managers cannot make member payments."
+
+
+def _reject_fee_manager(actor: AccountActor) -> None:
+    """Member payments are for paying members only. Admin-tier accounts
+    (fee managers) configure rates in Fee Settings and review every member's
+    payments via GET /admin/picnic-payments - they never pay as a member, so
+    these endpoints reject them explicitly instead of relying on the UI."""
+    if actor.admin is not None and actor.role in ADMIN_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=FEE_MANAGER_PAYMENT_MESSAGE,
+        )
 
 # Editing any of these on an APPROVED member re-queues them to PENDING for
 # management review, since they affect identity/eligibility verification.
@@ -111,11 +125,13 @@ async def list_picnic_payments(
     actor: AccountActor = Depends(get_account_actor),
     db: AsyncSession = Depends(get_db),
 ) -> list[PicnicPayment]:
-    # Members see only their own records; committee/admin-tier accounts see
-    # every member's payments from this same endpoint.
-    query = select(PicnicPayment)
-    if actor.member is not None:
-        query = query.where(PicnicPayment.member_id == actor.member.id)
+    _reject_fee_manager(actor)
+    if actor.member is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only accounts linked to a member profile can record picnic payments.",
+        )
+    query = select(PicnicPayment).where(PicnicPayment.member_id == actor.member.id)
     result = await db.execute(
         query.order_by(PicnicPayment.payment_date.desc(), PicnicPayment.id.desc())
     )
@@ -128,6 +144,7 @@ async def create_picnic_payment(
     actor: AccountActor = Depends(get_account_actor),
     db: AsyncSession = Depends(get_db),
 ) -> PicnicPayment:
+    _reject_fee_manager(actor)
     if actor.member is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

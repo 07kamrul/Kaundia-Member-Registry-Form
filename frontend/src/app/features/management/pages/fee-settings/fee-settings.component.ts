@@ -20,6 +20,10 @@ const MONTHLY_SUBSCRIPTION_TIER_KEYS = {
   threshold: 'monthly_subscription_base_threshold',
 } as const;
 
+/** Keys whose active versions must BOTH exist for members to be able to pay
+ * the picnic fee (mirrors backend resolve_picnic_rates in fee_calculation.py). */
+const PICNIC_FEE_KEYS: readonly string[] = ['picnic_head_fee', 'picnic_additional_head_fee'];
+
 /** Known fee keys the version form offers, in display order. */
 const KNOWN_FEE_KEYS: readonly string[] = [
   'admission_fee',
@@ -93,8 +97,7 @@ export class FeeSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadActive();
-    // Deep-link support: the picnic payment page's "Go to Fee Settings" button
-    // links here with ?key=picnic_head_fee to preselect that fee in the form.
+    // Deep-link support: ?key=<fee_key> preselects that fee in the form.
     const preselect = this.route.snapshot.queryParamMap.get('key');
     if (preselect && this.feeKeys.includes(preselect)) {
       this.draftKey = preselect;
@@ -123,6 +126,18 @@ export class FeeSettingsComponent implements OnInit {
     return this.draftKey === MONTHLY_SUBSCRIPTION_GROUP_KEY;
   }
 
+  /** False while either picnic rate has no active version - members then
+   * cannot pay, and fee managers see the warning badge/banner here since they
+   * no longer visit the member payment page. */
+  get picnicConfigured(): boolean {
+    const keys = new Set(this.active.map((s) => s.key));
+    return PICNIC_FEE_KEYS.every((k) => keys.has(k));
+  }
+
+  isPicnicKey(key: string): boolean {
+    return PICNIC_FEE_KEYS.includes(key);
+  }
+
   get monthlySubscriptionTier(): TieredFeeSummary | null {
     const base = this.active.find((s) => s.key === MONTHLY_SUBSCRIPTION_TIER_KEYS.base);
     const rate = this.active.find((s) => s.key === MONTHLY_SUBSCRIPTION_TIER_KEYS.rate);
@@ -132,12 +147,13 @@ export class FeeSettingsComponent implements OnInit {
 
   get calculatorFee(): number | null {
     const tier = this.monthlySubscriptionTier;
-    if (!tier || this.calculatorLandSize === null || this.calculatorLandSize < 0) return null;
+    if (!tier || this.calculatorLandSize === null || this.calculatorLandSize <= 0) return null;
     const { value: base } = tier.base;
     const { value: rate } = tier.rate;
     const { value: threshold } = tier.threshold;
     if (this.calculatorLandSize <= threshold) return base;
-    return base + (this.calculatorLandSize - threshold) * rate;
+    const extraUnits = Math.ceil(this.calculatorLandSize - threshold);
+    return base + extraUnits * rate;
   }
 
   get canSave(): boolean {

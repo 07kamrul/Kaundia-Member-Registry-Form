@@ -165,4 +165,5 @@ async def test_role_claim_normalization_still_grants_super_admin(
     assert rates.status_code == 404  # not configured, but authenticated + authorized
 
     payments = await client.get("/api/member/picnic-payments", headers=headers)
-    assert payments.status_code == 200
+    assert payments.status_code == 403
+    assert payments.json()["detail"] == "Fee managers cannot make member payments."

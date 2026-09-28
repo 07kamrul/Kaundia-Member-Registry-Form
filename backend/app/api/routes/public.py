@@ -76,7 +76,8 @@ async def get_subscription_quote(
     )
     return SubscriptionQuoteOut(
         base=breakdown.base,
-        extra_decimals=breakdown.extra_decimals,
+        extra_units=breakdown.extra_units,
+        extra_rate=breakdown.extra_rate,
         extra_amount=breakdown.extra_amount,
         total=breakdown.total,
         unit=breakdown.unit,

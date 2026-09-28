@@ -215,8 +215,6 @@
       "saveSuccess": "Payment recorded. Total: ৳ {{total}}",
       "saveError": "Could not record the payment.",
       "notConfigured": "Picnic fee has not been set up yet. Please contact the committee.",
-      "notConfiguredManager": "Picnic fee has not been set up yet.",
-      "goToFeeSettings": "Go to Fee Settings",
       "accessDenied": "You do not have access to picnic payments.",
       "taka": "Taka",
       "saving": "Saving…",
@@ -483,6 +481,7 @@
         "submit": "Save",
         "baseAmount": "Base Amount",
         "additionalRate": "Additional Rate per Decimal",
+        "additionalRateHint": "Each additional decimal, or part of a decimal, is charged in full.",
         "baseThreshold": "Base Threshold (decimals)"
       },
       "confirmTitle": "Confirm New Version",
@@ -500,12 +499,13 @@
       "active": "Active",
       "inactive": "Inactive",
       "noSettings": "No fee settings configured yet.",
+      "picnicNotConfigured": "Picnic fee is not configured yet - members cannot pay until both picnic rates have an active version.",
       "errors": {
         "loadFailed": "Could not load fee settings.",
         "loadHistoryFailed": "Could not load fee setting history.",
         "saveFailed": "Could not save the new fee setting version."
       },
-      "tieredSummary": "{{base}} Taka first {{threshold}} decimal + {{rate}} Taka per additional decimal",
+      "tieredSummary": "{{base}} Taka up to {{threshold}} decimal + {{rate}} Taka for each additional decimal (a partial decimal counts as a full one)",
       "calculator": {
         "title": "Fee Calculator",
         "landSize": "Land Size (decimal)",
@@ -888,7 +888,7 @@
       "subscriptionLoadFailed": "Could not calculate the subscription amount. Please retry.",
       "subscriptionRetry": "Retry",
       "subscriptionBaseSummary": "Base: {{amount}} Tk",
-      "subscriptionExtraSummary": "+ extra {{extra}} decimal × rate = {{amount}} Tk",
+      "subscriptionExtraSummary": "+ extra {{extra}} decimal(s) (a partial decimal counts as a full one) = {{amount}} Tk",
       "totalAmountSummary": "= Total {{amount}} Tk",
       "receiptNoLabel": "Receipt No./Transaction ID",
       "receiptImageLabel": "Money Receipt Image",

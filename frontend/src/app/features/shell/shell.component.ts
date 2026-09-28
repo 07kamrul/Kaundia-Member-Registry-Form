@@ -1,7 +1,11 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AuthService } from '../../core/services/auth.service';
+import {
+  AuthService,
+  MEMBER_PAYMENT_ROLES,
+  type UserRole,
+} from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { LanguageService } from '../../core/services/language.service';
 import { MemberService } from '../../core/services/member.service';
@@ -14,6 +18,9 @@ interface NavItem {
   // Absent = visible to any authenticated user (member-tier baseline).
   // Present = visible only if the user holds at least one of these keys.
   requiredPermission?: string[];
+  // Absent = no role restriction. Present = visible only to these roles
+  // (shared config - see MEMBER_PAYMENT_ROLES in auth.service.ts).
+  requiredRoles?: readonly UserRole[];
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -30,6 +37,7 @@ const NAV_ITEMS: NavItem[] = [
     route: '/picnic-payment',
     icon: 'sun',
     requiredPermission: ['profile.view_own'],
+    requiredRoles: MEMBER_PAYMENT_ROLES,
   },
   { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
   // Published notices/events - the same public pages logged-out visitors read.
@@ -158,9 +166,16 @@ export class ShellComponent implements OnInit {
   }
 
   get navItems(): NavItem[] {
-    return NAV_ITEMS.filter(
-      (item) => !item.requiredPermission || this.auth.hasAnyPermission(item.requiredPermission),
-    );
+    const role = this.auth.role;
+    return NAV_ITEMS.filter((item) => {
+      if (item.requiredPermission && !this.auth.hasAnyPermission(item.requiredPermission)) {
+        return false;
+      }
+      if (item.requiredRoles && (role === null || !item.requiredRoles.includes(role))) {
+        return false;
+      }
+      return true;
+    });
   }
 
   toggleSidebar(): void {

@@ -121,31 +121,22 @@ async def test_member_sees_only_own_payments(
         (AdminRole.ADMINISTRATOR, "administrator@example.com"),
     ],
 )
-async def test_admin_tier_roles_can_list_all_payments(
+async def test_admin_tier_roles_cannot_use_member_payment_history(
     client: AsyncClient, db_session: AsyncSession, role: AdminRole, email: str
 ) -> None:
+    """Fee managers configure/review payments elsewhere (Fee Settings and
+    GET /admin/picnic-payments); the member history endpoint rejects them."""
     await _seed_picnic_rates(db_session)
-    first = await _seed_member(db_session, "a@example.com", "A")
-    second = await _seed_member(db_session, "b@example.com", "B")
-    db_session.add_all(
-        [
-            PicnicPayment(
-                member_id=first.id,
-                head_price=500,
-                additional_price=300,
-                additional_count=0,
-                total=500,
-                payment_date=date(2026, 1, 10),
-            ),
-            PicnicPayment(
-                member_id=second.id,
-                head_price=500,
-                additional_price=300,
-                additional_count=1,
-                total=800,
-                payment_date=date(2026, 1, 11),
-            ),
-        ]
+    payer = await _seed_member(db_session, "payer@example.com", "Payer")
+    db_session.add(
+        PicnicPayment(
+            member_id=payer.id,
+            head_price=500,
+            additional_price=300,
+            additional_count=0,
+            total=500,
+            payment_date=date(2026, 1, 10),
+        )
     )
     await db_session.commit()
     admin = await _seed_admin(db_session, role, email)
@@ -154,8 +145,8 @@ async def test_admin_tier_roles_can_list_all_payments(
         "/api/member/picnic-payments", headers=_auth_header(create_access_token(str(admin.id), role.value))
     )
 
-    assert response.status_code == 200
-    assert len(response.json()) == 2
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Fee managers cannot make member payments."
 
 
 async def test_unauthenticated_picnic_payments_is_unauthorized(client: AsyncClient) -> None:
@@ -217,7 +208,23 @@ async def test_admin_tier_account_cannot_create_payment(
     )
 
     assert response.status_code == 403
-    assert "member profile" in response.json()["detail"]
+    assert response.json()["detail"] == "Fee managers cannot make member payments."
+
+
+async def test_super_admin_cannot_create_payment(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
+    await _seed_picnic_rates(db_session)
+    admin = await _seed_admin(db_session, AdminRole.SUPER_ADMIN, "super-payer@example.com")
+
+    response = await client.post(
+        "/api/member/picnic-payments",
+        headers=_auth_header(create_access_token(str(admin.id), "super_admin")),
+        json={"additional_heads": 1, "payment_date": "2026-01-15"},
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Fee managers cannot make member payments."
 
 
 async def test_picnic_rates_readable_by_member_and_admin(

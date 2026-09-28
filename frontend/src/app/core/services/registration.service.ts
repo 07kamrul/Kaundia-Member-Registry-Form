@@ -11,7 +11,8 @@ import type {
 
 interface SubscriptionQuoteApiResponse {
   base: number;
-  extra_decimals: number;
+  extra_units: number;
+  extra_rate: number;
   extra_amount: number;
   total: number;
   unit: string;
@@ -51,7 +52,8 @@ export class RegistrationService {
       .pipe(
         map((res) => ({
           base: res.base,
-          extraDecimals: res.extra_decimals,
+          extraUnits: res.extra_units,
+          extraRate: res.extra_rate,
           extraAmount: res.extra_amount,
           total: res.total,
           unit: res.unit,

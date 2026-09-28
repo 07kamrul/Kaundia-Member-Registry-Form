@@ -19,7 +19,8 @@ class SubscriptionQuoteRequest(BaseModel):
 
 class SubscriptionQuoteOut(BaseModel):
     base: Decimal
-    extra_decimals: Decimal
+    extra_units: int
+    extra_rate: Decimal
     extra_amount: Decimal
     total: Decimal
     unit: str

@@ -49,6 +49,7 @@ def _submission_payload() -> dict:
                 "dag_no_cs": "45",
                 "dag_no_rs": "67",
                 "land_quantity": "15",
+                "my_share_quantity": "1",
                 "ownership": "একক",
                 "co_owners": [],
                 "applicable_docs": [],
