@@ -10,6 +10,7 @@ from app.models.audit_log import AuditLog
 from app.models.config_list_item import ConfigListItem
 from app.models.event import Event
 from app.models.notice import Notice
+from app.models.picnic_payment import PicnicPayment
 
 __all__ = [
     "Member",
@@ -27,6 +28,7 @@ __all__ = [
     "ConfigListItem",
     "Notice",
     "Event",
+    "PicnicPayment",
     "Role",
     "Permission",
     "UserPermissionOverride",

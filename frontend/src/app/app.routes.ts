@@ -91,6 +91,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'picnic-payment',
+            loadComponent: () =>
+              import(
+                './features/member/pages/picnic-payment/picnic-payment.component'
+              ).then((m) => m.PicnicPaymentComponent),
+          },
+          {
             path: 'change-password',
             loadComponent: () =>
               import('./features/member/pages/change-password/change-password.component').then(

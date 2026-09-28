@@ -10,7 +10,14 @@
       }
       <div class="field">
         <label>{{ 'auth.login.identifierLabel' | translate }}</label>
-        <input type="text" formControlName="identifier" />
+        <input
+          type="text"
+          formControlName="identifier"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
+          autocomplete="username"
+        />
         @if (showError('identifier')) {
           <p class="field-error">{{ errorMessage('identifier') }}</p>
         }

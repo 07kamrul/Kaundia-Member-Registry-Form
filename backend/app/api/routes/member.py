@@ -8,11 +8,14 @@ from app.db.session import get_db
 from app.models.credential import MemberCredential
 from app.models.installment import Installment
 from app.models.member import Member, MemberStatus
+from app.models.picnic_payment import PicnicPayment
 from app.schemas.auth import ChangePasswordRequest
 from app.schemas.installment import InstallmentOut
 from app.schemas.member import MemberDetail, MemberProfileUpdate
+from app.schemas.picnic_payment import PicnicPaymentIn, PicnicPaymentOut
 from app.services.audit import record_audit
 from app.services.email import send_email
+from app.services.fee_calculation import calculate_picnic_fee
 
 router = APIRouter(prefix="/member", tags=["member"])
 
@@ -66,6 +69,46 @@ async def list_my_installments(
         )
     )
     return list(result.scalars().all())
+
+
+@router.get("/picnic-payments", response_model=list[PicnicPaymentOut])
+async def list_my_picnic_payments(
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+) -> list[PicnicPayment]:
+    result = await db.execute(
+        select(PicnicPayment)
+        .where(PicnicPayment.member_id == member.id)
+        .order_by(PicnicPayment.payment_date.desc(), PicnicPayment.id.desc())
+    )
+    return list(result.scalars().all())
+
+
+@router.post("/picnic-payments", response_model=PicnicPaymentOut, status_code=status.HTTP_201_CREATED)
+async def create_picnic_payment(
+    payload: PicnicPaymentIn,
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+) -> PicnicPayment:
+    # The total is always recomputed from the fee versions effective on the
+    # payment date; any client-sent amount is ignored.
+    breakdown = await calculate_picnic_fee(db, payload.additional_heads, payload.payment_date)
+
+    payment = PicnicPayment(
+        member_id=member.id,
+        head_price=breakdown.head_price,
+        additional_price=breakdown.additional_price,
+        additional_count=breakdown.additional_count,
+        total=breakdown.total,
+        additional_heads=[person.model_dump() for person in payload.additional_people] or None,
+        payment_date=payload.payment_date,
+        receipt_no=payload.receipt_no,
+        payment_method=payload.payment_method,
+    )
+    db.add(payment)
+    await db.commit()
+    await db.refresh(payment)
+    return payment
 
 
 @router.patch("/profile", response_model=MemberDetail)

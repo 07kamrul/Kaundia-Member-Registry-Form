@@ -18,6 +18,13 @@ MONTHLY_SUBSCRIPTION_FEE_KEYS = (
     MONTHLY_SUBSCRIPTION_BASE_THRESHOLD_KEY,
 )
 
+PICNIC_HEAD_FEE_KEY = "picnic_head_fee"
+PICNIC_ADDITIONAL_HEAD_FEE_KEY = "picnic_additional_head_fee"
+
+PICNIC_FEE_KEYS = (PICNIC_HEAD_FEE_KEY, PICNIC_ADDITIONAL_HEAD_FEE_KEY)
+
+PICNIC_MAX_ADDITIONAL_HEADS = 20
+
 
 @dataclass(frozen=True)
 class MonthlySubscriptionBreakdown:
@@ -45,6 +52,53 @@ async def resolve_active_fee_decimal(db: AsyncSession, key: str, on_date: date) 
             detail=f"No active fee setting configured for '{key}'",
         )
     return Decimal(str(value))
+
+
+@dataclass(frozen=True)
+class PicnicFeeBreakdown:
+    head_price: Decimal
+    additional_price: Decimal
+    additional_count: int
+    additional_amount: Decimal
+    total: Decimal
+
+
+async def calculate_picnic_fee(
+    db: AsyncSession, additional_heads: int, payment_date: date
+) -> PicnicFeeBreakdown:
+    """Picnic fee for one member seat plus `additional_heads` extra seats
+    (spouse, children, guests), using the rate versions effective on
+    `payment_date`. The total is always recomputed here; the client-sent
+    amount is never trusted."""
+    if isinstance(additional_heads, bool) or not isinstance(additional_heads, int):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Additional heads must be a whole number",
+        )
+    if additional_heads < 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Additional heads must not be negative",
+        )
+    if additional_heads > PICNIC_MAX_ADDITIONAL_HEADS:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Additional heads must not exceed {PICNIC_MAX_ADDITIONAL_HEADS}",
+        )
+
+    head_price = await resolve_active_fee_decimal(db, PICNIC_HEAD_FEE_KEY, payment_date)
+    additional_price = await resolve_active_fee_decimal(
+        db, PICNIC_ADDITIONAL_HEAD_FEE_KEY, payment_date
+    )
+
+    additional_amount = additional_price * additional_heads
+    return PicnicFeeBreakdown(
+        head_price=head_price,
+        additional_price=additional_price,
+        additional_count=additional_heads,
+        additional_amount=additional_amount,
+        total=head_price + additional_amount,
+    )
 
 
 async def calculate_monthly_subscription(

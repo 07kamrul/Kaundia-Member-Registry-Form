@@ -52,7 +52,8 @@
     "notices": "Notices",
     "events": "Events",
     "noticesManagement": "Manage Notices",
-    "eventsManagement": "Manage Events"
+    "eventsManagement": "Manage Events",
+    "picnicPayment": "Picnic Fee"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -180,6 +181,37 @@
       "savingButton": "Saving...",
       "saveButton": "Save Change",
       "changeFailedError": "Failed to change password."
+    },
+    "picnic": {
+      "title": "Picnic Fee Payment",
+      "subtitle": "Pay for your own seat plus seats for spouse, children or guests",
+      "dateLabel": "Payment Date",
+      "additionalHeadsLabel": "Additional Heads",
+      "additionalHeadsHint": "0 to {{max}} (spouse, children, guests)",
+      "headNameLabel": "Head {{n}} Name",
+      "headRelationLabel": "Head {{n}} Relation",
+      "relations": {
+        "spouse": "Spouse",
+        "child": "Child",
+        "guest": "Guest"
+      },
+      "memberHead": "Member head",
+      "additionalHeads": "Additional heads",
+      "total": "Total",
+      "receiptNoLabel": "Receipt No",
+      "methodLabel": "Payment Method",
+      "submit": "Confirm Payment",
+      "historyTitle": "Payment History",
+      "dateColumn": "Date",
+      "headsColumn": "Additional Heads",
+      "totalColumn": "Total",
+      "receiptColumn": "Receipt No",
+      "emptyState": "No picnic payments yet.",
+      "feeLoadFailed": "Picnic fee rates could not be loaded.",
+      "retry": "Retry",
+      "loadError": "Could not load payment history.",
+      "saveSuccess": "Payment recorded. Total: ৳ {{total}}",
+      "saveError": "Could not record the payment."
     }
   },
   "auth": {
@@ -417,7 +449,9 @@
         "monthly_subscription": "Monthly Subscription Rate",
         "monthly_subscription_base_amount": "Monthly Subscription Base Amount",
         "monthly_subscription_additional_rate": "Monthly Subscription Additional Rate",
-        "monthly_subscription_base_threshold": "Monthly Subscription Base Threshold"
+        "monthly_subscription_base_threshold": "Monthly Subscription Base Threshold",
+        "picnic_head_fee": "Picnic Fee - Member Head",
+        "picnic_additional_head_fee": "Picnic Fee - Additional Head"
       },
       "units": {
         "taka": "Taka",

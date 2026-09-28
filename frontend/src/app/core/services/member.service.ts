@@ -177,4 +177,74 @@ export class MemberService {
   getInstallments(): Observable<Installment[]> {
     return this.http.get<Installment[]>(`${this.base}/installments`);
   }
+
+  getPicnicPayments(): Observable<PicnicPayment[]> {
+    return this.http.get<PicnicPaymentApiModel[]>(`${this.base}/picnic-payments`).pipe(
+      map((rows) => rows.map(toPicnicPayment)),
+    );
+  }
+
+  createPicnicPayment(payload: PicnicPaymentPayload): Observable<PicnicPayment> {
+    return this.http.post<PicnicPaymentApiModel>(`${this.base}/picnic-payments`, {
+      additional_heads: payload.additionalHeads,
+      additional_people: payload.additionalPeople,
+      payment_date: payload.paymentDate,
+      receipt_no: payload.receiptNo || null,
+      payment_method: payload.paymentMethod || null,
+    }).pipe(map(toPicnicPayment));
+  }
+}
+
+function toPicnicPayment(row: PicnicPaymentApiModel): PicnicPayment {
+  return {
+    id: row.id,
+    headPrice: row.head_price,
+    additionalPrice: row.additional_price,
+    additionalCount: row.additional_count,
+    total: row.total,
+    additionalHeads: row.additional_heads ?? [],
+    paymentDate: row.payment_date,
+    receiptNo: row.receipt_no,
+    paymentMethod: row.payment_method,
+    createdAt: row.created_at,
+  };
+}
+
+export interface PicnicPaymentAdditionalHead {
+  name: string;
+  relation: string;
+}
+
+export interface PicnicPayment {
+  id: number;
+  headPrice: number;
+  additionalPrice: number;
+  additionalCount: number;
+  total: number;
+  additionalHeads: PicnicPaymentAdditionalHead[];
+  paymentDate: string;
+  receiptNo: string | null;
+  paymentMethod: string | null;
+  createdAt: string;
+}
+
+interface PicnicPaymentApiModel {
+  id: number;
+  head_price: number;
+  additional_price: number;
+  additional_count: number;
+  total: number;
+  additional_heads: { name: string; relation: string }[] | null;
+  payment_date: string;
+  receipt_no: string | null;
+  payment_method: string | null;
+  created_at: string;
+}
+
+export interface PicnicPaymentPayload {
+  additionalHeads: number;
+  additionalPeople: PicnicPaymentAdditionalHead[];
+  paymentDate: string;
+  receiptNo?: string;
+  paymentMethod?: string;
 }

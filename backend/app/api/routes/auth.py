@@ -26,13 +26,15 @@ async def _admin_token_response(db: AsyncSession, admin: AdminUser) -> TokenResp
 
 @router.post("/login", response_model=TokenResponse)
 async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
-    admin_result = await db.execute(select(AdminUser).where(AdminUser.email == payload.identifier))
+    identifier = payload.identifier.strip().lower()
+
+    admin_result = await db.execute(select(AdminUser).where(AdminUser.email == identifier))
     admin = admin_result.scalar_one_or_none()
     if admin is not None and await verify_password_async(payload.password, admin.password_hash):
         return await _admin_token_response(db, admin)
 
     credential_result = await db.execute(
-        select(MemberCredential).where(MemberCredential.username == payload.identifier)
+        select(MemberCredential).where(MemberCredential.username == identifier)
     )
     credential = credential_result.scalar_one_or_none()
     if credential is not None and await verify_password_async(payload.password, credential.password_hash):
@@ -49,7 +51,8 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> To
 
 @router.post("/admin/login", response_model=TokenResponse)
 async def admin_login(payload: AdminLoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
-    result = await db.execute(select(AdminUser).where(AdminUser.email == payload.email))
+    email = payload.email.strip().lower()
+    result = await db.execute(select(AdminUser).where(AdminUser.email == email))
     admin = result.scalar_one_or_none()
     if admin is None or not await verify_password_async(payload.password, admin.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -59,8 +62,9 @@ async def admin_login(payload: AdminLoginRequest, db: AsyncSession = Depends(get
 
 @router.post("/member/login", response_model=TokenResponse)
 async def member_login(payload: MemberLoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
+    username = payload.username.strip().lower()
     result = await db.execute(
-        select(MemberCredential).where(MemberCredential.username == payload.username)
+        select(MemberCredential).where(MemberCredential.username == username)
     )
     credential = result.scalar_one_or_none()
     if credential is None or not await verify_password_async(payload.password, credential.password_hash):

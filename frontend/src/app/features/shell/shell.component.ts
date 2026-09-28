@@ -25,6 +25,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'wallet',
     requiredPermission: ['profile.view_own'],
   },
+  {
+    labelKey: 'nav.picnicPayment',
+    route: '/picnic-payment',
+    icon: 'sun',
+    requiredPermission: ['profile.view_own'],
+  },
   { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
   // Published notices/events - the same public pages logged-out visitors read.
   {

@@ -52,7 +52,8 @@
     "notices": "নোটিশ",
     "events": "অনুষ্ঠান",
     "noticesManagement": "নোটিশ ব্যবস্থাপনা",
-    "eventsManagement": "অনুষ্ঠান ব্যবস্থাপনা"
+    "eventsManagement": "অনুষ্ঠান ব্যবস্থাপনা",
+    "picnicPayment": "পিকনিক ফি"
   },
   "forbidden": {
     "title": "প্রবেশাধিকার নেই",
@@ -180,6 +181,37 @@
       "savingButton": "সংরক্ষণ হচ্ছে...",
       "saveButton": "পরিবর্তন সংরক্ষণ করুন",
       "changeFailedError": "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে।"
+    },
+    "picnic": {
+      "title": "পিকনিক ফি পরিশোধ",
+      "subtitle": "নিজের আসন এবং স্ত্রী, সন্তান বা অতিথিদের আসনের জন্য পরিশোধ করুন",
+      "dateLabel": "পরিশোধের তারিখ",
+      "additionalHeadsLabel": "অতিরিক্ত জনসংখ্যা",
+      "additionalHeadsHint": "০ থেকে {{max}} (স্ত্রী, সন্তান, অতিথি)",
+      "headNameLabel": "প্রধান {{n}} নাম",
+      "headRelationLabel": "প্রধান {{n}} সম্পর্ক",
+      "relations": {
+        "spouse": "স্ত্রী/স্বামী",
+        "child": "সন্তান",
+        "guest": "অতিথি"
+      },
+      "memberHead": "সদস্য প্রধান",
+      "additionalHeads": "অতিরিক্ত প্রধান",
+      "total": "মোট",
+      "receiptNoLabel": "রশিদ নম্বর",
+      "methodLabel": "পরিশোধ পদ্ধতি",
+      "submit": "পরিশোধ নিশ্চিত করুন",
+      "historyTitle": "পরিশোধের ইতিহাস",
+      "dateColumn": "তারিখ",
+      "headsColumn": "অতিরিক্ত জন",
+      "totalColumn": "মোট",
+      "receiptColumn": "রশিদ নম্বর",
+      "emptyState": "এখনও কোনো পিকনিক পরিশোধ নেই।",
+      "feeLoadFailed": "পিকনিক ফি লোড করা যায়নি।",
+      "retry": "আবার চেষ্টা করুন",
+      "loadError": "পরিশোধের ইতিহাস লোড করা যায়নি।",
+      "saveSuccess": "পরিশোধ সংরক্ষিত হয়েছে। মোট: ৳ {{total}}",
+      "saveError": "পরিশোধ সংরক্ষণ করা যায়নি।"
     }
   },
   "auth": {
@@ -417,7 +449,9 @@
         "monthly_subscription": "মাসিক চাঁদা হার",
         "monthly_subscription_base_amount": "মাসিক চাঁদা বেস পরিমাণ",
         "monthly_subscription_additional_rate": "মাসিক চাঁদা অতিরিক্ত হার",
-        "monthly_subscription_base_threshold": "মাসিক চাঁদা বেস থ্রেশহোল্ড"
+        "monthly_subscription_base_threshold": "মাসিক চাঁদা বেস থ্রেশহোল্ড",
+        "picnic_head_fee": "পিকনিক ফি - সদস্য প্রধান",
+        "picnic_additional_head_fee": "পিকনিক ফি - অতিরিক্ত প্রধান"
       },
       "units": {
         "taka": "টাকা",

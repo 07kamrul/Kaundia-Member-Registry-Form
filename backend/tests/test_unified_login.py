@@ -28,3 +28,26 @@ async def test_unified_login_rejects_invalid_credentials(
         "/api/login", json={"identifier": "no-such-user", "password": "whatever"}
     )
     assert unknown_identifier.status_code == 401
+
+
+@pytest.mark.parametrize(
+    "identifier",
+    ["Admin@Example.com", "ADMIN@EXAMPLE.COM", " admin@example.com "],
+)
+async def test_unified_login_identifier_is_case_and_whitespace_insensitive(
+    client: AsyncClient, admin_user: AdminUser, identifier: str
+) -> None:
+    response = await client.post(
+        "/api/login", json={"identifier": identifier, "password": "adminpass123"}
+    )
+    assert response.status_code == 200
+    assert response.json()["access_token"]
+
+
+async def test_unified_login_rejects_wrong_case_password(
+    client: AsyncClient, admin_user: AdminUser
+) -> None:
+    response = await client.post(
+        "/api/login", json={"identifier": "admin@example.com", "password": "ADMINPASS123"}
+    )
+    assert response.status_code == 401

@@ -57,7 +57,7 @@ export class LoginComponent {
     this.error = '';
     this.submitting = true;
     const { identifier, password } = this.form.value;
-    this.auth.login(identifier, password).subscribe({
+    this.auth.login(identifier.trim().toLowerCase(), password).subscribe({
       next: (res) => {
         this.submitting = false;
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');

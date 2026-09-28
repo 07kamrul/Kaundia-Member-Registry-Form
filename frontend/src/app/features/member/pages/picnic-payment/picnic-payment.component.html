@@ -1,0 +1,132 @@
+<div style="max-width:52rem;margin:0 auto">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'member.picnic.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'member.picnic.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  @if (feeError) {
+    <div class="error-box">
+      <p style="margin:0">{{ 'member.picnic.feeLoadFailed' | translate }}</p>
+      <button type="button" class="btn btn-secondary" style="margin-top:0.5rem" (click)="retryRates()">
+        {{ 'member.picnic.retry' | translate }}
+      </button>
+    </div>
+  }
+
+  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+    <div class="grid-2">
+      <div class="field">
+        <label for="picnicDate">{{ 'member.picnic.dateLabel' | translate }} <span class="required">*</span></label>
+        <input id="picnicDate" type="date" [(ngModel)]="paymentDate" [max]="paymentDate" />
+      </div>
+      <div class="field">
+        <label for="picnicAdditional">{{ 'member.picnic.additionalHeadsLabel' | translate }}</label>
+        <div class="count-stepper" role="group" aria-label="Additional heads">
+          <button type="button" class="count-stepper-btn" (click)="decrementHeads()" [disabled]="additionalHeads() <= 0">−</button>
+          <input
+            id="picnicAdditional"
+            class="count-stepper-input"
+            type="number"
+            min="0"
+            [max]="maxAdditionalHeads"
+            step="1"
+            [ngModel]="additionalHeads()"
+            (ngModelChange)="onHeadsInput($event)"
+          />
+          <button type="button" class="count-stepper-btn" (click)="incrementHeads()" [disabled]="additionalHeads() >= maxAdditionalHeads">+</button>
+        </div>
+        <p class="field-hint">{{ 'member.picnic.additionalHeadsHint' | translate: { max: maxAdditionalHeads } }}</p>
+      </div>
+    </div>
+
+    @for (label of labels; track $index) {
+      <div class="grid-2" style="margin-top:0.25rem">
+        <div class="field">
+          <label [for]="'headName' + $index">{{ 'member.picnic.headNameLabel' | translate: { n: $index + 1 } }}</label>
+          <input [id]="'headName' + $index" type="text" [(ngModel)]="label.name" [maxlength]="255" />
+        </div>
+        <div class="field">
+          <label [for]="'headRelation' + $index">{{ 'member.picnic.headRelationLabel' | translate: { n: $index + 1 } }}</label>
+          <select [id]="'headRelation' + $index" [(ngModel)]="label.relation">
+            @for (relation of relations; track relation) {
+              <option [value]="relation">{{ 'member.picnic.relations.' + relation | translate }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+
+    @if (breakdown(); as b) {
+      <div class="breakdown" style="margin-top:0.75rem;border:1px solid #d1d5db;border-radius:0.5rem;padding:0.75rem">
+        <div class="breakdown-row" style="display:flex;justify-content:space-between;gap:1rem">
+          <span>{{ 'member.picnic.memberHead' | translate }}</span>
+          <span style="white-space:nowrap">1 × ৳ {{ b.headPrice }} = ৳ {{ b.headPrice }}</span>
+        </div>
+        @if (b.count > 0) {
+          <div class="breakdown-row" style="display:flex;justify-content:space-between;gap:1rem">
+            <span>{{ 'member.picnic.additionalHeads' | translate }}</span>
+            <span style="white-space:nowrap">{{ b.count }} × ৳ {{ b.additionalPrice }} = ৳ {{ b.additionalAmount }}</span>
+          </div>
+        }
+        <div class="breakdown-row" style="display:flex;justify-content:space-between;gap:1rem;border-top:1px solid #d1d5db;margin-top:0.5rem;padding-top:0.5rem">
+          <strong>{{ 'member.picnic.total' | translate }}</strong>
+          <strong style="white-space:nowrap">৳ {{ b.total }}</strong>
+        </div>
+      </div>
+    }
+
+    <div class="grid-2" style="margin-top:0.75rem">
+      <div class="field">
+        <label for="picnicReceipt">{{ 'member.picnic.receiptNoLabel' | translate }}</label>
+        <input id="picnicReceipt" type="text" [(ngModel)]="receiptNo" [maxlength]="64" />
+      </div>
+      <div class="field">
+        <label for="picnicMethod">{{ 'member.picnic.methodLabel' | translate }}</label>
+        <input id="picnicMethod" type="text" [(ngModel)]="paymentMethod" [maxlength]="64" />
+      </div>
+    </div>
+
+    @if (error) {
+      <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+    }
+    @if (success) {
+      <div class="success-box"><p style="margin:0">{{ success }}</p></div>
+    }
+
+    <button type="button" class="btn btn-primary" style="margin-top:1rem" [disabled]="!canSubmit" (click)="submit()">
+      {{ 'member.picnic.submit' | translate }}
+    </button>
+  </div>
+
+  <h2 class="section-title">{{ 'member.picnic.historyTitle' | translate }}</h2>
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else {
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ 'member.picnic.dateColumn' | translate }}</th>
+            <th>{{ 'member.picnic.headsColumn' | translate }}</th>
+            <th>{{ 'member.picnic.totalColumn' | translate }}</th>
+            <th>{{ 'member.picnic.receiptColumn' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of payments; track payment.id) {
+            <tr>
+              <td>{{ payment.paymentDate }}</td>
+              <td>{{ payment.additionalCount }}</td>
+              <td>৳ {{ payment.total }}</td>
+              <td>{{ payment.receiptNo || '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="empty-state">{{ 'member.picnic.emptyState' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -21,11 +21,18 @@ const MONTHLY_SUBSCRIPTION_TIER_KEYS = {
 } as const;
 
 /** Known fee keys the version form offers, in display order. */
-const KNOWN_FEE_KEYS: readonly string[] = ['admission_fee', MONTHLY_SUBSCRIPTION_GROUP_KEY];
+const KNOWN_FEE_KEYS: readonly string[] = [
+  'admission_fee',
+  'picnic_head_fee',
+  'picnic_additional_head_fee',
+  MONTHLY_SUBSCRIPTION_GROUP_KEY,
+];
 
 /** Default unit per known key (i18n unit option); empty string when unknown. */
 const DEFAULT_UNIT_BY_KEY: Record<string, string> = {
   admission_fee: 'taka',
+  picnic_head_fee: 'taka',
+  picnic_additional_head_fee: 'taka',
   [MONTHLY_SUBSCRIPTION_GROUP_KEY]: 'taka',
 };
 

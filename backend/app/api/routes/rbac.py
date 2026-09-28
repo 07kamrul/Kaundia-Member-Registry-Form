@@ -146,7 +146,9 @@ async def create_admin_user(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unknown role: {payload.role}"
         )
 
-    existing_result = await db.execute(select(AdminUser).where(AdminUser.email == payload.email))
+    email = payload.email.strip().lower()
+
+    existing_result = await db.execute(select(AdminUser).where(AdminUser.email == email))
     if existing_result.scalar_one_or_none() is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already in use")
 
@@ -157,7 +159,7 @@ async def create_admin_user(
 
     user = AdminUser(
         name=payload.name,
-        email=payload.email,
+        email=email,
         password_hash=await hash_password_async(payload.password),
         role=role_enum,
         role_id=payload.role_id,
