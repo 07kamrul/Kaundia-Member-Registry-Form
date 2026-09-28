@@ -44,11 +44,13 @@ async def resolve_active_fee_versions(
     None when any key has no active version. Shared by the calculators so the
     quote endpoint and the stored amounts always agree on which version won."""
     result = await db.execute(
-        select(FeeSetting).where(
+        select(FeeSetting)
+        .where(
             FeeSetting.key.in_(keys),
             FeeSetting.start_date <= on_date,
             or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= on_date),
         )
+        .order_by(FeeSetting.start_date.desc(), FeeSetting.id.desc())
     )
     versions = {row.key: row for row in result.scalars().all()}
     if any(key not in versions for key in keys):
@@ -60,12 +62,18 @@ async def resolve_active_fee_decimal(db: AsyncSession, key: str, on_date: date) 
     """Fee-setting value active on `on_date`, as a Decimal. Resolved against the
     version effective on that date rather than the latest one, so historical
     calculations (e.g. past invoices) stay correct after a rate change."""
+    # Overlapping active versions can exist (e.g. a backdated new version
+    # whose end_date still covers the period of the old one); the latest
+    # start_date wins, matching the versioned-settings semantics elsewhere.
     result = await db.execute(
-        select(FeeSetting.value).where(
+        select(FeeSetting.value)
+        .where(
             FeeSetting.key == key,
             FeeSetting.start_date <= on_date,
             or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= on_date),
         )
+        .order_by(FeeSetting.start_date.desc(), FeeSetting.id.desc())
+        .limit(1)
     )
     value = result.scalar_one_or_none()
     if value is None:
@@ -90,11 +98,13 @@ async def resolve_picnic_rates(db: AsyncSession, on_date: date) -> dict | None:
     key has no active version - surfaced as PICNIC_RATES_NOT_CONFIGURED
     instead of a generic failure."""
     result = await db.execute(
-        select(FeeSetting).where(
+        select(FeeSetting)
+        .where(
             FeeSetting.key.in_(PICNIC_FEE_KEYS),
             FeeSetting.start_date <= on_date,
             or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= on_date),
         )
+        .order_by(FeeSetting.start_date.desc(), FeeSetting.id.desc())
     )
     versions = {row.key: row for row in result.scalars().all()}
     head = versions.get(PICNIC_HEAD_FEE_KEY)

@@ -24,12 +24,18 @@ router = APIRouter(tags=["submissions"])
 async def resolve_active_fee(db: AsyncSession, key: str, on_date: date) -> str:
     """Active fee-setting value as of `on_date`. The client-sent amount is
     never trusted: the stored fee is always re-resolved here at submit time."""
+    # Overlapping active versions can exist (e.g. a backdated new version
+    # whose end_date still covers the period of the old one); the latest
+    # start_date wins, matching the versioned-settings semantics elsewhere.
     result = await db.execute(
-        select(FeeSetting.value).where(
+        select(FeeSetting.value)
+        .where(
             FeeSetting.key == key,
             FeeSetting.start_date <= on_date,
             or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= on_date),
         )
+        .order_by(FeeSetting.start_date.desc(), FeeSetting.id.desc())
+        .limit(1)
     )
     value = result.scalar_one_or_none()
     if value is None:
