@@ -414,7 +414,10 @@
       "addVersion": "নতুন ভার্সন যোগ করুন",
       "keys": {
         "admission_fee": "ভর্তি ফি",
-        "monthly_subscription": "মাসিক চাঁদা হার"
+        "monthly_subscription": "মাসিক চাঁদা হার",
+        "monthly_subscription_base_amount": "মাসিক চাঁদা বেস পরিমাণ",
+        "monthly_subscription_additional_rate": "মাসিক চাঁদা অতিরিক্ত হার",
+        "monthly_subscription_base_threshold": "মাসিক চাঁদা বেস থ্রেশহোল্ড"
       },
       "units": {
         "taka": "টাকা",
@@ -426,7 +429,10 @@
         "unit": "একক",
         "startDate": "শুরুর তারিখ (ঐচ্ছিক)",
         "startDateHint": "খালি রাখলে আজ থেকে কার্যকর",
-        "submit": "সংরক্ষণ করুন"
+        "submit": "সংরক্ষণ করুন",
+        "baseAmount": "বেস পরিমাণ",
+        "additionalRate": "প্রতি অতিরিক্ত ডেসিমেলে হার",
+        "baseThreshold": "বেস থ্রেশহোল্ড (ডেসিমেল)"
       },
       "confirmTitle": "নতুন ভার্সন নিশ্চিত করুন",
       "confirmMessage": "বর্তমান ভার্সন আজ থেকে নিষ্ক্রিয় হবে। নতুন ভার্সন সংরক্ষণ করতে চান?",
@@ -447,6 +453,12 @@
         "loadFailed": "ফি সেটিংস লোড করা যায়নি।",
         "loadHistoryFailed": "ফি সেটিংসের ইতিহাস লোড করা যায়নি।",
         "saveFailed": "নতুন ফি সেটিংস ভার্সন সংরক্ষণ করা যায়নি।"
+      },
+      "tieredSummary": "প্রথম {{threshold}} ডেসিমেলের জন্য {{base}} টাকা + প্রতি অতিরিক্ত ডেসিমেলে {{rate}} টাকা",
+      "calculator": {
+        "title": "ফি ক্যালকুলেটর",
+        "landSize": "জমির আয়তন (ডেসিমেল)",
+        "fee": "মাসিক ফি"
       }
     },
     "auditLog": {

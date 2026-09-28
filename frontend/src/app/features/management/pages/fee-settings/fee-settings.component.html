@@ -32,17 +32,59 @@
             }
           </select>
         </div>
-        <div class="field">
-          <label for="draftValue">{{ 'admin.feeSettings.form.value' | translate }}</label>
-          <input
-            type="number"
-            id="draftValue"
-            name="draftValue"
-            [(ngModel)]="draftValue"
-            [disabled]="!auth.hasPermission('manage_fee_settings')"
-            required
-          />
-        </div>
+        @if (isTieredKey) {
+          <div class="field">
+            <label for="draftBaseAmount">{{ 'admin.feeSettings.form.baseAmount' | translate }}</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              id="draftBaseAmount"
+              name="draftBaseAmount"
+              [(ngModel)]="draftBaseAmount"
+              [disabled]="!auth.hasPermission('manage_fee_settings')"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="draftAdditionalRate">{{ 'admin.feeSettings.form.additionalRate' | translate }}</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              id="draftAdditionalRate"
+              name="draftAdditionalRate"
+              [(ngModel)]="draftAdditionalRate"
+              [disabled]="!auth.hasPermission('manage_fee_settings')"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="draftBaseThreshold">{{ 'admin.feeSettings.form.baseThreshold' | translate }}</label>
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              id="draftBaseThreshold"
+              name="draftBaseThreshold"
+              [(ngModel)]="draftBaseThreshold"
+              [disabled]="!auth.hasPermission('manage_fee_settings')"
+              required
+            />
+          </div>
+        } @else {
+          <div class="field">
+            <label for="draftValue">{{ 'admin.feeSettings.form.value' | translate }}</label>
+            <input
+              type="number"
+              id="draftValue"
+              name="draftValue"
+              [(ngModel)]="draftValue"
+              [disabled]="!auth.hasPermission('manage_fee_settings')"
+              required
+            />
+          </div>
+        }
         <div class="field">
           <label for="draftUnit">{{ 'admin.feeSettings.form.unit' | translate }}</label>
           <select
@@ -80,6 +122,33 @@
     }
   </div>
 
+  @if (monthlySubscriptionTier) {
+    <div class="card card-pad" style="margin-bottom:1.5rem">
+      <h2 style="font-size:1rem;margin-top:0;margin-bottom:1rem">
+        {{ 'admin.feeSettings.calculator.title' | translate }}
+      </h2>
+      <div class="form-grid">
+        <div class="field">
+          <label for="calculatorLandSize">{{ 'admin.feeSettings.calculator.landSize' | translate }}</label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            id="calculatorLandSize"
+            name="calculatorLandSize"
+            [(ngModel)]="calculatorLandSize"
+          />
+        </div>
+        <div class="field">
+          <label>{{ 'admin.feeSettings.calculator.fee' | translate }}</label>
+          <p style="margin:0;font-weight:600">
+            {{ calculatorFee !== null ? calculatorFee : '—' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+
   @if (loading) {
     <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else {
@@ -95,7 +164,84 @@
           </tr>
         </thead>
         <tbody>
-          @for (row of active; track row.id) {
+          @if (monthlySubscriptionTier; as tier) {
+            <tr>
+              <td>
+                {{ 'admin.feeSettings.keys.monthly_subscription' | translate }}
+                <span class="cell-secondary">monthly_subscription</span>
+              </td>
+              <td>
+                {{ 'admin.feeSettings.tieredSummary' | translate: {
+                  base: tier.base.value,
+                  threshold: tier.threshold.value,
+                  rate: tier.rate.value
+                } }}
+              </td>
+              <td>{{ tier.base.unit ?? '—' }}</td>
+              <td>{{ tier.base.startDate }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-icon"
+                  (click)="toggleHistory('monthly_subscription')"
+                  [attr.aria-expanded]="expandedKey === 'monthly_subscription'"
+                >
+                  <span
+                    class="prop-chevron"
+                    [style.transform]="expandedKey === 'monthly_subscription' ? 'rotate(180deg)' : 'none'"
+                  >
+                    <app-icon name="chevron-down" [size]="16" />
+                  </span>
+                  {{ (expandedKey === 'monthly_subscription' ? 'admin.feeSettings.hideHistory' : 'admin.feeSettings.viewHistory') | translate }}
+                </button>
+              </td>
+            </tr>
+            @if (expandedKey === 'monthly_subscription') {
+              <tr>
+                <td colspan="5">
+                  @if (loadingHistory) {
+                    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+                  } @else {
+                    <div class="table-scroll">
+                      <table class="data-table">
+                        <thead>
+                          <tr>
+                            <th>{{ 'admin.feeSettings.form.baseAmount' | translate }}</th>
+                            <th>{{ 'admin.feeSettings.form.additionalRate' | translate }}</th>
+                            <th>{{ 'admin.feeSettings.form.baseThreshold' | translate }}</th>
+                            <th>{{ 'admin.feeSettings.table.startDate' | translate }}</th>
+                            <th>{{ 'admin.feeSettings.table.endDate' | translate }}</th>
+                            <th>{{ 'admin.feeSettings.table.status' | translate }}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (h of tieredHistory.base; track h.id; let i = $index) {
+                            <tr [class.is-current]="h.status === 1">
+                              <td>{{ h.value }}</td>
+                              <td>{{ tieredHistory.rate[i]?.value ?? '—' }}</td>
+                              <td>{{ tieredHistory.threshold[i]?.value ?? '—' }}</td>
+                              <td>{{ h.startDate }}</td>
+                              <td>{{ h.endDate ?? '—' }}</td>
+                              <td>
+                                <span
+                                  class="status-badge"
+                                  [class.status-active]="h.status === 1"
+                                  [class.status-inactive]="h.status !== 1"
+                                >
+                                  {{ h.status === 1 ? ('admin.feeSettings.active' | translate) : ('admin.feeSettings.inactive' | translate) }}
+                                </span>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          }
+          @for (row of tableRows; track row.id) {
             <tr>
               <td>
                 {{ 'admin.feeSettings.keys.' + row.key | translate }}
@@ -164,12 +310,14 @@
               </tr>
             }
           } @empty {
-            <tr>
-              <td colspan="5" class="empty-state">
-                <span class="empty-state-icon"><app-icon name="coin" [size]="22" /></span><br />
-                {{ 'admin.feeSettings.noSettings' | translate }}
-              </td>
-            </tr>
+            @if (!monthlySubscriptionTier) {
+              <tr>
+                <td colspan="5" class="empty-state">
+                  <span class="empty-state-icon"><app-icon name="coin" [size]="22" /></span><br />
+                  {{ 'admin.feeSettings.noSettings' | translate }}
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>

@@ -414,7 +414,10 @@
       "addVersion": "Add New Version",
       "keys": {
         "admission_fee": "Admission Fee",
-        "monthly_subscription": "Monthly Subscription Rate"
+        "monthly_subscription": "Monthly Subscription Rate",
+        "monthly_subscription_base_amount": "Monthly Subscription Base Amount",
+        "monthly_subscription_additional_rate": "Monthly Subscription Additional Rate",
+        "monthly_subscription_base_threshold": "Monthly Subscription Base Threshold"
       },
       "units": {
         "taka": "Taka",
@@ -426,7 +429,10 @@
         "unit": "Unit",
         "startDate": "Start Date (optional)",
         "startDateHint": "Leave empty to take effect from today",
-        "submit": "Save"
+        "submit": "Save",
+        "baseAmount": "Base Amount",
+        "additionalRate": "Additional Rate per Decimal",
+        "baseThreshold": "Base Threshold (decimals)"
       },
       "confirmTitle": "Confirm New Version",
       "confirmMessage": "The current version will be deactivated from today. Save the new version?",
@@ -447,6 +453,12 @@
         "loadFailed": "Could not load fee settings.",
         "loadHistoryFailed": "Could not load fee setting history.",
         "saveFailed": "Could not save the new fee setting version."
+      },
+      "tieredSummary": "{{base}} Taka first {{threshold}} decimal + {{rate}} Taka per additional decimal",
+      "calculator": {
+        "title": "Fee Calculator",
+        "landSize": "Land Size (decimal)",
+        "fee": "Monthly Fee"
       }
     },
     "auditLog": {
