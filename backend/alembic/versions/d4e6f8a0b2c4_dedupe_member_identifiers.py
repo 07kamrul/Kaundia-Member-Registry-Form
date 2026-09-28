@@ -21,11 +21,17 @@ depends_on: Union[str, Sequence[str], None] = None
 # block a resubmission (see _BLOCKING_STATUSES in
 # app/api/routes/submissions.py). A REJECTED row is excluded so a rejected
 # applicant can re-apply with the same nid/mobile/email.
+#
+# Raw SQL must use the enum LABEL ('REJECTED'), not the Python value
+# ('rejected'): sa.Enum stores the member NAMES as Postgres labels, so
+# status <> 'rejected' fails with "invalid input value for enum".
 _INDEXES = [
     ("ix_members_nid_active", "nid"),
     ("ix_members_mobile_active", "mobile"),
     ("ix_members_email_active", "email"),
 ]
+
+_NOT_REJECTED = "status::text <> 'REJECTED'"
 
 
 def upgrade() -> None:
@@ -41,7 +47,7 @@ def upgrade() -> None:
     for _name, column in _INDEXES:
         collisions = conn.execute(sa.text(
             f"SELECT {column}, count(*) FROM members "
-            f"WHERE status <> 'rejected' GROUP BY {column} HAVING count(*) > 1"
+            f"WHERE {_NOT_REJECTED} GROUP BY {column} HAVING count(*) > 1"
         )).fetchall()
         if collisions:
             raise RuntimeError(
@@ -54,7 +60,7 @@ def upgrade() -> None:
             "members",
             [column],
             unique=True,
-            postgresql_where=sa.text("status <> 'rejected'"),
+            postgresql_where=sa.text(_NOT_REJECTED),
         )
 
 
