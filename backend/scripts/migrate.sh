@@ -12,6 +12,13 @@ SLEEP_SECONDS="${MIGRATION_SLEEP_SECONDS:-2}"
 log() { echo "[migrate] $*"; }
 
 log "Starting migration (project root: $(pwd))"
+
+log "Resolving duplicate member identifiers before upgrade"
+if ! sh scripts/resolve_duplicate_members.sh; then
+    log "Duplicate resolution failed — aborting migration" >&2
+    exit 1
+fi
+
 attempt=1
 while :; do
     log "Running Alembic upgrade head (attempt ${attempt}/${MAX_ATTEMPTS})"
