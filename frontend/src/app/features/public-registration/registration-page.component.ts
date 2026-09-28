@@ -92,6 +92,8 @@ export class RegistrationPageComponent implements OnInit {
   submitAttempted = false;
   success: { id: string } | null = null;
   memberPhotoPreview = signal('');
+  feeLoading = signal(true);
+  feeError = signal(false);
 
   steps = REGISTRATION_STEPS;
   currentStep = 1;
@@ -120,8 +122,38 @@ export class RegistrationPageComponent implements OnInit {
       this.currentStep = draft.currentStep;
       this.showDraftRestoredToast = true;
     }
+    this.loadAdmissionFee();
     this.draftService.watch(this.form, () => this.currentStep);
     this.destroyRef.onDestroy(() => this.draftService.unwatch());
+  }
+
+  /**
+   * The admission fee is a system-defined amount: it always comes from the
+   * active fee setting, never from a hard-coded default or the saved draft.
+   */
+  loadAdmissionFee(): void {
+    this.feeLoading.set(true);
+    this.feeError.set(false);
+    this.registrationService
+      .getPublicFeeSettings()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (settings) => {
+          const admissionFee = settings['admission_fee'];
+          this.feeLoading.set(false);
+          if (Number.isFinite(admissionFee)) {
+            this.form.get('admissionFee')?.setValue(admissionFee);
+          } else {
+            this.feeError.set(true);
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.feeLoading.set(false);
+          this.feeError.set(true);
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   dismissDraftToast(): void {

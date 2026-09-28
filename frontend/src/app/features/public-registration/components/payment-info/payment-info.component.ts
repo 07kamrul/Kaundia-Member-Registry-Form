@@ -6,6 +6,7 @@ import {
   inject,
   Input,
   OnInit,
+  output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -40,6 +41,9 @@ export interface SubscriptionBreakdown {
 export class PaymentInfoComponent implements OnInit {
   @Input({ required: true }) form!: FormGroup;
   @Input() submitAttempted = false;
+  @Input() feeLoading = false;
+  @Input() feeError = false;
+  readonly retryFeeLoad = output<void>();
   readonly paymentMethods = PAYMENT_METHODS;
   readonly firstDecimalRate = FIRST_DECIMAL_RATE;
   readonly additionalDecimalRate = ADDITIONAL_DECIMAL_RATE;

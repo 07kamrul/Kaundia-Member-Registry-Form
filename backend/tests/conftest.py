@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator
+from datetime import date
 
 import pytest
 import pytest_asyncio
@@ -13,6 +14,7 @@ from app.db.session import get_db
 from app.main import app
 from app.core.security import hash_password
 from app.models.admin import AdminRole, AdminUser
+from app.models.fee_settings import FeeSetting
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -48,6 +50,16 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     finally:
         app.dependency_overrides.clear()
         await engine.dispose()
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def _seed_admission_fee(db_session: AsyncSession):
+    """Submissions re-resolve the admission fee server-side from the active
+    fee setting, so every test needs one configured."""
+    db_session.add(
+        FeeSetting(key="admission_fee", value=500, start_date=date(2000, 1, 1))
+    )
+    await db_session.commit()
 
 
 @pytest_asyncio.fixture

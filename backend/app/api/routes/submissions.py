@@ -1,10 +1,13 @@
 import json
+from datetime import date
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from pydantic import ValidationError
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
+from app.models.fee_settings import FeeSetting
 from app.models.member import Member, MemberStatus
 from app.models.property import ApplicableDoc, CoOwner, Property
 from app.models.nominee import Nominee
@@ -13,6 +16,25 @@ from app.schemas.submission import SubmissionPayload
 from app.services.storage import save_upload_file, slugify_path_segment
 
 router = APIRouter(tags=["submissions"])
+
+
+async def resolve_active_fee(db: AsyncSession, key: str, on_date: date) -> str:
+    """Active fee-setting value as of `on_date`. The client-sent amount is
+    never trusted: the stored fee is always re-resolved here at submit time."""
+    result = await db.execute(
+        select(FeeSetting.value).where(
+            FeeSetting.key == key,
+            FeeSetting.start_date <= on_date,
+            or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= on_date),
+        )
+    )
+    value = result.scalar_one_or_none()
+    if value is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"No active fee setting configured for '{key}'",
+        )
+    return str(value)
 
 
 @router.post("/submissions", response_model=SubmissionCreateResponse, status_code=status.HTTP_201_CREATED)
@@ -64,7 +86,9 @@ async def create_submission(
         urgent_contact_relation=data.urgent_contact_relation,
         urgent_contact_mobile=data.urgent_contact_mobile,
         urgent_contact_address=data.urgent_contact_address,
-        admission_fee=data.admission_fee,
+        # Client-sent admission_fee is deliberately ignored — the amount
+        # stored on the submission is the server-resolved active version.
+        admission_fee=await resolve_active_fee(db, "admission_fee", date.today()),
         subscription=data.subscription,
         receipt_no=data.receipt_no,
         payment_method=data.payment_method,

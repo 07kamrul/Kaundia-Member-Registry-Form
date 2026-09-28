@@ -21,6 +21,11 @@ function dataUrlToBlob(dataUrl: string): Blob {
 export class RegistrationService {
   constructor(private http: HttpClient) {}
 
+  // Active fee settings keyed by their Fee Settings key (e.g. 'admission_fee').
+  getPublicFeeSettings(): Observable<Record<string, number>> {
+    return this.http.get<Record<string, number>>(`${environment.apiBaseUrl}/public/fee-settings`);
+  }
+
   // Backend contract (see backend/app/api/routes/submissions.py): a single
   // 'payload' form field holding a JSON object matching SubmissionPayload
   // (snake_case, nested properties/nominees), plus an optional

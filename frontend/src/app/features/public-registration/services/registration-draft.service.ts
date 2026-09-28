@@ -14,6 +14,10 @@ const DRAFT_KEY = 'ukams_registration_draft';
 const DRAFT_SCHEMA_VERSION = 1;
 const AUTOSAVE_DEBOUNCE_MS = 400;
 
+// Fee-derived values are resolved from the live fee settings, never from a
+// draft: a stale draft must not be able to carry an outdated amount forward.
+const NON_RESTORABLE_FIELDS = ['admissionFee', 'subscription'];
+
 export interface RegistrationDraft {
   schemaVersion: number;
   currentStep: number;
@@ -51,11 +55,13 @@ export class RegistrationDraftService {
   }
 
   private save(form: FormGroup, currentStep: number): void {
+    const formValue = form.getRawValue() as Record<string, unknown>;
+    for (const field of NON_RESTORABLE_FIELDS) delete formValue[field];
     const draft: RegistrationDraft = {
       schemaVersion: DRAFT_SCHEMA_VERSION,
       currentStep,
       lastSaved: new Date().toISOString(),
-      formValue: form.getRawValue(),
+      formValue,
     };
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
@@ -81,6 +87,10 @@ export class RegistrationDraftService {
   /** Rebuilds nested FormArrays to match the draft shape, then patches all values onto the form. */
   restore(form: FormGroup, fb: FormBuilder, draft: RegistrationDraft): void {
     const value = draft.formValue as Record<string, any>;
+
+    // Guard against drafts saved before these fields were excluded from the
+    // payload — the live fee settings always win over any stored amount.
+    for (const field of NON_RESTORABLE_FIELDS) delete value[field];
 
     const properties = propertiesArray(form);
     const draftProperties = Array.isArray(value['properties']) ? value['properties'] : [];

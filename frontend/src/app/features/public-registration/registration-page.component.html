@@ -99,7 +99,13 @@
       }
 
       @if (currentStep === 4) {
-        <app-payment-info [form]="form" [submitAttempted]="submitAttempted" />
+        <app-payment-info
+          [form]="form"
+          [submitAttempted]="submitAttempted"
+          [feeLoading]="feeLoading()"
+          [feeError]="feeError()"
+          (retryFeeLoad)="loadAdmissionFee()"
+        />
       }
 
       @if (currentStep === 5) {
@@ -140,7 +146,14 @@
         }
 
         @if (currentStep < steps.length) {
-          <button type="button" class="btn btn-primary" (click)="nextStep()">{{ 'registration.nav.next' | translate }}</button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="feeLoading() || feeError()"
+            (click)="nextStep()"
+          >
+            {{ 'registration.nav.next' | translate }}
+          </button>
         } @else {
           <button type="submit" class="btn btn-primary submit-btn" [disabled]="submitting">
             {{ (submitting ? 'registration.nav.submitting' : 'registration.nav.submit') | translate }}

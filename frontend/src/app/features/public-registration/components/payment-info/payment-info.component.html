@@ -3,7 +3,23 @@
   <div class="grid-2">
     <div class="field">
       <label for="admissionFee">{{ 'registration.payment.admissionFeeLabel' | translate }} <span class="required">*</span></label>
-      <input id="admissionFee" type="number" formControlName="admissionFee" />
+      <input
+        id="admissionFee"
+        type="number"
+        formControlName="admissionFee"
+        readonly
+        style="background:#f3f4f6;color:#374151"
+      />
+      @if (feeLoading) {
+        <p class="field-hint">{{ 'registration.payment.admissionFeeLoading' | translate }}</p>
+      } @else if (feeError) {
+        <p class="field-error">{{ 'registration.payment.admissionFeeLoadFailed' | translate }}</p>
+        <button type="button" class="btn btn-secondary" style="margin-top:0.25rem" (click)="retryFeeLoad.emit()">
+          {{ 'registration.payment.admissionFeeRetry' | translate }}
+        </button>
+      } @else {
+        <p class="field-hint">{{ 'registration.payment.admissionFeeHint' | translate }}</p>
+      }
       @if (showError('admissionFee')) {
         <p class="field-error">{{ errorMessage('admissionFee') }}</p>
       }
