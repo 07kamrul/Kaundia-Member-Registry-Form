@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { IconComponent } from '../../../../shared/icon/icon.component';
 import type { ConfigListItem } from '../../../../core/models/admin.model';
 
 const MANAGE_SYSTEM_CONFIG = 'manage_system_config';
@@ -12,7 +13,7 @@ const CATEGORIES = ['property_type', 'document_type', 'notice_category', 'event_
   selector: 'app-config-lists',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, IconComponent],
   templateUrl: './config-lists.component.html',
 })
 export class ConfigListsComponent implements OnInit {
@@ -29,6 +30,10 @@ export class ConfigListsComponent implements OnInit {
 
   togglingId: string | null = null;
 
+  // Inline label editing state.
+  editingId: string | null = null;
+  editLabel = '';
+
   constructor(
     private adminService: AdminService,
     public auth: AuthService,
@@ -42,6 +47,7 @@ export class ConfigListsComponent implements OnInit {
 
   selectCategory(category: string): void {
     this.selectedCategory = category;
+    this.editingId = null;
     this.load();
   }
 
@@ -106,5 +112,82 @@ export class ConfigListsComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  startEdit(item: ConfigListItem): void {
+    if (!this.auth.hasPermission(MANAGE_SYSTEM_CONFIG)) return;
+    this.editingId = item.id;
+    this.editLabel = item.label;
+  }
+
+  cancelEdit(): void {
+    this.editingId = null;
+    this.editLabel = '';
+  }
+
+  saveLabel(item: ConfigListItem): void {
+    if (!this.auth.hasPermission(MANAGE_SYSTEM_CONFIG)) return;
+    const label = this.editLabel.trim();
+    if (!label || label === item.label) {
+      this.cancelEdit();
+      return;
+    }
+    this.togglingId = item.id;
+    this.adminService.updateConfigListItem(item.id, { label }).subscribe({
+      next: (updated) => {
+        const idx = this.items.findIndex((i) => i.id === updated.id);
+        if (idx >= 0) this.items[idx] = updated;
+        this.togglingId = null;
+        this.cancelEdit();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.error = this.translate.instant('admin.configLists.errors.saveFailed');
+        this.togglingId = null;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  /** Swaps sort_order with the neighbor in the given direction. */
+  moveItem(index: number, direction: -1 | 1): void {
+    if (!this.auth.hasPermission(MANAGE_SYSTEM_CONFIG)) return;
+    const target = index + direction;
+    if (target < 0 || target >= this.items.length) return;
+
+    const current = this.items[index];
+    const neighbor = this.items[target];
+    this.togglingId = current.id;
+    // Preserve immutability: build a new array instead of mutating this.items.
+    const reordered = [...this.items];
+    reordered[index] = neighbor;
+    reordered[target] = current;
+
+    this.adminService
+      .updateConfigListItem(current.id, { sortOrder: neighbor.sortOrder })
+      .subscribe({
+        next: () => {
+          this.adminService
+            .updateConfigListItem(neighbor.id, { sortOrder: current.sortOrder })
+            .subscribe({
+              next: () => {
+                this.items = reordered;
+                this.togglingId = null;
+                this.cdr.markForCheck();
+              },
+              error: () => {
+                this.error = this.translate.instant('admin.configLists.errors.saveFailed');
+                this.togglingId = null;
+                // Reload to resync server-side sort order.
+                this.load();
+              },
+            });
+        },
+        error: () => {
+          this.error = this.translate.instant('admin.configLists.errors.saveFailed');
+          this.togglingId = null;
+          this.cdr.markForCheck();
+        },
+      });
   }
 }

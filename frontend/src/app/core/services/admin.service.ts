@@ -4,6 +4,7 @@ import { map, type Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
   ApplicableDoc,
+  AuditLogEntry,
   ConfigListItem,
   FeeSetting,
   Installment,
@@ -74,6 +75,28 @@ interface ConfigListItemApiModel {
   label: string;
   sort_order: number;
   is_active: number;
+}
+
+interface AuditLogApiModel {
+  id: number;
+  actor_admin_id: number | null;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  detail: string | null;
+  created_at: string;
+}
+
+function toAuditLogEntry(api: AuditLogApiModel): AuditLogEntry {
+  return {
+    id: String(api.id),
+    actorAdminId: api.actor_admin_id !== null ? String(api.actor_admin_id) : null,
+    action: api.action,
+    entityType: api.entity_type,
+    entityId: api.entity_id,
+    detail: api.detail,
+    createdAt: api.created_at,
+  };
 }
 
 interface SubmissionSummaryApiModel {
@@ -385,6 +408,12 @@ export class AdminService {
         start_date: payload.startDate,
       })
       .pipe(map(toFeeSetting));
+  }
+
+  listAuditLog(): Observable<AuditLogEntry[]> {
+    return this.http
+      .get<AuditLogApiModel[]>(`${this.base}/audit-log`)
+      .pipe(map((rows) => rows.map(toAuditLogEntry)));
   }
 
   listConfigListItems(category?: string): Observable<ConfigListItem[]> {

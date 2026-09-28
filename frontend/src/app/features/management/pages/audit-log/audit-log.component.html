@@ -13,31 +13,190 @@
   @if (loading) {
     <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else {
-    <div class="card">
-      <table style="width:100%;border-collapse:collapse">
+    <!-- Filters -->
+    <div class="card card-pad" style="margin-bottom:1.5rem">
+      <div class="form-grid">
+        <div class="field">
+          <label for="filterDateFrom">{{ 'admin.auditLog.filters.dateFrom' | translate }}</label>
+          <input
+            type="date"
+            id="filterDateFrom"
+            name="filterDateFrom"
+            [(ngModel)]="filterDateFrom"
+            (ngModelChange)="onFiltersChanged()"
+          />
+        </div>
+        <div class="field">
+          <label for="filterDateTo">{{ 'admin.auditLog.filters.dateTo' | translate }}</label>
+          <input
+            type="date"
+            id="filterDateTo"
+            name="filterDateTo"
+            [(ngModel)]="filterDateTo"
+            (ngModelChange)="onFiltersChanged()"
+          />
+        </div>
+        <div class="field">
+          <label for="filterAction">{{ 'admin.auditLog.filters.action' | translate }}</label>
+          <select
+            id="filterAction"
+            name="filterAction"
+            [(ngModel)]="filterAction"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            <option value="">{{ 'admin.auditLog.filters.all' | translate }}</option>
+            @for (a of distinctActions; track a) {
+              <option [value]="a">{{ a }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label for="filterActor">{{ 'admin.auditLog.filters.actor' | translate }}</label>
+          <select
+            id="filterActor"
+            name="filterActor"
+            [(ngModel)]="filterActor"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            <option value="">{{ 'admin.auditLog.filters.all' | translate }}</option>
+            @for (a of distinctActors; track a) {
+              <option [value]="a">{{ actorLabel(a) }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label for="filterEntityType">{{ 'admin.auditLog.filters.entityType' | translate }}</label>
+          <select
+            id="filterEntityType"
+            name="filterEntityType"
+            [(ngModel)]="filterEntityType"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            <option value="">{{ 'admin.auditLog.filters.all' | translate }}</option>
+            @for (t of distinctEntityTypes; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="data-table-wrap table-scroll">
+      <table class="data-table">
         <thead>
           <tr>
-            <th style="text-align:left">{{ 'admin.auditLog.table.time' | translate }}</th>
-            <th style="text-align:left">{{ 'admin.auditLog.table.actor' | translate }}</th>
-            <th style="text-align:left">{{ 'admin.auditLog.table.action' | translate }}</th>
-            <th style="text-align:left">{{ 'admin.auditLog.table.entity' | translate }}</th>
-            <th style="text-align:left">{{ 'admin.auditLog.table.detail' | translate }}</th>
+            <th>{{ 'admin.auditLog.table.time' | translate }}</th>
+            <th>{{ 'admin.auditLog.table.actor' | translate }}</th>
+            <th>{{ 'admin.auditLog.table.action' | translate }}</th>
+            <th>{{ 'admin.auditLog.table.entity' | translate }}</th>
+            <th>{{ 'admin.auditLog.table.detail' | translate }}</th>
           </tr>
         </thead>
         <tbody>
-          @for (e of entries; track e.id) {
+          @for (e of pageEntries; track e.id) {
             <tr>
-              <td>{{ e.createdAt }}</td>
-              <td>{{ e.actorAdminId ?? '—' }}</td>
-              <td>{{ e.action }}</td>
+              <td class="ds-mono">{{ e.createdAt | date: dateTimeFormat }}</td>
+              <td [attr.title]="e.actorAdminId !== null ? '#' + e.actorAdminId : null">
+                {{ actorLabel(e.actorAdminId) }}
+              </td>
+              <td>
+                <span
+                  class="action-badge"
+                  [class.action-approve]="actionClass(e.action) === 'approve'"
+                  [class.action-reject]="actionClass(e.action) === 'reject'"
+                  [class.action-create]="actionClass(e.action) === 'create'"
+                  [class.action-update]="actionClass(e.action) === 'update'"
+                  [class.action-delete]="actionClass(e.action) === 'delete'"
+                >
+                  {{ e.action }}
+                </span>
+              </td>
               <td>{{ e.entityType }} #{{ e.entityId }}</td>
-              <td>{{ e.detail ?? '—' }}</td>
+              <td>
+                @if (e.detail) {
+                  <button type="button" class="table-link link-button" (click)="openDetail(e)">
+                    {{ truncate(e.detail) }}
+                  </button>
+                } @else {
+                  —
+                }
+              </td>
             </tr>
           } @empty {
-            <tr><td colspan="5" class="empty-state">{{ 'admin.auditLog.noEntries' | translate }}</td></tr>
+            <tr>
+              <td colspan="5" class="empty-state">
+                <span class="empty-state-icon"><app-icon name="doc" [size]="22" /></span><br />
+                {{ (hasActiveFilters ? 'admin.auditLog.noEntriesMatch' : 'admin.auditLog.noEntries') | translate }}
+              </td>
+            </tr>
           }
         </tbody>
       </table>
+      @if (total > 0) {
+        <div class="table-pagination">
+          <span>{{
+            'admin.auditLog.pagination.range'
+              | translate: { from: rangeFrom, to: rangeTo, total: total }
+          }}</span>
+          <div class="table-pagination-controls">
+            <label for="pageSize">{{ 'admin.auditLog.pagination.pageSize' | translate }}</label>
+            <select id="pageSize" name="pageSize" [(ngModel)]="pageSize" (ngModelChange)="page = 1">
+              @for (s of pageSizes; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm"
+              (click)="prevPage()"
+              [disabled]="page <= 1"
+            >
+              {{ 'admin.auditLog.pagination.prev' | translate }}
+            </button>
+            <span>{{ page }} / {{ totalPages }}</span>
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm"
+              (click)="nextPage()"
+              [disabled]="page >= totalPages"
+            >
+              {{ 'admin.auditLog.pagination.next' | translate }}
+            </button>
+          </div>
+        </div>
+      }
     </div>
   }
 </div>
+
+<!-- Detail drawer -->
+@if (detailEntry) {
+  <div class="modal-backdrop" (click)="closeDetail()">
+    <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ 'admin.auditLog.details.title' | translate }}</h3>
+      <p class="modal-message" style="margin-bottom:0.75rem">
+        {{ detailEntry.createdAt | date: dateTimeFormat }} ·
+        {{ actorLabel(detailEntry.actorAdminId) }} ·
+        {{ detailEntry.entityType }} #{{ detailEntry.entityId }}
+      </p>
+      @if (detailPairs.length > 0) {
+        <dl class="detail-kv">
+          @for (pair of detailPairs; track pair.key) {
+            <div>
+              <dt>{{ pair.key }}</dt>
+              <dd>{{ pair.value }}</dd>
+            </div>
+          }
+        </dl>
+      } @else {
+        <p class="modal-message">—</p>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeDetail()">
+          {{ 'admin.auditLog.details.close' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

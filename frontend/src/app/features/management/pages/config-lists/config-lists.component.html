@@ -10,13 +10,15 @@
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   }
 
-  <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
+  <!-- Category tabs: horizontally scrollable on mobile -->
+  <div class="ds-tab-bar" role="tablist">
     @for (c of categories; track c) {
       <button
         type="button"
-        class="btn"
-        [class.btn-primary]="c === selectedCategory"
-        [class.btn-secondary]="c !== selectedCategory"
+        role="tab"
+        class="ds-tab"
+        [class.is-active]="c === selectedCategory"
+        [attr.aria-selected]="c === selectedCategory"
         (click)="selectCategory(c)"
       >
         {{ 'admin.configLists.categories.' + c | translate }}
@@ -24,63 +26,161 @@
     }
   </div>
 
-  <div class="card" style="margin-bottom:1.5rem">
-    <h2 style="font-size:1rem;margin-top:0">{{ 'admin.configLists.addItem' | translate }}</h2>
-    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end">
-      <div>
-        <label>{{ 'admin.configLists.form.value' | translate }}</label><br />
-        <input type="text" [(ngModel)]="draftValue" name="draftValue" [disabled]="!auth.hasPermission('manage_system_config')" />
+  <div class="card card-pad" style="margin-bottom:1.5rem">
+    <h2 style="font-size:1rem;margin-top:0;margin-bottom:1rem">
+      {{ 'admin.configLists.addItem' | translate }}
+    </h2>
+    <form (ngSubmit)="addItem()">
+      <div class="form-grid">
+        <div class="field">
+          <label for="draftValue">{{ 'admin.configLists.form.value' | translate }}</label>
+          <input
+            type="text"
+            id="draftValue"
+            name="draftValue"
+            [(ngModel)]="draftValue"
+            [disabled]="!auth.hasPermission('manage_system_config')"
+            required
+          />
+        </div>
+        <div class="field">
+          <label for="draftLabel">{{ 'admin.configLists.form.label' | translate }}</label>
+          <input
+            type="text"
+            id="draftLabel"
+            name="draftLabel"
+            [(ngModel)]="draftLabel"
+            [placeholder]="draftValue"
+            [disabled]="!auth.hasPermission('manage_system_config')"
+          />
+        </div>
       </div>
-      <div>
-        <label>{{ 'admin.configLists.form.label' | translate }}</label><br />
-        <input type="text" [(ngModel)]="draftLabel" name="draftLabel" [placeholder]="draftValue" [disabled]="!auth.hasPermission('manage_system_config')" />
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="!auth.hasPermission('manage_system_config') || saving || !draftValue.trim()"
+        >
+          {{ 'admin.configLists.form.submit' | translate }}
+        </button>
       </div>
-      <button
-        type="button"
-        class="btn btn-primary"
-        [disabled]="!auth.hasPermission('manage_system_config') || saving || !draftValue.trim()"
-        (click)="addItem()"
-      >
-        {{ 'admin.configLists.form.submit' | translate }}
-      </button>
-    </div>
+    </form>
     @if (saveError) {
-      <p class="error-box" style="margin-top:0.75rem">{{ saveError }}</p>
+      <p class="error-box" style="margin-top:0.75rem;margin-bottom:0">{{ saveError }}</p>
     }
   </div>
 
   @if (loading) {
     <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else {
-    <div class="card">
-      <table style="width:100%;border-collapse:collapse">
+    <div class="data-table-wrap table-scroll">
+      <table class="data-table">
         <thead>
           <tr>
-            <th style="text-align:left">{{ 'admin.configLists.table.value' | translate }}</th>
-            <th style="text-align:left">{{ 'admin.configLists.table.label' | translate }}</th>
-            <th style="text-align:left">{{ 'admin.configLists.table.status' | translate }}</th>
-            <th></th>
+            <th>{{ 'admin.configLists.table.value' | translate }}</th>
+            <th>{{ 'admin.configLists.table.label' | translate }}</th>
+            <th>{{ 'admin.configLists.table.status' | translate }}</th>
+            <th>{{ 'admin.configLists.table.actions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
-          @for (item of items; track item.id) {
+          @for (item of items; track item.id; let i = $index) {
             <tr>
               <td>{{ item.value }}</td>
-              <td>{{ item.label }}</td>
-              <td>{{ item.isActive ? ('admin.configLists.active' | translate) : ('admin.configLists.inactive' | translate) }}</td>
               <td>
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  [disabled]="!auth.hasPermission('manage_system_config') || togglingId === item.id"
-                  (click)="toggleActive(item)"
+                @if (editingId === item.id) {
+                  <div class="inline-edit">
+                    <input
+                      type="text"
+                      name="editLabel"
+                      [(ngModel)]="editLabel"
+                      (keyup.enter)="saveLabel(item)"
+                      (keyup.escape)="cancelEdit()"
+                    />
+                    <span class="row-actions">
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        [disabled]="togglingId === item.id"
+                        (click)="saveLabel(item)"
+                      >
+                        <app-icon name="check" [size]="16" />
+                        <span class="sr-only">{{ 'admin.configLists.actions.save' | translate }}</span>
+                      </button>
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="cancelEdit()">
+                        <app-icon name="x" [size]="16" />
+                        <span class="sr-only">{{ 'admin.configLists.actions.cancel' | translate }}</span>
+                      </button>
+                    </span>
+                  </div>
+                } @else {
+                  <span
+                    class="inline-edit-value"
+                    [attr.role]="auth.hasPermission('manage_system_config') ? 'button' : null"
+                    [attr.tabindex]="auth.hasPermission('manage_system_config') ? 0 : null"
+                    [attr.title]="'admin.configLists.actions.editLabel' | translate"
+                    (click)="startEdit(item)"
+                    (keyup.enter)="startEdit(item)"
+                  >
+                    {{ item.label }}
+                  </span>
+                }
+              </td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.status-active]="item.isActive"
+                  [class.status-inactive]="!item.isActive"
                 >
-                  {{ (item.isActive ? 'admin.configLists.deactivate' : 'admin.configLists.activate') | translate }}
-                </button>
+                  {{ item.isActive ? ('admin.configLists.active' | translate) : ('admin.configLists.inactive' | translate) }}
+                </span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <!-- Sort order controls -->
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    [disabled]="!auth.hasPermission('manage_system_config') || togglingId === item.id || i === 0"
+                    [attr.title]="'admin.configLists.actions.moveUp' | translate"
+                    (click)="moveItem(i, -1)"
+                  >
+                    <app-icon name="chevron-left" [size]="16" [style.transform]="'rotate(90deg)'" />
+                    <span class="sr-only">{{ 'admin.configLists.actions.moveUp' | translate }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    [disabled]="!auth.hasPermission('manage_system_config') || togglingId === item.id || i === items.length - 1"
+                    [attr.title]="'admin.configLists.actions.moveDown' | translate"
+                    (click)="moveItem(i, 1)"
+                  >
+                    <app-icon name="chevron-left" [size]="16" [style.transform]="'rotate(-90deg)'" />
+                    <span class="sr-only">{{ 'admin.configLists.actions.moveDown' | translate }}</span>
+                  </button>
+                  <!-- Active toggle -->
+                  <label class="toggle-switch touch">
+                    <input
+                      type="checkbox"
+                      [checked]="item.isActive"
+                      [disabled]="!auth.hasPermission('manage_system_config') || togglingId === item.id"
+                      (change)="toggleActive(item)"
+                    />
+                    <span class="toggle-switch-track"></span>
+                    <span class="sr-only">
+                      {{ item.isActive ? ('admin.configLists.deactivate' | translate) : ('admin.configLists.activate' | translate) }}
+                    </span>
+                  </label>
+                </div>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="4" class="empty-state">{{ 'admin.configLists.noItems' | translate }}</td></tr>
+            <tr>
+              <td colspan="4" class="empty-state">
+                <span class="empty-state-icon"><app-icon name="doc" [size]="22" /></span><br />
+                {{ 'admin.configLists.noItems' | translate }}
+              </td>
+            </tr>
           }
         </tbody>
       </table>

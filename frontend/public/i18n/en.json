@@ -3,6 +3,7 @@
     "switchToEnglish": "Switch to English",
     "switchToBangla": "বাংলায় দেখুন",
     "loading": "Loading...",
+    "select": "Select",
     "close": "Close",
     "months": {
       "january": "January",
@@ -411,13 +412,24 @@
       "title": "Fee Settings",
       "subtitle": "Manage versioned fee rates with effective date ranges",
       "addVersion": "Add New Version",
+      "keys": {
+        "admission_fee": "Admission Fee",
+        "monthly_subscription": "Monthly Subscription Rate"
+      },
+      "units": {
+        "taka": "Taka",
+        "percent": "%"
+      },
       "form": {
-        "key": "Key",
+        "key": "Fee",
         "value": "Value",
         "unit": "Unit",
         "startDate": "Start Date (optional)",
-        "submit": "Save New Version"
+        "startDateHint": "Leave empty to take effect from today",
+        "submit": "Save"
       },
+      "confirmTitle": "Confirm New Version",
+      "confirmMessage": "The current version will be deactivated from today. Save the new version?",
       "table": {
         "key": "Key",
         "value": "Value",
@@ -442,12 +454,32 @@
       "subtitle": "Who approved, rejected, or changed what, and when",
       "table": {
         "time": "Time",
-        "actor": "Admin ID",
+        "actor": "Admin",
         "action": "Action",
         "entity": "Entity",
         "detail": "Detail"
       },
+      "filters": {
+        "dateFrom": "From date",
+        "dateTo": "To date",
+        "action": "Action",
+        "actor": "Admin",
+        "entityType": "Entity type",
+        "all": "All"
+      },
+      "pagination": {
+        "pageSize": "Per page",
+        "prev": "Previous",
+        "next": "Next",
+        "range": "{{from}}–{{to}} of {{total}}"
+      },
+      "details": {
+        "title": "Entry Details",
+        "view": "Details",
+        "close": "Close"
+      },
       "noEntries": "No audit log entries yet.",
+      "noEntriesMatch": "No entries match the selected filters.",
       "errors": {
         "loadFailed": "Could not load the audit log."
       }
@@ -470,7 +502,15 @@
       "table": {
         "value": "Value",
         "label": "Label",
-        "status": "Status"
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "editLabel": "Edit label",
+        "save": "Save",
+        "cancel": "Cancel",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
       },
       "active": "Active",
       "inactive": "Inactive",

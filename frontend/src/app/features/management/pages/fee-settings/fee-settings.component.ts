@@ -3,18 +3,33 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
+import { IconComponent } from '../../../../shared/icon/icon.component';
 import type { FeeSetting } from '../../../../core/models/admin.model';
 
 const MANAGE_FEE_SETTINGS = 'manage_fee_settings';
+
+/** Known fee keys the version form offers, in display order. */
+const KNOWN_FEE_KEYS: readonly string[] = ['admission_fee', 'monthly_subscription'];
+
+/** Default unit per known key (i18n unit option); empty string when unknown. */
+const DEFAULT_UNIT_BY_KEY: Record<string, string> = {
+  admission_fee: 'taka',
+  monthly_subscription: 'taka',
+};
+
+const UNIT_OPTIONS: readonly string[] = ['taka', 'percent'];
 
 @Component({
   selector: 'app-fee-settings',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, ConfirmModalComponent, IconComponent],
   templateUrl: './fee-settings.component.html',
 })
 export class FeeSettingsComponent implements OnInit {
+  readonly unitOptions = UNIT_OPTIONS;
+
   active: FeeSetting[] = [];
   loading = false;
   error = '';
@@ -30,6 +45,8 @@ export class FeeSettingsComponent implements OnInit {
   saving = false;
   saveError = '';
 
+  confirmOpen = false;
+
   constructor(
     private adminService: AdminService,
     public auth: AuthService,
@@ -39,6 +56,21 @@ export class FeeSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadActive();
+  }
+
+  /** Known keys plus any extra keys already present in active settings. */
+  get feeKeys(): string[] {
+    const extra = this.active.map((s) => s.key).filter((k) => !KNOWN_FEE_KEYS.includes(k));
+    return [...KNOWN_FEE_KEYS, ...extra];
+  }
+
+  get canSave(): boolean {
+    return (
+      this.auth.hasPermission(MANAGE_FEE_SETTINGS) &&
+      !this.saving &&
+      !!this.draftKey &&
+      this.draftValue !== null
+    );
   }
 
   loadActive(): void {
@@ -79,7 +111,22 @@ export class FeeSettingsComponent implements OnInit {
     });
   }
 
+  onKeyChange(): void {
+    // Unit auto-fills from the selected key but stays editable.
+    this.draftUnit = DEFAULT_UNIT_BY_KEY[this.draftKey] ?? '';
+  }
+
+  openConfirm(): void {
+    if (!this.canSave) return;
+    this.confirmOpen = true;
+  }
+
+  cancelConfirm(): void {
+    this.confirmOpen = false;
+  }
+
   createVersion(): void {
+    this.confirmOpen = false;
     if (!this.auth.hasPermission(MANAGE_FEE_SETTINGS)) return;
     if (!this.draftKey || this.draftValue === null) return;
 

@@ -126,3 +126,13 @@ export interface FeeSetting {
   endDate?: string;
   status: number;
 }
+
+export interface AuditLogEntry {
+  id: string;
+  actorAdminId: string | null;
+  action: string;
+  entityType: string;
+  entityId: string;
+  detail: string | null;
+  createdAt: string;
+}
