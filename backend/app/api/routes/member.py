@@ -1,8 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import date
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_current_member, get_current_member_detail
+from app.core.deps import (
+    AccountActor,
+    get_account_actor,
+    get_current_member,
+    get_current_member_detail,
+)
 from app.core.security import hash_password_async, verify_password_async
 from app.db.session import get_db
 from app.models.credential import MemberCredential
@@ -15,7 +22,9 @@ from app.schemas.member import MemberDetail, MemberProfileUpdate
 from app.schemas.picnic_payment import PicnicPaymentIn, PicnicPaymentOut
 from app.services.audit import record_audit
 from app.services.email import send_email
-from app.services.fee_calculation import calculate_picnic_fee
+from app.services.fee_calculation import calculate_picnic_fee, resolve_picnic_rates
+
+from fastapi import Query
 
 router = APIRouter(prefix="/member", tags=["member"])
 
@@ -71,15 +80,44 @@ async def list_my_installments(
     return list(result.scalars().all())
 
 
+@router.get("/picnic-rates")
+async def get_picnic_rates(
+    payment_date: date | None = Query(default=None),
+    _actor: AccountActor = Depends(get_account_actor),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """The picnic rate versions effective on the given (or today's) date.
+    Read-only: members and committee/admin accounts can all read; the values
+    are only ever changed through Fee Settings."""
+    rates = await resolve_picnic_rates(db, payment_date or date.today())
+    if rates is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "PICNIC_RATES_NOT_CONFIGURED",
+                "message": "Picnic fee has not been set up yet. Please contact the committee.",
+            },
+        )
+    return {
+        "head_fee": float(rates["head_fee"]),
+        "additional_head_fee": float(rates["additional_head_fee"]),
+        "unit": rates["unit"],
+        "effective_from": rates["effective_from"],
+    }
+
+
 @router.get("/picnic-payments", response_model=list[PicnicPaymentOut])
-async def list_my_picnic_payments(
-    member: Member = Depends(get_current_member),
+async def list_picnic_payments(
+    actor: AccountActor = Depends(get_account_actor),
     db: AsyncSession = Depends(get_db),
 ) -> list[PicnicPayment]:
+    # Members see only their own records; committee/admin-tier accounts see
+    # every member's payments from this same endpoint.
+    query = select(PicnicPayment)
+    if actor.member is not None:
+        query = query.where(PicnicPayment.member_id == actor.member.id)
     result = await db.execute(
-        select(PicnicPayment)
-        .where(PicnicPayment.member_id == member.id)
-        .order_by(PicnicPayment.payment_date.desc(), PicnicPayment.id.desc())
+        query.order_by(PicnicPayment.payment_date.desc(), PicnicPayment.id.desc())
     )
     return list(result.scalars().all())
 
@@ -87,9 +125,15 @@ async def list_my_picnic_payments(
 @router.post("/picnic-payments", response_model=PicnicPaymentOut, status_code=status.HTTP_201_CREATED)
 async def create_picnic_payment(
     payload: PicnicPaymentIn,
-    member: Member = Depends(get_current_member),
+    actor: AccountActor = Depends(get_account_actor),
     db: AsyncSession = Depends(get_db),
 ) -> PicnicPayment:
+    if actor.member is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only accounts linked to a member profile can record picnic payments.",
+        )
+    member = actor.member
     # The total is always recomputed from the fee versions effective on the
     # payment date; any client-sent amount is ignored.
     breakdown = await calculate_picnic_fee(db, payload.additional_heads, payload.payment_date)

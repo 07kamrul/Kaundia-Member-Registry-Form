@@ -58,6 +58,12 @@ const NAV_ITEMS: NavItem[] = [
     requiredPermission: ['member.view_all'],
   },
   {
+    labelKey: 'nav.picnicPayments',
+    route: '/picnic-payments',
+    icon: 'wallet',
+    requiredPermission: ['member.view_all'],
+  },
+  {
     labelKey: 'nav.installmentsManagement',
     route: '/installments-management',
     icon: 'coin',

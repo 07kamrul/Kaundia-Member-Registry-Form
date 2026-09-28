@@ -15,6 +15,7 @@ from app.models.config_list_item import ConfigListItem
 from app.models.fee_settings import FeeSetting
 from app.models.installment import Installment, InstallmentStatus
 from app.models.member import Member, MemberStatus
+from app.models.picnic_payment import PicnicPayment
 from app.models.nominee import Nominee
 from app.models.property import ApplicableDoc, CoOwner, Property
 from app.schemas.audit_log import AuditLogOut
@@ -24,6 +25,7 @@ from app.schemas.installment import InstallmentCreate, InstallmentOut, Installme
 from app.models.audit_log import AuditLog
 from app.services.audit import record_audit
 from app.schemas.member import ApproveResponse, MemberDetail, MemberSummary, RejectRequest
+from app.schemas.picnic_payment import PicnicPaymentOut
 from app.services.email import send_email
 from app.services.storage import save_upload_file
 
@@ -513,6 +515,64 @@ async def update_config_list_item(
     # in async) lazy load.
     await db.refresh(item)
     return item
+
+
+
+@router.get("/picnic-payments")
+async def list_picnic_payments(
+    member_id: int | None = Query(default=None),
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    _admin: AdminUser = Depends(require_permission("member.view_all")),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    query = (
+        select(PicnicPayment)
+        .options(selectinload(PicnicPayment.member))
+        .where(
+            *[
+                condition
+                for condition in (
+                    PicnicPayment.member_id == member_id if member_id is not None else None,
+                    PicnicPayment.payment_date >= date_from if date_from is not None else None,
+                    PicnicPayment.payment_date <= date_to if date_to is not None else None,
+                )
+                if condition is not None
+            ]
+        )
+        .order_by(PicnicPayment.payment_date.desc(), PicnicPayment.id.desc())
+    )
+
+    result = await db.execute(query)
+    payments = result.scalars().all()
+
+    # Summary over the same filtered set, done in SQL rather than summing in
+    # Python so the aggregation stays correct as the list grows.
+    summary_query = select(func.count(PicnicPayment.id), func.coalesce(func.sum(PicnicPayment.total), 0)).where(
+        *[
+            condition
+            for condition in (
+                PicnicPayment.member_id == member_id if member_id is not None else None,
+                PicnicPayment.payment_date >= date_from if date_from is not None else None,
+                PicnicPayment.payment_date <= date_to if date_to is not None else None,
+            )
+            if condition is not None
+        ]
+    )
+    count, total_collected = (await db.execute(summary_query)).one()
+
+    return {
+        "items": [
+            {
+                **PicnicPaymentOut.model_validate(payment).model_dump(mode="json"),
+                "member_name": payment.member.full_name if payment.member else None,
+            }
+            for payment in payments
+        ],
+        "total_collected": float(total_collected),
+        "count": count,
+    }
+
 
 
 async def _get_member_or_404(db: AsyncSession, member_id: int, *, eager: bool = True) -> Member:

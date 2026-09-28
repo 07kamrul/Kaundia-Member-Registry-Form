@@ -63,6 +63,30 @@ class PicnicFeeBreakdown:
     total: Decimal
 
 
+async def resolve_picnic_rates(db: AsyncSession, on_date: date) -> dict | None:
+    """The picnic rate versions effective on `on_date`, or None when either
+    key has no active version - surfaced as PICNIC_RATES_NOT_CONFIGURED
+    instead of a generic failure."""
+    result = await db.execute(
+        select(FeeSetting).where(
+            FeeSetting.key.in_(PICNIC_FEE_KEYS),
+            FeeSetting.start_date <= on_date,
+            or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= on_date),
+        )
+    )
+    versions = {row.key: row for row in result.scalars().all()}
+    head = versions.get(PICNIC_HEAD_FEE_KEY)
+    additional = versions.get(PICNIC_ADDITIONAL_HEAD_FEE_KEY)
+    if head is None or additional is None:
+        return None
+    return {
+        "head_fee": head.value,
+        "additional_head_fee": additional.value,
+        "unit": head.unit or additional.unit or "taka",
+        "effective_from": max(head.start_date, additional.start_date),
+    }
+
+
 async def calculate_picnic_fee(
     db: AsyncSession, additional_heads: int, payment_date: date
 ) -> PicnicFeeBreakdown:

@@ -53,7 +53,8 @@
     "events": "অনুষ্ঠান",
     "noticesManagement": "নোটিশ ব্যবস্থাপনা",
     "eventsManagement": "অনুষ্ঠান ব্যবস্থাপনা",
-    "picnicPayment": "পিকনিক ফি"
+    "picnicPayment": "পিকনিক ফি",
+    "picnicPayments": "পিকনিক পরিশোধ"
   },
   "forbidden": {
     "title": "প্রবেশাধিকার নেই",
@@ -211,7 +212,21 @@
       "retry": "আবার চেষ্টা করুন",
       "loadError": "পরিশোধের ইতিহাস লোড করা যায়নি।",
       "saveSuccess": "পরিশোধ সংরক্ষিত হয়েছে। মোট: ৳ {{total}}",
-      "saveError": "পরিশোধ সংরক্ষণ করা যায়নি।"
+      "saveError": "পরিশোধ সংরক্ষণ করা যায়নি।",
+      "notConfigured": "পিকনিক ফি এখনও নির্ধারণ করা হয়নি। কমিটির সাথে যোগাযোগ করুন।",
+      "goToFeeSettings": "ফি সেটিংসে যান",
+      "accessDenied": "আপনার পিকনিক পরিশোধে প্রবেশাধিকার নেই।",
+      "taka": "টাকা",
+      "saving": "সংরক্ষণ হচ্ছে…",
+      "historyLoadFailed": "পরিশোধের ইতিহাস লোড করা যায়নি।",
+      "methodColumn": "পদ্ধতি",
+      "methods": {
+        "Cash": "ক্যাশ",
+        "bKash": "বিকাশ",
+        "Nagad": "নগদ",
+        "Bank Transfer": "ব্যাংক ট্রান্সফার",
+        "Other": "অন্যান্য"
+      }
     }
   },
   "auth": {
@@ -701,6 +716,26 @@
         "saveFailed": "অনুষ্ঠান সংরক্ষণ করা যায়নি।",
         "deleteFailed": "অনুষ্ঠান মুছা যায়নি।"
       }
+    },
+    "picnicPayments": {
+      "title": "পিকনিক পরিশোধ",
+      "subtitle": "ফিল্টার ও মোট সহ সকল সদস্যের পিকনিক পরিশোধ",
+      "memberFilter": "সদস্য আইডি (ঐচ্ছিক)",
+      "dateRange": "তারিখের পরিসর",
+      "dateFrom": "থেকে",
+      "dateTo": "পর্যন্ত",
+      "apply": "প্রয়োগ করুন",
+      "reset": "রিসেট",
+      "totalCollected": "মোট আদায়",
+      "count": "পরিশোধ সংখ্যা",
+      "memberColumn": "সদস্য",
+      "dateColumn": "তারিখ",
+      "headsColumn": "অতিরিক্ত জন",
+      "totalColumn": "মোট",
+      "receiptColumn": "রশিদ নম্বর",
+      "methodColumn": "পদ্ধতি",
+      "emptyState": "নির্বাচিত ফিল্টারে কোনো পিকনিক পরিশোধ পাওয়া যায়নি।",
+      "loadError": "পিকনিক পরিশোধ লোড করা যায়নি।"
     }
   },
   "registration": {

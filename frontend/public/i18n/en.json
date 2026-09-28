@@ -53,7 +53,8 @@
     "events": "Events",
     "noticesManagement": "Manage Notices",
     "eventsManagement": "Manage Events",
-    "picnicPayment": "Picnic Fee"
+    "picnicPayment": "Picnic Fee",
+    "picnicPayments": "Picnic Payments"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -211,7 +212,21 @@
       "retry": "Retry",
       "loadError": "Could not load payment history.",
       "saveSuccess": "Payment recorded. Total: ৳ {{total}}",
-      "saveError": "Could not record the payment."
+      "saveError": "Could not record the payment.",
+      "notConfigured": "Picnic fee has not been set up yet. Please contact the committee.",
+      "goToFeeSettings": "Go to Fee Settings",
+      "accessDenied": "You do not have access to picnic payments.",
+      "taka": "Taka",
+      "saving": "Saving…",
+      "historyLoadFailed": "Could not load payment history.",
+      "methodColumn": "Method",
+      "methods": {
+        "Cash": "Cash",
+        "bKash": "bKash",
+        "Nagad": "Nagad",
+        "Bank Transfer": "Bank Transfer",
+        "Other": "Other"
+      }
     }
   },
   "auth": {
@@ -701,6 +716,26 @@
         "saveFailed": "Could not save the event.",
         "deleteFailed": "Could not delete the event."
       }
+    },
+    "picnicPayments": {
+      "title": "Picnic Payments",
+      "subtitle": "All members' picnic payments with filters and totals",
+      "memberFilter": "Member ID (optional)",
+      "dateRange": "Date Range",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "apply": "Apply",
+      "reset": "Reset",
+      "totalCollected": "Total Collected",
+      "count": "Payments",
+      "memberColumn": "Member",
+      "dateColumn": "Date",
+      "headsColumn": "Additional Heads",
+      "totalColumn": "Total",
+      "receiptColumn": "Receipt No",
+      "methodColumn": "Method",
+      "emptyState": "No picnic payments found for the selected filters.",
+      "loadError": "Could not load picnic payments."
     }
   },
   "registration": {

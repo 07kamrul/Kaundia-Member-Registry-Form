@@ -1,0 +1,74 @@
+<div style="max-width:64rem;margin:0 auto">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.picnicPayments.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.picnicPayments.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+    <div class="grid-2">
+      <div class="field">
+        <label for="filterMember">{{ 'admin.picnicPayments.memberFilter' | translate }}</label>
+        <input id="filterMember" type="number" min="1" [(ngModel)]="memberFilter" placeholder="ID" />
+      </div>
+      <div class="field">
+        <label>{{ 'admin.picnicPayments.dateRange' | translate }}</label>
+        <div class="grid-2" style="gap:0.5rem">
+          <input type="date" [(ngModel)]="dateFrom" [attr.aria-label]="'admin.picnicPayments.dateFrom' | translate" />
+          <input type="date" [(ngModel)]="dateTo" [attr.aria-label]="'admin.picnicPayments.dateTo' | translate" />
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
+      <button type="button" class="btn btn-primary" (click)="load()">{{ 'admin.picnicPayments.apply' | translate }}</button>
+      <button type="button" class="btn btn-secondary" (click)="resetFilters()">{{ 'admin.picnicPayments.reset' | translate }}</button>
+    </div>
+  </div>
+
+  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem;display:flex;gap:2rem;flex-wrap:wrap">
+    <div>
+      <p class="field-hint" style="margin:0">{{ 'admin.picnicPayments.totalCollected' | translate }}</p>
+      <strong style="font-size:1.25rem">৳ {{ totalCollected }}</strong>
+    </div>
+    <div>
+      <p class="field-hint" style="margin:0">{{ 'admin.picnicPayments.count' | translate }}</p>
+      <strong style="font-size:1.25rem">{{ count }}</strong>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else {
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ 'admin.picnicPayments.memberColumn' | translate }}</th>
+            <th>{{ 'admin.picnicPayments.dateColumn' | translate }}</th>
+            <th>{{ 'admin.picnicPayments.headsColumn' | translate }}</th>
+            <th>{{ 'admin.picnicPayments.totalColumn' | translate }}</th>
+            <th>{{ 'admin.picnicPayments.receiptColumn' | translate }}</th>
+            <th>{{ 'admin.picnicPayments.methodColumn' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of payments; track payment.id) {
+            <tr>
+              <td>{{ payment.memberName || ('#' + payment.memberId) }}</td>
+              <td>{{ payment.paymentDate }}</td>
+              <td style="text-align:center">{{ payment.additionalCount }}</td>
+              <td>৳ {{ payment.total }}</td>
+              <td>{{ payment.receiptNo || '—' }}</td>
+              <td>{{ payment.paymentMethod || '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="empty-state">{{ 'admin.picnicPayments.emptyState' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -382,6 +382,35 @@ export class AdminService {
     return this.http.patch<Installment>(`${this.base}/installments/${id}`, { status });
   }
 
+  getPicnicPayments(filters: {
+    memberId?: number;
+    dateFrom?: string;
+    dateTo?: string;
+  }): Observable<PicnicPaymentsPage> {
+    const params: Record<string, string> = {};
+    if (filters.memberId != null) params['member_id'] = String(filters.memberId);
+    if (filters.dateFrom) params['date_from'] = filters.dateFrom;
+    if (filters.dateTo) params['date_to'] = filters.dateTo;
+    return this.http.get<PicnicPaymentsPageApiModel>(`${this.base}/picnic-payments`, { params }).pipe(
+      map((page) => ({
+        totalCollected: page.total_collected,
+        count: page.count,
+        items: page.items.map((row) => ({
+          id: row.id,
+          memberId: row.member_id,
+          memberName: row.member_name,
+          headPrice: row.head_price,
+          additionalPrice: row.additional_price,
+          additionalCount: row.additional_count,
+          total: row.total,
+          paymentDate: row.payment_date,
+          receiptNo: row.receipt_no,
+          paymentMethod: row.payment_method,
+        })),
+      })),
+    );
+  }
+
   getActiveFeeSettings(): Observable<FeeSetting[]> {
     return this.http
       .get<FeeSettingApiModel[]>(`${this.base}/fee-settings`)
@@ -527,4 +556,40 @@ export class AdminService {
       is_members_only: payload.isMembersOnly ?? false,
     };
   }
+}
+
+interface PicnicPaymentsPageApiModel {
+  items: {
+    id: number;
+    member_id: number;
+    member_name: string | null;
+    head_price: number;
+    additional_price: number;
+    additional_count: number;
+    total: number;
+    payment_date: string;
+    receipt_no: string | null;
+    payment_method: string | null;
+  }[];
+  total_collected: number;
+  count: number;
+}
+
+export interface AdminPicnicPayment {
+  id: number;
+  memberId: number;
+  memberName: string | null;
+  headPrice: number;
+  additionalPrice: number;
+  additionalCount: number;
+  total: number;
+  paymentDate: string;
+  receiptNo: string | null;
+  paymentMethod: string | null;
+}
+
+export interface PicnicPaymentsPage {
+  items: AdminPicnicPayment[];
+  totalCollected: number;
+  count: number;
 }

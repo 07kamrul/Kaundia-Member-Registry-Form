@@ -184,6 +184,21 @@ export class MemberService {
     );
   }
 
+  getPicnicRates(paymentDate: string): Observable<PicnicRates> {
+    return this.http
+      .get<PicnicRatesApiModel>(`${this.base}/picnic-rates`, {
+        params: { payment_date: paymentDate },
+      })
+      .pipe(
+        map((rates) => ({
+          headFee: rates.head_fee,
+          additionalHeadFee: rates.additional_head_fee,
+          unit: rates.unit,
+          effectiveFrom: rates.effective_from,
+        })),
+      );
+  }
+
   createPicnicPayment(payload: PicnicPaymentPayload): Observable<PicnicPayment> {
     return this.http.post<PicnicPaymentApiModel>(`${this.base}/picnic-payments`, {
       additional_heads: payload.additionalHeads,
@@ -213,6 +228,20 @@ function toPicnicPayment(row: PicnicPaymentApiModel): PicnicPayment {
 export interface PicnicPaymentAdditionalHead {
   name: string;
   relation: string;
+}
+
+export interface PicnicRates {
+  headFee: number;
+  additionalHeadFee: number;
+  unit: string;
+  effectiveFrom: string;
+}
+
+interface PicnicRatesApiModel {
+  head_fee: number;
+  additional_head_fee: number;
+  unit: string;
+  effective_from: string;
 }
 
 export interface PicnicPayment {

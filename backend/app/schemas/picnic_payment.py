@@ -43,6 +43,7 @@ class PicnicPaymentOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    member_id: int
     head_price: Decimal
     additional_price: Decimal
     additional_count: int

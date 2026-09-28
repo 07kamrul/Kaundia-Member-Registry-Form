@@ -1,7 +1,7 @@
 from datetime import date, datetime
 
 from sqlalchemy import Date, DateTime, ForeignKey, Integer, JSON, Numeric, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
@@ -13,6 +13,7 @@ class PicnicPayment(Base):
     member_id: Mapped[int] = mapped_column(
         ForeignKey("members.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    member: Mapped["Member"] = relationship(lazy="joined")  # noqa: F821 - imported for typing via registry
 
     # Snapshot of the fee versions effective on the payment date, so later
     # rate changes never alter what was already paid.

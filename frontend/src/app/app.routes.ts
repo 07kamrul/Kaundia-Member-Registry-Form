@@ -154,6 +154,14 @@ export const routes: Routes = [
               ).then((m) => m.InstallmentsManagementComponent),
           },
           {
+            path: 'picnic-payments',
+            canActivate: [permissionGuard(['member.view_all'])],
+            loadComponent: () =>
+              import(
+                './features/management/pages/picnic-payments/picnic-payments.component'
+              ).then((m) => m.PicnicPaymentsComponent),
+          },
+          {
             path: 'fee-settings',
             canActivate: [permissionGuard(['manage_fee_settings'])],
             loadComponent: () =>
