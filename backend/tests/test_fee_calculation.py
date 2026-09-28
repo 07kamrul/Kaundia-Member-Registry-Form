@@ -107,6 +107,18 @@ async def test_calculate_monthly_subscription_uses_rate_effective_on_billing_dat
 
 @pytest.mark.asyncio
 async def test_calculate_monthly_subscription_requires_configured_fee(db_session: AsyncSession) -> None:
+    # The autouse fixture seeds default subscription rates for every test;
+    # remove them here to exercise the "not configured" path specifically.
+    from sqlalchemy import delete
+
+    from app.models.fee_settings import FeeSetting
+    from app.services.fee_calculation import MONTHLY_SUBSCRIPTION_FEE_KEYS
+
+    await db_session.execute(
+        delete(FeeSetting).where(FeeSetting.key.in_(MONTHLY_SUBSCRIPTION_FEE_KEYS))
+    )
+    await db_session.commit()
+
     with pytest.raises(HTTPException) as exc_info:
         await calculate_monthly_subscription(db_session, Decimal("1"), date(2026, 1, 1))
 

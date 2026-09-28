@@ -6,6 +6,8 @@ from pydantic import ValidationError
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from decimal import Decimal, InvalidOperation
+
 from app.db.session import get_db
 from app.models.fee_settings import FeeSetting
 from app.models.member import Member, MemberStatus
@@ -13,6 +15,7 @@ from app.models.property import ApplicableDoc, CoOwner, Property
 from app.models.nominee import Nominee
 from app.schemas.member import SubmissionCreateResponse
 from app.schemas.submission import SubmissionPayload
+from app.services.fee_calculation import calculate_monthly_subscription
 from app.services.storage import save_upload_file, slugify_path_segment
 
 router = APIRouter(tags=["submissions"])
@@ -35,6 +38,19 @@ async def resolve_active_fee(db: AsyncSession, key: str, on_date: date) -> str:
             detail=f"No active fee setting configured for '{key}'",
         )
     return str(value)
+
+
+def _total_share_quantity(data: SubmissionPayload) -> Decimal:
+    total = Decimal("0")
+    for property_in in data.properties:
+        try:
+            total += Decimal(property_in.my_share_quantity or "0")
+        except InvalidOperation:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid land share quantity",
+            )
+    return total
 
 
 @router.post("/submissions", response_model=SubmissionCreateResponse, status_code=status.HTTP_201_CREATED)
@@ -89,7 +105,16 @@ async def create_submission(
         # Client-sent admission_fee is deliberately ignored — the amount
         # stored on the submission is the server-resolved active version.
         admission_fee=await resolve_active_fee(db, "admission_fee", date.today()),
-        subscription=data.subscription,
+        # Client-sent subscription is deliberately ignored - it is always
+        # recomputed from the tiered rates active today and the submitted
+        # land share, the same calculation the quote endpoint returns.
+        subscription=str(
+            (
+                await calculate_monthly_subscription(
+                    db, _total_share_quantity(data), date.today()
+                )
+            ).total
+        ),
         receipt_no=data.receipt_no,
         payment_method=data.payment_method,
         member_signature=data.member_signature,
@@ -147,6 +172,7 @@ async def create_submission(
                 dag_no_rs=property_in.dag_no_rs,
                 holding_number=property_in.holding_number,
                 land_quantity=property_in.land_quantity,
+                my_share_quantity=property_in.my_share_quantity,
                 ownership=property_in.ownership,
                 co_owners=[
                     CoOwner(owner_name=co_owner_in.owner_name, owner_phone=co_owner_in.owner_phone)

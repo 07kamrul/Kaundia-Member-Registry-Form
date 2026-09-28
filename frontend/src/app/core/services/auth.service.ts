@@ -14,6 +14,11 @@ export type LandingTier = 'super_admin' | 'management' | 'member';
 // is a permission-based (not role-name) way to detect Super Admin tier.
 export const SUPER_ADMIN_AREA_PERMISSIONS = ['manage_users', 'manage_roles', 'view_audit_log'];
 
+// The single shared gate for everything fee-settings related (Fee Settings
+// page/menu, "Go to Fee Settings" on the picnic payment page). Super Admin's
+// full permission catalog includes it, so no role-name checks are needed.
+export const FEE_MANAGER_PERMISSION = 'manage_fee_settings';
+
 // Union of EXECUTIVE_COMMITTEE + ADMINISTRATOR default tuples - holding any
 // of these means "management tier or above" for area-guard/landing purposes.
 export const MANAGEMENT_AREA_PERMISSIONS = [

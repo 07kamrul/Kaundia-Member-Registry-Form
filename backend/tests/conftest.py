@@ -54,10 +54,22 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 
 @pytest_asyncio.fixture(autouse=True)
 async def _seed_admission_fee(db_session: AsyncSession):
-    """Submissions re-resolve the admission fee server-side from the active
-    fee setting, so every test needs one configured."""
-    db_session.add(
-        FeeSetting(key="admission_fee", value=500, start_date=date(2000, 1, 1))
+    """Submissions re-resolve the admission fee and monthly subscription
+    server-side from the active fee settings, so every test needs them
+    configured."""
+    db_session.add_all(
+        [
+            FeeSetting(key="admission_fee", value=500, start_date=date(2000, 1, 1)),
+            FeeSetting(
+                key="monthly_subscription_base_amount", value=100, start_date=date(2000, 1, 1)
+            ),
+            FeeSetting(
+                key="monthly_subscription_additional_rate", value=10, start_date=date(2000, 1, 1)
+            ),
+            FeeSetting(
+                key="monthly_subscription_base_threshold", value=1, start_date=date(2000, 1, 1)
+            ),
+        ]
     )
     await db_session.commit()
 

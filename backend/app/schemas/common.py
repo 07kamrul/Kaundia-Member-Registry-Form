@@ -59,8 +59,10 @@ class PropertyIn(BaseModel):
     dag_no_rs: str | None = None
     holding_number: str | None = None
     land_quantity: str | None = None
+    my_share_quantity: str | None = None
     ownership: str | None = None
     co_owners: list[CoOwner] = []
     applicable_docs: list[ApplicableDocIn] = []
 
     _validate_land_quantity = field_validator("land_quantity")(validate_digits_only)
+    _validate_my_share_quantity = field_validator("my_share_quantity")(validate_digits_only)

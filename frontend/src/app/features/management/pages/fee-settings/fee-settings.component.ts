@@ -1,15 +1,14 @@
 import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin, Observable } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { FEE_MANAGER_PERMISSION, AuthService } from '../../../../core/services/auth.service';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
 import { IconComponent } from '../../../../shared/icon/icon.component';
 import { DatePickerComponent } from '../../../../shared/date-picker/date-picker.component';
 import type { FeeSetting } from '../../../../core/models/admin.model';
-
-const MANAGE_FEE_SETTINGS = 'manage_fee_settings';
 
 /** Virtual key selected in the form for the tiered monthly subscription rate;
  * it maps to three real fee-setting rows (see MONTHLY_SUBSCRIPTION_TIER_KEYS). */
@@ -89,10 +88,18 @@ export class FeeSettingsComponent implements OnInit {
     public auth: AuthService,
     private cdr: ChangeDetectorRef,
     private translate: TranslateService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     this.loadActive();
+    // Deep-link support: the picnic payment page's "Go to Fee Settings" button
+    // links here with ?key=picnic_head_fee to preselect that fee in the form.
+    const preselect = this.route.snapshot.queryParamMap.get('key');
+    if (preselect && this.feeKeys.includes(preselect)) {
+      this.draftKey = preselect;
+      this.draftUnit = DEFAULT_UNIT_BY_KEY[preselect] ?? '';
+    }
   }
 
   private readonly tierKeySet = new Set<string>(Object.values(MONTHLY_SUBSCRIPTION_TIER_KEYS));
@@ -134,7 +141,7 @@ export class FeeSettingsComponent implements OnInit {
   }
 
   get canSave(): boolean {
-    if (!this.auth.hasPermission(MANAGE_FEE_SETTINGS) || this.saving || !this.draftKey)
+    if (!this.auth.hasPermission(FEE_MANAGER_PERMISSION) || this.saving || !this.draftKey)
       return false;
     if (this.isTieredKey) {
       return (
@@ -225,7 +232,7 @@ export class FeeSettingsComponent implements OnInit {
 
   createVersion(): void {
     this.confirmOpen = false;
-    if (!this.auth.hasPermission(MANAGE_FEE_SETTINGS) || !this.canSave || !this.draftKey) return;
+    if (!this.auth.hasPermission(FEE_MANAGER_PERMISSION) || !this.canSave || !this.draftKey) return;
 
     this.saving = true;
     this.saveError = '';

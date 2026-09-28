@@ -114,6 +114,7 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "complaint.process",
         "report.view_operational",
         "manage_system_config",
+        "manage_fee_settings",
     ),
     "member": (
         "profile.view_own",

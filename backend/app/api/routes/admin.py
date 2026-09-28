@@ -410,7 +410,13 @@ async def create_fee_setting_version(
         action="fee_settings.new_version",
         entity_type="fee_settings",
         entity_id=payload.key,
-        detail=f"value={payload.value} start_date={new_start_date}",
+        # Actor role, old value and effective date are recorded alongside the
+        # user id so a super_admin change is auditable exactly like any other.
+        detail=(
+            f"role={admin.role.value} value={payload.value}"
+            f" old_value={current.value if current is not None else None}"
+            f" start_date={new_start_date}"
+        ),
     )
     await db.commit()
     await db.refresh(new_version)

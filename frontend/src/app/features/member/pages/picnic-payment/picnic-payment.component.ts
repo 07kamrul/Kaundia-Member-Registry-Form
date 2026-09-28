@@ -10,7 +10,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AuthService } from '../../../../core/services/auth.service';
+import { FEE_MANAGER_PERMISSION, AuthService } from '../../../../core/services/auth.service';
 import { MemberService } from '../../../../core/services/member.service';
 import type {
   PicnicPayment,
@@ -60,10 +60,10 @@ export class PicnicPaymentComponent implements OnInit {
   private readonly memberService = inject(MemberService);
   private readonly auth = inject(AuthService);
 
-  readonly isAdminTier = computed(() => {
-    const role = this.auth.role;
-    return role === 'super_admin' || role === 'executive_committee' || role === 'administrator';
-  });
+  // Fee managers (Super Admin, Executive Committee, Administrator - anyone
+  // holding the shared fee permission) get the "Go to Fee Settings" shortcut;
+  // ordinary members only see the "contact the committee" message.
+  readonly canManageFees = computed(() => this.auth.hasPermission(FEE_MANAGER_PERMISSION));
 
   readonly breakdown = computed(() => {
     const rates = this.rates();

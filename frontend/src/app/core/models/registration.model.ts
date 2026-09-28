@@ -18,6 +18,15 @@ export function createEmptyAddress(): AddressDetail {
   return { house: '', road: '', postOffice: '', upazila: '', district: '', division: '' };
 }
 
+export interface SubscriptionQuote {
+  base: number;
+  extraDecimals: number;
+  extraAmount: number;
+  total: number;
+  unit: string;
+  rateVersionEffectiveFrom: string | null;
+}
+
 export interface ApplicableDocEntry {
   type: string;
   fileName: string;

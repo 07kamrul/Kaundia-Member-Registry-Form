@@ -1,8 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import type { FormDataModel, SubmissionResult } from '../models/registration.model';
+import type {
+  FormDataModel,
+  SubmissionResult,
+  SubscriptionQuote,
+} from '../models/registration.model';
+
+interface SubscriptionQuoteApiResponse {
+  base: number;
+  extra_decimals: number;
+  extra_amount: number;
+  total: number;
+  unit: string;
+  rate_version_effective_from: string | null;
+}
 
 // Converts a "data:<mime>;base64,..." URL (how photo/doc uploads are held
 // in the form model) back into a Blob for multipart upload.
@@ -24,6 +38,26 @@ export class RegistrationService {
   // Active fee settings keyed by their Fee Settings key (e.g. 'admission_fee').
   getPublicFeeSettings(): Observable<Record<string, number>> {
     return this.http.get<Record<string, number>>(`${environment.apiBaseUrl}/public/fee-settings`);
+  }
+
+  // The monthly subscription (চাঁদা) amount is always backend-quoted from the
+  // active tiered fee settings - never computed or hard-coded on the client.
+  getSubscriptionQuote(landSizeDecimal: number): Observable<SubscriptionQuote> {
+    return this.http
+      .post<SubscriptionQuoteApiResponse>(
+        `${environment.apiBaseUrl}/public/registration/subscription-quote`,
+        { land_size_decimal: landSizeDecimal },
+      )
+      .pipe(
+        map((res) => ({
+          base: res.base,
+          extraDecimals: res.extra_decimals,
+          extraAmount: res.extra_amount,
+          total: res.total,
+          unit: res.unit,
+          rateVersionEffectiveFrom: res.rate_version_effective_from,
+        })),
+      );
   }
 
   // Backend contract (see backend/app/api/routes/submissions.py): a single

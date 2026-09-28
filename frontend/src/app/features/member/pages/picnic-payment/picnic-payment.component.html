@@ -9,9 +9,16 @@
   <!-- ONE error banner for the rate-loading state, message depends on cause. -->
   @if (ratesError === 'not_configured') {
     <div class="error-box">
-      <p style="margin:0">{{ 'member.picnic.notConfigured' | translate }}</p>
-      @if (isAdminTier()) {
-        <a routerLink="/dashboard/fee-settings" class="btn btn-secondary" style="display:inline-block;margin-top:0.5rem">
+      <p style="margin:0">
+        {{ (canManageFees() ? 'member.picnic.notConfiguredManager' : 'member.picnic.notConfigured') | translate }}
+      </p>
+      @if (canManageFees()) {
+        <a
+          routerLink="/fee-settings"
+          [queryParams]="{ key: 'picnic_head_fee' }"
+          class="btn btn-secondary"
+          style="display:inline-block;margin-top:0.5rem"
+        >
           {{ 'member.picnic.goToFeeSettings' | translate }}
         </a>
       }

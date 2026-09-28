@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.security import ADMIN_ROLES, decode_token
+from app.core.security import ADMIN_ROLES, decode_token, normalize_token_role
 from app.db.session import get_db
 from app.models.admin import AdminUser
 from app.models.member import Member
@@ -40,7 +40,7 @@ async def get_current_admin(
     db: AsyncSession = Depends(get_db),
 ) -> AdminUser:
     payload = await _get_token_payload(credentials)
-    if payload.get("role") not in ADMIN_ROLES:
+    if normalize_token_role(payload.get("role")) not in ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     result = await db.execute(select(AdminUser).where(AdminUser.id == _subject_id(payload)))
     admin = result.scalar_one_or_none()
@@ -56,7 +56,7 @@ async def _resolve_member(
     eager: bool,
 ) -> Member:
     payload = await _get_token_payload(credentials)
-    if payload.get("role") != "member":
+    if normalize_token_role(payload.get("role")) != "member":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Member access required")
 
     query = select(Member).where(Member.id == _subject_id(payload))
@@ -112,7 +112,7 @@ async def get_account_actor(
     db: AsyncSession = Depends(get_db),
 ) -> AccountActor:
     payload = await _get_token_payload(credentials)
-    role = payload.get("role")
+    role = normalize_token_role(payload.get("role"))
 
     if role == "member":
         result = await db.execute(select(Member).where(Member.id == _subject_id(payload)))

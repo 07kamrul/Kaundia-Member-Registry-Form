@@ -19,6 +19,7 @@ class Property(Base):
     dag_no_rs: Mapped[str | None] = mapped_column(String(128), nullable=True)
     holding_number: Mapped[str | None] = mapped_column(String(128), nullable=True)
     land_quantity: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    my_share_quantity: Mapped[str | None] = mapped_column(String(128), nullable=True)
     ownership: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
     member: Mapped["Member"] = relationship(back_populates="properties")

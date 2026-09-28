@@ -1,5 +1,6 @@
 import json
 import re
+from decimal import Decimal
 
 import pytest
 from httpx import AsyncClient
@@ -216,6 +217,42 @@ async def test_admin_replaces_missing_attachment(
     new_path = replace_response.json()["member_photo_path"]
     assert new_path.startswith(f"photos/member_{member_pk}/")
     assert (tmp_path / new_path).is_file()
+
+
+async def test_subscription_quote_endpoint_matches_configured_tiers(client: AsyncClient) -> None:
+    response = await client.post(
+        "/api/public/registration/subscription-quote", json={"land_size_decimal": "0.3"}
+    )
+    assert response.status_code == 200
+    assert Decimal(response.json()["total"]) == Decimal("100")
+
+    response = await client.post(
+        "/api/public/registration/subscription-quote", json={"land_size_decimal": "3"}
+    )
+    assert Decimal(response.json()["total"]) == Decimal("120")
+
+
+async def test_submission_ignores_client_sent_subscription_amount(
+    client: AsyncClient, admin_user: AdminUser
+) -> None:
+    payload = _submission_payload()
+    payload["properties"][0]["my_share_quantity"] = "3"
+    # Tampered: the client sends a subscription amount that doesn't match the
+    # tiered calculation for a 3-decimal share (100 base + 2 x 10 = 120).
+    payload["subscription"] = "999999"
+
+    response = await client.post("/api/submissions", data={"payload": json.dumps(payload)})
+    assert response.status_code == 201
+    member_pk = response.json()["id"]
+
+    login_response = await client.post(
+        "/api/admin/login", json={"email": "admin@example.com", "password": "adminpass123"}
+    )
+    admin_headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+    detail_response = await client.get(
+        f"/api/admin/submissions/{member_pk}", headers=admin_headers
+    )
+    assert Decimal(detail_response.json()["subscription"]) == Decimal("120")
 
 
 async def test_replace_attachment_rejects_unknown_kind(

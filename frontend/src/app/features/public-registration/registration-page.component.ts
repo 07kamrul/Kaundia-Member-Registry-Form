@@ -96,6 +96,7 @@ export class RegistrationPageComponent implements OnInit {
   memberPhotoPreview = signal('');
   feeLoading = signal(true);
   feeError = signal(false);
+  subscriptionBusy = signal(false);
 
   steps = REGISTRATION_STEPS;
   currentStep = 1;

@@ -13,7 +13,8 @@ from app.models.notice import Notice
 from app.schemas.config_list import ConfigListItemOut
 from app.schemas.event import EventOut
 from app.schemas.notice import NoticeOut
-from app.schemas.public import PublicStatsOut
+from app.schemas.public import PublicStatsOut, SubscriptionQuoteOut, SubscriptionQuoteRequest
+from app.services.fee_calculation import calculate_monthly_subscription
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -61,6 +62,26 @@ async def get_public_fee_settings(db: AsyncSession = Depends(get_db)) -> dict[st
         )
     )
     return {key: float(value) for key, value in result.all()}
+
+
+@router.post("/registration/subscription-quote", response_model=SubscriptionQuoteOut)
+async def get_subscription_quote(
+    payload: SubscriptionQuoteRequest, db: AsyncSession = Depends(get_db)
+) -> SubscriptionQuoteOut:
+    """Live-quotes the monthly subscription (চাঁদা) for a land size, using the
+    same tiered calculation the final submission recomputes from - the
+    frontend never derives this amount itself."""
+    breakdown = await calculate_monthly_subscription(
+        db, payload.land_size_decimal, payload.billing_date or date.today()
+    )
+    return SubscriptionQuoteOut(
+        base=breakdown.base,
+        extra_decimals=breakdown.extra_decimals,
+        extra_amount=breakdown.extra_amount,
+        total=breakdown.total,
+        unit=breakdown.unit,
+        rate_version_effective_from=breakdown.effective_from,
+    )
 
 
 @router.get("/config-lists/{category}", response_model=list[ConfigListItemOut])

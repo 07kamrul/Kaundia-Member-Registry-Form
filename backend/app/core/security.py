@@ -15,6 +15,24 @@ TokenRole = Literal["super_admin", "executive_committee", "administrator", "memb
 
 ADMIN_ROLES: tuple[TokenRole, ...] = ("super_admin", "executive_committee", "administrator")
 
+# Every role value a token may carry; the comparison set for the normalizer.
+CANONICAL_ROLES: tuple[str, ...] = ("super_admin", "executive_committee", "administrator", "member")
+
+
+def normalize_token_role(role: object) -> str:
+    """Canonical form of a token role claim, so "super_admin", "SuperAdmin",
+    "SUPER_ADMIN" and "super-admin" all compare equal to "super_admin".
+    Separators fold to underscore first; anything else is matched compact
+    (separators stripped) against the known role names."""
+    folded = str(role or "").strip().lower().replace("-", "_").replace(" ", "_")
+    if folded in CANONICAL_ROLES:
+        return folded
+    compact = folded.replace("_", "")
+    for canonical in CANONICAL_ROLES:
+        if compact == canonical.replace("_", ""):
+            return canonical
+    return folded
+
 # bcrypt has a hard 72-byte input limit; truncate defensively so arbitrarily
 # long passwords don't raise instead of just losing entropy past 72 bytes.
 _BCRYPT_MAX_BYTES = 72

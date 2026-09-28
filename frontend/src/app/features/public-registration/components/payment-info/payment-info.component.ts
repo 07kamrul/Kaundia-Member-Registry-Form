@@ -11,25 +11,20 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs';
 import {
   ALLOWED_DOC_MIME_TYPES,
   MAX_DOC_FILE_BYTES,
   ORG_BANK_INFO,
   ORG_MFS_INFO,
   PAYMENT_METHODS,
+  SubscriptionQuote,
 } from '../../../../core/models/registration.model';
+import { RegistrationService } from '../../../../core/services/registration.service';
 import { propertiesArray } from '../../registration-form.builder';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-const FIRST_DECIMAL_RATE = 50;
-const ADDITIONAL_DECIMAL_RATE = 10;
-
-export interface SubscriptionBreakdown {
-  totalDecimal: number;
-  additionalDecimal: number;
-  additionalAmount: number;
-  amount: number;
-}
+const SUBSCRIPTION_QUOTE_DEBOUNCE_MS = 400;
 
 @Component({
   selector: 'app-payment-info',
@@ -44,10 +39,13 @@ export class PaymentInfoComponent implements OnInit {
   @Input() feeLoading = false;
   @Input() feeError = false;
   readonly retryFeeLoad = output<void>();
+  // Lets the parent disable "পরবর্তী" while the quote is in flight or failed,
+  // the same way it already does for the admission-fee load.
+  readonly subscriptionBusyChange = output<boolean>();
   readonly paymentMethods = PAYMENT_METHODS;
-  readonly firstDecimalRate = FIRST_DECIMAL_RATE;
-  readonly additionalDecimalRate = ADDITIONAL_DECIMAL_RATE;
-  readonly subscriptionBreakdown = signal<SubscriptionBreakdown | null>(null);
+  readonly subscriptionQuote = signal<SubscriptionQuote | null>(null);
+  readonly subscriptionLoading = signal(false);
+  readonly subscriptionError = signal(false);
   readonly maxReceiptFileMb = MAX_DOC_FILE_BYTES / (1024 * 1024);
   readonly bankInfo = ORG_BANK_INFO;
   readonly mfsInfo = ORG_MFS_INFO;
@@ -55,43 +53,65 @@ export class PaymentInfoComponent implements OnInit {
 
   private readonly translate = inject(TranslateService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly registrationService = inject(RegistrationService);
 
   constructor(private destroyRef: DestroyRef) {}
 
   ngOnInit(): void {
-    const properties = this.properties;
-    this.recalculateSubscription(properties);
-    properties.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.recalculateSubscription(properties));
+    this.loadSubscriptionQuote();
+    this.properties.valueChanges
+      .pipe(debounceTime(SUBSCRIPTION_QUOTE_DEBOUNCE_MS), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadSubscriptionQuote());
   }
 
   private get properties(): FormArray {
     return propertiesArray(this.form);
   }
 
-  private recalculateSubscription(properties: FormArray): void {
-    const totalDecimal = properties.controls.reduce((sum, property) => {
+  private totalShareQuantity(): number {
+    return this.properties.controls.reduce((sum, property) => {
       const value = parseFloat(property.get('myShareQuantity')?.value);
       return sum + (Number.isFinite(value) && value > 0 ? value : 0);
     }, 0);
+  }
+
+  // The চাঁদা amount is always backend-quoted from the admin-configured,
+  // tiered Fee Settings - never computed or hard-coded on the client, and
+  // never restored from a saved draft (see RegistrationDraftService).
+  loadSubscriptionQuote(): void {
+    const totalDecimal = this.totalShareQuantity();
 
     if (totalDecimal <= 0) {
-      this.subscriptionBreakdown.set(null);
+      this.subscriptionQuote.set(null);
+      this.subscriptionError.set(false);
+      this.form.get('subscription')?.setValue('', { emitEvent: false });
+      this.subscriptionBusyChange.emit(false);
       return;
     }
 
-    const additionalDecimal = totalDecimal - 1;
-    const additionalAmount = additionalDecimal * ADDITIONAL_DECIMAL_RATE;
-    const amount = FIRST_DECIMAL_RATE + additionalAmount;
-
-    this.subscriptionBreakdown.set({
-      totalDecimal,
-      additionalDecimal,
-      additionalAmount,
-      amount,
-    });
-    this.form.get('subscription')?.setValue(amount, { emitEvent: false });
+    this.subscriptionLoading.set(true);
+    this.subscriptionError.set(false);
+    this.subscriptionBusyChange.emit(true);
+    this.registrationService
+      .getSubscriptionQuote(totalDecimal)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (quote) => {
+          this.subscriptionLoading.set(false);
+          this.subscriptionQuote.set(quote);
+          this.form.get('subscription')?.setValue(quote.total, { emitEvent: false });
+          this.subscriptionBusyChange.emit(false);
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.subscriptionLoading.set(false);
+          this.subscriptionError.set(true);
+          this.subscriptionQuote.set(null);
+          this.form.get('subscription')?.setValue('', { emitEvent: false });
+          this.subscriptionBusyChange.emit(true);
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   onReceiptFileChange(event: Event): void {

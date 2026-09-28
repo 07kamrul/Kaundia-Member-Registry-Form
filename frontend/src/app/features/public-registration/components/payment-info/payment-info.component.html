@@ -26,15 +26,30 @@
     </div>
     <div class="field">
       <label for="subscription">{{ 'registration.payment.subscriptionLabel' | translate }} <span class="required">*</span></label>
-      <input id="subscription" type="number" formControlName="subscription" />
-      @if (subscriptionBreakdown(); as b) {
+      <input
+        id="subscription"
+        type="number"
+        formControlName="subscription"
+        readonly
+        style="background:#f3f4f6;color:#374151"
+      />
+      @if (subscriptionLoading()) {
+        <p class="field-hint">{{ 'registration.payment.subscriptionLoading' | translate }}</p>
+      } @else if (subscriptionError()) {
+        <p class="field-error">{{ 'registration.payment.subscriptionLoadFailed' | translate }}</p>
+        <button type="button" class="btn btn-secondary" style="margin-top:0.25rem" (click)="loadSubscriptionQuote()">
+          {{ 'registration.payment.subscriptionRetry' | translate }}
+        </button>
+      } @else if (subscriptionQuote(); as q) {
         <p class="field-hint">
-          {{ 'registration.payment.totalDecimalSummary' | translate: { total: b.totalDecimal, rate: firstDecimalRate } }}
-          @if (b.additionalDecimal > 0) {
-            {{ 'registration.payment.additionalDecimalSummary' | translate: { additional: b.additionalDecimal, rate: additionalDecimalRate, amount: b.additionalAmount } }}
+          {{ 'registration.payment.subscriptionBaseSummary' | translate: { amount: q.base } }}
+          @if (q.extraDecimals > 0) {
+            {{ 'registration.payment.subscriptionExtraSummary' | translate: { extra: q.extraDecimals, amount: q.extraAmount } }}
           }
-          {{ 'registration.payment.totalAmountSummary' | translate: { amount: b.amount } }}
+          {{ 'registration.payment.totalAmountSummary' | translate: { amount: q.total } }}
         </p>
+      } @else {
+        <p class="field-hint">{{ 'registration.payment.subscriptionHint' | translate }}</p>
       }
       @if (showError('subscription')) {
         <p class="field-error">{{ errorMessage('subscription') }}</p>
