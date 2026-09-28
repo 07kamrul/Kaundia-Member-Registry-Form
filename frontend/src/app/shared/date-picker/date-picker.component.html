@@ -1,0 +1,34 @@
+<div class="date-picker" [class.date-picker--invalid]="invalid" [class.date-picker--disabled]="disabled">
+  <button
+    type="button"
+    class="date-picker-display"
+    [attr.id]="inputId || null"
+    [disabled]="disabled"
+    (click)="openPicker()"
+  >
+    <span class="date-picker-value" [class.date-picker-value--placeholder]="!displayValue">
+      {{ displayValue || placeholder }}
+    </span>
+    @if (clearable && value) {
+      <span class="date-picker-clear" (click)="clear($event)" aria-label="Clear date">×</span>
+    }
+  </button>
+
+  <input
+    #nativeInput
+    type="date"
+    class="date-picker-native"
+    [value]="value"
+    [min]="min || null"
+    [max]="max || null"
+    [disabled]="disabled"
+    (change)="onNativeChange($event)"
+    (keydown)="onKeydown($event)"
+    (click)="openPicker()"
+    (focus)="openPicker()"
+  />
+</div>
+
+@if (invalid && errorMessage) {
+  <div class="field-error">{{ errorMessage }}</div>
+}

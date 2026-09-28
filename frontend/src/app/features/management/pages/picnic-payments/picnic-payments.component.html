@@ -15,8 +15,18 @@
       <div class="field">
         <label>{{ 'admin.picnicPayments.dateRange' | translate }}</label>
         <div class="grid-2" style="gap:0.5rem">
-          <input type="date" [(ngModel)]="dateFrom" [attr.aria-label]="'admin.picnicPayments.dateFrom' | translate" />
-          <input type="date" [(ngModel)]="dateTo" [attr.aria-label]="'admin.picnicPayments.dateTo' | translate" />
+          <app-date-picker
+            [value]="dateFrom"
+            (valueChange)="dateFrom = $event"
+            [max]="dateTo"
+            [clearable]="true"
+          ></app-date-picker>
+          <app-date-picker
+            [value]="dateTo"
+            (valueChange)="dateTo = $event"
+            [min]="dateFrom"
+            [clearable]="true"
+          ></app-date-picker>
         </div>
       </div>
     </div>

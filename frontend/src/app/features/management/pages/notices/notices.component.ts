@@ -7,6 +7,9 @@ import { AuthService } from '../../../../core/services/auth.service';
 import type { ConfigListItem } from '../../../../core/models/admin.model';
 import { toDatetimeLocal, toIso, type Notice } from '../../../../core/models/content.model';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
+import { DatePickerComponent } from '../../../../shared/date-picker/date-picker.component';
+import { TimePickerComponent } from '../../../../shared/time-picker/time-picker.component';
+import { IconComponent } from '../../../../shared/icon/icon.component';
 
 const MANAGE_NOTICES = 'manage_notices';
 
@@ -17,8 +20,17 @@ export type StatusFilter = 'all' | 'draft' | 'published';
   selector: 'app-notices',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, ConfirmModalComponent, DatePipe],
+  imports: [
+    FormsModule,
+    TranslatePipe,
+    ConfirmModalComponent,
+    DatePipe,
+    DatePickerComponent,
+    TimePickerComponent,
+    IconComponent,
+  ],
   templateUrl: './notices.component.html',
+  styleUrl: './notices.component.scss',
 })
 export class NoticesComponent implements OnInit {
   notices: Notice[] = [];
@@ -35,7 +47,10 @@ export class NoticesComponent implements OnInit {
   formTitle = '';
   formBody = '';
   formCategoryId = '';
-  formPublishAt = '';
+  /** Date portion ("yyyy-MM-dd") of the publish-at field, driven by app-date-picker. */
+  formPublishDate = '';
+  /** Time portion ("HH:mm") of the publish-at field, driven by app-time-picker. */
+  formPublishTime = '';
   formPublished = false;
   formMembersOnly = false;
   saving = false;
@@ -106,13 +121,32 @@ export class NoticesComponent implements OnInit {
     return this.categories.find((item) => item.id === categoryId)?.label ?? '—';
   }
 
+  /** Combined publish-at "yyyy-MM-ddTHH:mm" value, or '' when either part is unset. */
+  private get formPublishAt(): string {
+    if (!this.formPublishDate) return '';
+    return `${this.formPublishDate}T${this.formPublishTime || '00:00'}`;
+  }
+
+  get isPublishAtInPast(): boolean {
+    if (this.editingId !== null) return false; // Only enforced when scheduling a new notice.
+    if (!this.formPublishDate) return false;
+    const combined = toIso(this.formPublishAt);
+    if (!combined) return false;
+    return new Date(combined).getTime() < Date.now();
+  }
+
+  get isFormValid(): boolean {
+    return !!this.formTitle.trim() && !!this.formBody.trim() && !this.isPublishAtInPast;
+  }
+
   openCreate(): void {
     if (!this.auth.hasPermission(MANAGE_NOTICES)) return;
     this.editingId = null;
     this.formTitle = '';
     this.formBody = '';
     this.formCategoryId = '';
-    this.formPublishAt = '';
+    this.formPublishDate = '';
+    this.formPublishTime = '';
     this.formPublished = false;
     this.formMembersOnly = false;
     this.saveError = '';
@@ -125,7 +159,9 @@ export class NoticesComponent implements OnInit {
     this.formTitle = notice.title;
     this.formBody = notice.body;
     this.formCategoryId = notice.categoryId ?? '';
-    this.formPublishAt = toDatetimeLocal(notice.publishAt);
+    const [datePart, timePart] = toDatetimeLocal(notice.publishAt).split('T');
+    this.formPublishDate = datePart ?? '';
+    this.formPublishTime = timePart ?? '';
     this.formPublished = notice.isPublished;
     this.formMembersOnly = notice.isMembersOnly;
     this.saveError = '';
@@ -140,7 +176,7 @@ export class NoticesComponent implements OnInit {
 
   save(): void {
     if (!this.auth.hasPermission(MANAGE_NOTICES)) return;
-    if (!this.formTitle.trim() || !this.formBody.trim()) return;
+    if (!this.isFormValid) return;
 
     const payload: NoticeInput = {
       title: this.formTitle.trim(),

@@ -32,6 +32,27 @@ class MonthlySubscriptionBreakdown:
     extra_decimals: Decimal
     extra_amount: Decimal
     total: Decimal
+    unit: str = "taka"
+    effective_from: date | None = None
+
+
+async def resolve_active_fee_versions(
+    db: AsyncSession, keys: tuple[str, ...], on_date: date
+) -> dict[str, FeeSetting] | None:
+    """The FeeSetting rows active on `on_date` for every key in `keys`, or
+    None when any key has no active version. Shared by the calculators so the
+    quote endpoint and the stored amounts always agree on which version won."""
+    result = await db.execute(
+        select(FeeSetting).where(
+            FeeSetting.key.in_(keys),
+            FeeSetting.start_date <= on_date,
+            or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= on_date),
+        )
+    )
+    versions = {row.key: row for row in result.scalars().all()}
+    if any(key not in versions for key in keys):
+        return None
+    return versions
 
 
 async def resolve_active_fee_decimal(db: AsyncSession, key: str, on_date: date) -> Decimal:
@@ -132,19 +153,27 @@ async def calculate_monthly_subscription(
     area unit): `base_amount` covers up to `base_threshold` decimals, and each
     decimal beyond that costs `additional_rate`, proportionally for fractions.
     """
+    versions = await resolve_active_fee_versions(
+        db, MONTHLY_SUBSCRIPTION_FEE_KEYS, billing_date
+    )
+    if versions is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "SUBSCRIPTION_RATES_NOT_CONFIGURED",
+                    "message": "Monthly subscription rates are not configured"},
+        )
+
+    base_amount = Decimal(str(versions[MONTHLY_SUBSCRIPTION_BASE_AMOUNT_KEY].value))
+    additional_rate = Decimal(str(versions[MONTHLY_SUBSCRIPTION_ADDITIONAL_RATE_KEY].value))
+    base_threshold = Decimal(str(versions[MONTHLY_SUBSCRIPTION_BASE_THRESHOLD_KEY].value))
+    effective_from = max(row.start_date for row in versions.values())
+    unit = versions[MONTHLY_SUBSCRIPTION_BASE_AMOUNT_KEY].unit or "taka"
+
     if land_size_decimal < 0:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Land size must not be negative",
         )
-
-    base_amount = await resolve_active_fee_decimal(db, MONTHLY_SUBSCRIPTION_BASE_AMOUNT_KEY, billing_date)
-    additional_rate = await resolve_active_fee_decimal(
-        db, MONTHLY_SUBSCRIPTION_ADDITIONAL_RATE_KEY, billing_date
-    )
-    base_threshold = await resolve_active_fee_decimal(
-        db, MONTHLY_SUBSCRIPTION_BASE_THRESHOLD_KEY, billing_date
-    )
 
     if land_size_decimal <= base_threshold:
         return MonthlySubscriptionBreakdown(
@@ -152,6 +181,8 @@ async def calculate_monthly_subscription(
             extra_decimals=Decimal("0"),
             extra_amount=Decimal("0"),
             total=base_amount,
+            unit=unit,
+            effective_from=effective_from,
         )
 
     extra_decimals = land_size_decimal - base_threshold
@@ -161,4 +192,6 @@ async def calculate_monthly_subscription(
         extra_decimals=extra_decimals,
         extra_amount=extra_amount,
         total=base_amount + extra_amount,
+        unit=unit,
+        effective_from=effective_from,
     )

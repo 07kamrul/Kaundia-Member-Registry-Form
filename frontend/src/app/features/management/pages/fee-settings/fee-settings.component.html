@@ -101,13 +101,13 @@
         </div>
         <div class="field">
           <label for="draftStartDate">{{ 'admin.feeSettings.form.startDate' | translate }}</label>
-          <input
-            type="date"
-            id="draftStartDate"
-            name="draftStartDate"
-            [(ngModel)]="draftStartDate"
+          <app-date-picker
+            inputId="draftStartDate"
+            [value]="draftStartDate"
+            (valueChange)="draftStartDate = $event"
+            [clearable]="true"
             [disabled]="!auth.hasPermission('manage_fee_settings')"
-          />
+          ></app-date-picker>
           <p class="field-hint">{{ 'admin.feeSettings.form.startDateHint' | translate }}</p>
         </div>
       </div>

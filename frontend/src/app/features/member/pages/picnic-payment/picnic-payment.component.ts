@@ -12,7 +12,12 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { MemberService } from '../../../../core/services/member.service';
-import type { PicnicPayment, PicnicPaymentAdditionalHead, PicnicRates } from '../../../../core/services/member.service';
+import type {
+  PicnicPayment,
+  PicnicPaymentAdditionalHead,
+  PicnicRates,
+} from '../../../../core/services/member.service';
+import { DatePickerComponent } from '../../../../shared/date-picker/date-picker.component';
 
 const MAX_ADDITIONAL_HEADS = 20;
 const RELATIONS = ['spouse', 'child', 'guest'] as const;
@@ -24,7 +29,7 @@ type ErrorKind = 'not_configured' | 'access' | 'generic' | null;
   selector: 'app-member-picnic-payment',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, RouterLink],
+  imports: [FormsModule, TranslatePipe, RouterLink, DatePickerComponent],
   templateUrl: './picnic-payment.component.html',
 })
 export class PicnicPaymentComponent implements OnInit {
@@ -189,31 +194,35 @@ export class PicnicPaymentComponent implements OnInit {
     this.saving = true;
     this.formError = '';
     this.success = '';
-    this.memberService.createPicnicPayment({
-      additionalHeads: this.additionalHeads(),
-      additionalPeople: this.labels.map((label) => ({
-        name: label.name.trim(),
-        relation: label.relation,
-      })),
-      paymentDate: this.paymentDate,
-      receiptNo: this.receiptNo,
-      paymentMethod: this.paymentMethod,
-    }).subscribe({
-      next: (payment) => {
-        this.saving = false;
-        this.success = this.translate.instant('member.picnic.saveSuccess', { total: payment.total });
-        this.additionalHeads.set(0);
-        this.labels = [];
-        this.receiptNo = '';
-        this.loadPayments();
-        this.cdr.markForCheck();
-      },
-      error: (err: unknown) => {
-        const detail = (err as { error?: { detail?: string } })?.error?.detail;
-        this.formError = detail ?? this.translate.instant('member.picnic.saveError');
-        this.saving = false;
-        this.cdr.markForCheck();
-      },
-    });
+    this.memberService
+      .createPicnicPayment({
+        additionalHeads: this.additionalHeads(),
+        additionalPeople: this.labels.map((label) => ({
+          name: label.name.trim(),
+          relation: label.relation,
+        })),
+        paymentDate: this.paymentDate,
+        receiptNo: this.receiptNo,
+        paymentMethod: this.paymentMethod,
+      })
+      .subscribe({
+        next: (payment) => {
+          this.saving = false;
+          this.success = this.translate.instant('member.picnic.saveSuccess', {
+            total: payment.total,
+          });
+          this.additionalHeads.set(0);
+          this.labels = [];
+          this.receiptNo = '';
+          this.loadPayments();
+          this.cdr.markForCheck();
+        },
+        error: (err: unknown) => {
+          const detail = (err as { error?: { detail?: string } })?.error?.detail;
+          this.formError = detail ?? this.translate.instant('member.picnic.saveError');
+          this.saving = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 }

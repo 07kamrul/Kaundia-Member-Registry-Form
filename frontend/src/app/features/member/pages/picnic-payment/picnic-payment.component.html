@@ -31,13 +31,12 @@
     <div class="grid-2">
       <div class="field">
         <label for="picnicDate">{{ 'member.picnic.dateLabel' | translate }} <span class="required">*</span></label>
-        <input
-          id="picnicDate"
-          type="date"
-          [ngModel]="paymentDate"
-          (ngModelChange)="onDateChange($event)"
+        <app-date-picker
+          inputId="picnicDate"
+          [value]="paymentDate"
+          (valueChange)="onDateChange($event)"
           [max]="paymentDate"
-        />
+        ></app-date-picker>
       </div>
       <div class="field">
         <label for="picnicAdditional">{{ 'member.picnic.additionalHeadsLabel' | translate }}</label>

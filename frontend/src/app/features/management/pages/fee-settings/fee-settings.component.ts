@@ -6,6 +6,7 @@ import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
 import { IconComponent } from '../../../../shared/icon/icon.component';
+import { DatePickerComponent } from '../../../../shared/date-picker/date-picker.component';
 import type { FeeSetting } from '../../../../core/models/admin.model';
 
 const MANAGE_FEE_SETTINGS = 'manage_fee_settings';
@@ -54,7 +55,7 @@ interface TieredFeeHistory {
   selector: 'app-fee-settings',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, ConfirmModalComponent, IconComponent],
+  imports: [FormsModule, TranslatePipe, ConfirmModalComponent, IconComponent, DatePickerComponent],
   templateUrl: './fee-settings.component.html',
 })
 export class FeeSettingsComponent implements OnInit {

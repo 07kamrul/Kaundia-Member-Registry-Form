@@ -7,6 +7,9 @@ import { AuthService } from '../../../../core/services/auth.service';
 import type { ConfigListItem } from '../../../../core/models/admin.model';
 import { toDatetimeLocal, toIso, type EventItem } from '../../../../core/models/content.model';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
+import { DatePickerComponent } from '../../../../shared/date-picker/date-picker.component';
+import { TimePickerComponent } from '../../../../shared/time-picker/time-picker.component';
+import { IconComponent } from '../../../../shared/icon/icon.component';
 
 const MANAGE_NOTICES = 'manage_notices';
 
@@ -16,8 +19,17 @@ export type EventStatusFilter = 'all' | 'published' | 'draft';
   selector: 'app-events',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, ConfirmModalComponent, DatePipe],
+  imports: [
+    FormsModule,
+    TranslatePipe,
+    ConfirmModalComponent,
+    DatePipe,
+    DatePickerComponent,
+    TimePickerComponent,
+    IconComponent,
+  ],
   templateUrl: './events.component.html',
+  styleUrl: './events.component.scss',
 })
 export class EventsComponent implements OnInit {
   events: EventItem[] = [];
@@ -35,8 +47,12 @@ export class EventsComponent implements OnInit {
   formDescription = '';
   formLocation = '';
   formCategoryId = '';
-  formStartAt = '';
-  formEndAt = '';
+  /** Date/time parts of "Starts", driven by app-date-picker / app-time-picker. */
+  formStartDate = '';
+  formStartTime = '';
+  /** Date/time parts of "Ends". */
+  formEndDate = '';
+  formEndTime = '';
   formPublished = false;
   formMembersOnly = false;
   saving = false;
@@ -101,6 +117,28 @@ export class EventsComponent implements OnInit {
     return this.categories.find((item) => item.id === categoryId)?.label ?? '—';
   }
 
+  private get formStartAt(): string {
+    if (!this.formStartDate) return '';
+    return `${this.formStartDate}T${this.formStartTime || '00:00'}`;
+  }
+
+  private get formEndAt(): string {
+    if (!this.formEndDate) return '';
+    return `${this.formEndDate}T${this.formEndTime || '00:00'}`;
+  }
+
+  get isEndBeforeStart(): boolean {
+    if (!this.formStartAt || !this.formEndAt) return false;
+    const start = toIso(this.formStartAt);
+    const end = toIso(this.formEndAt);
+    if (!start || !end) return false;
+    return new Date(end).getTime() <= new Date(start).getTime();
+  }
+
+  get isFormValid(): boolean {
+    return !!this.formTitle.trim() && !!this.formStartDate && !this.isEndBeforeStart;
+  }
+
   openCreate(): void {
     if (!this.auth.hasPermission(MANAGE_NOTICES)) return;
     this.editingId = null;
@@ -108,8 +146,10 @@ export class EventsComponent implements OnInit {
     this.formDescription = '';
     this.formLocation = '';
     this.formCategoryId = '';
-    this.formStartAt = '';
-    this.formEndAt = '';
+    this.formStartDate = '';
+    this.formStartTime = '';
+    this.formEndDate = '';
+    this.formEndTime = '';
     this.formPublished = false;
     this.formMembersOnly = false;
     this.saveError = '';
@@ -123,8 +163,12 @@ export class EventsComponent implements OnInit {
     this.formDescription = event.description ?? '';
     this.formLocation = event.location ?? '';
     this.formCategoryId = event.categoryId ?? '';
-    this.formStartAt = toDatetimeLocal(event.startAt);
-    this.formEndAt = toDatetimeLocal(event.endAt);
+    const [startDate, startTime] = toDatetimeLocal(event.startAt).split('T');
+    this.formStartDate = startDate ?? '';
+    this.formStartTime = startTime ?? '';
+    const [endDate, endTime] = toDatetimeLocal(event.endAt).split('T');
+    this.formEndDate = endDate ?? '';
+    this.formEndTime = endTime ?? '';
     this.formPublished = event.isPublished;
     this.formMembersOnly = event.isMembersOnly;
     this.saveError = '';
@@ -139,7 +183,7 @@ export class EventsComponent implements OnInit {
 
   save(): void {
     if (!this.auth.hasPermission(MANAGE_NOTICES)) return;
-    if (!this.formTitle.trim() || !this.formStartAt) return;
+    if (!this.isFormValid) return;
 
     const payload: EventInput = {
       title: this.formTitle.trim(),

@@ -1,0 +1,32 @@
+<div class="time-picker" [class.time-picker--invalid]="invalid" [class.time-picker--disabled]="disabled">
+  <button
+    type="button"
+    class="time-picker-display"
+    [attr.id]="inputId || null"
+    [disabled]="disabled"
+    (click)="openPicker()"
+  >
+    <span class="time-picker-value" [class.time-picker-value--placeholder]="!displayValue">
+      {{ displayValue || placeholder }}
+    </span>
+    @if (clearable && value) {
+      <span class="time-picker-clear" (click)="clear($event)" aria-label="Clear time">×</span>
+    }
+  </button>
+
+  <input
+    #nativeInput
+    type="time"
+    class="time-picker-native"
+    [value]="value"
+    [disabled]="disabled"
+    (change)="onNativeChange($event)"
+    (keydown)="onKeydown($event)"
+    (click)="openPicker()"
+    (focus)="openPicker()"
+  />
+</div>
+
+@if (invalid && errorMessage) {
+  <div class="field-error">{{ errorMessage }}</div>
+}

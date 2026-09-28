@@ -833,36 +833,50 @@ textarea:focus {
   cursor: pointer;
 }
 
-.checkbox-item input[type="checkbox"] {
+/*
+ * Global checkbox styling. Deliberately white bg / black border in BOTH
+ * light and dark mode (not tokenized to --surface/--gray-*) for consistent
+ * contrast everywhere in the app, per design spec.
+ */
+input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
-  background-color: #ffffff;
-  border: 1.5px solid #000000;
-  width: 1rem;
-  height: 1rem;
-  display: inline-block;
-  box-sizing: border-box;
-  border-radius: 2px;
-  position: relative;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 4px;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
   flex-shrink: 0;
 }
 
-.checkbox-item input[type="checkbox"]:checked {
-  background-color: #ffffff;
-  border: 1.5px solid #000000;
+input[type='checkbox']::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: transform 0.12s;
+  background: #000;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
 }
 
-.checkbox-item input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  left: 3px;
-  top: 0px;
-  width: 4px;
-  height: 8px;
-  border: solid #000000;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+input[type='checkbox']:checked::after {
+  transform: scale(1);
 }
+
+input[type='checkbox']:focus-visible {
+  outline: 3px solid rgba(0, 0, 0, 0.35);
+  outline-offset: 2px;
+}
+
+input[type='checkbox']:disabled {
+  border-color: #999;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 
 .radio-group {
   display: flex;
@@ -4031,50 +4045,6 @@ textarea:focus {
   border-right: 1px solid var(--gray-300);
 }
 
-.checkbox-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.checkbox-item input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  background-color: #ffffff;
-  border: 1.5px solid #000000;
-  width: 1rem;
-  height: 1rem;
-  display: inline-block;
-  box-sizing: border-box;
-  border-radius: 2px;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.checkbox-item input[type="checkbox"]:checked {
-  background-color: #ffffff;
-  border: 1.5px solid #000000;
-}
-
-.checkbox-item input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  left: 3px;
-  top: 0px;
-  width: 4px;
-  height: 8px;
-  border: solid #000000;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
 
 .radio-group {
   display: flex;

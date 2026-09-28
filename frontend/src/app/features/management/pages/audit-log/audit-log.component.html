@@ -18,23 +18,23 @@
       <div class="form-grid">
         <div class="field">
           <label for="filterDateFrom">{{ 'admin.auditLog.filters.dateFrom' | translate }}</label>
-          <input
-            type="date"
-            id="filterDateFrom"
-            name="filterDateFrom"
-            [(ngModel)]="filterDateFrom"
-            (ngModelChange)="onFiltersChanged()"
-          />
+          <app-date-picker
+            inputId="filterDateFrom"
+            [value]="filterDateFrom"
+            (valueChange)="filterDateFrom = $event; onFiltersChanged()"
+            [max]="filterDateTo"
+            [clearable]="true"
+          ></app-date-picker>
         </div>
         <div class="field">
           <label for="filterDateTo">{{ 'admin.auditLog.filters.dateTo' | translate }}</label>
-          <input
-            type="date"
-            id="filterDateTo"
-            name="filterDateTo"
-            [(ngModel)]="filterDateTo"
-            (ngModelChange)="onFiltersChanged()"
-          />
+          <app-date-picker
+            inputId="filterDateTo"
+            [value]="filterDateTo"
+            (valueChange)="filterDateTo = $event; onFiltersChanged()"
+            [min]="filterDateFrom"
+            [clearable]="true"
+          ></app-date-picker>
         </div>
         <div class="field">
           <label for="filterAction">{{ 'admin.auditLog.filters.action' | translate }}</label>

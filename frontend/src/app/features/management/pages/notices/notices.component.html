@@ -15,24 +15,23 @@
     </div>
   }
 
-  <div
-    style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center"
-  >
-    @for (filter of statusFilters; track filter) {
-      <button
-        type="button"
-        class="btn"
-        [class.btn-primary]="statusFilter === filter"
-        [class.btn-secondary]="statusFilter !== filter"
-        (click)="setStatusFilter(filter)"
-      >
-        {{ 'admin.notices.filters.' + filter | translate }}
-      </button>
-    }
+  <div class="filter-bar">
+    <div class="filter-chips">
+      @for (filter of statusFilters; track filter) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.filter-chip-active]="statusFilter === filter"
+          (click)="setStatusFilter(filter)"
+        >
+          {{ 'admin.notices.filters.' + filter | translate }}
+        </button>
+      }
+    </div>
     <select
       [(ngModel)]="categoryFilter"
       (ngModelChange)="onCategoryFilter()"
-      style="max-width: 16rem"
+      class="filter-select"
       [attr.aria-label]="'admin.notices.filters.category' | translate"
     >
       <option value="">{{ 'admin.notices.filters.allCategories' | translate }}</option>
@@ -43,13 +42,15 @@
   </div>
 
   @if (formOpen) {
-    <div class="card" style="margin-bottom: 1.5rem">
-      <h2 style="font-size: 1rem; margin-top: 0">
-        {{
-          (editingId ? 'admin.notices.form.editTitle' : 'admin.notices.form.createTitle')
-            | translate
-        }}
-      </h2>
+    <div class="card card-pad form-card">
+      <div class="card-header">
+        <h2 class="card-header-title">
+          {{
+            (editingId ? 'admin.notices.form.editTitle' : 'admin.notices.form.createTitle')
+              | translate
+          }}
+        </h2>
+      </div>
 
       <div class="field">
         <label for="notice-title"
@@ -76,43 +77,47 @@
           </select>
         </div>
         <div class="field">
-          <label for="notice-publish-at">{{ 'admin.notices.form.publishAt' | translate }}</label>
-          <input
-            id="notice-publish-at"
-            type="datetime-local"
-            [(ngModel)]="formPublishAt"
-            name="formPublishAt"
-          />
-          <p class="field-hint">{{ 'admin.notices.form.publishAtHint' | translate }}</p>
+          <label for="notice-publish-date">{{ 'admin.notices.form.publishAt' | translate }}</label>
+          <div class="date-time-row">
+            <app-date-picker
+              inputId="notice-publish-date"
+              [value]="formPublishDate"
+              (valueChange)="formPublishDate = $event"
+              [clearable]="true"
+              [invalid]="isPublishAtInPast"
+            ></app-date-picker>
+            <app-time-picker
+              [value]="formPublishTime"
+              (valueChange)="formPublishTime = $event"
+              [clearable]="true"
+              [disabled]="!formPublishDate"
+              [invalid]="isPublishAtInPast"
+            ></app-time-picker>
+          </div>
+          @if (isPublishAtInPast) {
+            <p class="field-error">{{ 'admin.notices.form.publishAtPast' | translate }}</p>
+          } @else {
+            <p class="field-hint">{{ 'admin.notices.form.publishAtHint' | translate }}</p>
+          }
         </div>
       </div>
 
-      <div class="field">
-        <label style="display: flex; align-items: center; gap: 0.5rem">
-          <input
-            type="checkbox"
-            [(ngModel)]="formPublished"
-            name="formPublished"
-            style="width: auto"
-          />
+      <div class="field checkbox-field">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="formPublished" name="formPublished" />
           {{ 'admin.notices.form.published' | translate }}
         </label>
-        <label style="display: flex; align-items: center; gap: 0.5rem">
-          <input
-            type="checkbox"
-            [(ngModel)]="formMembersOnly"
-            name="formMembersOnly"
-            style="width: auto"
-          />
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="formMembersOnly" name="formMembersOnly" />
           {{ 'admin.notices.form.membersOnly' | translate }}
         </label>
       </div>
 
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+      <div class="form-actions">
         <button
           type="button"
           class="btn btn-primary"
-          [disabled]="saving || !formTitle.trim() || !formBody.trim()"
+          [disabled]="saving || !isFormValid"
           (click)="save()"
         >
           {{
@@ -132,17 +137,35 @@
 
   @if (loading) {
     <div class="loading-state">
-      <span class="spinner"></span> {{ 'common.loading' | translate }}
+      <div class="skeleton-rows">
+        @for (row of [1, 2, 3]; track row) {
+          <div class="skeleton-row"></div>
+        }
+      </div>
+    </div>
+  } @else if (error && !notices.length) {
+    <div class="card card-pad empty-state">
+      <p>{{ error }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
     </div>
   } @else {
-    <div class="card">
-      <table style="width: 100%; border-collapse: collapse">
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <colgroup>
+          <col style="width: 32%" />
+          <col style="width: 16%" />
+          <col style="width: 16%" />
+          <col style="width: 18%" />
+          <col style="width: 18%" />
+        </colgroup>
         <thead>
           <tr>
-            <th style="text-align: left">{{ 'admin.notices.table.title' | translate }}</th>
-            <th style="text-align: left">{{ 'admin.notices.table.category' | translate }}</th>
-            <th style="text-align: left">{{ 'admin.notices.table.status' | translate }}</th>
-            <th style="text-align: left">{{ 'admin.notices.table.publishAt' | translate }}</th>
+            <th>{{ 'admin.notices.table.title' | translate }}</th>
+            <th>{{ 'admin.notices.table.category' | translate }}</th>
+            <th>{{ 'admin.notices.table.status' | translate }}</th>
+            <th>{{ 'admin.notices.table.publishAt' | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -156,12 +179,18 @@
                   class="status-badge"
                   [class.status-approved]="statusOf(notice) === 'published'"
                   [class.status-pending]="statusOf(notice) === 'scheduled'"
+                  [class.status-inactive]="statusOf(notice) === 'draft'"
                 >
                   {{ 'admin.notices.status.' + statusOf(notice) | translate }}
                 </span>
+                @if (notice.isMembersOnly) {
+                  <span class="status-badge status-members-only">
+                    {{ 'admin.notices.membersOnlyBadge' | translate }}
+                  </span>
+                }
               </td>
               <td>{{ notice.publishAt ? (notice.publishAt | date: 'MMM d, y, HH:mm') : '—' }}</td>
-              <td style="white-space: nowrap">
+              <td class="row-actions">
                 <button type="button" class="btn btn-secondary btn-sm" (click)="edit(notice)">
                   {{ 'common.edit' | translate }}
                 </button>
@@ -183,11 +212,82 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="empty-state">{{ 'admin.notices.noItems' | translate }}</td>
+              <td colspan="5">
+                <div class="empty-state">
+                  <span class="empty-state-icon"><app-icon name="inbox" [size]="22" /></span>
+                  <p style="margin: 0.5rem 0 0.25rem; font-weight: 600">
+                    {{ 'admin.notices.noItems' | translate }}
+                  </p>
+                  <p style="margin: 0 0 1rem; color: var(--gray-600)">
+                    {{ 'admin.notices.emptyHelper' | translate }}
+                  </p>
+                  <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
+                    {{ 'admin.notices.createFirst' | translate }}
+                  </button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
       </table>
+
+      <div class="stacked-cards">
+        @for (notice of notices; track notice.id) {
+          <div class="stacked-card">
+            <div class="stacked-card-row stacked-card-title">
+              <span>{{ notice.title }}</span>
+              <span
+                class="status-badge"
+                [class.status-approved]="statusOf(notice) === 'published'"
+                [class.status-pending]="statusOf(notice) === 'scheduled'"
+                [class.status-inactive]="statusOf(notice) === 'draft'"
+              >
+                {{ 'admin.notices.status.' + statusOf(notice) | translate }}
+              </span>
+            </div>
+            <div class="stacked-card-row">
+              <span class="stacked-card-label">{{ 'admin.notices.table.category' | translate }}</span>
+              <span>{{ categoryLabel(notice.categoryId) }}</span>
+            </div>
+            <div class="stacked-card-row">
+              <span class="stacked-card-label">{{ 'admin.notices.table.publishAt' | translate }}</span>
+              <span>{{ notice.publishAt ? (notice.publishAt | date: 'MMM d, y, HH:mm') : '—' }}</span>
+            </div>
+            <div class="stacked-card-actions">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="edit(notice)">
+                {{ 'common.edit' | translate }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                [disabled]="togglingId === notice.id"
+                (click)="togglePublished(notice)"
+              >
+                {{
+                  (notice.isPublished ? 'admin.notices.unpublish' : 'admin.notices.publish')
+                    | translate
+                }}
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" (click)="askDelete(notice)">
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-state-icon"><app-icon name="inbox" [size]="22" /></span>
+            <p style="margin: 0.5rem 0 0.25rem; font-weight: 600">
+              {{ 'admin.notices.noItems' | translate }}
+            </p>
+            <p style="margin: 0 0 1rem; color: var(--gray-600)">
+              {{ 'admin.notices.emptyHelper' | translate }}
+            </p>
+            <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
+              {{ 'admin.notices.createFirst' | translate }}
+            </button>
+          </div>
+        }
+      </div>
     </div>
   }
 

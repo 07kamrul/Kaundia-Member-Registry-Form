@@ -56,7 +56,14 @@
             <span class="field-error-inline">{{ errorMessage('dob') }}</span>
           }
         </div>
-        <input id="dob" type="date" formControlName="dob" />
+        <app-date-picker
+          inputId="dob"
+          [value]="form.get('dob')?.value ?? ''"
+          (valueChange)="form.get('dob')?.setValue($event)"
+          [max]="today"
+          [invalid]="showError('dob')"
+          [errorMessage]="errorMessage('dob')"
+        ></app-date-picker>
       </div>
     </div>
 

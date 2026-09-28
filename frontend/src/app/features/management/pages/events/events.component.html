@@ -15,24 +15,23 @@
     </div>
   }
 
-  <div
-    style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center"
-  >
-    @for (filter of statusFilters; track filter) {
-      <button
-        type="button"
-        class="btn"
-        [class.btn-primary]="statusFilter === filter"
-        [class.btn-secondary]="statusFilter !== filter"
-        (click)="setStatusFilter(filter)"
-      >
-        {{ 'admin.events.filters.' + filter | translate }}
-      </button>
-    }
+  <div class="filter-bar">
+    <div class="filter-chips">
+      @for (filter of statusFilters; track filter) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.filter-chip-active]="statusFilter === filter"
+          (click)="setStatusFilter(filter)"
+        >
+          {{ 'admin.events.filters.' + filter | translate }}
+        </button>
+      }
+    </div>
     <select
       [(ngModel)]="categoryFilter"
       (ngModelChange)="onCategoryFilter()"
-      style="max-width: 16rem"
+      class="filter-select"
       [attr.aria-label]="'admin.events.filters.category' | translate"
     >
       <option value="">{{ 'admin.events.filters.allCategories' | translate }}</option>
@@ -43,12 +42,15 @@
   </div>
 
   @if (formOpen) {
-    <div class="card" style="margin-bottom: 1.5rem">
-      <h2 style="font-size: 1rem; margin-top: 0">
-        {{
-          (editingId ? 'admin.events.form.editTitle' : 'admin.events.form.createTitle') | translate
-        }}
-      </h2>
+    <div class="card card-pad form-card">
+      <div class="card-header">
+        <h2 class="card-header-title">
+          {{
+            (editingId ? 'admin.events.form.editTitle' : 'admin.events.form.createTitle')
+              | translate
+          }}
+        </h2>
+      </div>
 
       <div class="field">
         <label for="event-title"
@@ -85,48 +87,66 @@
 
       <div class="grid-2">
         <div class="field">
-          <label for="event-start-at"
+          <label for="event-start-date"
             >{{ 'admin.events.form.startAt' | translate }}<span class="required">*</span></label
           >
-          <input
-            id="event-start-at"
-            type="datetime-local"
-            [(ngModel)]="formStartAt"
-            name="formStartAt"
-          />
+          <div class="date-time-row">
+            <app-date-picker
+              inputId="event-start-date"
+              [value]="formStartDate"
+              (valueChange)="formStartDate = $event"
+            ></app-date-picker>
+            <app-time-picker
+              [value]="formStartTime"
+              (valueChange)="formStartTime = $event"
+              [clearable]="true"
+              [disabled]="!formStartDate"
+            ></app-time-picker>
+          </div>
+          @if (!formStartDate) {
+            <p class="field-hint">{{ 'admin.events.form.startAtRequired' | translate }}</p>
+          }
         </div>
         <div class="field">
-          <label for="event-end-at">{{ 'admin.events.form.endAt' | translate }}</label>
-          <input id="event-end-at" type="datetime-local" [(ngModel)]="formEndAt" name="formEndAt" />
+          <label for="event-end-date">{{ 'admin.events.form.endAt' | translate }}</label>
+          <div class="date-time-row">
+            <app-date-picker
+              inputId="event-end-date"
+              [value]="formEndDate"
+              (valueChange)="formEndDate = $event"
+              [clearable]="true"
+              [invalid]="isEndBeforeStart"
+            ></app-date-picker>
+            <app-time-picker
+              [value]="formEndTime"
+              (valueChange)="formEndTime = $event"
+              [clearable]="true"
+              [disabled]="!formEndDate"
+              [invalid]="isEndBeforeStart"
+            ></app-time-picker>
+          </div>
+          @if (isEndBeforeStart) {
+            <p class="field-error">{{ 'admin.events.form.endBeforeStart' | translate }}</p>
+          }
         </div>
       </div>
 
-      <div class="field">
-        <label style="display: flex; align-items: center; gap: 0.5rem">
-          <input
-            type="checkbox"
-            [(ngModel)]="formPublished"
-            name="formPublished"
-            style="width: auto"
-          />
+      <div class="field checkbox-field">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="formPublished" name="formPublished" />
           {{ 'admin.events.form.published' | translate }}
         </label>
-        <label style="display: flex; align-items: center; gap: 0.5rem">
-          <input
-            type="checkbox"
-            [(ngModel)]="formMembersOnly"
-            name="formMembersOnly"
-            style="width: auto"
-          />
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="formMembersOnly" name="formMembersOnly" />
           {{ 'admin.events.form.membersOnly' | translate }}
         </label>
       </div>
 
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+      <div class="form-actions">
         <button
           type="button"
           class="btn btn-primary"
-          [disabled]="saving || !formTitle.trim() || !formStartAt"
+          [disabled]="saving || !isFormValid"
           (click)="save()"
         >
           {{
@@ -146,18 +166,37 @@
 
   @if (loading) {
     <div class="loading-state">
-      <span class="spinner"></span> {{ 'common.loading' | translate }}
+      <div class="skeleton-rows">
+        @for (row of [1, 2, 3]; track row) {
+          <div class="skeleton-row"></div>
+        }
+      </div>
+    </div>
+  } @else if (error && !events.length) {
+    <div class="card card-pad empty-state">
+      <p>{{ error }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
     </div>
   } @else {
-    <div class="card">
-      <table style="width: 100%; border-collapse: collapse">
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <colgroup>
+          <col style="width: 24%" />
+          <col style="width: 20%" />
+          <col style="width: 16%" />
+          <col style="width: 14%" />
+          <col style="width: 12%" />
+          <col style="width: 14%" />
+        </colgroup>
         <thead>
           <tr>
-            <th style="text-align: left">{{ 'admin.events.table.title' | translate }}</th>
-            <th style="text-align: left">{{ 'admin.events.table.when' | translate }}</th>
-            <th style="text-align: left">{{ 'admin.events.table.location' | translate }}</th>
-            <th style="text-align: left">{{ 'admin.events.table.category' | translate }}</th>
-            <th style="text-align: left">{{ 'admin.events.table.status' | translate }}</th>
+            <th>{{ 'admin.events.table.title' | translate }}</th>
+            <th>{{ 'admin.events.table.when' | translate }}</th>
+            <th>{{ 'admin.events.table.location' | translate }}</th>
+            <th>{{ 'admin.events.table.category' | translate }}</th>
+            <th>{{ 'admin.events.table.status' | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -175,7 +214,11 @@
               <td>{{ row.location ?? '—' }}</td>
               <td>{{ categoryLabel(row.categoryId) }}</td>
               <td>
-                <span class="status-badge" [class.status-approved]="row.isPublished">
+                <span
+                  class="status-badge"
+                  [class.status-approved]="row.isPublished"
+                  [class.status-inactive]="!row.isPublished"
+                >
                   {{
                     (row.isPublished
                       ? 'admin.events.status.published'
@@ -183,8 +226,13 @@
                     ) | translate
                   }}
                 </span>
+                @if (row.isMembersOnly) {
+                  <span class="status-badge status-members-only">
+                    {{ 'admin.events.membersOnlyBadge' | translate }}
+                  </span>
+                }
               </td>
-              <td style="white-space: nowrap">
+              <td class="row-actions">
                 <button type="button" class="btn btn-secondary btn-sm" (click)="edit(row)">
                   {{ 'common.edit' | translate }}
                 </button>
@@ -206,11 +254,92 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="empty-state">{{ 'admin.events.noItems' | translate }}</td>
+              <td colspan="6">
+                <div class="empty-state">
+                  <span class="empty-state-icon"><app-icon name="pin" [size]="22" /></span>
+                  <p style="margin: 0.5rem 0 0.25rem; font-weight: 600">
+                    {{ 'admin.events.noItems' | translate }}
+                  </p>
+                  <p style="margin: 0 0 1rem; color: var(--gray-600)">
+                    {{ 'admin.events.emptyHelper' | translate }}
+                  </p>
+                  <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
+                    {{ 'admin.events.createFirst' | translate }}
+                  </button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
       </table>
+
+      <div class="stacked-cards">
+        @for (row of events; track row.id) {
+          <div class="stacked-card">
+            <div class="stacked-card-row stacked-card-title">
+              <span>{{ row.title }}</span>
+              <span
+                class="status-badge"
+                [class.status-approved]="row.isPublished"
+                [class.status-inactive]="!row.isPublished"
+              >
+                {{
+                  (row.isPublished ? 'admin.events.status.published' : 'admin.events.status.draft')
+                    | translate
+                }}
+              </span>
+            </div>
+            <div class="stacked-card-row">
+              <span class="stacked-card-label">{{ 'admin.events.table.when' | translate }}</span>
+              <span
+                >{{ row.startAt | date: 'MMM d, y, HH:mm' }}
+                @if (row.endAt) {
+                  – {{ row.endAt | date: 'HH:mm' }}
+                }</span
+              >
+            </div>
+            <div class="stacked-card-row">
+              <span class="stacked-card-label">{{ 'admin.events.table.location' | translate }}</span>
+              <span>{{ row.location ?? '—' }}</span>
+            </div>
+            <div class="stacked-card-row">
+              <span class="stacked-card-label">{{ 'admin.events.table.category' | translate }}</span>
+              <span>{{ categoryLabel(row.categoryId) }}</span>
+            </div>
+            <div class="stacked-card-actions">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="edit(row)">
+                {{ 'common.edit' | translate }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                [disabled]="togglingId === row.id"
+                (click)="togglePublished(row)"
+              >
+                {{
+                  (row.isPublished ? 'admin.events.unpublish' : 'admin.events.publish') | translate
+                }}
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" (click)="askDelete(row)">
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-state-icon"><app-icon name="pin" [size]="22" /></span>
+            <p style="margin: 0.5rem 0 0.25rem; font-weight: 600">
+              {{ 'admin.events.noItems' | translate }}
+            </p>
+            <p style="margin: 0 0 1rem; color: var(--gray-600)">
+              {{ 'admin.events.emptyHelper' | translate }}
+            </p>
+            <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
+              {{ 'admin.events.createFirst' | translate }}
+            </button>
+          </div>
+        }
+      </div>
     </div>
   }
 

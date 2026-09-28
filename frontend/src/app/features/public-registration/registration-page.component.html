@@ -29,7 +29,11 @@
 
       <div class="field submission-date-field">
         <label for="submissionDate">{{ 'registration.header.submissionDateLabel' | translate }}</label>
-        <input id="submissionDate" type="date" formControlName="submissionDate" />
+        <app-date-picker
+          inputId="submissionDate"
+          [value]="form.get('submissionDate')?.value ?? ''"
+          (valueChange)="form.get('submissionDate')?.setValue($event)"
+        ></app-date-picker>
       </div>
 
       @if (showDraftRestoredToast) {

@@ -1,0 +1,205 @@
+/* Visual redesign for the Notices admin page. Shared with the Events page
+ * pattern (filter bar, form card, stacked-card list) — kept local rather than
+ * promoted to styles.scss since only these two admin pages need it so far. */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-chip {
+  height: 40px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--gray-200);
+  background: var(--surface);
+  color: var(--gray-700);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--emerald-800);
+}
+
+.filter-chip-active {
+  background: var(--emerald-50);
+  border-color: var(--emerald-800);
+  color: var(--emerald-800);
+}
+
+.filter-select {
+  height: 40px;
+  max-width: 16rem;
+}
+
+.form-card {
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.card-header-title {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.field {
+  margin-bottom: 1.1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.checkbox-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-label input[type='checkbox'] {
+  width: auto;
+}
+
+.date-time-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.date-time-row > * {
+  flex: 1 1 10rem;
+  min-width: 9rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.row-actions {
+  white-space: nowrap;
+}
+
+.status-badge.status-members-only {
+  background: var(--blue-50, #eff6ff);
+  color: var(--blue-700, #1d4ed8);
+  margin-left: 0.35rem;
+}
+
+.skeleton-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.5rem 0;
+}
+
+.skeleton-row {
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 37%, var(--gray-100) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* Stacked-card list replaces the table below 768px. */
+.stacked-cards {
+  display: none;
+}
+
+.stacked-card {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.stacked-card:last-child {
+  border-bottom: none;
+}
+
+.stacked-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.15rem 0;
+  font-size: 0.875rem;
+}
+
+.stacked-card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+
+.stacked-card-label {
+  color: var(--gray-600);
+}
+
+.stacked-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+
+@media (max-width: 767px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-header .btn {
+    width: 100%;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .data-table-wrap table {
+    display: none;
+  }
+
+  .stacked-cards {
+    display: block;
+  }
+}

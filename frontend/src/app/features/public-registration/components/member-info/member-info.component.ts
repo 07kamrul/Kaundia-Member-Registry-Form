@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { DatePickerComponent } from '../../../../shared/date-picker/date-picker.component';
 
 @Component({
   selector: 'app-member-info',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, DatePickerComponent],
   templateUrl: './member-info.component.html',
 })
 export class MemberInfoComponent {
@@ -15,6 +16,9 @@ export class MemberInfoComponent {
   @Input() submitAttempted = false;
   @Output() photoChange = new EventEmitter<Event>();
   @Output() photoClear = new EventEmitter<void>();
+
+  /** dob must be in the past; used as the date-picker's max. */
+  readonly today = new Date().toISOString().slice(0, 10);
 
   constructor(private translate: TranslateService) {}
 

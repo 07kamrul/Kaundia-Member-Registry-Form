@@ -23,6 +23,7 @@ import { NomineeListComponent } from './components/nominee-list/nominee-list.com
 import { PaymentInfoComponent } from './components/payment-info/payment-info.component';
 import { ConfirmationComponent } from './components/confirmation/confirmation.component';
 import { ReviewSummaryComponent } from './components/review-summary/review-summary.component';
+import { DatePickerComponent } from '../../shared/date-picker/date-picker.component';
 import { buildRegistrationForm, propertiesArray, nomineesArray } from './registration-form.builder';
 
 const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
@@ -80,6 +81,7 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
     PaymentInfoComponent,
     ConfirmationComponent,
     ReviewSummaryComponent,
+    DatePickerComponent,
     TranslatePipe,
   ],
   templateUrl: './registration-page.component.html',

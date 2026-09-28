@@ -26,7 +26,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "retry": "Retry"
   },
   "nav": {
     "openMenu": "Open menu",
@@ -639,7 +640,8 @@
         "publishAtHint": "Optional. A scheduled notice stays hidden until this time passes.",
         "published": "Published",
         "membersOnly": "Members only (hidden from the public feed)",
-        "create": "Create"
+        "create": "Create",
+        "publishAtPast": "Publish date/time cannot be in the past."
       },
       "table": {
         "title": "Title",
@@ -664,7 +666,10 @@
         "loadFailed": "Could not load notices.",
         "saveFailed": "Could not save the notice.",
         "deleteFailed": "Could not delete the notice."
-      }
+      },
+      "createFirst": "Create your first notice",
+      "emptyHelper": "Published and draft notices will appear here.",
+      "membersOnlyBadge": "Members only"
     },
     "events": {
       "title": "Events",
@@ -689,7 +694,9 @@
         "endAt": "Ends",
         "published": "Published",
         "membersOnly": "Members only (hidden from the public feed)",
-        "create": "Create"
+        "create": "Create",
+        "endBeforeStart": "End must be after the start time.",
+        "startAtRequired": "Start date and time are required."
       },
       "table": {
         "title": "Title",
@@ -715,7 +722,10 @@
         "loadFailed": "Could not load events.",
         "saveFailed": "Could not save the event.",
         "deleteFailed": "Could not delete the event."
-      }
+      },
+      "createFirst": "Create your first event",
+      "emptyHelper": "Published and draft events will appear here.",
+      "membersOnlyBadge": "Members only"
     },
     "picnicPayments": {
       "title": "Picnic Payments",

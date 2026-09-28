@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
 import { RbacService } from '../../../../core/services/rbac.service';
 import { IconComponent } from '../../../../shared/icon/icon.component';
+import { DatePickerComponent } from '../../../../shared/date-picker/date-picker.component';
 import type { AuditLogEntry } from '../../../../core/models/admin.model';
 
 const PAGE_SIZES: readonly number[] = [10, 25, 50];
@@ -19,7 +20,7 @@ interface DetailPair {
   selector: 'app-audit-log',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, FormsModule, TranslatePipe, IconComponent],
+  imports: [DatePipe, FormsModule, TranslatePipe, IconComponent, DatePickerComponent],
   templateUrl: './audit-log.component.html',
 })
 export class AuditLogComponent implements OnInit {
