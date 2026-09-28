@@ -15,6 +15,7 @@ export class ConfirmModalComponent {
   @Input() cancelLabel = '';
   @Input() danger = false;
   @Input() confirmDisabled = false;
+  @Input() showCancel = true;
 
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();

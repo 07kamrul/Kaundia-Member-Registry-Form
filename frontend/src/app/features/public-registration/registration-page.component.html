@@ -1,6 +1,19 @@
 @if (success) {
   <app-confirmation [submissionId]="success.id" (acknowledge)="onConfirmationAcknowledged()" />
 } @else {
+  <app-confirm-modal
+    [open]="!!duplicateSubmission"
+    [showCancel]="false"
+    [title]="'registration.submit.duplicateTitle' | translate"
+    [message]="duplicateSubmission?.message ?? ''"
+    [confirmLabel]="
+      duplicateSubmission?.code === 'ALREADY_REGISTERED'
+        ? ('nav.login' | translate)
+        : ('common.confirmModal.confirmButton' | translate)
+    "
+    (confirm)="dismissDuplicateSubmission()"
+    (cancel)="dismissDuplicateSubmission()"
+  />
   <div class="page-with-banner">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card reg-card">
     <div class="reg-card-body">

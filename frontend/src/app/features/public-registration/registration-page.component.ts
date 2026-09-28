@@ -24,7 +24,23 @@ import { PaymentInfoComponent } from './components/payment-info/payment-info.com
 import { ConfirmationComponent } from './components/confirmation/confirmation.component';
 import { ReviewSummaryComponent } from './components/review-summary/review-summary.component';
 import { DatePickerComponent } from '../../shared/date-picker/date-picker.component';
+import { ConfirmModalComponent } from '../../shared/confirm-modal/confirm-modal.component';
 import { buildRegistrationForm, propertiesArray, nomineesArray } from './registration-form.builder';
+
+interface DuplicateSubmissionError {
+  success: false;
+  code: 'APPLICATION_PENDING' | 'ALREADY_REGISTERED';
+  message: string;
+}
+
+function isDuplicateSubmissionError(body: unknown): body is DuplicateSubmissionError {
+  return (
+    !!body &&
+    typeof body === 'object' &&
+    ((body as { code?: unknown }).code === 'APPLICATION_PENDING' ||
+      (body as { code?: unknown }).code === 'ALREADY_REGISTERED')
+  );
+}
 
 const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
 
@@ -82,6 +98,7 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
     ConfirmationComponent,
     ReviewSummaryComponent,
     DatePickerComponent,
+    ConfirmModalComponent,
     TranslatePipe,
   ],
   templateUrl: './registration-page.component.html',
@@ -93,6 +110,7 @@ export class RegistrationPageComponent implements OnInit {
   submitting = false;
   submitAttempted = false;
   success: { id: string } | null = null;
+  duplicateSubmission: DuplicateSubmissionError | null = null;
   memberPhotoPreview = signal('');
   feeLoading = signal(true);
   feeError = signal(false);
@@ -510,13 +528,25 @@ export class RegistrationPageComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.submitting = false;
-        this.serverError = this.translate.instant(
-          err.status > 0 ? 'registration.submit.genericError' : 'registration.submit.networkError',
-        );
+        if (err.status === 409 && isDuplicateSubmissionError(err.error?.detail)) {
+          this.duplicateSubmission = err.error.detail;
+        } else {
+          this.serverError = this.translate.instant(
+            err.status > 0 ? 'registration.submit.genericError' : 'registration.submit.networkError',
+          );
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
         this.cdr.markForCheck();
       },
     });
+  }
+
+  dismissDuplicateSubmission(): void {
+    const wasApproved = this.duplicateSubmission?.code === 'ALREADY_REGISTERED';
+    this.duplicateSubmission = null;
+    if (wasApproved) {
+      this.router.navigate(['/login']);
+    }
   }
 
   onConfirmationAcknowledged(): void {

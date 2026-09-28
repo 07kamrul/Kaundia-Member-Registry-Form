@@ -991,7 +991,11 @@
     },
     "submit": {
       "genericError": "There was a problem submitting",
-      "networkError": "Network issue. Please try again."
+      "networkError": "Network issue. Please try again.",
+      "duplicateTitle": "Application Already Exists",
+      "duplicatePending": "Your application is pending. Please wait for confirmation.",
+      "duplicateApproved": "You are already registered as a member. Please login.",
+      "duplicateGeneric": "An application with this information already exists."
     },
     "draft": {
       "draftSaved": "Draft saved",

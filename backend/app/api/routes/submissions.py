@@ -4,6 +4,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from pydantic import ValidationError
 from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from decimal import Decimal, InvalidOperation
@@ -16,9 +17,53 @@ from app.models.nominee import Nominee
 from app.schemas.member import SubmissionCreateResponse
 from app.schemas.submission import SubmissionPayload
 from app.services.fee_calculation import calculate_monthly_subscription
+from app.services.normalization import normalize_email, normalize_mobile, normalize_nid
 from app.services.storage import save_upload_file, slugify_path_segment
 
 router = APIRouter(tags=["submissions"])
+
+# Statuses that still block a resubmission with the same identifier. A
+# REJECTED applicant is free to re-apply.
+_BLOCKING_STATUSES = (MemberStatus.PENDING, MemberStatus.APPROVED)
+
+
+async def _reject_duplicate_submission(
+    db: AsyncSession, nid: str, mobile: str, email: str
+) -> None:
+    """Raise a 409 if a non-rejected member already matches any identifier.
+
+    This is the user-facing check: it distinguishes PENDING from APPROVED so
+    the frontend can show the right popup. It does not fully close the race
+    between two simultaneous submissions - the partial unique indexes added
+    in migration d4e6f8a0b2c4 are the actual safety net for that, and
+    `create_submission` catches the resulting IntegrityError as a fallback.
+    """
+    result = await db.execute(
+        select(Member.status).where(
+            Member.status.in_(_BLOCKING_STATUSES),
+            or_(Member.nid == nid, Member.mobile == mobile, Member.email == email),
+        )
+    )
+    matched_statuses = set(result.scalars().all())
+    if not matched_statuses:
+        return
+    if MemberStatus.APPROVED in matched_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "success": False,
+                "code": "ALREADY_REGISTERED",
+                "message": "You are already registered as a member. Please login.",
+            },
+        )
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail={
+            "success": False,
+            "code": "APPLICATION_PENDING",
+            "message": "Your application is pending. Please wait for confirmation.",
+        },
+    )
 
 
 async def resolve_active_fee(db: AsyncSession, key: str, on_date: date) -> str:
@@ -80,6 +125,12 @@ async def create_submission(
     except (json.JSONDecodeError, ValidationError) as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
+    normalized_nid = normalize_nid(data.nid)
+    normalized_mobile = normalize_mobile(data.mobile)
+    normalized_email = normalize_email(data.email)
+
+    await _reject_duplicate_submission(db, normalized_nid, normalized_mobile, normalized_email)
+
     member = Member(
         status=MemberStatus.PENDING,
         full_name=data.full_name,
@@ -88,10 +139,10 @@ async def create_submission(
         dob=data.dob,
         nationality=data.nationality,
         occupation=data.occupation,
-        nid=data.nid,
-        mobile=data.mobile,
+        nid=normalized_nid,
+        mobile=normalized_mobile,
         gender=data.gender,
-        email=data.email,
+        email=normalized_email,
         permanent_house=data.permanent_address.house if data.permanent_address else None,
         permanent_road=data.permanent_address.road if data.permanent_address else None,
         permanent_post_office=data.permanent_address.post_office if data.permanent_address else None,
@@ -133,7 +184,15 @@ async def create_submission(
     )
 
     db.add(member)
-    await db.flush()  # assigns member.id, used to namespace uploaded files below
+    try:
+        await db.flush()  # assigns member.id, used to namespace uploaded files below
+    except IntegrityError:
+        # Two identical submissions raced past the query in
+        # _reject_duplicate_submission and both reached the insert; the
+        # partial unique indexes from migration d4e6f8a0b2c4 caught it here.
+        await db.rollback()
+        await _reject_duplicate_submission(db, normalized_nid, normalized_mobile, normalized_email)
+        raise  # the identifiers now match a REJECTED-only row - genuinely not a duplicate, surface the DB error
 
     member_dir = f"member_{member.id}"
 

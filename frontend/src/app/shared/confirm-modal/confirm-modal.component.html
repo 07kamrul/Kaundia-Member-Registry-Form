@@ -9,7 +9,9 @@
         <ng-content></ng-content>
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" (click)="cancel.emit()">{{ resolvedCancelLabel }}</button>
+        @if (showCancel) {
+          <button type="button" class="btn btn-secondary" (click)="cancel.emit()">{{ resolvedCancelLabel }}</button>
+        }
         <button
           type="button"
           class="btn"
