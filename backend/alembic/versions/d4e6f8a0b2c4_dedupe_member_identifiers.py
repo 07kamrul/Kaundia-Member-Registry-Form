@@ -31,7 +31,9 @@ _INDEXES = [
     ("ix_members_email_active", "email"),
 ]
 
-_NOT_REJECTED = "status::text <> 'REJECTED'"
+# Compare against a typed enum literal: the enum->text cast is not IMMUTABLE,
+# so Postgres rejects it inside a partial-index predicate.
+_NOT_REJECTED = "status <> 'REJECTED'::member_status"
 
 
 def upgrade() -> None:
