@@ -63,7 +63,7 @@
       <div class="grid-2">
         <div class="field">
           <label>{{ 'admin.roleManagement.createAdmin.passwordLabel' | translate }}</label>
-          <input type="password" [(ngModel)]="newUserPassword" [placeholder]="'admin.roleManagement.createAdmin.passwordPlaceholder' | translate" />
+          <app-password-field [(ngModel)]="newUserPassword" autocomplete="new-password" [placeholder]="'admin.roleManagement.createAdmin.passwordPlaceholder' | translate" />
         </div>
         <div class="field">
           <label>{{ 'admin.roleManagement.createAdmin.roleLabel' | translate }}</label>

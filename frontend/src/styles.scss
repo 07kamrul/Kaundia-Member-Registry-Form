@@ -6441,3 +6441,11 @@ textarea:focus {
   margin-bottom: 1.5rem;
   color: var(--green-800, #065f46);
 }
+
+.password-field {
+  position: relative;
+
+  input {
+    padding-right: 2.5rem;
+  }
+}

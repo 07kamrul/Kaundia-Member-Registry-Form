@@ -182,7 +182,10 @@
       "passwordMismatchError": "Passwords do not match.",
       "savingButton": "Saving...",
       "saveButton": "Save Change",
-      "changeFailedError": "Failed to change password."
+      "changeFailedError": "Failed to change password.",
+      "currentPasswordRequiredError": "Current password is required.",
+      "passwordPolicyError": "Password must be at least 8 characters and include a number.",
+      "sameAsCurrentError": "New password must be different from the current password."
     },
     "picnic": {
       "title": "Picnic Fee Payment",
@@ -247,6 +250,10 @@
       "showPassword": "Show password",
       "hidePassword": "Hide password"
     }
+  },
+  "passwordField": {
+    "show": "Show password",
+    "hide": "Hide password"
   },
   "admin": {
     "submissionDetail": {

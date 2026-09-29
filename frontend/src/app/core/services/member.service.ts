@@ -141,9 +141,9 @@ export class MemberService {
 
   constructor(private http: HttpClient) {}
 
-  changePassword(oldPassword: string, newPassword: string): Observable<void> {
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
     return this.http.post<void>(`${this.base}/change-password`, {
-      old_password: oldPassword,
+      current_password: currentPassword,
       new_password: newPassword,
     });
   }

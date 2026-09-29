@@ -16,7 +16,7 @@ from app.models.credential import MemberCredential
 from app.models.installment import Installment
 from app.models.member import Member, MemberStatus
 from app.models.picnic_payment import PicnicPayment
-from app.schemas.auth import ChangePasswordRequest
+from app.schemas.auth import ChangePasswordRequest, validate_new_password
 from app.schemas.installment import InstallmentOut
 from app.schemas.member import MemberDetail, MemberProfileUpdate
 from app.schemas.picnic_payment import PicnicPaymentIn, PicnicPaymentOut
@@ -229,7 +229,21 @@ async def change_password(
     )
     credential = result.scalar_one_or_none()
     if credential is None or not await verify_password_async(payload.current_password, credential.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid current password")
+        # 422 (not 401): the frontend treats any 401 as an expired session and logs out.
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "message": "Current password is incorrect",
+                "errors": {"current_password": "Current password is incorrect"},
+            },
+        )
+
+    errors = validate_new_password(payload.current_password, payload.new_password)
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": next(iter(errors.values())), "errors": errors},
+        )
 
     credential.password_hash = await hash_password_async(payload.new_password)
     credential.must_change_password = False

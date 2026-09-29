@@ -2,14 +2,14 @@ import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { IconComponent } from '../../../../shared/icon/icon.component';
+import { PasswordFieldComponent } from '../../../../shared/password-field/password-field.component';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, ReactiveFormsModule, TranslatePipe, IconComponent],
+  imports: [RouterLink, ReactiveFormsModule, TranslatePipe, PasswordFieldComponent],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
@@ -17,7 +17,6 @@ export class LoginComponent {
   error = '';
   submitting = false;
   submitAttempted = false;
-  passwordVisible = false;
 
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -32,10 +31,6 @@ export class LoginComponent {
       identifier: ['', Validators.required],
       password: ['', Validators.required],
     });
-  }
-
-  togglePasswordVisibility(): void {
-    this.passwordVisible = !this.passwordVisible;
   }
 
   showError(controlName: string): boolean {

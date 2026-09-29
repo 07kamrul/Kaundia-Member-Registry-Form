@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PasswordFieldComponent } from '../../../../shared/password-field/password-field.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   AdminUserDef,
@@ -13,7 +14,7 @@ import {
   selector: 'app-role-management',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, PasswordFieldComponent],
   templateUrl: './role-management.component.html',
 })
 export class RoleManagementComponent implements OnInit {

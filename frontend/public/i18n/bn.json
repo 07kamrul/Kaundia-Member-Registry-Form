@@ -182,7 +182,10 @@
       "passwordMismatchError": "পাসওয়ার্ড মিলছে না।",
       "savingButton": "সংরক্ষণ হচ্ছে...",
       "saveButton": "পরিবর্তন সংরক্ষণ করুন",
-      "changeFailedError": "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে।"
+      "changeFailedError": "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে।",
+      "currentPasswordRequiredError": "বর্তমান পাসওয়ার্ড দিন।",
+      "passwordPolicyError": "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে এবং একটি সংখ্যা থাকতে হবে।",
+      "sameAsCurrentError": "নতুন পাসওয়ার্ড বর্তমান পাসওয়ার্ড থেকে আলাদা হতে হবে।"
     },
     "picnic": {
       "title": "পিকনিক ফি পরিশোধ",
@@ -247,6 +250,10 @@
       "showPassword": "পাসওয়ার্ড দেখুন",
       "hidePassword": "পাসওয়ার্ড লুকান"
     }
+  },
+  "passwordField": {
+    "show": "পাসওয়ার্ড দেখুন",
+    "hide": "পাসওয়ার্ড লুকান"
   },
   "admin": {
     "submissionDetail": {
