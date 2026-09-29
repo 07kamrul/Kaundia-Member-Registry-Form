@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   inject,
+  signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -13,6 +14,7 @@ import {
   type MemberProperty,
   type MemberProfileUpdatePayload,
 } from '../../../../core/services/member.service';
+import { IconComponent } from '../../../../shared/icon/icon.component';
 
 const CORE_FIELDS: (keyof MemberProfileUpdatePayload)[] = [
   'fullName',
@@ -41,8 +43,9 @@ const CORE_FIELDS: (keyof MemberProfileUpdatePayload)[] = [
   selector: 'app-member-profile',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, FormsModule],
+  imports: [TranslatePipe, FormsModule, IconComponent],
   templateUrl: './profile.component.html',
+  styleUrl: './profile.component.scss',
 })
 export class ProfileComponent implements OnInit {
   profile: MemberProfile | null = null;
@@ -54,6 +57,7 @@ export class ProfileComponent implements OnInit {
   saving = false;
   saveError = '';
   willRequeue = false;
+  readonly photoFailed = signal(false);
 
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -67,6 +71,7 @@ export class ProfileComponent implements OnInit {
     this.memberService.getProfile().subscribe({
       next: (data) => {
         this.profile = data;
+        this.photoFailed.set(false);
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -80,6 +85,37 @@ export class ProfileComponent implements OnInit {
 
   propertyTypes(property: MemberProperty): string {
     return [...property.propertyType, property.propertyTypeOther ?? ''].filter(Boolean).join(' / ');
+  }
+
+  get avatarInitial(): string {
+    return (this.profile?.fullName ?? '').trim().charAt(0) || '—';
+  }
+
+  get statusKey(): string {
+    switch (this.profile?.status) {
+      case 'approved':
+        return 'member.profile.statusApproved';
+      case 'rejected':
+        return 'member.profile.statusRejected';
+      default:
+        return 'member.profile.statusPending';
+    }
+  }
+
+  get statusClass(): string {
+    switch (this.profile?.status) {
+      case 'approved':
+        return 'profile-status-badge approved';
+      case 'rejected':
+        return 'profile-status-badge rejected';
+      default:
+        return 'profile-status-badge pending';
+    }
+  }
+
+  // A 404/missing photo must fall back to the initial avatar, never a broken image.
+  onPhotoError(): void {
+    this.photoFailed.set(true);
   }
 
   hasCurrentAddress(profile: MemberProfile): boolean {

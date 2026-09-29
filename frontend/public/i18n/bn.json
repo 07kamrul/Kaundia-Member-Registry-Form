@@ -182,7 +182,10 @@
       "myShareQuantityLabel": "আমার অংশ",
       "ownershipLabel": "মালিকানা",
       "coOwnerLabel": "সহ-মালিক",
-      "documentLabel": "দলিল"
+      "documentLabel": "দলিল",
+      "statusApproved": "অনুমোদিত",
+      "statusPending": "পর্যালোচনাধীন",
+      "statusRejected": "প্রত্যাখ্যাত"
     },
     "installments": {
       "title": "চাঁদার ইতিহাস",

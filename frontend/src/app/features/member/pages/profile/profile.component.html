@@ -14,13 +14,39 @@
       <div class="error-box" style="margin-bottom:1rem"><p style="margin:0">{{ 'member.profile.pendingReviewNotice' | translate }}</p></div>
     }
 
-    @if (!editing) {
-      <div style="margin-bottom:1rem">
-        <button type="button" class="btn btn-secondary" (click)="startEdit()">
-          {{ 'member.profile.editButton' | translate }}
-        </button>
+    <div class="profile-hero card">
+      <div class="profile-hero-avatar" [class.profile-hero-avatar-fallback]="photoFailed() || !profile.memberPhotoUrl">
+        @if (profile.memberPhotoUrl && !photoFailed()) {
+          <img [src]="profile.memberPhotoUrl" [alt]="'member.profile.photoLabel' | translate" (error)="onPhotoError()" />
+        } @else {
+          {{ avatarInitial }}
+        }
       </div>
-    }
+      <div class="profile-hero-info">
+        <h1 class="profile-hero-name">{{ profile.fullName || '—' }}</h1>
+        <div class="profile-hero-meta">
+          @if (profile.memberId) {
+            <span class="profile-hero-id">{{ profile.memberId }}</span>
+          }
+          <span [class]="'profile-status-badge ' + (profile.status === 'approved' ? 'approved' : profile.status === 'rejected' ? 'rejected' : 'pending')">
+            {{ statusKey | translate }}
+          </span>
+        </div>
+        @if (profile.mobile) {
+          <p class="profile-hero-contact">
+            <app-icon name="phone" [size]="13" /> {{ profile.mobile }}
+            @if (profile.email) { · {{ profile.email }} }
+          </p>
+        }
+      </div>
+      <div class="profile-hero-actions">
+        @if (!editing) {
+          <button type="button" class="btn btn-primary" (click)="startEdit()">
+            {{ 'member.profile.editButton' | translate }}
+          </button>
+        }
+      </div>
+    </div>
 
     @if (editing) {
       <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
@@ -68,8 +94,8 @@
     <div class="detail-card-grid">
       <div class="card" style="padding:1.25rem">
         <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.personalInfoTitle' | translate }}</h3>
-        @if (profile.memberPhotoUrl) {
-          <img [src]="profile.memberPhotoUrl" [alt]="'member.profile.photoLabel' | translate" width="96" height="96" style="border-radius:0.5rem;object-fit:cover;margin-bottom:0.75rem" />
+        @if (profile.memberPhotoUrl && !photoFailed()) {
+          <img [src]="profile.memberPhotoUrl" [alt]="'member.profile.photoLabel' | translate" width="96" height="96" class="profile-photo" (error)="onPhotoError()" />
         }
         <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.memberIdLabel' | translate }}</span><span class="detail-card-value">{{ profile.memberId || '—' }}</span></div>
         <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.nameLabel' | translate }}</span><span class="detail-card-value">{{ profile.fullName || '—' }}</span></div>
@@ -84,8 +110,8 @@
       </div>
       <div class="card" style="padding:1.25rem">
         <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.contactTitle' | translate }}</h3>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.mobileLabel' | translate }}</span><span class="detail-card-value">{{ profile.mobile || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.emailLabel' | translate }}</span><span class="detail-card-value">{{ profile.email || '—' }}</span></div>
+        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.mobileLabel' | translate }}</span><span class="detail-card-value">@if (profile.mobile) {<a class="profile-link" [href]="'tel:' + profile.mobile">{{ profile.mobile }}</a>} @else {—}</span></div>
+        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.emailLabel' | translate }}</span><span class="detail-card-value">@if (profile.email) {<a class="profile-link" [href]="'mailto:' + profile.email">{{ profile.email }}</a>} @else {—}</span></div>
       </div>
       <div class="card" style="padding:1.25rem">
         <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.permanentAddressLabel' | translate }}</h3>

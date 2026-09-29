@@ -1,0 +1,140 @@
+/* Profile page: hero header, status badge and photo fallbacks. */
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.profile-hero-avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.profile-hero-avatar-fallback {
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+  font-weight: 700;
+  font-size: 1.6rem;
+  border: 1px solid var(--emerald-200);
+}
+
+.profile-hero-info {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.profile-hero-name {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.profile-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.profile-hero-id {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--emerald-800);
+  background: var(--emerald-50);
+  border: 1px solid var(--emerald-200);
+  border-radius: 999px;
+  padding: 0.15rem 0.65rem;
+}
+
+.profile-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.15rem 0.65rem;
+  border: 1px solid transparent;
+
+  &.approved {
+    color: var(--emerald-800);
+    background: var(--emerald-50);
+    border-color: var(--emerald-200);
+  }
+
+  &.pending {
+    color: var(--amber-700, #92600a);
+    background: var(--amber-50, #fef7e6);
+    border-color: var(--amber-200, #f3dfae);
+  }
+
+  &.rejected {
+    color: var(--red-700);
+    background: var(--red-50);
+    border-color: var(--red-200);
+  }
+}
+
+.profile-hero-contact {
+  margin: 0.45rem 0 0;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  overflow-wrap: anywhere;
+}
+
+.profile-hero-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+/* Photos that do load: keep a tidy fixed frame. */
+.profile-photo {
+  border-radius: 0.5rem;
+  object-fit: cover;
+  margin-bottom: 0.75rem;
+  max-width: 100%;
+  height: auto;
+}
+
+.profile-link {
+  color: var(--emerald-700);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Stack the hero on small screens: avatar + text on top, button full-width. */
+@media (max-width: 480px) {
+  .profile-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-hero-actions {
+    width: 100%;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

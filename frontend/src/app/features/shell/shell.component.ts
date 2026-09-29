@@ -126,6 +126,7 @@ export class ShellComponent implements OnInit {
   readonly sidebarOpen = signal(false);
   readonly displayName = signal('');
   readonly memberId = signal('');
+  readonly avatarPhotoUrl = signal<string | undefined>(undefined);
 
   constructor(
     public auth: AuthService,
@@ -145,6 +146,7 @@ export class ShellComponent implements OnInit {
         next: (profile) => {
           this.displayName.set(profile.fullName);
           this.memberId.set(profile.memberId);
+          this.avatarPhotoUrl.set(profile.memberPhotoUrl);
         },
         error: () => {
           // Header still renders without the name/ID; page content shows its own error state.
@@ -155,6 +157,12 @@ export class ShellComponent implements OnInit {
 
   get avatarInitial(): string {
     return this.welcomeName.trim().charAt(0) || (this.lang.lang() === 'bn' ? 'ব' : 'A');
+  }
+
+  // A missing/404 photo (e.g. file not yet on the server) must not render a
+  // broken-image icon - fall back to the initial-letter avatar.
+  onAvatarError(): void {
+    this.avatarPhotoUrl.set(undefined);
   }
 
   get welcomeName(): string {

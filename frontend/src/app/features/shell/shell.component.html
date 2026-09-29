@@ -52,7 +52,13 @@
     <aside class="sidebar" [class.sidebar-open]="sidebarOpen()">
       @if (welcomeName) {
         <div class="card sidebar-user-card">
-          <div class="sidebar-avatar">{{ avatarInitial }}</div>
+          <div class="sidebar-avatar">
+            @if (avatarPhotoUrl(); as url) {
+              <img [src]="url" [alt]="welcomeName" class="sidebar-avatar-img" (error)="onAvatarError()" loading="lazy" />
+            } @else {
+              {{ avatarInitial }}
+            }
+          </div>
           <p class="sidebar-user-name">{{ welcomeName }}</p>
           @if (memberId()) {
             <p class="sidebar-user-id">{{ memberId() }}</p>

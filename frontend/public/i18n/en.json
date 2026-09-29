@@ -182,7 +182,10 @@
       "myShareQuantityLabel": "My Share",
       "ownershipLabel": "Ownership",
       "coOwnerLabel": "Co-owner",
-      "documentLabel": "Document"
+      "documentLabel": "Document",
+      "statusApproved": "Approved",
+      "statusPending": "Under Review",
+      "statusRejected": "Rejected"
     },
     "installments": {
       "title": "Subscription History",
