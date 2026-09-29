@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.member import MemberStatus
 from app.schemas.common import ApplicableDocIn, CoOwner, Nominee, PropertyIn
@@ -139,7 +139,21 @@ class MemberDetail(MemberSummary):
 
 
 class RejectRequest(BaseModel):
-    reason: str
+    # The reason is emailed to the applicant, so a blank one is never valid.
+    reason: str = Field(min_length=1)
+
+    @field_validator("reason")
+    @classmethod
+    def _strip_reason(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("reason must not be blank")
+        return stripped
+
+
+class RejectResponse(BaseModel):
+    status: str
+    email_sent: bool
 
 
 class ApproveResponse(BaseModel):

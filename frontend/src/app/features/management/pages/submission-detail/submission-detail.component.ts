@@ -40,6 +40,7 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   rejectReason = '';
   showApproveModal = false;
   showRejectModal = false;
+  rejecting = false;
   previewImageUrl: string | null = null;
   previewImageAlt = '';
   previewIsImage = true;
@@ -597,14 +598,34 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   }
 
   reject(): void {
-    if (!this.submission || !this.rejectReason.trim()) {
+    const reason = this.rejectReason.trim();
+    if (!this.submission || !reason) {
       this.actionError = this.translate.instant('admin.submissionDetail.errors.reasonRequired');
       return;
     }
+    if (this.rejecting) return;
     this.actionError = '';
-    this.adminService.rejectSubmission(this.submission.id, this.rejectReason).subscribe({
-      next: () => this.router.navigate(['/submissions']),
+    this.rejecting = true;
+    this.adminService.rejectSubmission(this.submission.id, reason).subscribe({
+      next: ({ emailSent }) => {
+        this.rejecting = false;
+        if (emailSent) {
+          this.router.navigate(['/submissions']);
+          return;
+        }
+        // Rejected, but the applicant was not told: stay here so the admin
+        // sees the warning instead of a silent success.
+        this.submission = this.submission
+          ? { ...this.submission, status: 'rejected', rejectionReason: reason }
+          : this.submission;
+        this.actionError = this.translate.instant(
+          'admin.submissionDetail.errors.rejectEmailFailed',
+        );
+        this.showRejectModal = false;
+        this.cdr.markForCheck();
+      },
       error: () => {
+        this.rejecting = false;
         this.actionError = this.translate.instant('admin.submissionDetail.errors.rejectFailed');
         this.showRejectModal = false;
         this.cdr.markForCheck();

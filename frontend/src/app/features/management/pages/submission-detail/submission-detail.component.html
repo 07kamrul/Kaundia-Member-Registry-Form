@@ -1036,6 +1036,7 @@
     [confirmLabel]="'admin.submissionDetail.rejectModal.confirmLabel' | translate"
     [danger]="true"
     [confirmDisabled]="!rejectReason.trim()"
+    [loading]="rejecting"
     (confirm)="reject()"
     (cancel)="showRejectModal = false"
   >

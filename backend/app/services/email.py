@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import aiosmtplib
@@ -10,6 +11,9 @@ settings = get_settings()
 
 # Bounds how long a slow/unreachable SMTP server can hold a request open.
 SMTP_TIMEOUT_SECONDS = 10
+
+# aiosmtplib errors, socket/DNS failures (OSError) and asyncio timeouts.
+_DELIVERY_ERRORS = (aiosmtplib.SMTPException, OSError, asyncio.TimeoutError)
 
 
 async def send_email(to: str, subject: str, html_body: str) -> bool:
@@ -34,9 +38,12 @@ async def send_email(to: str, subject: str, html_body: str) -> bool:
             username=settings.smtp_user or None,
             password=settings.smtp_password or None,
             start_tls=settings.smtp_port == 587,
-            timeout=_SMTP_TIMEOUT_SECONDS,
+            timeout=SMTP_TIMEOUT_SECONDS,
         )
         return True
-    except Exception:
+    except _DELIVERY_ERRORS:
+        # Only genuine delivery failures are swallowed. Programming errors
+        # (NameError, TypeError, ...) propagate so they surface as a 500 and
+        # trip error alerting instead of masquerading as "email not sent".
         logger.exception("Failed to send email to %s", to)
         return False

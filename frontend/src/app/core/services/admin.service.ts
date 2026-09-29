@@ -26,6 +26,12 @@ import {
 
 export type AttachmentKind = 'member_photo' | 'receipt_photo';
 
+/** Outcome of a rejection: the submission is rejected either way, but the
+ * applicant is only notified when `emailSent` is true. */
+export interface RejectResult {
+  emailSent: boolean;
+}
+
 /** Fields a notice is created/edited with. Dates are ISO instants (UTC). */
 export interface NoticeInput {
   title: string;
@@ -350,8 +356,12 @@ export class AdminService {
     return this.http.post<{ member_id: string }>(`${this.base}/submissions/${id}/approve`, {});
   }
 
-  rejectSubmission(id: string, reason: string): Observable<void> {
-    return this.http.post<void>(`${this.base}/submissions/${id}/reject`, { reason });
+  rejectSubmission(id: string, reason: string): Observable<RejectResult> {
+    return this.http
+      .post<{ status: string; email_sent: boolean }>(`${this.base}/submissions/${id}/reject`, {
+        reason,
+      })
+      .pipe(map((res) => ({ emailSent: res.email_sent })));
   }
 
   listMembers(): Observable<Member[]> {

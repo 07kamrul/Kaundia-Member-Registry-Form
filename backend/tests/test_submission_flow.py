@@ -167,29 +167,85 @@ async def test_submission_approval_member_id_login_flow(
     assert relogin.json()["must_change_password"] is False
 
 
-async def test_reject_submission(client: AsyncClient, admin_user: AdminUser) -> None:
+async def _submit_and_login(client: AsyncClient) -> tuple[int, dict]:
     response = await client.post(
         "/api/submissions",
         data={"payload": json.dumps(_submission_payload())},
     )
-    member_pk = response.json()["id"]
-
     login_response = await client.post(
         "/api/admin/login", json={"email": "admin@example.com", "password": "adminpass123"}
     )
-    admin_headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+    headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+    return response.json()["id"], headers
+
+
+async def test_reject_submission_emails_escaped_reason(
+    client: AsyncClient, admin_user: AdminUser, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sent_emails: list[dict] = []
+
+    async def fake_send_email(to: str, subject: str, html_body: str) -> bool:
+        sent_emails.append({"to": to, "html_body": html_body})
+        return True
+
+    monkeypatch.setattr(admin_routes, "send_email", fake_send_email)
+    member_pk, admin_headers = await _submit_and_login(client)
+
+    reject_response = await client.post(
+        f"/api/admin/submissions/{member_pk}/reject",
+        json={"reason": "  image <b>missing</b>  "},
+        headers=admin_headers,
+    )
+
+    assert reject_response.status_code == 200
+    assert reject_response.json() == {"status": "rejected", "email_sent": True}
+    assert sent_emails[0]["to"] == "member@example.com"
+    assert "image &lt;b&gt;missing&lt;/b&gt;" in sent_emails[0]["html_body"]
+    assert "Test User" in sent_emails[0]["html_body"]
+
+    detail_response = await client.get(
+        f"/api/admin/submissions/{member_pk}", headers=admin_headers
+    )
+    assert detail_response.json()["status"] == "rejected"
+    assert detail_response.json()["rejection_reason"] == "image <b>missing</b>"
+
+
+async def test_reject_submission_reports_email_failure_but_stays_rejected(
+    client: AsyncClient, admin_user: AdminUser, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def failing_send_email(to: str, subject: str, html_body: str) -> bool:
+        return False
+
+    monkeypatch.setattr(admin_routes, "send_email", failing_send_email)
+    member_pk, admin_headers = await _submit_and_login(client)
 
     reject_response = await client.post(
         f"/api/admin/submissions/{member_pk}/reject",
         json={"reason": "Incomplete documents"},
         headers=admin_headers,
     )
-    assert reject_response.status_code == 204
 
+    assert reject_response.status_code == 200
+    assert reject_response.json() == {"status": "rejected", "email_sent": False}
     detail_response = await client.get(
         f"/api/admin/submissions/{member_pk}", headers=admin_headers
     )
     assert detail_response.json()["status"] == "rejected"
+
+
+@pytest.mark.parametrize("reason", ["", "   "])
+async def test_reject_submission_requires_non_blank_reason(
+    client: AsyncClient, admin_user: AdminUser, reason: str
+) -> None:
+    member_pk, admin_headers = await _submit_and_login(client)
+
+    reject_response = await client.post(
+        f"/api/admin/submissions/{member_pk}/reject",
+        json={"reason": reason},
+        headers=admin_headers,
+    )
+
+    assert reject_response.status_code == 422
 
 
 async def test_admin_replaces_missing_attachment(

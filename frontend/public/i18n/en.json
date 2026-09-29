@@ -327,6 +327,7 @@
         "approveFailed": "Approval failed.",
         "reasonRequired": "Please enter a reason for rejection.",
         "rejectFailed": "Rejection failed.",
+        "rejectEmailFailed": "Rejected, but the applicant could not be notified by email.",
         "uploadFailed": "Upload failed. Please try again.",
         "downloadFailed": "Download failed. The file may be missing on the server."
       },

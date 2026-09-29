@@ -10,14 +10,15 @@
       </div>
       <div class="modal-actions">
         @if (showCancel) {
-          <button type="button" class="btn btn-secondary" (click)="cancel.emit()">{{ resolvedCancelLabel }}</button>
+          <button type="button" class="btn btn-secondary" [disabled]="loading" (click)="cancel.emit()">{{ resolvedCancelLabel }}</button>
         }
         <button
           type="button"
           class="btn"
           [class.btn-primary]="!danger"
           [class.btn-danger]="danger"
-          [disabled]="confirmDisabled"
+          [disabled]="confirmDisabled || loading"
+          [attr.aria-busy]="loading"
           (click)="confirm.emit()"
         >
           {{ resolvedConfirmLabel }}

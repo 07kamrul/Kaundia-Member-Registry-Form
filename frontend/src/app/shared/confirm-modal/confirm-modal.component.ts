@@ -15,6 +15,8 @@ export class ConfirmModalComponent {
   @Input() cancelLabel = '';
   @Input() danger = false;
   @Input() confirmDisabled = false;
+  /** True while the confirmed action is in flight: locks both buttons. */
+  @Input() loading = false;
   @Input() showCancel = true;
 
   @Output() confirm = new EventEmitter<void>();

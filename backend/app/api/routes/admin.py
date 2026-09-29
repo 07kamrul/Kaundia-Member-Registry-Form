@@ -1,3 +1,4 @@
+import html
 from datetime import date, datetime, timezone
 from enum import Enum
 
@@ -24,8 +25,15 @@ from app.schemas.fee_settings import FeeSettingCreate, FeeSettingOut
 from app.schemas.installment import InstallmentCreate, InstallmentOut, InstallmentUpdate
 from app.models.audit_log import AuditLog
 from app.services.audit import record_audit
-from app.schemas.member import ApproveResponse, MemberDetail, MemberSummary, RejectRequest
+from app.schemas.member import (
+    ApproveResponse,
+    MemberDetail,
+    MemberSummary,
+    RejectRequest,
+    RejectResponse,
+)
 from app.schemas.picnic_payment import PicnicPaymentOut
+from app.core.config import get_settings
 from app.services.email import send_email
 from app.services.storage import save_upload_file
 
@@ -197,13 +205,34 @@ async def approve_submission(
     return ApproveResponse(member_id=generated_member_id, email_sent=email_sent)
 
 
-@router.post("/submissions/{member_id}/reject", status_code=status.HTTP_204_NO_CONTENT)
+def _rejection_email_body(full_name: str, reason: str) -> str:
+    """Bilingual (Bangla + English) rejection notice. Every interpolated value
+    is HTML-escaped: the reason is free text typed by an admin."""
+    name = html.escape(full_name)
+    safe_reason = html.escape(reason)
+    contact = html.escape(get_settings().smtp_from)
+    return (
+        f"<p>প্রিয় {name},</p>"
+        "<p>আপনার সদস্যপদের আবেদনটি অনুমোদিত হয়নি।</p>"
+        f"<p><b>কারণ:</b> {safe_reason}</p>"
+        "<p>প্রয়োজনীয় সংশোধন করে আপনি নতুন করে আবেদন করতে পারবেন। "
+        f"যোগাযোগ: {contact}</p>"
+        "<hr/>"
+        f"<p>Dear {name},</p>"
+        "<p>Your membership application was not approved.</p>"
+        f"<p><b>Reason:</b> {safe_reason}</p>"
+        "<p>You may correct the issue and submit a new application "
+        f"(for example, re-upload any missing photo). Contact: {contact}</p>"
+    )
+
+
+@router.post("/submissions/{member_id}/reject", response_model=RejectResponse)
 async def reject_submission(
     member_id: int,
     payload: RejectRequest,
     db: AsyncSession = Depends(get_db),
     admin: AdminUser = Depends(require_permission("approve_membership")),
-) -> None:
+) -> RejectResponse:
     member = await _get_member_or_404(db, member_id, eager=False)
     member.status = MemberStatus.REJECTED
     member.reviewed_at = datetime.now(timezone.utc)
@@ -219,15 +248,12 @@ async def reject_submission(
     )
     await db.commit()
 
-    await send_email(
+    email_sent = await send_email(
         to=member.email,
         subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - আবেদনের আপডেট",
-        html_body=(
-            f"<p>Dear {member.full_name},</p>"
-            f"<p>Your membership application was not approved.</p>"
-            f"<p>Reason: {payload.reason}</p>"
-        ),
+        html_body=_rejection_email_body(member.full_name, payload.reason),
     )
+    return RejectResponse(status="rejected", email_sent=email_sent)
 
 
 @router.get("/members", response_model=list[MemberSummary])

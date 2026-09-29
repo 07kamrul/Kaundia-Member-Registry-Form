@@ -22,7 +22,7 @@ async def _reject(client: AsyncClient, admin_headers: dict, member_pk: int) -> N
         json={"reason": "Incomplete documents"},
         headers=admin_headers,
     )
-    assert response.status_code == 204
+    assert response.status_code == 200
 
 
 async def _admin_headers(client: AsyncClient) -> dict:
