@@ -59,6 +59,19 @@
             <strong>{{ 'admin.submissionDetail.fields.rejectionReason' | translate }}:</strong>
             {{ submission.rejectionReason }}
           </p>
+          @if (submission.notificationStatus === 'failed') {
+            <p style="margin: 0.5rem 0 0">
+              {{ 'admin.submissionDetail.notNotified' | translate }}
+              <button
+                type="button"
+                class="btn btn-secondary"
+                [disabled]="resending"
+                (click)="resendNotification()"
+              >
+                {{ 'admin.submissionDetail.resendButton' | translate }}
+              </button>
+            </p>
+          }
         </div>
       }
 

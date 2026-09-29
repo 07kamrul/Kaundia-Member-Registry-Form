@@ -182,6 +182,7 @@ interface SubmissionDetailApiModel {
   member_photo_path: string | null;
   receipt_photo_path: string | null;
   rejection_reason: string | null;
+  notification_status?: 'sent' | 'failed' | null;
   properties: SubmissionPropertyApiModel[];
   nominees: NomineeApiModel[];
 }
@@ -322,6 +323,7 @@ function toSubmissionDetail(api: SubmissionDetailApiModel): SubmissionDetail {
     memberSignature: api.member_signature ?? undefined,
     receiptPhotoUrl: toFileUrl(api.receipt_photo_path),
     rejectionReason: api.rejection_reason ?? undefined,
+    notificationStatus: api.notification_status ?? undefined,
   };
 }
 
@@ -361,6 +363,15 @@ export class AdminService {
       .post<{ status: string; email_sent: boolean }>(`${this.base}/submissions/${id}/reject`, {
         reason,
       })
+      .pipe(map((res) => ({ emailSent: res.email_sent })));
+  }
+
+  resendRejectionNotification(id: string): Observable<RejectResult> {
+    return this.http
+      .post<{ status: string; email_sent: boolean }>(
+        `${this.base}/submissions/${id}/resend-notification`,
+        {},
+      )
       .pipe(map((res) => ({ emailSent: res.email_sent })));
   }
 

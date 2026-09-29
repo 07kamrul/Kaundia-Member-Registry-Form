@@ -81,6 +81,8 @@ class Member(Base):
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("admin_users.id"), nullable=True)
     rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Outcome of the rejection email: "sent" or "failed" (None = not attempted).
+    notification_status: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     properties: Mapped[list["Property"]] = relationship(
         back_populates="member", cascade="all, delete-orphan"

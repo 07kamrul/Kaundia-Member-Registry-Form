@@ -134,6 +134,7 @@ class MemberDetail(MemberSummary):
     receipt_photo_path: str | None = None
     reviewed_at: datetime | None = None
     rejection_reason: str | None = None
+    notification_status: str | None = None
     properties: list[PropertyOut] = []
     nominees: list[NomineeOut] = []
 

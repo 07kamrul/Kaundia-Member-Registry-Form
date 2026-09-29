@@ -296,6 +296,8 @@
         "messageSuffix": "will be approved as a member; a member ID and login credentials will be created automatically.",
         "confirmLabel": "Confirm and Approve"
       },
+      "notNotified": "The applicant has not been notified by email.",
+      "resendButton": "Resend notification",
       "rejectModal": {
         "title": "Reject Application",
         "messageSuffix": "'s application — enter the reason for rejection. This will be shown to the applicant.",
@@ -327,6 +329,7 @@
         "approveFailed": "Approval failed.",
         "reasonRequired": "Please enter a reason for rejection.",
         "rejectFailed": "Rejection failed.",
+        "resendFailed": "Could not resend the notification.",
         "rejectEmailFailed": "Rejected, but the applicant could not be notified by email.",
         "uploadFailed": "Upload failed. Please try again.",
         "downloadFailed": "Download failed. The file may be missing on the server."

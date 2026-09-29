@@ -41,6 +41,7 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   showApproveModal = false;
   showRejectModal = false;
   rejecting = false;
+  resending = false;
   previewImageUrl: string | null = null;
   previewImageAlt = '';
   previewIsImage = true;
@@ -592,6 +593,30 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
       error: () => {
         this.actionError = this.translate.instant('admin.submissionDetail.errors.approveFailed');
         this.showApproveModal = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  resendNotification(): void {
+    if (!this.submission || this.resending) return;
+    this.actionError = '';
+    this.resending = true;
+    this.adminService.resendRejectionNotification(this.submission.id).subscribe({
+      next: ({ emailSent }) => {
+        this.resending = false;
+        if (emailSent && this.submission) {
+          this.submission = { ...this.submission, notificationStatus: 'sent' };
+        } else {
+          this.actionError = this.translate.instant(
+            'admin.submissionDetail.errors.rejectEmailFailed',
+          );
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.resending = false;
+        this.actionError = this.translate.instant('admin.submissionDetail.errors.resendFailed');
         this.cdr.markForCheck();
       },
     });

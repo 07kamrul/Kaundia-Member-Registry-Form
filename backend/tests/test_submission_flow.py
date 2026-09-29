@@ -213,6 +213,10 @@ async def test_reject_submission_emails_escaped_reason(
 async def test_reject_submission_reports_email_failure_but_stays_rejected(
     client: AsyncClient, admin_user: AdminUser, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    from app.services import email as email_service
+
+    monkeypatch.setattr(email_service, "RETRY_BASE_DELAY_SECONDS", 0)
+
     async def failing_send_email(to: str, subject: str, html_body: str) -> bool:
         return False
 
@@ -231,6 +235,59 @@ async def test_reject_submission_reports_email_failure_but_stays_rejected(
         f"/api/admin/submissions/{member_pk}", headers=admin_headers
     )
     assert detail_response.json()["status"] == "rejected"
+
+
+async def test_failed_rejection_email_is_recorded_and_can_be_resent(
+    client: AsyncClient, admin_user: AdminUser, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.services import email as email_service
+
+    monkeypatch.setattr(email_service, "RETRY_BASE_DELAY_SECONDS", 0)
+    attempts: list[int] = []
+    deliver = {"ok": False}
+
+    async def fake_send_email(to: str, subject: str, html_body: str) -> bool:
+        attempts.append(1)
+        return deliver["ok"]
+
+    monkeypatch.setattr(admin_routes, "send_email", fake_send_email)
+    member_pk, admin_headers = await _submit_and_login(client)
+
+    reject = await client.post(
+        f"/api/admin/submissions/{member_pk}/reject",
+        json={"reason": "image are missing"},
+        headers=admin_headers,
+    )
+    assert reject.json()["email_sent"] is False
+    assert len(attempts) == email_service.MAX_SEND_ATTEMPTS
+    detail = await client.get(f"/api/admin/submissions/{member_pk}", headers=admin_headers)
+    assert detail.json()["notification_status"] == "failed"
+
+    deliver["ok"] = True
+    resend = await client.post(
+        f"/api/admin/submissions/{member_pk}/resend-notification", headers=admin_headers
+    )
+    assert resend.status_code == 200
+    assert resend.json() == {"status": "rejected", "email_sent": True}
+    detail = await client.get(f"/api/admin/submissions/{member_pk}", headers=admin_headers)
+    assert detail.json()["notification_status"] == "sent"
+
+    again = await client.post(
+        f"/api/admin/submissions/{member_pk}/resend-notification", headers=admin_headers
+    )
+    assert again.status_code == 409
+
+
+async def test_resend_notification_rejects_non_rejected_submission(
+    client: AsyncClient, admin_user: AdminUser
+) -> None:
+    member_pk, admin_headers = await _submit_and_login(client)
+
+    resend = await client.post(
+        f"/api/admin/submissions/{member_pk}/resend-notification", headers=admin_headers
+    )
+
+    assert resend.status_code == 409
 
 
 @pytest.mark.parametrize("reason", ["", "   "])

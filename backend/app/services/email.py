@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections.abc import Awaitable, Callable
 
 import aiosmtplib
 from email.message import EmailMessage
@@ -11,6 +12,10 @@ settings = get_settings()
 
 # Bounds how long a slow/unreachable SMTP server can hold a request open.
 SMTP_TIMEOUT_SECONDS = 10
+
+MAX_SEND_ATTEMPTS = 3
+# Delay before retry n is RETRY_BASE_DELAY_SECONDS * 2**(n-1): 1s, then 2s.
+RETRY_BASE_DELAY_SECONDS = 1.0
 
 # aiosmtplib errors, socket/DNS failures (OSError) and asyncio timeouts.
 _DELIVERY_ERRORS = (aiosmtplib.SMTPException, OSError, asyncio.TimeoutError)
@@ -47,3 +52,18 @@ async def send_email(to: str, subject: str, html_body: str) -> bool:
         # trip error alerting instead of masquerading as "email not sent".
         logger.exception("Failed to send email to %s", to)
         return False
+
+
+async def send_with_retries(send: Callable[[], Awaitable[bool]]) -> bool:
+    """Call `send` up to MAX_SEND_ATTEMPTS times with exponential backoff,
+    stopping at the first success. Logs every attempt; returns whether any
+    attempt succeeded."""
+    for attempt in range(1, MAX_SEND_ATTEMPTS + 1):
+        if await send():
+            logger.info("Email send succeeded on attempt %d/%d", attempt, MAX_SEND_ATTEMPTS)
+            return True
+        logger.warning("Email send failed on attempt %d/%d", attempt, MAX_SEND_ATTEMPTS)
+        if attempt < MAX_SEND_ATTEMPTS:
+            await asyncio.sleep(RETRY_BASE_DELAY_SECONDS * 2 ** (attempt - 1))
+    logger.error("Email send failed after %d attempts", MAX_SEND_ATTEMPTS)
+    return False

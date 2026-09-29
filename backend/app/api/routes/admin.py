@@ -34,7 +34,7 @@ from app.schemas.member import (
 )
 from app.schemas.picnic_payment import PicnicPaymentOut
 from app.core.config import get_settings
-from app.services.email import send_email
+from app.services.email import send_email, send_with_retries
 from app.services.storage import save_upload_file
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -226,6 +226,21 @@ def _rejection_email_body(full_name: str, reason: str) -> str:
     )
 
 
+async def _notify_rejection(db: AsyncSession, member: Member) -> bool:
+    """Email the applicant their rejection (with retries) and record the
+    outcome on the member so a failure stays visible and re-sendable."""
+    sent = await send_with_retries(
+        lambda: send_email(
+            to=member.email,
+            subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - আবেদনের আপডেট",
+            html_body=_rejection_email_body(member.full_name, member.rejection_reason or ""),
+        )
+    )
+    member.notification_status = "sent" if sent else "failed"
+    await db.commit()
+    return sent
+
+
 @router.post("/submissions/{member_id}/reject", response_model=RejectResponse)
 async def reject_submission(
     member_id: int,
@@ -248,11 +263,25 @@ async def reject_submission(
     )
     await db.commit()
 
-    email_sent = await send_email(
-        to=member.email,
-        subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - আবেদনের আপডেট",
-        html_body=_rejection_email_body(member.full_name, payload.reason),
-    )
+    email_sent = await _notify_rejection(db, member)
+    return RejectResponse(status="rejected", email_sent=email_sent)
+
+
+@router.post(
+    "/submissions/{member_id}/resend-notification", response_model=RejectResponse
+)
+async def resend_rejection_notification(
+    member_id: int,
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("approve_membership")),
+) -> RejectResponse:
+    member = await _get_member_or_404(db, member_id, eager=False)
+    if member.status != MemberStatus.REJECTED or member.notification_status != "failed":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No failed rejection notification to resend",
+        )
+    email_sent = await _notify_rejection(db, member)
     return RejectResponse(status="rejected", email_sent=email_sent)
 
 

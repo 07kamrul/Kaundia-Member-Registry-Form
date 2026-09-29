@@ -87,6 +87,8 @@ export interface SubmissionDetail extends SubmissionSummary {
   memberSignature?: string;
   receiptPhotoUrl?: string;
   rejectionReason?: string;
+  /** Rejection email outcome; 'failed' means the applicant was not notified. */
+  notificationStatus?: 'sent' | 'failed';
 }
 
 export interface Member {
