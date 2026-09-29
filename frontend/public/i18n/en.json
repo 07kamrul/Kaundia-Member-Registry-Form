@@ -185,7 +185,12 @@
       "documentLabel": "Document",
       "statusApproved": "Approved",
       "statusPending": "Under Review",
-      "statusRejected": "Rejected"
+      "statusRejected": "Rejected",
+      "changePhotoButton": "Change Photo",
+      "removePhotoButton": "Remove",
+      "photoTypeError": "Please select an image file (JPG/PNG)",
+      "photoSizeError": "Photo size must be less than 3 MB",
+      "photoUploadError": "Failed to upload the photo. Please try again."
     },
     "installments": {
       "title": "Subscription History",

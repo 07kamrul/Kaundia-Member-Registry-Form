@@ -1,6 +1,7 @@
 from datetime import date
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,6 +24,7 @@ from app.schemas.picnic_payment import PicnicPaymentIn, PicnicPaymentOut
 from app.services.audit import record_audit
 from app.services.email import send_email
 from app.services.fee_calculation import calculate_picnic_fee, resolve_picnic_rates
+from app.services.storage import save_upload_file
 
 from fastapi import Query
 
@@ -215,6 +217,35 @@ async def update_my_profile(
             ),
         )
 
+    return member
+
+
+# save_upload_file also accepts PDFs (documents/receipts need them); a member
+# photo is always an image, so reject PDFs here before the storage layer does.
+_PHOTO_EXTENSIONS = {".jpg", ".jpeg", ".png"}
+
+
+@router.post("/me/photo", response_model=MemberDetail)
+async def upload_my_photo(
+    photo: UploadFile = File(...),
+    member: Member = Depends(get_current_member_detail),
+    db: AsyncSession = Depends(get_db),
+) -> Member:
+    """Replace the member's profile photo.
+
+    Upload files can be lost from the server's uploads directory (e.g. saved
+    before the uploads volume existed), leaving the stored path pointing at
+    nothing; the member needs a way to restore the photo themselves. Swapping
+    the photo is not a core-field edit, so it does not re-queue approval.
+    """
+    suffix = Path(photo.filename or "").suffix.lower()
+    if suffix not in _PHOTO_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Unsupported photo type; use JPG or PNG.",
+        )
+    member.member_photo_path = await save_upload_file(photo, f"photos/member_{member.id}")
+    await db.commit()
     return member
 
 

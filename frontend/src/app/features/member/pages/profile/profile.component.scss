@@ -345,3 +345,46 @@
     font-size: 0.85rem;
   }
 }
+
+/* Photo replacement inside the edit form. */
+.profile-edit-photo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.profile-edit-photo-preview {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+.profile-edit-photo-placeholder {
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+  border: 1px solid var(--emerald-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.6rem;
+}
+
+.profile-edit-photo-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-edit-photo-label {
+  cursor: pointer;
+}
+
+.profile-photo-error {
+  color: var(--red-700);
+}

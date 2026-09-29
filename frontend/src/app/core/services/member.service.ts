@@ -292,6 +292,16 @@ export class MemberService {
       .pipe(map(toMemberProfile));
   }
 
+  /** Uploads a new profile photo (JPG/PNG, enforced again server-side). */
+  uploadPhoto(file: File): Observable<MemberProfile> {
+    const form = new FormData();
+    form.append('photo', file);
+    this.clearProfileCache();
+    return this.http
+      .post<MemberProfileApiModel>(`${this.base}/me/photo`, form)
+      .pipe(map(toMemberProfile));
+  }
+
   getInstallments(): Observable<Installment[]> {
     return this.http.get<Installment[]>(`${this.base}/installments`);
   }

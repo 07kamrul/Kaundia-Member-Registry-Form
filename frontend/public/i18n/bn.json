@@ -185,7 +185,12 @@
       "documentLabel": "দলিল",
       "statusApproved": "অনুমোদিত",
       "statusPending": "পর্যালোচনাধীন",
-      "statusRejected": "প্রত্যাখ্যাত"
+      "statusRejected": "প্রত্যাখ্যাত",
+      "changePhotoButton": "ছবি পরিবর্তন",
+      "removePhotoButton": "সরান",
+      "photoTypeError": "অনুগ্রহ করে একটি ছবি নির্বাচন করুন (JPG/PNG)",
+      "photoSizeError": "ছবির আকার ৩ এমবি-র কম হতে হবে",
+      "photoUploadError": "ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।"
     },
     "installments": {
       "title": "চাঁদার ইতিহাস",

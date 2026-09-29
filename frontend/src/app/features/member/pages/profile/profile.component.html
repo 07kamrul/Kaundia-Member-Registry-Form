@@ -62,6 +62,28 @@
         @if (willRequeue) {
           <div class="error-box" style="margin-bottom:0.75rem"><p style="margin:0">{{ 'member.profile.requeueWarning' | translate }}</p></div>
         }
+        <div class="profile-edit-photo">
+          @if (photoPreviewUrl) {
+            <img [src]="photoPreviewUrl" [alt]="'member.profile.photoLabel' | translate" class="profile-edit-photo-preview" />
+            <button type="button" class="btn btn-secondary btn-sm" (click)="removeSelectedPhoto()">
+              {{ 'member.profile.removePhotoButton' | translate }}
+            </button>
+          } @else {
+            <div class="profile-edit-photo-preview profile-edit-photo-placeholder">{{ avatarInitial }}</div>
+            <div class="profile-edit-photo-controls">
+              <label class="btn btn-secondary btn-sm profile-edit-photo-label">
+                {{ 'member.profile.changePhotoButton' | translate }}
+                <input type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" (change)="onPhotoSelected($event)" hidden />
+              </label>
+            </div>
+          }
+        </div>
+        @if (photoInputError) {
+          <p class="field-hint profile-photo-error">{{ photoInputError }}</p>
+        }
+        @if (photoUploadError) {
+          <p class="error-box">{{ photoUploadError }}</p>
+        }
         <div class="profile-form-grid">
           <label class="profile-field">
             <span>{{ 'member.profile.nameLabel' | translate }}</span>

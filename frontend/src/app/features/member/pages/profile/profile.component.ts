@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { of } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   MemberService,
@@ -58,6 +59,12 @@ export class ProfileComponent implements OnInit {
   saveError = '';
   willRequeue = false;
   readonly photoFailed = signal(false);
+
+  // Pending photo replacement: picked in edit mode, uploaded on save.
+  selectedPhoto: File | null = null;
+  photoPreviewUrl: string | null = null;
+  photoInputError = '';
+  photoUploadError = '';
 
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -118,6 +125,38 @@ export class ProfileComponent implements OnInit {
     this.photoFailed.set(true);
   }
 
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.photoInputError = '';
+    if (!file) return;
+    if (!/\.(jpe?g|png)$/i.test(file.name)) {
+      this.photoInputError = this.translate.instant('member.profile.photoTypeError');
+      input.value = '';
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      this.photoInputError = this.translate.instant('member.profile.photoSizeError');
+      input.value = '';
+      return;
+    }
+    this.selectedPhoto = file;
+    this.photoPreviewUrl = URL.createObjectURL(file);
+    input.value = '';
+  }
+
+  removeSelectedPhoto(): void {
+    if (this.photoPreviewUrl) URL.revokeObjectURL(this.photoPreviewUrl);
+    this.selectedPhoto = null;
+    this.photoPreviewUrl = null;
+    this.photoInputError = '';
+  }
+
+  private resetPhotoDraft(): void {
+    this.removeSelectedPhoto();
+    this.photoUploadError = '';
+  }
+
   hasCurrentAddress(profile: MemberProfile): boolean {
     return [
       profile.currentHouse,
@@ -165,6 +204,7 @@ export class ProfileComponent implements OnInit {
     };
     this.editing = true;
     this.saveError = '';
+    this.resetPhotoDraft();
     this.checkRequeue();
   }
 
@@ -172,6 +212,7 @@ export class ProfileComponent implements OnInit {
     this.editing = false;
     this.draft = {};
     this.saveError = '';
+    this.resetPhotoDraft();
   }
 
   checkRequeue(): void {
@@ -188,6 +229,31 @@ export class ProfileComponent implements OnInit {
     if (!this.profile) return;
     this.saving = true;
     this.saveError = '';
+    this.photoUploadError = '';
+    // The photo upload goes first: if it fails, the text edits stay in draft
+    // so the member can retry without retyping anything.
+    const details$ = this.selectedPhoto
+      ? this.memberService.uploadPhoto(this.selectedPhoto)
+      : of(null as unknown as MemberProfile);
+    details$.subscribe({
+      next: (uploaded) => {
+        if (uploaded) {
+          this.profile = uploaded;
+          this.photoFailed.set(false);
+          this.resetPhotoDraft();
+        }
+        this.patchProfileDetails();
+      },
+      error: () => {
+        this.photoUploadError = this.translate.instant('member.profile.photoUploadError');
+        this.saving = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  private patchProfileDetails(): void {
+    if (!this.profile) return;
     this.memberService.updateProfile(this.draft).subscribe({
       next: (updated) => {
         this.profile = updated;
