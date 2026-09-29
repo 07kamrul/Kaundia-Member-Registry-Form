@@ -140,3 +140,36 @@ def test_slugify_path_segment(label: str, expected: str) -> None:
     assert slug == expected
     assert slug.isascii()
     assert "/" not in slug and "\\" not in slug
+
+
+def test_upload_root_check_reports_writable_absolute_dir(tmp_path, monkeypatch, caplog) -> None:
+    monkeypatch.setattr(storage.settings, "upload_dir", str(tmp_path / "up"))
+
+    with caplog.at_level("INFO"):
+        is_writable = storage.check_upload_root()
+
+    assert is_writable is True
+    assert "writable=True" in caplog.text
+    assert "relative" not in caplog.text
+
+
+def test_upload_root_check_warns_on_relative_dir(tmp_path, monkeypatch, caplog) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(storage.settings, "upload_dir", "storage/kaundia/uploads")
+
+    with caplog.at_level("INFO"):
+        storage.check_upload_root()
+
+    assert "relative" in caplog.text
+
+
+def test_upload_root_check_reports_unwritable_dir(tmp_path, monkeypatch, caplog) -> None:
+    blocker = tmp_path / "file"
+    blocker.write_text("x")
+    monkeypatch.setattr(storage.settings, "upload_dir", str(blocker / "up"))
+
+    with caplog.at_level("INFO"):
+        is_writable = storage.check_upload_root()
+
+    assert is_writable is False
+    assert "writable=False" in caplog.text

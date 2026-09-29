@@ -12,7 +12,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from app.api.routes import admin, auth, member, notices, public, rbac, submissions
 from app.core.config import get_settings
 from app.db.session import engine
-from app.services.storage import UploadStaticFiles
+from app.services.storage import UploadStaticFiles, check_upload_root
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     # Uploads are written and served from this exact directory; printing it on
     # startup makes "file saved here, server looking there" mismatches obvious.
     logger.info("[uploads] serving directory: %s", settings.upload_root)
+    check_upload_root()
     # Warm the pool so the first request doesn't pay connection setup (remote
     # Postgres handshakes dominate first-hit latency), then release everything
     # cleanly on shutdown so the process exits without dangling connections.

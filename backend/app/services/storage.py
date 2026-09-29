@@ -70,6 +70,37 @@ def slugify_path_segment(value: str) -> str:
     return f"doc-{digest}"
 
 
+def check_upload_root() -> bool:
+    """Log where uploads live and whether that directory is writable.
+
+    Run at startup so a misconfigured STORAGE_BASE_DIR shows up in the first
+    log lines instead of as "upload succeeded, file 404s after redeploy". A
+    relative value resolves inside the container's working directory - which
+    is not a mounted volume, so everything written there is lost on restart.
+    """
+    root = settings.upload_root
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+        probe = root / f".write-probe-{uuid.uuid4().hex}"
+        probe.write_bytes(b"")
+        probe.unlink()
+        is_writable = True
+    except OSError as exc:
+        logger.error("[uploads] upload root %s is not writable: %s", root, exc)
+        is_writable = False
+
+    logger.info("[uploads] UPLOAD_ROOT=%s writable=%s", root, is_writable)
+    if not Path(settings.upload_dir).expanduser().is_absolute():
+        logger.warning(
+            "[uploads] STORAGE_BASE_DIR=%r is relative (resolved to %s); in a "
+            "container this is usually NOT a persistent volume and uploads will "
+            "be lost on redeploy. Set it to the mounted path, e.g. /app/uploads.",
+            settings.upload_dir,
+            root,
+        )
+    return is_writable
+
+
 class UploadStaticFiles(StaticFiles):
     """Serves ``settings.upload_root`` - the directory ``save_upload_file``
     writes to.
