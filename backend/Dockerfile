@@ -18,11 +18,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /app/uploads
+# Strip CRLF in case the repo was checked out on Windows.
+RUN sed -i 's/\r$//' scripts/*.sh && chmod +x scripts/entrypoint.sh && mkdir -p /app/uploads
 
 # Uploads must outlive the container; mount persistent storage here.
 VOLUME ["/app/uploads"]
 
 EXPOSE 9090
 
-CMD ["sh", "-c", "sh scripts/migrate.sh && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 9090"]
+# Entrypoint pins STORAGE_BASE_DIR, prepares uploads, migrates + seeds.
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9090"]
