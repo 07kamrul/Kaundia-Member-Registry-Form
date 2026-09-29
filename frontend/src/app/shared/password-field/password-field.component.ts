@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, forwardRef, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  forwardRef,
+  inject,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IconComponent } from '../icon/icon.component';
@@ -13,7 +20,11 @@ import { IconComponent } from '../icon/icon.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslatePipe, IconComponent],
   providers: [
-    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => PasswordFieldComponent), multi: true },
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => PasswordFieldComponent),
+      multi: true,
+    },
   ],
   template: `
     <div class="password-field">

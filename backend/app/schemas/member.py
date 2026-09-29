@@ -72,6 +72,7 @@ class PropertyOut(BaseModel):
     dag_no_rs: str | None = None
     holding_number: str | None = None
     land_quantity: str | None = None
+    my_share_quantity: str | None = None
     ownership: str | None = None
     co_owners: list[CoOwnerOut] = []
     applicable_docs: list[ApplicableDocOut] = []

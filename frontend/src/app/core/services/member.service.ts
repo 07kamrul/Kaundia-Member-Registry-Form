@@ -3,6 +3,65 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type { Installment } from '../models/admin.model';
+import { toFileUrl } from './admin.service';
+
+export interface MemberCoOwner {
+  id: number;
+  ownerName: string;
+  ownerPhone: string;
+}
+
+export interface MemberPropertyDoc {
+  id: number;
+  docType: string;
+  fileUrl?: string;
+}
+
+export interface MemberProperty {
+  id: number;
+  propertyType: string[];
+  propertyTypeOther?: string;
+  khatianNo?: string;
+  dagNoCs?: string;
+  dagNoRs?: string;
+  holdingNumber?: string;
+  landQuantity?: string;
+  myShareQuantity?: string;
+  ownership?: string;
+  coOwners: MemberCoOwner[];
+  applicableDocs: MemberPropertyDoc[];
+}
+
+export interface MemberNominee {
+  id: number;
+  name: string;
+  relation: string;
+  mobile: string;
+  address?: string;
+}
+
+interface PropertyApiModel {
+  id: number;
+  property_type?: string[];
+  property_type_other?: string | null;
+  khatian_no?: string | null;
+  dag_no_cs?: string | null;
+  dag_no_rs?: string | null;
+  holding_number?: string | null;
+  land_quantity?: string | null;
+  my_share_quantity?: string | null;
+  ownership?: string | null;
+  co_owners?: { id: number; owner_name: string; owner_phone: string }[];
+  applicable_docs?: { id: number; doc_type: string; file_path: string | null }[];
+}
+
+interface NomineeApiModel {
+  id: number;
+  name: string;
+  relation: string;
+  mobile: string;
+  address?: string | null;
+}
 
 export interface MemberProfile {
   memberId: string;
@@ -33,8 +92,16 @@ export interface MemberProfile {
   urgentContactRelation?: string;
   urgentContactMobile?: string;
   urgentContactAddress?: string;
-  properties: unknown[];
-  nominees: unknown[];
+  admissionFee?: string;
+  subscription?: string;
+  receiptNo?: string;
+  paymentMethod?: string;
+  memberSignature?: string;
+  submissionDate?: string;
+  memberPhotoUrl?: string;
+  receiptPhotoUrl?: string;
+  properties: MemberProperty[];
+  nominees: MemberNominee[];
 }
 
 interface MemberProfileApiModel {
@@ -66,8 +133,51 @@ interface MemberProfileApiModel {
   urgent_contact_relation?: string;
   urgent_contact_mobile?: string;
   urgent_contact_address?: string;
-  properties: unknown[];
-  nominees: unknown[];
+  admission_fee?: string;
+  subscription?: string;
+  receipt_no?: string;
+  payment_method?: string;
+  member_signature?: string | null;
+  submission_date?: string;
+  member_photo_path?: string | null;
+  receipt_photo_path?: string | null;
+  properties: PropertyApiModel[];
+  nominees: NomineeApiModel[];
+}
+
+function toProperty(api: PropertyApiModel): MemberProperty {
+  return {
+    id: api.id,
+    propertyType: api.property_type ?? [],
+    propertyTypeOther: api.property_type_other ?? undefined,
+    khatianNo: api.khatian_no ?? undefined,
+    dagNoCs: api.dag_no_cs ?? undefined,
+    dagNoRs: api.dag_no_rs ?? undefined,
+    holdingNumber: api.holding_number ?? undefined,
+    landQuantity: api.land_quantity ?? undefined,
+    myShareQuantity: api.my_share_quantity ?? undefined,
+    ownership: api.ownership ?? undefined,
+    coOwners: (api.co_owners ?? []).map((c) => ({
+      id: c.id,
+      ownerName: c.owner_name,
+      ownerPhone: c.owner_phone,
+    })),
+    applicableDocs: (api.applicable_docs ?? []).map((d) => ({
+      id: d.id,
+      docType: d.doc_type,
+      fileUrl: toFileUrl(d.file_path),
+    })),
+  };
+}
+
+function toNominee(api: NomineeApiModel): MemberNominee {
+  return {
+    id: api.id,
+    name: api.name,
+    relation: api.relation,
+    mobile: api.mobile,
+    address: api.address ?? undefined,
+  };
 }
 
 function toMemberProfile(api: MemberProfileApiModel): MemberProfile {
@@ -100,8 +210,16 @@ function toMemberProfile(api: MemberProfileApiModel): MemberProfile {
     urgentContactRelation: api.urgent_contact_relation,
     urgentContactMobile: api.urgent_contact_mobile,
     urgentContactAddress: api.urgent_contact_address,
-    properties: api.properties,
-    nominees: api.nominees,
+    admissionFee: api.admission_fee,
+    subscription: api.subscription,
+    receiptNo: api.receipt_no,
+    paymentMethod: api.payment_method,
+    memberSignature: api.member_signature ?? undefined,
+    submissionDate: api.submission_date,
+    memberPhotoUrl: toFileUrl(api.member_photo_path ?? null),
+    receiptPhotoUrl: toFileUrl(api.receipt_photo_path ?? null),
+    properties: (api.properties ?? []).map(toProperty),
+    nominees: (api.nominees ?? []).map(toNominee),
   };
 }
 
