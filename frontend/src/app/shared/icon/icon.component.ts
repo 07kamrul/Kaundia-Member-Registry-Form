@@ -26,6 +26,7 @@ export type IconName =
   | 'eye'
   | 'eye-off'
   | 'phone'
+  | 'mail'
   | 'map'
   | 'pin'
   | 'copy'
@@ -73,6 +74,8 @@ const ICON_PATHS: Record<IconName, string> = {
   download: '<path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/>',
   alert:
     '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  mail:
+    '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
   'chevron-down': '<path d="m6 9 6 6 6-6"/>',
   'check-circle': '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
 };

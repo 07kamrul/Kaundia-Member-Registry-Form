@@ -1,4 +1,4 @@
-<div style="max-width:56rem;margin:0 auto">
+<div class="profile-page">
   <div class="page-header">
     <div>
       <h1 class="page-title">{{ 'member.profile.title' | translate }}</h1>
@@ -11,7 +11,7 @@
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else if (profile) {
     @if (profile.status === 'pending') {
-      <div class="error-box" style="margin-bottom:1rem"><p style="margin:0">{{ 'member.profile.pendingReviewNotice' | translate }}</p></div>
+      <div class="error-box profile-notice"><p style="margin:0">{{ 'member.profile.pendingReviewNotice' | translate }}</p></div>
     }
 
     <div class="profile-hero card">
@@ -32,12 +32,18 @@
             {{ statusKey | translate }}
           </span>
         </div>
-        @if (profile.mobile) {
-          <p class="profile-hero-contact">
-            <app-icon name="phone" [size]="13" /> {{ profile.mobile }}
-            @if (profile.email) { · {{ profile.email }} }
-          </p>
-        }
+        <div class="profile-hero-contact">
+          @if (profile.mobile) {
+            <a class="profile-contact-chip" [href]="'tel:' + profile.mobile">
+              <app-icon name="phone" [size]="13" /> {{ profile.mobile }}
+            </a>
+          }
+          @if (profile.email) {
+            <a class="profile-contact-chip" [href]="'mailto:' + profile.email">
+              <app-icon name="mail" [size]="13" /> {{ profile.email }}
+            </a>
+          }
+        </div>
       </div>
       <div class="profile-hero-actions">
         @if (!editing) {
@@ -49,38 +55,47 @@
     </div>
 
     @if (editing) {
-      <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
-        <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.editTitle' | translate }}</h3>
+      <div class="card profile-section">
+        <div class="profile-section-head">
+          <h3 class="profile-section-title">{{ 'member.profile.editTitle' | translate }}</h3>
+        </div>
         @if (willRequeue) {
           <div class="error-box" style="margin-bottom:0.75rem"><p style="margin:0">{{ 'member.profile.requeueWarning' | translate }}</p></div>
         }
-        <div class="detail-card-grid">
-          <label>{{ 'member.profile.nameLabel' | translate }}<br />
+        <div class="profile-form-grid">
+          <label class="profile-field">
+            <span>{{ 'member.profile.nameLabel' | translate }}</span>
             <input type="text" [(ngModel)]="draft.fullName" name="fullName" (ngModelChange)="checkRequeue()" />
           </label>
-          <label>{{ 'member.profile.fatherOrHusbandLabel' | translate }}<br />
+          <label class="profile-field">
+            <span>{{ 'member.profile.fatherOrHusbandLabel' | translate }}</span>
             <input type="text" [(ngModel)]="draft.fatherOrHusband" name="fatherOrHusband" (ngModelChange)="checkRequeue()" />
           </label>
-          <label>{{ 'member.profile.motherLabel' | translate }}<br />
+          <label class="profile-field">
+            <span>{{ 'member.profile.motherLabel' | translate }}</span>
             <input type="text" [(ngModel)]="draft.mother" name="mother" (ngModelChange)="checkRequeue()" />
           </label>
-          <label>{{ 'member.profile.dobLabel' | translate }}<br />
+          <label class="profile-field">
+            <span>{{ 'member.profile.dobLabel' | translate }}</span>
             <input type="text" [(ngModel)]="draft.dob" name="dob" (ngModelChange)="checkRequeue()" />
           </label>
-          <label>{{ 'member.profile.nidLabel' | translate }}<br />
+          <label class="profile-field">
+            <span>{{ 'member.profile.nidLabel' | translate }}</span>
             <input type="text" [(ngModel)]="draft.nid" name="nid" (ngModelChange)="checkRequeue()" />
           </label>
-          <label>{{ 'member.profile.occupationLabel' | translate }}<br />
+          <label class="profile-field">
+            <span>{{ 'member.profile.occupationLabel' | translate }}</span>
             <input type="text" [(ngModel)]="draft.occupation" name="occupation" (ngModelChange)="checkRequeue()" />
           </label>
-          <label>{{ 'member.profile.mobileLabel' | translate }}<br />
+          <label class="profile-field">
+            <span>{{ 'member.profile.mobileLabel' | translate }}</span>
             <input type="text" [(ngModel)]="draft.mobile" name="mobile" />
           </label>
         </div>
         @if (saveError) {
-          <p class="error-box" style="margin-top:0.75rem">{{ saveError }}</p>
+          <p class="error-box">{{ saveError }}</p>
         }
-        <div style="margin-top:1rem;display:flex;gap:0.75rem">
+        <div class="profile-form-actions">
           <button type="button" class="btn btn-primary" [disabled]="saving" (click)="saveProfile()">
             {{ 'member.profile.saveButton' | translate }}
           </button>
@@ -91,131 +106,189 @@
       </div>
     }
 
-    <div class="detail-card-grid">
-      <div class="card" style="padding:1.25rem">
-        <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.personalInfoTitle' | translate }}</h3>
+    <div class="profile-grid">
+      <div class="card profile-section">
+        <div class="profile-section-head">
+          <h3 class="profile-section-title">{{ 'member.profile.personalInfoTitle' | translate }}</h3>
+        </div>
         @if (profile.memberPhotoUrl && !photoFailed()) {
           <img [src]="profile.memberPhotoUrl" [alt]="'member.profile.photoLabel' | translate" width="96" height="96" class="profile-photo" (error)="onPhotoError()" />
         }
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.memberIdLabel' | translate }}</span><span class="detail-card-value">{{ profile.memberId || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.nameLabel' | translate }}</span><span class="detail-card-value">{{ profile.fullName || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.fatherOrHusbandLabel' | translate }}</span><span class="detail-card-value">{{ profile.fatherOrHusband || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.motherLabel' | translate }}</span><span class="detail-card-value">{{ profile.mother || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.dobLabel' | translate }}</span><span class="detail-card-value">{{ profile.dob || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.genderLabel' | translate }}</span><span class="detail-card-value">{{ profile.gender || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.nationalityLabel' | translate }}</span><span class="detail-card-value">{{ profile.nationality || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.nidLabel' | translate }}</span><span class="detail-card-value">{{ profile.nid || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.occupationLabel' | translate }}</span><span class="detail-card-value">{{ profile.occupation || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.submissionDateLabel' | translate }}</span><span class="detail-card-value">{{ profile.submissionDate || '—' }}</span></div>
+        <div class="profile-rows">
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.memberIdLabel' | translate }}</span><span class="profile-row-value">{{ profile.memberId || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nameLabel' | translate }}</span><span class="profile-row-value">{{ profile.fullName || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.fatherOrHusbandLabel' | translate }}</span><span class="profile-row-value">{{ profile.fatherOrHusband || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.motherLabel' | translate }}</span><span class="profile-row-value">{{ profile.mother || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.dobLabel' | translate }}</span><span class="profile-row-value">{{ profile.dob || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.genderLabel' | translate }}</span><span class="profile-row-value">{{ profile.gender || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nationalityLabel' | translate }}</span><span class="profile-row-value">{{ profile.nationality || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nidLabel' | translate }}</span><span class="profile-row-value">{{ profile.nid || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.occupationLabel' | translate }}</span><span class="profile-row-value">{{ profile.occupation || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.submissionDateLabel' | translate }}</span><span class="profile-row-value">{{ profile.submissionDate || '—' }}</span></div>
+        </div>
       </div>
-      <div class="card" style="padding:1.25rem">
-        <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.contactTitle' | translate }}</h3>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.mobileLabel' | translate }}</span><span class="detail-card-value">@if (profile.mobile) {<a class="profile-link" [href]="'tel:' + profile.mobile">{{ profile.mobile }}</a>} @else {—}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.emailLabel' | translate }}</span><span class="detail-card-value">@if (profile.email) {<a class="profile-link" [href]="'mailto:' + profile.email">{{ profile.email }}</a>} @else {—}</span></div>
+
+      <div class="card profile-section">
+        <div class="profile-section-head">
+          <h3 class="profile-section-title">{{ 'member.profile.contactTitle' | translate }}</h3>
+        </div>
+        <div class="profile-rows">
+          <div class="profile-row profile-row-stack">
+            <span class="profile-row-label">{{ 'member.profile.mobileLabel' | translate }}</span>
+            <span class="profile-row-value">@if (profile.mobile) {<a class="profile-link" [href]="'tel:' + profile.mobile">{{ profile.mobile }}</a>} @else {—}</span>
+          </div>
+          <div class="profile-row profile-row-stack">
+            <span class="profile-row-label">{{ 'member.profile.emailLabel' | translate }}</span>
+            <span class="profile-row-value profile-row-value-wrap">@if (profile.email) {<a class="profile-link" [href]="'mailto:' + profile.email">{{ profile.email }}</a>} @else {—}</span>
+          </div>
+        </div>
       </div>
-      <div class="card" style="padding:1.25rem">
-        <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.permanentAddressLabel' | translate }}</h3>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.houseLabel' | translate }}</span><span class="detail-card-value">{{ profile.permanentHouse || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.roadLabel' | translate }}</span><span class="detail-card-value">{{ profile.permanentRoad || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.postOfficeLabel' | translate }}</span><span class="detail-card-value">{{ profile.permanentPostOffice || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.upazilaLabel' | translate }}</span><span class="detail-card-value">{{ profile.permanentUpazila || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.districtLabel' | translate }}</span><span class="detail-card-value">{{ profile.permanentDistrict || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.divisionLabel' | translate }}</span><span class="detail-card-value">{{ profile.permanentDivision || '—' }}</span></div>
+
+      <div class="card profile-section">
+        <div class="profile-section-head">
+          <h3 class="profile-section-title">{{ 'member.profile.permanentAddressLabel' | translate }}</h3>
+        </div>
+        <div class="profile-rows">
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.houseLabel' | translate }}</span><span class="profile-row-value">{{ profile.permanentHouse || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.roadLabel' | translate }}</span><span class="profile-row-value">{{ profile.permanentRoad || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.postOfficeLabel' | translate }}</span><span class="profile-row-value">{{ profile.permanentPostOffice || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.upazilaLabel' | translate }}</span><span class="profile-row-value">{{ profile.permanentUpazila || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.districtLabel' | translate }}</span><span class="profile-row-value">{{ profile.permanentDistrict || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.divisionLabel' | translate }}</span><span class="profile-row-value">{{ profile.permanentDivision || '—' }}</span></div>
+        </div>
       </div>
-      <div class="card" style="padding:1.25rem">
-        <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.currentAddressLabel' | translate }}</h3>
+
+      <div class="card profile-section">
+        <div class="profile-section-head">
+          <h3 class="profile-section-title">{{ 'member.profile.currentAddressLabel' | translate }}</h3>
+        </div>
         @if (hasCurrentAddress(profile)) {
-          <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.houseLabel' | translate }}</span><span class="detail-card-value">{{ profile.currentHouse || '—' }}</span></div>
-          <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.roadLabel' | translate }}</span><span class="detail-card-value">{{ profile.currentRoad || '—' }}</span></div>
-          <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.postOfficeLabel' | translate }}</span><span class="detail-card-value">{{ profile.currentPostOffice || '—' }}</span></div>
-          <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.upazilaLabel' | translate }}</span><span class="detail-card-value">{{ profile.currentUpazila || '—' }}</span></div>
-          <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.districtLabel' | translate }}</span><span class="detail-card-value">{{ profile.currentDistrict || '—' }}</span></div>
-          <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.divisionLabel' | translate }}</span><span class="detail-card-value">{{ profile.currentDivision || '—' }}</span></div>
+          <div class="profile-rows">
+            <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.houseLabel' | translate }}</span><span class="profile-row-value">{{ profile.currentHouse || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.roadLabel' | translate }}</span><span class="profile-row-value">{{ profile.currentRoad || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.postOfficeLabel' | translate }}</span><span class="profile-row-value">{{ profile.currentPostOffice || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.upazilaLabel' | translate }}</span><span class="profile-row-value">{{ profile.currentUpazila || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.districtLabel' | translate }}</span><span class="profile-row-value">{{ profile.currentDistrict || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.divisionLabel' | translate }}</span><span class="profile-row-value">{{ profile.currentDivision || '—' }}</span></div>
+          </div>
         } @else {
           <p class="field-hint">{{ 'member.profile.sameAsPermanentAddress' | translate }}</p>
         }
       </div>
-      <div class="card" style="padding:1.25rem">
-        <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.urgentContactTitle' | translate }}</h3>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.nameLabel' | translate }}</span><span class="detail-card-value">{{ profile.urgentContactName || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.relationLabel' | translate }}</span><span class="detail-card-value">{{ profile.urgentContactRelation || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.mobileLabel' | translate }}</span><span class="detail-card-value">{{ profile.urgentContactMobile || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.addressLabel' | translate }}</span><span class="detail-card-value">{{ profile.urgentContactAddress || '—' }}</span></div>
+
+      <div class="card profile-section">
+        <div class="profile-section-head">
+          <h3 class="profile-section-title">{{ 'member.profile.urgentContactTitle' | translate }}</h3>
+        </div>
+        <div class="profile-rows">
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nameLabel' | translate }}</span><span class="profile-row-value">{{ profile.urgentContactName || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.relationLabel' | translate }}</span><span class="profile-row-value">{{ profile.urgentContactRelation || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.mobileLabel' | translate }}</span><span class="profile-row-value">@if (profile.urgentContactMobile) {<a class="profile-link" [href]="'tel:' + profile.urgentContactMobile">{{ profile.urgentContactMobile }}</a>} @else {—}</span></div>
+          <div class="profile-row profile-row-stack">
+            <span class="profile-row-label">{{ 'member.profile.addressLabel' | translate }}</span>
+            <span class="profile-row-value profile-row-value-wrap">{{ profile.urgentContactAddress || '—' }}</span>
+          </div>
+        </div>
       </div>
-      <div class="card" style="padding:1.25rem">
-        <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.paymentTitle' | translate }}</h3>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.admissionFeeLabel' | translate }}</span><span class="detail-card-value">{{ profile.admissionFee || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.subscriptionLabel' | translate }}</span><span class="detail-card-value">{{ profile.subscription || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.receiptNoLabel' | translate }}</span><span class="detail-card-value">{{ profile.receiptNo || '—' }}</span></div>
-        <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.paymentMethodLabel' | translate }}</span><span class="detail-card-value">{{ profile.paymentMethod || '—' }}</span></div>
+
+      <div class="card profile-section">
+        <div class="profile-section-head">
+          <h3 class="profile-section-title">{{ 'member.profile.paymentTitle' | translate }}</h3>
+        </div>
+        <div class="profile-rows">
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.admissionFeeLabel' | translate }}</span><span class="profile-row-value">{{ profile.admissionFee || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.subscriptionLabel' | translate }}</span><span class="profile-row-value">{{ profile.subscription || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.receiptNoLabel' | translate }}</span><span class="profile-row-value">{{ profile.receiptNo || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.paymentMethodLabel' | translate }}</span><span class="profile-row-value">{{ profile.paymentMethod || '—' }}</span></div>
+        </div>
       </div>
     </div>
 
     @if (profile.receiptPhotoUrl || isImageDataUrl(profile.memberSignature)) {
-      <div class="detail-card-grid" style="margin-top:1rem">
+      <div class="profile-grid">
         @if (profile.receiptPhotoUrl) {
-          <div class="card" style="padding:1.25rem">
-            <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.receiptPhotoLabel' | translate }}</h3>
-            <a [href]="profile.receiptPhotoUrl" target="_blank" rel="noopener noreferrer">{{ 'member.profile.viewFile' | translate }}</a>
+          <div class="card profile-section">
+            <div class="profile-section-head">
+              <h3 class="profile-section-title">{{ 'member.profile.receiptPhotoLabel' | translate }}</h3>
+            </div>
+            <a class="profile-link" [href]="profile.receiptPhotoUrl" target="_blank" rel="noopener noreferrer">{{ 'member.profile.viewFile' | translate }}</a>
           </div>
         }
         @if (isImageDataUrl(profile.memberSignature)) {
-          <div class="card" style="padding:1.25rem">
-            <h3 class="section-title" style="background:var(--emerald-700)">{{ 'member.profile.signatureLabel' | translate }}</h3>
-            <img [src]="profile.memberSignature" [alt]="'member.profile.signatureLabel' | translate" style="max-width:100%;max-height:6rem" />
+          <div class="card profile-section">
+            <div class="profile-section-head">
+              <h3 class="profile-section-title">{{ 'member.profile.signatureLabel' | translate }}</h3>
+            </div>
+            <img [src]="profile.memberSignature" [alt]="'member.profile.signatureLabel' | translate" class="profile-signature" />
           </div>
         }
       </div>
     }
 
-    <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">{{ 'member.profile.nomineesTitle' | translate }}</h3>
-    @if (profile.nominees.length) {
-      <div class="detail-card-grid">
-        @for (nominee of profile.nominees; track nominee.id) {
-          <div class="card" style="padding:1.25rem">
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.nameLabel' | translate }}</span><span class="detail-card-value">{{ nominee.name || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.relationLabel' | translate }}</span><span class="detail-card-value">{{ nominee.relation || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.mobileLabel' | translate }}</span><span class="detail-card-value">{{ nominee.mobile || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.addressLabel' | translate }}</span><span class="detail-card-value">{{ nominee.address || '—' }}</span></div>
-          </div>
-        }
+    <section class="profile-full-section">
+      <div class="profile-full-section-head">
+        <h3 class="profile-section-title">{{ 'member.profile.nomineesTitle' | translate }}</h3>
       </div>
-    } @else {
-      <p class="field-hint">{{ 'member.profile.noNominees' | translate }}</p>
-    }
-
-    <h3 class="section-title" style="background:var(--emerald-700);margin-top:1.5rem">{{ 'member.profile.propertyTitle' | translate }}</h3>
-    @if (profile.properties.length) {
-      <div class="detail-card-grid">
-        @for (property of profile.properties; track property.id; let i = $index) {
-          <div class="card" style="padding:1.25rem">
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.propertyItemLabel' | translate }}</span><span class="detail-card-value">#{{ i + 1 }} — {{ propertyTypes(property) || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.khatianLabel' | translate }}</span><span class="detail-card-value">{{ property.khatianNo || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.dagNoCsLabel' | translate }}</span><span class="detail-card-value">{{ property.dagNoCs || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.dagNoRsLabel' | translate }}</span><span class="detail-card-value">{{ property.dagNoRs || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.holdingNumberLabel' | translate }}</span><span class="detail-card-value">{{ property.holdingNumber || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.landQuantityLabel' | translate }}</span><span class="detail-card-value">{{ property.landQuantity || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.myShareQuantityLabel' | translate }}</span><span class="detail-card-value">{{ property.myShareQuantity || '—' }}</span></div>
-            <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.ownershipLabel' | translate }}</span><span class="detail-card-value">{{ property.ownership || '—' }}</span></div>
-            @for (owner of property.coOwners; track owner.id) {
-              <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.coOwnerLabel' | translate }}</span><span class="detail-card-value">{{ owner.ownerName }} ({{ owner.ownerPhone }})</span></div>
-            }
-            @for (doc of property.applicableDocs; track doc.id) {
-              <div class="detail-card-row"><span class="detail-card-label">{{ 'member.profile.documentLabel' | translate }}</span>
-                <span class="detail-card-value">
-                  @if (doc.fileUrl) {
-                    <a [href]="doc.fileUrl" target="_blank" rel="noopener noreferrer">{{ doc.docType }}</a>
-                  } @else {
-                    {{ doc.docType }}
-                  }
-                </span>
+      @if (profile.nominees.length) {
+        <div class="profile-grid">
+          @for (nominee of profile.nominees; track nominee.id) {
+            <div class="card profile-section">
+              <div class="profile-rows">
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nameLabel' | translate }}</span><span class="profile-row-value">{{ nominee.name || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.relationLabel' | translate }}</span><span class="profile-row-value">{{ nominee.relation || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.mobileLabel' | translate }}</span><span class="profile-row-value">@if (nominee.mobile) {<a class="profile-link" [href]="'tel:' + nominee.mobile">{{ nominee.mobile }}</a>} @else {—}</span></div>
+                <div class="profile-row profile-row-stack">
+                  <span class="profile-row-label">{{ 'member.profile.addressLabel' | translate }}</span>
+                  <span class="profile-row-value profile-row-value-wrap">{{ nominee.address || '—' }}</span>
+                </div>
               </div>
-            }
-          </div>
-        }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="field-hint">{{ 'member.profile.noNominees' | translate }}</p>
+      }
+    </section>
+
+    <section class="profile-full-section">
+      <div class="profile-full-section-head">
+        <h3 class="profile-section-title">{{ 'member.profile.propertyTitle' | translate }}</h3>
       </div>
-    } @else {
-      <p class="field-hint">{{ 'member.profile.noPropertyInfo' | translate }}</p>
-    }
+      @if (profile.properties.length) {
+        <div class="profile-grid">
+          @for (property of profile.properties; track property.id; let i = $index) {
+            <div class="card profile-section">
+              <div class="profile-rows">
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.propertyItemLabel' | translate }}</span><span class="profile-row-value">#{{ i + 1 }} — {{ propertyTypes(property) || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.khatianLabel' | translate }}</span><span class="profile-row-value">{{ property.khatianNo || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.dagNoCsLabel' | translate }}</span><span class="profile-row-value">{{ property.dagNoCs || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.dagNoRsLabel' | translate }}</span><span class="profile-row-value">{{ property.dagNoRs || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.holdingNumberLabel' | translate }}</span><span class="profile-row-value">{{ property.holdingNumber || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.landQuantityLabel' | translate }}</span><span class="profile-row-value">{{ property.landQuantity || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.myShareQuantityLabel' | translate }}</span><span class="profile-row-value">{{ property.myShareQuantity || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.ownershipLabel' | translate }}</span><span class="profile-row-value">{{ property.ownership || '—' }}</span></div>
+                @for (owner of property.coOwners; track owner.id) {
+                  <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.coOwnerLabel' | translate }}</span><span class="profile-row-value">{{ owner.ownerName }} ({{ owner.ownerPhone }})</span></div>
+                }
+                @for (doc of property.applicableDocs; track doc.id) {
+                  <div class="profile-row profile-row-stack">
+                    <span class="profile-row-label">{{ 'member.profile.documentLabel' | translate }}</span>
+                    <span class="profile-row-value">
+                      @if (doc.fileUrl) {
+                        <a class="profile-link" [href]="doc.fileUrl" target="_blank" rel="noopener noreferrer">{{ doc.docType }}</a>
+                      } @else {
+                        {{ doc.docType }}
+                      }
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="field-hint">{{ 'member.profile.noPropertyInfo' | translate }}</p>
+      }
+    </section>
   }
 </div>
