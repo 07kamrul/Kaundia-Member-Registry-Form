@@ -2,6 +2,17 @@ services:
   postgres:
     image: postgres:16
     restart: unless-stopped
+    # Right-sized for a small VPS (~2-4 GB total RAM). shared_buffers ~25% of
+    # the memory we grant this container; work_mem is PER sort/hash operation,
+    # so keep it low and raise per-query only if a specific report needs it.
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c effective_cache_size=768MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=64MB
+      -c max_connections=60
+      -c wal_buffers=8MB
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-kaundia}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kaundia}
@@ -13,6 +24,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    # Hard ceiling so Postgres can never starve the host; memswap_limit equals
+    # mem_limit so Postgres does not swap silently and stall requests.
+    mem_limit: 1g
+    memswap_limit: 1g
+    shm_size: 64mb
 
   backend:
     build:
@@ -42,7 +58,11 @@ services:
     # Migrations + seed run in scripts/entrypoint.sh before this command.
     command: >
       sh -c "(python -m scripts.repair_document_paths --apply || true) &&
-             uvicorn app.main:app --host 0.0.0.0 --port 9090"
+             uvicorn app.main:app --host 0.0.0.0 --port 9090 --workers 1"
+    # Single worker is intentional for the VPS RAM budget; each additional
+    # worker is a full Python process. Raise together with mem_limit.
+    mem_limit: 768m
+    memswap_limit: 768m
 
   frontend:
     build:
@@ -52,6 +72,8 @@ services:
       - backend
     ports:
       - "9091:9091"
+    mem_limit: 128m
+    memswap_limit: 128m
 
 volumes:
   postgres_data:

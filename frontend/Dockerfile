@@ -2,6 +2,12 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
+# Angular builds run on the VPS itself (Dokploy builds on the host). An
+# uncapped Node heap can spike to multiple GB during ng build and was the
+# likely OOM-killer trigger; cap the heap so the build degrades on its own
+# instead of starving the whole server.
+ENV NODE_OPTIONS=--max-old-space-size=1536
+
 COPY package.json package-lock.json ./
 RUN npm ci
 

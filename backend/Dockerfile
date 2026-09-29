@@ -9,6 +9,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     STORAGE_BASE_DIR=/app/uploads
 
+# Runtime hint so Python's allocator returns freed arenas to the OS more
+# eagerly; matters on small VPSes where RSS creep from response buffers was
+# getting the container OOM-killed under global memory pressure.
+ENV MALLOC_ARENA_MAX=2 \
+    MALLOC_TRIM_THRESHOLD_=131072
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential libpq-dev curl \
     && rm -rf /var/lib/apt/lists/*

@@ -25,8 +25,11 @@ def _build_engine(url: str) -> AsyncEngine:
         future=True,
         pool_pre_ping=True,
         pool_recycle=1800,
-        pool_size=10,
-        max_overflow=20,
+        # Small VPS deployment: one uvicorn worker, so the pool must stay
+        # modest - each connection is a Postgres backend process with its own
+        # memory, and 10+20 here multiplied by any future worker/replica.
+        pool_size=5,
+        max_overflow=10,
         pool_timeout=30,
     )
 
