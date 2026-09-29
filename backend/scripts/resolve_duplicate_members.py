@@ -11,6 +11,12 @@ can still review and reinstate one manually afterwards.
 Normalization matches app/services/normalization.py and the migration itself:
 nid/mobile keep digits only, email is lowercased and trimmed.
 
+This runs BEFORE `alembic upgrade head` (scripts/migrate.sh), so the database
+may lag the current models. Queries therefore touch only columns that have
+existed since the initial schema - selecting whole ORM entities would compile
+SQL for newer columns (e.g. members.notification_status) that do not exist
+yet. On a fresh database with no members table it is a no-op.
+
 Usage:
     python -m scripts.resolve_duplicate_members            # dry run, prints a report
     python -m scripts.resolve_duplicate_members --apply     # writes the fixes to the DB
@@ -21,12 +27,15 @@ import asyncio
 import re
 from collections import defaultdict
 
-from sqlalchemy import select
+from sqlalchemy import inspect, select, update
 
 from app.db.session import AsyncSessionLocal
 from app.models.member import Member, MemberStatus
 
 _IDENTIFIERS = ("nid", "mobile", "email")
+
+# Columns present since the initial schema; see module docstring.
+_MEMBER_COLUMNS = (Member.id, Member.nid, Member.mobile, Member.email, Member.created_at)
 
 
 def _normalize(column: str, value: str) -> str:
@@ -37,43 +46,57 @@ def _normalize(column: str, value: str) -> str:
 
 async def resolve(apply: bool) -> None:
     async with AsyncSessionLocal() as db:
-        members = (
+        has_members_table = await db.run_sync(
+            lambda session: inspect(session.connection()).has_table("members")
+        )
+        if not has_members_table:
+            print("members table does not exist yet - nothing to resolve")
+            return
+
+        rows = (
             await db.execute(
-                select(Member).where(Member.status != MemberStatus.REJECTED)
+                select(*_MEMBER_COLUMNS).where(Member.status != MemberStatus.REJECTED)
             )
-        ).scalars().all()
+        ).all()
 
         rejected_ids: set[int] = set()
+        updates: list[dict] = []
 
         for column in _IDENTIFIERS:
-            groups: dict[str, list[Member]] = defaultdict(list)
-            for member in members:
-                if member.id in rejected_ids:
+            groups: dict[str, list] = defaultdict(list)
+            for row in rows:
+                if row.id in rejected_ids:
                     continue
-                key = _normalize(column, getattr(member, column))
-                groups[key].append(member)
+                key = _normalize(column, getattr(row, column))
+                groups[key].append(row)
 
             for key, group in groups.items():
                 if len(group) < 2:
                     continue
-                group.sort(key=lambda m: m.created_at)
+                group.sort(key=lambda r: r.created_at)
                 keep = group[-1]
                 losers = group[:-1]
                 print(
                     f"[{column}={key!r}] keeping member id={keep.id} "
                     f"(created_at={keep.created_at}), rejecting "
-                    f"{[m.id for m in losers]}"
+                    f"{[r.id for r in losers]}"
                 )
                 for member in losers:
                     rejected_ids.add(member.id)
                     if apply:
-                        member.status = MemberStatus.REJECTED
-                        member.rejection_reason = (
-                            "Auto-rejected by scripts/resolve_duplicate_members.py: "
-                            f"duplicate {column} ({key}) with member id={keep.id}"
+                        updates.append(
+                            {
+                                "id": member.id,
+                                "status": MemberStatus.REJECTED,
+                                "rejection_reason": (
+                                    "Auto-rejected by scripts/resolve_duplicate_members.py: "
+                                    f"duplicate {column} ({key}) with member id={keep.id}"
+                                ),
+                            }
                         )
 
-        if apply and rejected_ids:
+        if apply and updates:
+            await db.execute(update(Member), updates)
             await db.commit()
 
         print(
