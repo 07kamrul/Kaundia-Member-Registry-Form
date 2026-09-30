@@ -1,0 +1,265 @@
+// Global form-field design. Every input, select, textarea, date/time picker,
+// checkbox and radio in the app takes its look from here — components must
+// not restyle field colors, borders, radius or height locally. Use the
+// .field-sm modifier when a denser variant is needed.
+
+:root {
+  // Tokens map onto the palette, so light/dark theme switches repaint fields
+  // automatically without redefining anything here.
+  --field-bg: var(--surface);
+  --field-text: var(--gray-800);
+  --field-placeholder: var(--gray-500);
+  --field-border: var(--gray-300);
+  --field-border-hover: var(--gray-400);
+  --field-border-focus: var(--emerald-600);
+  --field-focus-ring: 0 0 0 2px var(--emerald-200);
+  --field-error: var(--red-600);
+  --field-error-ring: 0 0 0 2px var(--red-200);
+  --field-disabled-bg: var(--surface-2);
+  --field-radius: 0.375rem;
+  --field-height: 2.5rem;
+  --field-height-sm: 2.25rem;
+  --field-padding-y: 0.5rem;
+  --field-padding-x: 0.75rem;
+  --field-font-size: 0.875rem;
+
+  // Checkbox/radio are deliberately white bg / black border in BOTH light
+  // and dark mode for consistent contrast, per design spec.
+  --choice-bg: #fff;
+  --choice-border: #000;
+  --choice-mark: #000;
+}
+
+/* ---------- Field wrapper, label, hint, error ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.field .required {
+  color: var(--red-600);
+  margin-left: 0.15rem;
+}
+
+.field-error {
+  color: var(--field-error);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.field-hint {
+  color: var(--gray-600);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.field-label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.field-error-inline {
+  color: var(--field-error);
+  font-size: 0.8rem;
+}
+
+/* ---------- Text-like controls ---------- */
+
+input:not([type]),
+input[type='text'],
+input[type='date'],
+input[type='datetime-local'],
+input[type='time'],
+input[type='email'],
+input[type='number'],
+input[type='password'],
+input[type='tel'],
+input[type='search'],
+input[type='url'],
+select,
+textarea,
+.field-control {
+  width: 100%;
+  min-height: var(--field-height);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  padding: var(--field-padding-y) var(--field-padding-x);
+  font-size: var(--field-font-size);
+  font-family: inherit;
+  // Explicit background/text color — without these, native controls fall
+  // back to the browser's own dark-mode widget chrome whenever the OS
+  // prefers dark, because `html` declares `color-scheme: light dark`
+  // independently of our data-theme tokens.
+  background: var(--field-bg);
+  color: var(--field-text);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &::placeholder {
+    color: var(--field-placeholder);
+    opacity: 1;
+  }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: var(--field-border-hover);
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    border-color: var(--field-border-focus);
+    box-shadow: var(--field-focus-ring);
+  }
+
+  &:disabled,
+  &[readonly] {
+    background: var(--field-disabled-bg);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  &.ng-invalid.ng-touched,
+  &[aria-invalid='true'],
+  &.is-invalid {
+    border-color: var(--field-error);
+
+    &:focus,
+    &:focus-visible {
+      box-shadow: var(--field-error-ring);
+    }
+  }
+}
+
+textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+/* Compact variant for tables, pagination and inline edits. Same colors. */
+.field-sm {
+  width: auto;
+  min-height: var(--field-height-sm);
+  padding: 0.3rem 0.5rem;
+}
+
+/* ---------- Checkbox ---------- */
+
+.checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  background: var(--choice-bg);
+  border: 2px solid var(--choice-border);
+  border-radius: 4px;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+input[type='checkbox']::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: transform 0.12s;
+  background: var(--choice-mark);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+}
+
+input[type='checkbox']:checked::after {
+  transform: scale(1);
+}
+
+/* ---------- Radio ---------- */
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+// .gender-toggle hides its radios behind segmented labels, so it is excluded.
+input[type='radio']:not(.gender-toggle input) {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  background: var(--choice-bg);
+  border: 1.5px solid var(--choice-border);
+  border-radius: 50%;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+input[type='radio']:not(.gender-toggle input)::after {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--choice-mark);
+  transform: scale(0);
+  transition: transform 0.12s;
+}
+
+input[type='radio']:not(.gender-toggle input):checked::after {
+  transform: scale(1);
+}
+
+/* ---------- Shared checkbox/radio states ---------- */
+
+input[type='checkbox'],
+input[type='radio']:not(.gender-toggle input) {
+  &:focus-visible {
+    outline: 3px solid rgba(0, 0, 0, 0.35);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    border-color: #999;
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
