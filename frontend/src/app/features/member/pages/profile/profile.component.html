@@ -1,48 +1,44 @@
 <div class="profile-page">
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">{{ 'member.profile.title' | translate }}</h1>
-    </div>
-  </div>
-
   @if (loading) {
     <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else if (profile) {
-    @if (profile.status === 'pending') {
-      <div class="error-box profile-notice"><p style="margin:0">{{ 'member.profile.pendingReviewNotice' | translate }}</p></div>
-    }
-
     <div class="profile-hero card">
-      <div class="profile-hero-avatar" [class.profile-hero-avatar-fallback]="photoFailed() || !profile.memberPhotoUrl">
-        @if (profile.memberPhotoUrl && !photoFailed()) {
-          <img [src]="profile.memberPhotoUrl" [alt]="'member.profile.photoLabel' | translate" (error)="onPhotoError()" />
-        } @else {
-          {{ avatarInitial }}
-        }
-      </div>
-      <div class="profile-hero-info">
-        <h1 class="profile-hero-name">{{ profile.fullName || '—' }}</h1>
-        <div class="profile-hero-meta">
-          @if (profile.memberId) {
-            <span class="profile-hero-id">{{ profile.memberId }}</span>
+      <div class="profile-hero-main">
+        <div class="profile-hero-avatar" [class.profile-hero-avatar-fallback]="photoFailed() || !profile.memberPhotoUrl">
+          @if (profile.memberPhotoUrl && !photoFailed()) {
+            <img [src]="profile.memberPhotoUrl" [alt]="'member.profile.photoLabel' | translate" (error)="onPhotoError()" />
+          } @else {
+            {{ avatarInitial }}
           }
-          <span [class]="'profile-status-badge ' + (profile.status === 'approved' ? 'approved' : profile.status === 'rejected' ? 'rejected' : 'pending')">
-            {{ statusKey | translate }}
-          </span>
         </div>
-        <div class="profile-hero-contact">
-          @if (profile.mobile) {
-            <a class="profile-contact-chip" [href]="'tel:' + profile.mobile">
-              <app-icon name="phone" [size]="13" /> {{ profile.mobile }}
-            </a>
-          }
-          @if (profile.email) {
-            <a class="profile-contact-chip" [href]="'mailto:' + profile.email">
-              <app-icon name="mail" [size]="13" /> {{ profile.email }}
-            </a>
-          }
+        <div class="profile-hero-info">
+          <h1 class="profile-hero-name">{{ profile.fullName || '—' }}</h1>
+          <div class="profile-hero-meta">
+            @if (profile.memberId) {
+              <span class="profile-hero-id">
+                <app-icon name="shield" [size]="12" />
+                {{ profile.memberId }}
+              </span>
+            }
+            <span [class]="'profile-status-badge ' + (profile.status === 'approved' ? 'approved' : profile.status === 'rejected' ? 'rejected' : 'pending')">
+              <span class="profile-status-dot"></span>
+              {{ statusKey | translate }}
+            </span>
+          </div>
+          <div class="profile-hero-contact">
+            @if (profile.mobile) {
+              <a class="profile-contact-chip" [href]="'tel:' + profile.mobile">
+                <app-icon name="phone" [size]="13" /> {{ profile.mobile }}
+              </a>
+            }
+            @if (profile.email) {
+              <a class="profile-contact-chip" [href]="'mailto:' + profile.email">
+                <app-icon name="mail" [size]="13" /> {{ profile.email }}
+              </a>
+            }
+          </div>
         </div>
       </div>
       <div class="profile-hero-actions">
@@ -54,13 +50,24 @@
       </div>
     </div>
 
+    @if (profile.status === 'pending') {
+      <div class="profile-banner profile-banner-warning">
+        <app-icon name="alert" [size]="18" />
+        <p>{{ 'member.profile.pendingReviewNotice' | translate }}</p>
+      </div>
+    }
+
     @if (editing) {
-      <div class="card profile-section">
+      <div class="card profile-section profile-editor">
         <div class="profile-section-head">
+          <span class="profile-section-icon"><app-icon name="user" [size]="16" /></span>
           <h3 class="profile-section-title">{{ 'member.profile.editTitle' | translate }}</h3>
         </div>
         @if (willRequeue) {
-          <div class="error-box" style="margin-bottom:0.75rem"><p style="margin:0">{{ 'member.profile.requeueWarning' | translate }}</p></div>
+          <div class="profile-banner profile-banner-warning profile-banner-inline">
+            <app-icon name="alert" [size]="18" />
+            <p>{{ 'member.profile.requeueWarning' | translate }}</p>
+          </div>
         }
         <div class="profile-edit-photo">
           @if (photoPreviewUrl) {
@@ -118,11 +125,11 @@
           <p class="error-box">{{ saveError }}</p>
         }
         <div class="profile-form-actions">
-          <button type="button" class="btn btn-primary" [disabled]="saving" (click)="saveProfile()">
-            {{ 'member.profile.saveButton' | translate }}
-          </button>
           <button type="button" class="btn btn-secondary" [disabled]="saving" (click)="cancelEdit()">
             {{ 'member.profile.cancelButton' | translate }}
+          </button>
+          <button type="button" class="btn btn-primary" [disabled]="saving" (click)="saveProfile()">
+            {{ 'member.profile.saveButton' | translate }}
           </button>
         </div>
       </div>
@@ -131,20 +138,18 @@
     <div class="profile-grid">
       <div class="card profile-section">
         <div class="profile-section-head">
+          <span class="profile-section-icon"><app-icon name="user" [size]="16" /></span>
           <h3 class="profile-section-title">{{ 'member.profile.personalInfoTitle' | translate }}</h3>
         </div>
-        @if (profile.memberPhotoUrl && !photoFailed()) {
-          <img [src]="profile.memberPhotoUrl" [alt]="'member.profile.photoLabel' | translate" width="96" height="96" class="profile-photo" (error)="onPhotoError()" />
-        }
         <div class="profile-rows">
-          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.memberIdLabel' | translate }}</span><span class="profile-row-value">{{ profile.memberId || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.memberIdLabel' | translate }}</span><span class="profile-row-value profile-row-mono">{{ profile.memberId || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nameLabel' | translate }}</span><span class="profile-row-value">{{ profile.fullName || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.fatherOrHusbandLabel' | translate }}</span><span class="profile-row-value">{{ profile.fatherOrHusband || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.motherLabel' | translate }}</span><span class="profile-row-value">{{ profile.mother || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.dobLabel' | translate }}</span><span class="profile-row-value">{{ profile.dob || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.genderLabel' | translate }}</span><span class="profile-row-value">{{ profile.gender || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nationalityLabel' | translate }}</span><span class="profile-row-value">{{ profile.nationality || '—' }}</span></div>
-          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nidLabel' | translate }}</span><span class="profile-row-value">{{ profile.nid || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.nidLabel' | translate }}</span><span class="profile-row-value profile-row-mono">{{ profile.nid || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.occupationLabel' | translate }}</span><span class="profile-row-value">{{ profile.occupation || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.submissionDateLabel' | translate }}</span><span class="profile-row-value">{{ profile.submissionDate || '—' }}</span></div>
         </div>
@@ -152,6 +157,7 @@
 
       <div class="card profile-section">
         <div class="profile-section-head">
+          <span class="profile-section-icon"><app-icon name="phone" [size]="16" /></span>
           <h3 class="profile-section-title">{{ 'member.profile.contactTitle' | translate }}</h3>
         </div>
         <div class="profile-rows">
@@ -168,6 +174,7 @@
 
       <div class="card profile-section">
         <div class="profile-section-head">
+          <span class="profile-section-icon"><app-icon name="pin" [size]="16" /></span>
           <h3 class="profile-section-title">{{ 'member.profile.permanentAddressLabel' | translate }}</h3>
         </div>
         <div class="profile-rows">
@@ -182,6 +189,7 @@
 
       <div class="card profile-section">
         <div class="profile-section-head">
+          <span class="profile-section-icon"><app-icon name="map" [size]="16" /></span>
           <h3 class="profile-section-title">{{ 'member.profile.currentAddressLabel' | translate }}</h3>
         </div>
         @if (hasCurrentAddress(profile)) {
@@ -194,12 +202,16 @@
             <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.divisionLabel' | translate }}</span><span class="profile-row-value">{{ profile.currentDivision || '—' }}</span></div>
           </div>
         } @else {
-          <p class="field-hint">{{ 'member.profile.sameAsPermanentAddress' | translate }}</p>
+          <div class="profile-empty">
+            <app-icon name="check-circle" [size]="20" />
+            <p>{{ 'member.profile.sameAsPermanentAddress' | translate }}</p>
+          </div>
         }
       </div>
 
       <div class="card profile-section">
         <div class="profile-section-head">
+          <span class="profile-section-icon"><app-icon name="alert" [size]="16" /></span>
           <h3 class="profile-section-title">{{ 'member.profile.urgentContactTitle' | translate }}</h3>
         </div>
         <div class="profile-rows">
@@ -215,12 +227,13 @@
 
       <div class="card profile-section">
         <div class="profile-section-head">
+          <span class="profile-section-icon"><app-icon name="coin" [size]="16" /></span>
           <h3 class="profile-section-title">{{ 'member.profile.paymentTitle' | translate }}</h3>
         </div>
         <div class="profile-rows">
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.admissionFeeLabel' | translate }}</span><span class="profile-row-value">{{ profile.admissionFee || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.subscriptionLabel' | translate }}</span><span class="profile-row-value">{{ profile.subscription || '—' }}</span></div>
-          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.receiptNoLabel' | translate }}</span><span class="profile-row-value">{{ profile.receiptNo || '—' }}</span></div>
+          <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.receiptNoLabel' | translate }}</span><span class="profile-row-value profile-row-mono">{{ profile.receiptNo || '—' }}</span></div>
           <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.paymentMethodLabel' | translate }}</span><span class="profile-row-value">{{ profile.paymentMethod || '—' }}</span></div>
         </div>
       </div>
@@ -231,14 +244,19 @@
         @if (profile.receiptPhotoUrl) {
           <div class="card profile-section">
             <div class="profile-section-head">
+              <span class="profile-section-icon"><app-icon name="doc" [size]="16" /></span>
               <h3 class="profile-section-title">{{ 'member.profile.receiptPhotoLabel' | translate }}</h3>
             </div>
-            <a class="profile-link" [href]="profile.receiptPhotoUrl" target="_blank" rel="noopener noreferrer">{{ 'member.profile.viewFile' | translate }}</a>
+            <a class="btn btn-secondary btn-sm profile-doc-button" [href]="profile.receiptPhotoUrl" target="_blank" rel="noopener noreferrer">
+              <app-icon name="eye" [size]="14" />
+              {{ 'member.profile.viewFile' | translate }}
+            </a>
           </div>
         }
         @if (isImageDataUrl(profile.memberSignature)) {
           <div class="card profile-section">
             <div class="profile-section-head">
+              <span class="profile-section-icon"><app-icon name="check-circle" [size]="16" /></span>
               <h3 class="profile-section-title">{{ 'member.profile.signatureLabel' | translate }}</h3>
             </div>
             <img [src]="profile.memberSignature" [alt]="'member.profile.signatureLabel' | translate" class="profile-signature" />
@@ -249,7 +267,11 @@
 
     <section class="profile-full-section">
       <div class="profile-full-section-head">
+        <span class="profile-section-icon"><app-icon name="users" [size]="16" /></span>
         <h3 class="profile-section-title">{{ 'member.profile.nomineesTitle' | translate }}</h3>
+        @if (profile.nominees.length) {
+          <span class="profile-count-pill">{{ profile.nominees.length }}</span>
+        }
       </div>
       @if (profile.nominees.length) {
         <div class="profile-grid">
@@ -268,13 +290,20 @@
           }
         </div>
       } @else {
-        <p class="field-hint">{{ 'member.profile.noNominees' | translate }}</p>
+        <div class="card profile-empty profile-empty-block">
+          <app-icon name="users" [size]="22" />
+          <p>{{ 'member.profile.noNominees' | translate }}</p>
+        </div>
       }
     </section>
 
     <section class="profile-full-section">
       <div class="profile-full-section-head">
+        <span class="profile-section-icon"><app-icon name="doc" [size]="16" /></span>
         <h3 class="profile-section-title">{{ 'member.profile.propertyTitle' | translate }}</h3>
+        @if (profile.properties.length) {
+          <span class="profile-count-pill">{{ profile.properties.length }}</span>
+        }
       </div>
       @if (profile.properties.length) {
         <div class="profile-grid">
@@ -282,10 +311,10 @@
             <div class="card profile-section">
               <div class="profile-rows">
                 <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.propertyItemLabel' | translate }}</span><span class="profile-row-value">#{{ i + 1 }} — {{ propertyTypes(property) || '—' }}</span></div>
-                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.khatianLabel' | translate }}</span><span class="profile-row-value">{{ property.khatianNo || '—' }}</span></div>
-                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.dagNoCsLabel' | translate }}</span><span class="profile-row-value">{{ property.dagNoCs || '—' }}</span></div>
-                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.dagNoRsLabel' | translate }}</span><span class="profile-row-value">{{ property.dagNoRs || '—' }}</span></div>
-                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.holdingNumberLabel' | translate }}</span><span class="profile-row-value">{{ property.holdingNumber || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.khatianLabel' | translate }}</span><span class="profile-row-value profile-row-mono">{{ property.khatianNo || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.dagNoCsLabel' | translate }}</span><span class="profile-row-value profile-row-mono">{{ property.dagNoCs || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.dagNoRsLabel' | translate }}</span><span class="profile-row-value profile-row-mono">{{ property.dagNoRs || '—' }}</span></div>
+                <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.holdingNumberLabel' | translate }}</span><span class="profile-row-value profile-row-mono">{{ property.holdingNumber || '—' }}</span></div>
                 <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.landQuantityLabel' | translate }}</span><span class="profile-row-value">{{ property.landQuantity || '—' }}</span></div>
                 <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.myShareQuantityLabel' | translate }}</span><span class="profile-row-value">{{ property.myShareQuantity || '—' }}</span></div>
                 <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.ownershipLabel' | translate }}</span><span class="profile-row-value">{{ property.ownership || '—' }}</span></div>
@@ -309,7 +338,10 @@
           }
         </div>
       } @else {
-        <p class="field-hint">{{ 'member.profile.noPropertyInfo' | translate }}</p>
+        <div class="card profile-empty profile-empty-block">
+          <app-icon name="doc" [size]="22" />
+          <p>{{ 'member.profile.noPropertyInfo' | translate }}</p>
+        </div>
       }
     </section>
   }

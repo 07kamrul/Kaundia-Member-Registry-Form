@@ -10,22 +10,50 @@
 .profile-hero {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1.25rem;
   flex-wrap: wrap;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 1.75rem 1.5rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+
+  /* Soft emerald wash behind the avatar side; keeps text on --surface readable
+     in both themes. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 55% 0 0;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--emerald-50) 65%, transparent), transparent);
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+  }
+}
+
+.profile-hero-main {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .profile-hero-avatar {
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 6rem;
+  height: 6rem;
   border-radius: 999px;
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--emerald-200);
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 0 0 5px var(--emerald-200),
+    var(--shadow-md);
 
   img {
     width: 100%;
@@ -39,7 +67,7 @@
   background: var(--emerald-50);
   color: var(--emerald-800);
   font-weight: 700;
-  font-size: 2rem;
+  font-size: 2.1rem;
   border: 1px solid var(--emerald-200);
 }
 
@@ -50,7 +78,7 @@
 
 .profile-hero-name {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: var(--gray-900);
   line-height: 1.25;
@@ -62,25 +90,43 @@
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-top: 0.5rem;
+  margin-top: 0.55rem;
 }
 
 .profile-hero-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--emerald-800);
   background: var(--emerald-50);
   border: 1px solid var(--emerald-200);
   border-radius: 999px;
-  padding: 0.15rem 0.7rem;
+  padding: 0.18rem 0.7rem;
+  letter-spacing: 0.02em;
+
+  app-icon {
+    opacity: 0.75;
+  }
 }
 
 .profile-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 999px;
-  padding: 0.15rem 0.7rem;
+  padding: 0.18rem 0.7rem;
   border: 1px solid transparent;
+
+  .profile-status-dot {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 999px;
+    background: currentColor;
+  }
 
   &.approved {
     color: var(--emerald-800);
@@ -106,22 +152,23 @@
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-top: 0.65rem;
+  margin-top: 0.7rem;
 }
 
 .profile-contact-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   font-size: 0.82rem;
   color: var(--gray-700);
-  background: var(--gray-50, #f6f7f6);
+  background: var(--surface);
   border: 1px solid var(--gray-200);
   border-radius: 999px;
-  padding: 0.25rem 0.75rem;
+  padding: 0.28rem 0.8rem;
   text-decoration: none;
   max-width: 100%;
   overflow-wrap: anywhere;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 
   app-icon {
     color: var(--emerald-700);
@@ -129,15 +176,46 @@
   }
 
   &:hover {
-    border-color: var(--emerald-300);
+    border-color: var(--emerald-200);
     color: var(--emerald-800);
+    box-shadow: var(--shadow-sm);
   }
 }
 
 .profile-hero-actions {
   display: flex;
   gap: 0.6rem;
-  margin-left: auto;
+}
+
+/* ---- Banners (pending review, requeue warning) ---- */
+
+.profile-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.87rem;
+
+  app-icon {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  &.profile-banner-warning {
+    color: var(--amber-700, #92600a);
+    background: var(--amber-50, #fef7e6);
+    border: 1px solid var(--amber-200, #f3dfae);
+  }
+
+  &.profile-banner-inline {
+    margin-bottom: 1rem;
+  }
 }
 
 /* ---- Sections ---- */
@@ -145,14 +223,29 @@
 .profile-section {
   padding: 1.25rem;
   min-width: 0;
+  height: 100%;
 }
 
 .profile-section-head {
   display: flex;
   align-items: center;
+  gap: 0.55rem;
   margin-bottom: 0.85rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 2px solid var(--emerald-100, #dcebe3);
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.profile-section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 0.55rem;
+  flex-shrink: 0;
+  color: var(--emerald-800);
+  background: var(--emerald-50);
+  border: 1px solid color-mix(in srgb, var(--emerald-200) 55%, transparent);
 }
 
 .profile-section-title {
@@ -161,6 +254,17 @@
   font-weight: 700;
   color: var(--emerald-800);
   letter-spacing: 0.01em;
+}
+
+.profile-count-pill {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
 }
 
 .profile-grid {
@@ -190,9 +294,10 @@
 .profile-full-section-head {
   display: flex;
   align-items: center;
+  gap: 0.55rem;
   margin-bottom: 0.85rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--emerald-100, #dcebe3);
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--gray-200);
 
   .profile-section-title {
     font-size: 1.05rem;
@@ -211,13 +316,18 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.45rem 0;
+  padding: 0.5rem 0;
   font-size: 0.87rem;
   border-bottom: 1px dashed var(--gray-200);
   min-width: 0;
 
   &:last-child {
     border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
   }
 }
 
@@ -226,10 +336,15 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0.15rem;
+
+  &.profile-row:first-child {
+    padding-top: 0;
+  }
 }
 
 .profile-row-label {
-  color: var(--gray-600);
+  color: var(--gray-500);
+  font-size: 0.8rem;
   flex-shrink: 0;
 }
 
@@ -239,6 +354,12 @@
   text-align: right;
   overflow-wrap: anywhere;
   min-width: 0;
+}
+
+/* IDs, khatian/dag numbers and receipt numbers scan better monospaced. */
+.profile-row-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
 
 .profile-row-stack .profile-row-value {
@@ -251,16 +372,36 @@
   font-weight: 500;
 }
 
-/* ---- Photos & links ---- */
+/* ---- Empty states ---- */
 
-.profile-photo {
-  border-radius: 0.75rem;
-  object-fit: cover;
-  margin-bottom: 0.85rem;
-  max-width: 100%;
-  height: auto;
-  border: 1px solid var(--gray-200);
+.profile-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--gray-500);
+  padding: 0.5rem 0;
+
+  app-icon {
+    color: var(--emerald-700);
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+  }
 }
+
+.profile-empty-block {
+  justify-content: center;
+  padding: 1.5rem 1.25rem;
+
+  p {
+    color: var(--gray-500);
+  }
+}
+
+/* ---- Photos & links ---- */
 
 .profile-signature {
   max-width: 100%;
@@ -278,7 +419,18 @@
   }
 }
 
+.profile-doc-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+
 /* ---- Edit form ---- */
+
+.profile-editor {
+  margin-bottom: 1.5rem;
+}
 
 .profile-form-grid {
   display: grid;
@@ -317,10 +469,13 @@
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
-}
+  justify-content: flex-end;
 
-.profile-notice {
-  margin-bottom: 1rem;
+  /* Primary action last in DOM, so on narrow screens it lands full-width
+     beneath the cancel button — the safest tap target order. */
+  .btn-primary {
+    flex: 1 1 auto;
+  }
 }
 
 /* ---- Responsive: hero stacks on small screens ---- */
@@ -328,13 +483,27 @@
 @media (max-width: 640px) {
   .profile-hero {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     padding: 1.25rem;
+
+    &::before {
+      inset: 0 0 55% 0;
+    }
+  }
+
+  .profile-hero-main {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-hero-meta,
+  .profile-hero-contact {
+    justify-content: center;
   }
 
   .profile-hero-actions {
     width: 100%;
-    margin-left: 0;
 
     .btn {
       width: 100%;
@@ -343,6 +512,14 @@
 
   .profile-row {
     font-size: 0.85rem;
+  }
+
+  .profile-form-actions {
+    flex-direction: column-reverse;
+
+    .btn {
+      width: 100%;
+    }
   }
 }
 
