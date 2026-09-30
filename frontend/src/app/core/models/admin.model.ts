@@ -110,6 +110,42 @@ export interface Installment {
   paidAt?: string;
 }
 
+export interface MemberPicnicPayment {
+  id: number;
+  total: number;
+  additionalCount: number;
+  paymentDate: string;
+  receiptNo: string | null;
+  paymentMethod: string | null;
+}
+
+export interface MemberAuditEntry {
+  id: number;
+  action: string;
+  detail: string | null;
+  actorName: string | null;
+  createdAt: string;
+}
+
+export interface MemberFeeSummary {
+  dueCount: number;
+  paidCount: number;
+  dueTotal: number;
+  paidTotal: number;
+}
+
+/** Full admin view of a member (GET /admin/members/:id). */
+export interface MemberProfile extends SubmissionDetail {
+  memberId: string | null;
+  updatedAt: string;
+  reviewedAt?: string;
+  reviewedByName?: string;
+  feeSummary: MemberFeeSummary;
+  installments: Installment[];
+  picnicPayments: MemberPicnicPayment[];
+  auditTrail: MemberAuditEntry[];
+}
+
 export interface ConfigListItem {
   id: string;
   category: string;

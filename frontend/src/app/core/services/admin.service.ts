@@ -9,6 +9,7 @@ import type {
   FeeSetting,
   Installment,
   Member,
+  MemberProfile,
   Nominee,
   SubmissionDetail,
   SubmissionProperty,
@@ -327,6 +328,75 @@ function toSubmissionDetail(api: SubmissionDetailApiModel): SubmissionDetail {
   };
 }
 
+interface MemberProfileApiModel extends SubmissionDetailApiModel {
+  updated_at: string;
+  reviewed_at: string | null;
+  reviewed_by_name: string | null;
+  fee_summary: { due_count: number; paid_count: number; due_total: number; paid_total: number };
+  installments: {
+    id: number;
+    year: number;
+    month: number;
+    amount: number;
+    status: 'paid' | 'due';
+    paid_at: string | null;
+  }[];
+  picnic_payments: {
+    id: number;
+    total: number;
+    additional_count: number;
+    payment_date: string;
+    receipt_no: string | null;
+    payment_method: string | null;
+  }[];
+  audit_trail: {
+    id: number;
+    action: string;
+    detail: string | null;
+    actor_name: string | null;
+    created_at: string;
+  }[];
+}
+
+function toMemberProfile(api: MemberProfileApiModel): MemberProfile {
+  return {
+    ...toSubmissionDetail(api),
+    memberId: api.member_id,
+    updatedAt: api.updated_at,
+    reviewedAt: api.reviewed_at ?? undefined,
+    reviewedByName: api.reviewed_by_name ?? undefined,
+    feeSummary: {
+      dueCount: api.fee_summary.due_count,
+      paidCount: api.fee_summary.paid_count,
+      dueTotal: api.fee_summary.due_total,
+      paidTotal: api.fee_summary.paid_total,
+    },
+    installments: api.installments.map((row) => ({
+      id: String(row.id),
+      year: row.year,
+      month: row.month,
+      amount: row.amount,
+      status: row.status,
+      paidAt: row.paid_at ?? undefined,
+    })),
+    picnicPayments: api.picnic_payments.map((row) => ({
+      id: row.id,
+      total: row.total,
+      additionalCount: row.additional_count,
+      paymentDate: row.payment_date,
+      receiptNo: row.receipt_no,
+      paymentMethod: row.payment_method,
+    })),
+    auditTrail: api.audit_trail.map((row) => ({
+      id: row.id,
+      action: row.action,
+      detail: row.detail,
+      actorName: row.actor_name,
+      createdAt: row.created_at,
+    })),
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private base = `${environment.apiBaseUrl}/admin`;
@@ -379,6 +449,12 @@ export class AdminService {
     return this.http
       .get<MemberApiModel[]>(`${this.base}/members`)
       .pipe(map((rows) => rows.map(toMember)));
+  }
+
+  getMemberProfile(id: string): Observable<MemberProfile> {
+    return this.http
+      .get<MemberProfileApiModel>(`${this.base}/members/${id}`)
+      .pipe(map(toMemberProfile));
   }
 
   getMemberInstallments(memberId: string): Observable<Installment[]> {

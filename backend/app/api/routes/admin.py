@@ -5,7 +5,7 @@ from enum import Enum
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import load_only, selectinload
+from sqlalchemy.orm import load_only, noload, selectinload
 
 from app.core.permissions import require_permission
 from app.core.security import generate_temp_password, hash_password_async
@@ -27,7 +27,10 @@ from app.models.audit_log import AuditLog
 from app.services.audit import record_audit
 from app.schemas.member import (
     ApproveResponse,
+    MemberAuditEntry,
     MemberDetail,
+    MemberFeeSummary,
+    MemberProfile,
     MemberSummary,
     RejectRequest,
     RejectResponse,
@@ -52,6 +55,9 @@ _SUMMARY_COLUMNS = (
     Member.email,
     Member.created_at,
 )
+
+# Bound on audit rows returned with a member profile.
+_AUDIT_TRAIL_LIMIT = 50
 
 # Optional windowing for the list endpoints (`limit`/`offset` params below).
 # Omitted by default so existing clients keep receiving the full list; clients
@@ -328,6 +334,85 @@ async def list_members(
         )
         for member in members
     ]
+
+
+@router.get("/members/{member_id}", response_model=MemberProfile)
+async def get_member_profile(
+    member_id: int,
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("member.view_all")),
+) -> MemberProfile:
+    """Full member record for the admin detail drawer.
+
+    Gated on `member.view_all` (403 otherwise); members authenticate against a
+    different token type and never reach `get_current_admin`.
+    """
+    member = await _get_member_or_404(db, member_id)
+
+    installments = list(
+        (
+            await db.execute(
+                select(Installment)
+                .where(Installment.member_id == member_id)
+                .order_by(Installment.year.desc(), Installment.month.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
+    picnic_payments = list(
+        (
+            await db.execute(
+                select(PicnicPayment)
+                .options(noload(PicnicPayment.member))
+                .where(PicnicPayment.member_id == member_id)
+                .order_by(PicnicPayment.payment_date.desc(), PicnicPayment.id.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
+    audit_rows = (
+        await db.execute(
+            select(AuditLog, AdminUser.name)
+            .outerjoin(AdminUser, AdminUser.id == AuditLog.actor_admin_id)
+            .where(AuditLog.entity_type == "member", AuditLog.entity_id == str(member_id))
+            .order_by(AuditLog.created_at.desc(), AuditLog.id.desc())
+            .limit(_AUDIT_TRAIL_LIMIT)
+        )
+    ).all()
+    reviewed_by_name = (
+        await db.scalar(select(AdminUser.name).where(AdminUser.id == member.reviewed_by))
+        if member.reviewed_by is not None
+        else None
+    )
+
+    detail = MemberDetail.model_validate(member)
+    due = [i for i in installments if i.status == InstallmentStatus.DUE]
+    paid = [i for i in installments if i.status == InstallmentStatus.PAID]
+    return MemberProfile(
+        **detail.model_dump(),
+        updated_at=member.updated_at,
+        reviewed_by_name=reviewed_by_name,
+        fee_summary=MemberFeeSummary(
+            due_count=len(due),
+            paid_count=len(paid),
+            due_total=float(sum(i.amount for i in due)),
+            paid_total=float(sum(i.amount for i in paid)),
+        ),
+        installments=[InstallmentOut.model_validate(i) for i in installments],
+        picnic_payments=[PicnicPaymentOut.model_validate(p) for p in picnic_payments],
+        audit_trail=[
+            MemberAuditEntry(
+                id=log.id,
+                action=log.action,
+                detail=log.detail,
+                actor_name=actor_name,
+                created_at=log.created_at,
+            )
+            for log, actor_name in audit_rows
+        ],
+    )
 
 
 @router.get("/members/{member_id}/installments", response_model=list[InstallmentOut])

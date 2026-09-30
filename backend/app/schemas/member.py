@@ -3,6 +3,8 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.member import MemberStatus
+from app.schemas.installment import InstallmentOut
+from app.schemas.picnic_payment import PicnicPaymentOut
 from app.schemas.common import ApplicableDocIn, CoOwner, Nominee, PropertyIn
 
 
@@ -161,3 +163,31 @@ class RejectResponse(BaseModel):
 class ApproveResponse(BaseModel):
     member_id: str
     email_sent: bool
+
+
+class MemberAuditEntry(BaseModel):
+    id: int
+    action: str
+    detail: str | None = None
+    actor_name: str | None = None
+    created_at: datetime
+
+
+class MemberFeeSummary(BaseModel):
+    """Roll-up of a member's installments (all amounts in taka)."""
+
+    due_count: int
+    paid_count: int
+    due_total: float
+    paid_total: float
+
+
+class MemberProfile(MemberDetail):
+    """Everything the admin member-detail drawer shows, in one response."""
+
+    updated_at: datetime
+    reviewed_by_name: str | None = None
+    fee_summary: MemberFeeSummary
+    installments: list[InstallmentOut] = []
+    picnic_payments: list[PicnicPaymentOut] = []
+    audit_trail: list[MemberAuditEntry] = []

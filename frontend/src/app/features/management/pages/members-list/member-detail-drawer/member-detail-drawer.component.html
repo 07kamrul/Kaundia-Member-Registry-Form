@@ -1,0 +1,273 @@
+@if (memberId) {
+  <div class="drawer-backdrop" (click)="onBackdropClick($event)">
+    <aside
+      class="drawer-panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="'admin.memberDetail.title' | translate"
+    >
+      <header class="drawer-header">
+        <h2 class="drawer-title">{{ 'admin.memberDetail.title' | translate }}</h2>
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm btn-icon"
+          [attr.aria-label]="'admin.memberDetail.close' | translate"
+          (click)="closed.emit()"
+        >
+          <app-icon name="x" [size]="16" />
+        </button>
+      </header>
+
+      <div class="drawer-body">
+        @if (loading) {
+          <div class="drawer-skeleton" aria-busy="true">
+            <div class="skeleton-line skeleton-lg"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-lg"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        } @else if (error) {
+          <div class="error-box">
+            <p style="margin: 0 0 0.75rem">{{ 'admin.memberDetail.loadFailed' | translate }}</p>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+              {{ 'admin.memberDetail.retry' | translate }}
+            </button>
+          </div>
+        } @else if (profile; as p) {
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.identity' | translate }}</h3>
+            <div class="drawer-identity">
+              @if (p.memberPhotoUrl) {
+                <a [href]="p.memberPhotoUrl" target="_blank" rel="noopener">
+                  <img class="drawer-avatar" [src]="p.memberPhotoUrl" [alt]="'admin.memberDetail.memberPhoto' | translate" />
+                </a>
+              } @else {
+                <span class="drawer-avatar drawer-avatar-fallback">{{ initials(p) }}</span>
+              }
+              <dl class="drawer-grid">
+                <div><dt>{{ 'admin.memberDetail.f.memberId' | translate }}</dt><dd>{{ p.memberId ?? '—' }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.name' | translate }}</dt><dd>{{ p.fullName }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.fatherOrHusband' | translate }}</dt><dd>{{ p.fatherOrHusband }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.mother' | translate }}</dt><dd>{{ p.mother }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.nid' | translate }}</dt><dd>{{ p.nid }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.dob' | translate }}</dt><dd>{{ p.dob }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.gender' | translate }}</dt><dd>{{ p.gender }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.occupation' | translate }}</dt><dd>{{ p.occupation }}</dd></div>
+              </dl>
+            </div>
+          </section>
+
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.contact' | translate }}</h3>
+            <dl class="drawer-grid">
+              <div><dt>{{ 'admin.memberDetail.f.mobile' | translate }}</dt><dd>{{ p.mobile }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.email' | translate }}</dt><dd>{{ p.email }}</dd></div>
+              <div class="span-2"><dt>{{ 'admin.memberDetail.f.presentAddress' | translate }}</dt><dd>{{ presentAddress(p) || '—' }}</dd></div>
+              <div class="span-2"><dt>{{ 'admin.memberDetail.f.permanentAddress' | translate }}</dt><dd>{{ permanentAddress(p) || '—' }}</dd></div>
+              @if (p.urgentContactName) {
+                <div class="span-2">
+                  <dt>{{ 'admin.memberDetail.f.urgentContact' | translate }}</dt>
+                  <dd>{{ p.urgentContactName }} ({{ p.urgentContactRelation }}) · {{ p.urgentContactMobile }}</dd>
+                </div>
+              }
+            </dl>
+          </section>
+
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.membership' | translate }}</h3>
+            <dl class="drawer-grid">
+              <div>
+                <dt>{{ 'admin.memberDetail.f.status' | translate }}</dt>
+                <dd>
+                  <span
+                    class="status-badge"
+                    [class.status-pending]="p.status === 'pending'"
+                    [class.status-approved]="p.status === 'approved'"
+                    [class.status-rejected]="p.status === 'rejected'"
+                  >{{ p.status }}</span>
+                </dd>
+              </div>
+              <div><dt>{{ 'admin.memberDetail.f.joined' | translate }}</dt><dd>{{ p.createdAt | date: 'mediumDate' }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.approvedBy' | translate }}</dt><dd>{{ p.reviewedByName ?? '—' }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.reviewedAt' | translate }}</dt><dd>{{ p.reviewedAt ? (p.reviewedAt | date: 'medium') : '—' }}</dd></div>
+              @if (p.status === 'rejected' && p.rejectionReason) {
+                <div class="span-2"><dt>{{ 'admin.memberDetail.f.rejectionReason' | translate }}</dt><dd>{{ p.rejectionReason }}</dd></div>
+              }
+            </dl>
+          </section>
+
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.property' | translate }}</h3>
+            @for (prop of p.properties; track prop.id) {
+              <dl class="drawer-grid drawer-card">
+                <div><dt>{{ 'admin.memberDetail.f.holding' | translate }}</dt><dd>{{ prop.holdingNumber || '—' }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.khatian' | translate }}</dt><dd>{{ prop.khatianNo || '—' }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.dag' | translate }}</dt><dd>{{ prop.dagNoCs || '—' }} / {{ prop.dagNoRs || '—' }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.ownership' | translate }}</dt><dd>{{ prop.ownership || '—' }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.landSize' | translate }}</dt><dd>{{ prop.landQuantity || '—' }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.myShare' | translate }}</dt><dd>{{ prop.myShareQuantity || '—' }}</dd></div>
+              </dl>
+            } @empty {
+              <p class="drawer-empty">{{ 'admin.memberDetail.noProperties' | translate }}</p>
+            }
+          </section>
+
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.nominees' | translate }}</h3>
+            @for (n of p.nominees; track n.id) {
+              <dl class="drawer-grid drawer-card">
+                <div><dt>{{ 'admin.memberDetail.f.name' | translate }}</dt><dd>{{ n.name }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.nomineeRelation' | translate }}</dt><dd>{{ n.relation }}</dd></div>
+                <div><dt>{{ 'admin.memberDetail.f.nomineeMobile' | translate }}</dt><dd>{{ n.mobile }}</dd></div>
+              </dl>
+            } @empty {
+              <p class="drawer-empty">{{ 'admin.memberDetail.noNominees' | translate }}</p>
+            }
+          </section>
+
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.fees' | translate }}</h3>
+            <dl class="drawer-grid">
+              <div>
+                <dt>{{ 'admin.memberDetail.f.contribution' | translate }}</dt>
+                <dd>
+                  @if (p.status !== 'approved') {
+                    —
+                  } @else {
+                    <span class="status-badge" [class.status-paid]="p.feeSummary.dueCount === 0" [class.status-due]="p.feeSummary.dueCount > 0">
+                      {{ p.feeSummary.dueCount === 0 ? ('admin.memberDetail.fullyPaid' | translate) : p.feeSummary.dueCount + ' ' + ('admin.memberDetail.monthsOverdue' | translate) }}
+                    </span>
+                  }
+                </dd>
+              </div>
+              <div><dt>{{ 'admin.memberDetail.f.monthly' | translate }}</dt><dd>৳{{ p.subscription }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.admissionFee' | translate }}</dt><dd>৳{{ p.admissionFee }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.receiptNo' | translate }}</dt><dd>{{ p.receiptNo }} · {{ p.paymentMethod }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.dueTotal' | translate }}</dt><dd>৳{{ p.feeSummary.dueTotal }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.paidTotal' | translate }}</dt><dd>৳{{ p.feeSummary.paidTotal }}</dd></div>
+            </dl>
+
+            <h4>{{ 'admin.memberDetail.sections.picnic' | translate }}</h4>
+            @if (p.picnicPayments.length) {
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead><tr>
+                    <th>{{ 'admin.memberDetail.f.date' | translate }}</th>
+                    <th>{{ 'admin.memberDetail.f.extraHeads' | translate }}</th>
+                    <th>{{ 'admin.memberDetail.f.total' | translate }}</th>
+                    <th>{{ 'admin.memberDetail.f.receiptNo' | translate }}</th>
+                  </tr></thead>
+                  <tbody>
+                    @for (pay of p.picnicPayments; track pay.id) {
+                      <tr>
+                        <td>{{ pay.paymentDate }}</td>
+                        <td>{{ pay.additionalCount }}</td>
+                        <td>৳{{ pay.total }}</td>
+                        <td>{{ pay.receiptNo || '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="drawer-empty">{{ 'admin.memberDetail.noPicnic' | translate }}</p>
+            }
+          </section>
+
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.installments' | translate }}</h3>
+            @if (p.installments.length) {
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead><tr>
+                    <th>{{ 'admin.memberDetail.f.month' | translate }}</th>
+                    <th>{{ 'admin.memberDetail.f.amount' | translate }}</th>
+                    <th>{{ 'admin.memberDetail.f.status' | translate }}</th>
+                    <th>{{ 'admin.memberDetail.f.paidOn' | translate }}</th>
+                  </tr></thead>
+                  <tbody>
+                    @for (i of p.installments; track i.id) {
+                      <tr>
+                        <td>{{ monthKey(i.month) | translate }} {{ i.year }}</td>
+                        <td>৳{{ i.amount }}</td>
+                        <td>
+                          <span class="status-badge" [class.status-paid]="i.status === 'paid'" [class.status-due]="i.status === 'due'">
+                            {{ (i.status === 'paid' ? 'admin.memberDetail.paid' : 'admin.memberDetail.due') | translate }}
+                          </span>
+                        </td>
+                        <td>{{ i.paidAt ? (i.paidAt | date: 'mediumDate') : '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="drawer-empty">{{ 'admin.memberDetail.noInstallments' | translate }}</p>
+            }
+            @if (p.status === 'approved') {
+              <button type="button" class="btn btn-secondary btn-sm" style="margin-top: 0.75rem" (click)="manageInstallments.emit(p.id)">
+                {{ 'admin.memberDetail.openInstallments' | translate }}
+              </button>
+            }
+          </section>
+
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.documents' | translate }}</h3>
+            <div class="drawer-docs">
+              @if (p.memberPhotoUrl) {
+                <a class="drawer-doc" [href]="p.memberPhotoUrl" target="_blank" rel="noopener">
+                  <img [src]="p.memberPhotoUrl" [alt]="'admin.memberDetail.memberPhoto' | translate" />
+                  <span>{{ 'admin.memberDetail.memberPhoto' | translate }}</span>
+                </a>
+              }
+              @if (p.receiptPhotoUrl) {
+                <a class="drawer-doc drawer-doc-file" [href]="p.receiptPhotoUrl" target="_blank" rel="noopener">
+                  <app-icon name="eye" [size]="20" />
+                  <span>{{ 'admin.memberDetail.receiptPhoto' | translate }}</span>
+                </a>
+              }
+              @if (p.memberSignature) {
+                <a class="drawer-doc" [href]="p.memberSignature" target="_blank" rel="noopener">
+                  <img [src]="p.memberSignature" [alt]="'admin.memberDetail.signature' | translate" />
+                  <span>{{ 'admin.memberDetail.signature' | translate }}</span>
+                </a>
+              }
+              @for (prop of p.properties; track prop.id) {
+                @for (doc of prop.applicableDocs; track doc.id) {
+                  @if (doc.fileUrl) {
+                    <a class="drawer-doc drawer-doc-file" [href]="doc.fileUrl" target="_blank" rel="noopener">
+                      <app-icon name="eye" [size]="20" />
+                      <span>{{ doc.docType }}</span>
+                    </a>
+                  }
+                }
+              }
+            </div>
+          </section>
+
+          <section class="drawer-section">
+            <h3>{{ 'admin.memberDetail.sections.audit' | translate }}</h3>
+            <dl class="drawer-grid">
+              <div><dt>{{ 'admin.memberDetail.f.created' | translate }}</dt><dd>{{ p.createdAt | date: 'medium' }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.updated' | translate }}</dt><dd>{{ p.updatedAt | date: 'medium' }}</dd></div>
+              <div><dt>{{ 'admin.memberDetail.f.lastModifiedBy' | translate }}</dt><dd>{{ p.auditTrail[0]?.actorName ?? '—' }}</dd></div>
+            </dl>
+            <ul class="drawer-audit">
+              @for (a of p.auditTrail; track a.id) {
+                <li>
+                  <strong>{{ a.action }}</strong>
+                  <span>{{ a.actorName ?? '—' }} · {{ a.createdAt | date: 'medium' }}</span>
+                  @if (a.detail) { <em>{{ a.detail }}</em> }
+                </li>
+              } @empty {
+                <li class="drawer-empty">{{ 'admin.memberDetail.noAudit' | translate }}</li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+    </aside>
+  </div>
+}

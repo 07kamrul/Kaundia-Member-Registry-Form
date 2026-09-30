@@ -5,13 +5,14 @@ import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import type { Member } from '../../../../core/models/admin.model';
 import { IconComponent } from '../../../../shared/icon/icon.component';
+import { MemberDetailDrawerComponent } from './member-detail-drawer/member-detail-drawer.component';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-members-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IconComponent, ConfirmModalComponent, TranslatePipe],
+  imports: [IconComponent, ConfirmModalComponent, MemberDetailDrawerComponent, TranslatePipe],
   templateUrl: './members-list.component.html',
 })
 export class MembersListComponent implements OnInit {
@@ -20,6 +21,7 @@ export class MembersListComponent implements OnInit {
   error = '';
   deleteTarget: Member | null = null;
   deleting = false;
+  viewMemberId: string | null = null;
 
   constructor(
     private adminService: AdminService,
@@ -52,9 +54,17 @@ export class MembersListComponent implements OnInit {
       : this.translate.instant('admin.membersList.fullyPaid');
   }
 
-  viewContributions(member: Member): void {
-    if (member.status !== 'approved') return;
-    this.router.navigate(['/installments-management'], { queryParams: { memberId: member.id } });
+  viewDetails(member: Member): void {
+    this.viewMemberId = member.id;
+  }
+
+  closeDetails(): void {
+    this.viewMemberId = null;
+  }
+
+  viewContributions(memberId: string): void {
+    this.closeDetails();
+    this.router.navigate(['/installments-management'], { queryParams: { memberId } });
   }
 
   askDelete(member: Member): void {

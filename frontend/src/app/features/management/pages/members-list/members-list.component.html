@@ -50,11 +50,15 @@
               </td>
               <td>
                 <div class="flex-row-wrap">
-                  @if (m.status === 'approved') {
-                    <button type="button" class="btn btn-secondary btn-sm btn-icon" [title]="'admin.membersList.viewContributionsTitle' | translate" (click)="viewContributions(m)">
-                      <app-icon name="eye" [size]="16" />
-                    </button>
-                  }
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm btn-icon"
+                    [title]="'admin.membersList.viewDetailsTitle' | translate"
+                    [attr.aria-label]="'admin.membersList.viewDetailsTitle' | translate"
+                    (click)="viewDetails(m)"
+                  >
+                    <app-icon name="eye" [size]="16" />
+                  </button>
                   @if (auth.hasPermission('member.manage')) {
                     <button
                       type="button"
@@ -75,6 +79,12 @@
       </table>
     </div>
   }
+
+  <app-member-detail-drawer
+    [memberId]="viewMemberId"
+    (closed)="closeDetails()"
+    (manageInstallments)="viewContributions($event)"
+  ></app-member-detail-drawer>
 
   <app-confirm-modal
     [open]="!!deleteTarget"
