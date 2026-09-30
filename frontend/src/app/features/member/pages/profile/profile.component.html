@@ -325,11 +325,15 @@
                   <div class="profile-row profile-row-stack">
                     <span class="profile-row-label">{{ 'member.profile.documentLabel' | translate }}</span>
                     <span class="profile-row-value">
-                      @if (doc.fileUrl) {
-                        <a class="profile-link" [href]="doc.fileUrl" target="_blank" rel="noopener noreferrer">{{ doc.docType }}</a>
-                      } @else {
+                      <span class="profile-doc-entry">
                         {{ doc.docType }}
-                      }
+                        @if (doc.fileUrl) {
+                          <button type="button" class="btn btn-secondary btn-sm profile-doc-button" (click)="openDocPreview(doc)">
+                            <app-icon name="eye" [size]="14" />
+                            {{ 'member.profile.viewFile' | translate }}
+                          </button>
+                        }
+                      </span>
                     </span>
                   </div>
                 }
@@ -344,5 +348,52 @@
         </div>
       }
     </section>
+
+    @if (previewUrl || previewLoading || previewError) {
+      <div class="modal-backdrop" (click)="closePreview()">
+        <div
+          class="modal-card modal-card-wide"
+          (click)="$event.stopPropagation()"
+          role="dialog"
+          aria-modal="true"
+          [attr.aria-label]="previewTitle"
+        >
+          <h3 class="modal-title">{{ previewTitle }}</h3>
+          <div class="modal-body">
+            @if (previewLoading) {
+              <div class="loading-state">
+                <span class="spinner"></span> {{ 'common.loading' | translate }}
+              </div>
+            } @else if (previewError) {
+              <div class="error-box" role="alert">
+                <p style="margin: 0">{{ previewError }}</p>
+              </div>
+            } @else if (previewIsImage) {
+              <img
+                [src]="previewUrl"
+                [alt]="previewTitle"
+                class="preview-media"
+                (error)="onPreviewImageError()"
+              />
+            } @else {
+              <iframe [src]="previewFrameUrl" class="preview-frame" [title]="previewTitle"></iframe>
+            }
+          </div>
+          <div class="modal-actions">
+            @if (downloadError) {
+              <p class="field-hint profile-download-error">{{ downloadError }}</p>
+            }
+            @if (!previewError && !previewLoading) {
+              <button type="button" class="btn btn-secondary" (click)="downloadPreview()">
+                {{ 'member.profile.download' | translate }}
+              </button>
+            }
+            <button type="button" class="btn btn-primary" (click)="closePreview()">
+              {{ 'common.close' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   }
 </div>

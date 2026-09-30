@@ -426,6 +426,20 @@
   text-decoration: none;
 }
 
+/* Doc type label with its View button on one line (wraps on narrow cards). */
+.profile-doc-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.profile-download-error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--red-600);
+}
+
 /* ---- Edit form ---- */
 
 .profile-editor {

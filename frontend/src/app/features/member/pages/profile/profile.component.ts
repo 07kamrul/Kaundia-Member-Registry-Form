@@ -1,20 +1,24 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   inject,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   MemberService,
   type MemberProfile,
   type MemberProperty,
+  type MemberPropertyDoc,
   type MemberProfileUpdatePayload,
 } from '../../../../core/services/member.service';
+import { AttachmentService } from '../../../../core/services/attachment.service';
 import { IconComponent } from '../../../../shared/icon/icon.component';
 
 const CORE_FIELDS: (keyof MemberProfileUpdatePayload)[] = [
@@ -48,7 +52,7 @@ const CORE_FIELDS: (keyof MemberProfileUpdatePayload)[] = [
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   profile: MemberProfile | null = null;
   loading = false;
   error = '';
@@ -66,7 +70,26 @@ export class ProfileComponent implements OnInit {
   photoInputError = '';
   photoUploadError = '';
 
+  // Property document popup preview (mirrors the admin submission-detail modal).
+  previewUrl: string | null = null;
+  previewTitle = '';
+  previewIsImage = true;
+  previewLoading = false;
+  previewError = '';
+  downloadError = '';
+
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly attachments = inject(AttachmentService);
+  private readonly sanitizer = inject(DomSanitizer);
+
+  /** Object URL backing a blob preview; revoked when the preview closes. */
+  private previewObjectUrl: string | null = null;
+  /** Bumped whenever the preview target changes, to ignore stale loads. */
+  private previewRequestId = 0;
+  /** What the modal's download button should fetch, and under which name. */
+  private previewTarget: { url: string; filename: string } | null = null;
+  private sanitizedFrameUrl: SafeResourceUrl | null = null;
+  private sanitizedFrameUrlFor: string | null | undefined = undefined;
 
   constructor(
     private memberService: MemberService,
@@ -88,6 +111,10 @@ export class ProfileComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.revokePreviewObjectUrl();
   }
 
   propertyTypes(property: MemberProperty): string {
@@ -123,6 +150,113 @@ export class ProfileComponent implements OnInit {
   // A 404/missing photo must fall back to the initial avatar, never a broken image.
   onPhotoError(): void {
     this.photoFailed.set(true);
+  }
+
+  /* ---------- property document preview ---------- */
+
+  /** Sanitized URL for embedding non-image previews (e.g. PDF) in an iframe. */
+  get previewFrameUrl(): SafeResourceUrl {
+    if (this.sanitizedFrameUrlFor !== this.previewUrl) {
+      this.sanitizedFrameUrlFor = this.previewUrl;
+      this.sanitizedFrameUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.previewUrl ?? '');
+    }
+    return this.sanitizedFrameUrl as SafeResourceUrl;
+  }
+
+  openDocPreview(doc: MemberPropertyDoc): void {
+    if (!doc.fileUrl) return;
+    this.startPreview({
+      url: doc.fileUrl,
+      title: doc.docType,
+      isImage: /\.(png|jpe?g|gif|webp|svg|avif)(\?|$)/i.test(doc.fileUrl) || /^data:image\//i.test(doc.fileUrl),
+      filename: this.attachmentFilename(doc.docType, doc.fileUrl),
+    });
+  }
+
+  closePreview(): void {
+    this.resetPreview();
+  }
+
+  /** The modal's <img> failed: replace it with the app's missing-file message. */
+  onPreviewImageError(): void {
+    if (!this.previewUrl) return;
+    this.previewError = this.translate.instant('member.profile.fileMissing');
+    this.previewUrl = null;
+    this.cdr.markForCheck();
+  }
+
+  /** Modal download button: fetch as a blob instead of navigating to the URL. */
+  downloadPreview(): void {
+    if (!this.previewTarget) return;
+    this.downloadError = '';
+    this.attachments.download(this.previewTarget.url, this.previewTarget.filename).catch(() => {
+      this.downloadError = this.translate.instant('member.profile.downloadFailed');
+      this.cdr.markForCheck();
+    });
+  }
+
+  /**
+   * Open the preview modal for a file URL.
+   *
+   * Images are handed straight to `<img>` (its `error` handler reports a 404);
+   * every other type is fetched into a blob first so a file that no longer
+   * exists shows the app's error UI instead of the backend's raw JSON inside
+   * an iframe.
+   */
+  private startPreview(target: { url: string; title: string; isImage: boolean; filename: string }): void {
+    this.resetPreview();
+    const requestId = this.previewRequestId;
+    this.previewTarget = { url: target.url, filename: target.filename };
+    this.previewTitle = target.title;
+    this.previewIsImage = target.isImage;
+
+    if (target.isImage) {
+      this.previewUrl = target.url;
+      return;
+    }
+
+    this.previewLoading = true;
+    this.attachments.load(target.url).then(
+      (blob) => {
+        if (requestId !== this.previewRequestId) return; // preview moved on
+        this.previewObjectUrl = URL.createObjectURL(blob);
+        this.previewUrl = this.previewObjectUrl;
+        this.previewLoading = false;
+        this.cdr.markForCheck();
+      },
+      () => {
+        if (requestId !== this.previewRequestId) return;
+        this.previewLoading = false;
+        this.previewError = this.translate.instant('member.profile.fileMissing');
+        this.cdr.markForCheck();
+      },
+    );
+  }
+
+  private resetPreview(): void {
+    this.revokePreviewObjectUrl();
+    this.previewRequestId++;
+    this.previewUrl = null;
+    this.previewTitle = '';
+    this.previewIsImage = true;
+    this.previewError = '';
+    this.previewLoading = false;
+    this.downloadError = '';
+    this.previewTarget = null;
+  }
+
+  private revokePreviewObjectUrl(): void {
+    if (!this.previewObjectUrl) return;
+    URL.revokeObjectURL(this.previewObjectUrl);
+    this.previewObjectUrl = null;
+  }
+
+  /** Download name: the Bengali label stays readable, path-hostile characters go. */
+  private attachmentFilename(label: string, url: string): string {
+    const base = label.replace(/[\\/:*?"<>|]/g, '-').trim() || 'attachment';
+    const ext =
+      /^data:image\/([a-z0-9.+-]+);/i.exec(url)?.[1] ?? /\.([a-z0-9]{1,8})(?:$|\?)/i.exec(url)?.[1];
+    return ext ? `${base}.${ext.toLowerCase()}` : base;
   }
 
   onPhotoSelected(event: Event): void {
