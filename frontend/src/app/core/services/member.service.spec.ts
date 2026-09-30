@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { MemberService, type MemberProfile } from './member.service';
 
 const API_PROFILE = {
-  member_id: 'KAM-2026-0001',
+  member_id: 'UKAMKS-1',
   status: 'approved',
   full_name: 'Md. Kamrul Hasan',
   father_or_husband: 'Abul Kasem',

@@ -11,6 +11,7 @@ from app.models.config_list_item import ConfigListItem
 from app.models.event import Event
 from app.models.notice import Notice
 from app.models.picnic_payment import PicnicPayment
+from app.models.member_id_sequence import MemberIdSequence
 
 __all__ = [
     "Member",
@@ -29,6 +30,7 @@ __all__ = [
     "Notice",
     "Event",
     "PicnicPayment",
+    "MemberIdSequence",
     "Role",
     "Permission",
     "UserPermissionOverride",

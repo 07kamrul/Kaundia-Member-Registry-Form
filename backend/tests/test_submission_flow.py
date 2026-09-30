@@ -114,7 +114,8 @@ async def test_submission_approval_member_id_login_flow(
     )
     assert approve_response.status_code == 200
     generated_member_id = approve_response.json()["member_id"]
-    assert generated_member_id.startswith("KAM-")
+    assert generated_member_id.startswith("UKAMKS-")
+    assert re.fullmatch(r"UKAMKS-\d+", generated_member_id)
 
     detail_response = await client.get(
         f"/api/admin/submissions/{member_pk}", headers=admin_headers

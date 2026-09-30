@@ -1,4 +1,5 @@
 import html
+import re
 from datetime import date, datetime, timezone
 from enum import Enum
 
@@ -16,6 +17,7 @@ from app.models.config_list_item import ConfigListItem
 from app.models.fee_settings import FeeSetting
 from app.models.installment import Installment, InstallmentStatus
 from app.models.member import Member, MemberStatus
+from app.models.member_id_sequence import MemberIdSequence
 from app.models.picnic_payment import PicnicPayment
 from app.models.nominee import Nominee
 from app.models.property import ApplicableDoc, CoOwner, Property
@@ -174,6 +176,11 @@ async def approve_submission(
         return ApproveResponse(member_id=generated_member_id, email_sent=email_sent)
 
     generated_member_id = await _generate_member_id(db)
+    if not is_valid_member_id(generated_member_id):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="generated member id is malformed",
+        )
     temp_password = generate_temp_password()
     username = generated_member_id.lower()
     member.member_id = generated_member_id
@@ -751,11 +758,30 @@ async def _require_member_exists(db: AsyncSession, member_id: int) -> None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
 
 
+MEMBER_ID_PREFIX = "UKAMKS-"
+MEMBER_ID_PATTERN = re.compile(rf"^{MEMBER_ID_PREFIX}\d+$")
+
+
+def is_valid_member_id(value: str) -> bool:
+    """True for well-formed member ids (e.g. UKAMKS-1). Case-sensitive by
+    convention; logins normalize case separately via credential usernames."""
+    return bool(MEMBER_ID_PATTERN.match(value))
+
+
 async def _generate_member_id(db: AsyncSession) -> str:
-    year = datetime.now(timezone.utc).year
-    prefix = f"KAM-{year}-"
+    """Mint the next UKAMKS-N from the global member_id_sequence row.
+
+    The row is selected FOR UPDATE (a no-op on SQLite's single-writer lock,
+    a real row lock on Postgres) so concurrent approvals serialize instead
+    of drawing the same number. Deleted members never free their number.
+    """
     result = await db.execute(
-        select(func.count()).select_from(Member).where(Member.member_id.like(f"{prefix}%"))
+        select(MemberIdSequence).where(MemberIdSequence.id == 1).with_for_update()
     )
-    count = result.scalar_one() or 0
-    return f"{prefix}{count + 1:04d}"
+    seq = result.scalar_one_or_none()
+    if seq is None:
+        seq = MemberIdSequence(id=1, value=0)
+        db.add(seq)
+        await db.flush()
+    seq.value += 1
+    return f"{MEMBER_ID_PREFIX}{seq.value}"
