@@ -200,3 +200,44 @@ describe('SubmissionDetailComponent (OnPush + memoized derived values)', () => {
     expect(component.submission!.id).toBe('1');
   });
 });
+
+describe('SubmissionDetailComponent review mode (pending queue)', () => {
+  const attachmentLoad = vi.fn();
+  const attachmentDownload = vi.fn();
+
+  function createWithStatus(status: SubmissionDetail['status']) {
+    TestBed.configureTestingModule({
+      imports: [SubmissionDetailComponent],
+      providers: [
+        provideTranslateService(),
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: new Map([['id', '1']]) } } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        {
+          provide: AdminService,
+          useValue: { getSubmission: () => of({ ...submission, status }) },
+        },
+        { provide: AttachmentService, useValue: { load: attachmentLoad, download: attachmentDownload } },
+      ],
+    });
+    const fixture = TestBed.createComponent(SubmissionDetailComponent);
+    fixture.detectChanges();
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it('a pending submission shows the full review mode (approve + reject actions)', () => {
+    const fixture = createWithStatus('pending');
+    const html: string = fixture.nativeElement.innerHTML;
+    expect(html).toContain('review-action-bar');
+    expect(html).toContain('admin.submissionDetail.approveButton');
+    expect(html).toContain('admin.submissionDetail.rejectButton');
+  });
+
+  it('an approved submission renders read-only, without the review action bar', () => {
+    const fixture = createWithStatus('approved');
+    const html: string = fixture.nativeElement.innerHTML;
+    expect(html).not.toContain('review-action-bar');
+    expect(html).not.toContain('admin.submissionDetail.approveButton');
+    expect(html).not.toContain('admin.submissionDetail.rejectButton');
+  });
+});

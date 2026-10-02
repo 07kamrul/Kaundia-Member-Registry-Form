@@ -65,6 +65,13 @@ else
 fi
 
 log "2/4 Pulling/building and recreating the stack"
+# Pre-build gate: run the test suites when the source tree is present (a git
+# checkout on the host). Skip with SKIP_TESTS=1 for a hotfix deploy.
+if [ "${SKIP_TESTS:-0}" != "1" ] && [ -d "$COMPOSE_DIR/backend/app" ] && [ -f "$COMPOSE_DIR/scripts/test.sh" ]; then
+    log "2a/4 Running tests (SKIP_TESTS=1 to skip)"
+    SKIP_BACKEND="${SKIP_BACKEND:-0}" SKIP_FRONTEND="${SKIP_FRONTEND:-0}" \
+        sh "$COMPOSE_DIR/scripts/test.sh"
+fi
 docker compose pull --ignore-pull-failures || true
 docker compose build "$BACKEND_SERVICE"
 docker compose up -d --force-recreate

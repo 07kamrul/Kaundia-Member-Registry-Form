@@ -56,12 +56,19 @@ async def get_public_stats(db: AsyncSession = Depends(get_db)) -> PublicStatsOut
 async def get_public_fee_settings(db: AsyncSession = Depends(get_db)) -> dict[str, float]:
     today = date.today()
     result = await db.execute(
-        select(FeeSetting.key, FeeSetting.value).where(
+        select(FeeSetting.key, FeeSetting.value)
+        .where(
             FeeSetting.start_date <= today,
             or_(FeeSetting.end_date.is_(None), FeeSetting.end_date >= today),
         )
+        .order_by(FeeSetting.start_date.desc(), FeeSetting.id.desc())
     )
-    return {key: float(value) for key, value in result.all()}
+    # Overlapping date windows are legal (a closed version keeps end_date =
+    # the day the new one took effect), so the newest version wins per key.
+    current: dict[str, float] = {}
+    for key, value in result.all():
+        current.setdefault(key, float(value))
+    return current
 
 
 @router.post("/registration/subscription-quote", response_model=SubscriptionQuoteOut)

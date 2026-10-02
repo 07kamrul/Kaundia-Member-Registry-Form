@@ -303,7 +303,9 @@ export class MemberService {
   }
 
   getInstallments(): Observable<Installment[]> {
-    return this.http.get<Installment[]>(`${this.base}/installments`);
+    return this.http
+      .get<InstallmentApiModel[]>(`${this.base}/installments`)
+      .pipe(map((rows) => rows.map(toInstallment)));
   }
 
   getPicnicPayments(): Observable<PicnicPayment[]> {
@@ -336,6 +338,26 @@ export class MemberService {
       payment_method: payload.paymentMethod || null,
     }).pipe(map(toPicnicPayment));
   }
+}
+
+interface InstallmentApiModel {
+  id: number;
+  year: number;
+  month: number;
+  amount: number;
+  status: 'paid' | 'due';
+  paid_at: string | null;
+}
+
+function toInstallment(row: InstallmentApiModel): Installment {
+  return {
+    id: String(row.id),
+    year: row.year,
+    month: row.month,
+    amount: row.amount,
+    status: row.status,
+    paidAt: row.paid_at ?? undefined,
+  };
 }
 
 function toPicnicPayment(row: PicnicPaymentApiModel): PicnicPayment {

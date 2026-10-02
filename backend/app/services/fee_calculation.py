@@ -52,7 +52,11 @@ async def resolve_active_fee_versions(
         )
         .order_by(FeeSetting.start_date.desc(), FeeSetting.id.desc())
     )
-    versions = {row.key: row for row in result.scalars().all()}
+    # Newest-start row per key wins; the dict must not let an older overlapping
+    # version (later in the desc-ordered result) overwrite it.
+    versions: dict[str, FeeSetting] = {}
+    for row in result.scalars():
+        versions.setdefault(row.key, row)
     if any(key not in versions for key in keys):
         return None
     return versions
@@ -106,7 +110,9 @@ async def resolve_picnic_rates(db: AsyncSession, on_date: date) -> dict | None:
         )
         .order_by(FeeSetting.start_date.desc(), FeeSetting.id.desc())
     )
-    versions = {row.key: row for row in result.scalars().all()}
+    versions: dict[str, FeeSetting] = {}
+    for row in result.scalars():
+        versions.setdefault(row.key, row)
     head = versions.get(PICNIC_HEAD_FEE_KEY)
     additional = versions.get(PICNIC_ADDITIONAL_HEAD_FEE_KEY)
     if head is None or additional is None:
