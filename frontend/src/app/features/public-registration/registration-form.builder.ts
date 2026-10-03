@@ -1,6 +1,6 @@
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { internationalPhoneValidator } from '../../shared/phone-input/phone-number';
 
-const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
 const NID_PATTERN = /^\d{10,17}$/;
 const DIGITS_ONLY_PATTERN = /^\d+$/;
 const DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
@@ -69,7 +69,7 @@ export function buildNomineeGroup(fb: FormBuilder): FormGroup {
   return fb.group({
     name: ['', Validators.required],
     relation: [''],
-    mobile: ['', [Validators.required, Validators.pattern(MOBILE_PATTERN)]],
+    mobile: ['', [Validators.required, internationalPhoneValidator]],
     address: [''],
   });
 }
@@ -83,7 +83,7 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
     nationality: ['বাংলাদেশী'],
     occupation: [''],
     nid: ['', [Validators.required, Validators.pattern(NID_PATTERN)]],
-    mobile: ['', [Validators.required, Validators.pattern(MOBILE_PATTERN)]],
+    mobile: ['', [Validators.required, internationalPhoneValidator]],
     gender: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
 
@@ -92,7 +92,7 @@ export function buildRegistrationForm(fb: FormBuilder): FormGroup {
 
     urgentContactName: ['', Validators.required],
     urgentContactRelation: [''],
-    urgentContactMobile: ['', [Validators.required, Validators.pattern(MOBILE_PATTERN)]],
+    urgentContactMobile: ['', [Validators.required, internationalPhoneValidator]],
     urgentContactAddress: [''],
 
     propertyCount: new FormControl(null),
@@ -126,5 +126,3 @@ export function nomineesArray(form: FormGroup): FormArray {
 export function applicableDocsArray(propertyGroup: FormGroup): FormArray {
   return propertyGroup.get('applicableDocs') as FormArray;
 }
-
-export const MOBILE_REGEX = MOBILE_PATTERN;

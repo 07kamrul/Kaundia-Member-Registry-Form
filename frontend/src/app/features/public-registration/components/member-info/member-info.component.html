@@ -84,7 +84,7 @@
             <span class="field-error-inline">{{ errorMessage('mobile') }}</span>
           }
         </div>
-        <input id="mobile" type="text" formControlName="mobile" placeholder="01XXXXXXXXX" />
+        <app-phone-input inputId="mobile" formControlName="mobile" [invalid]="showError('mobile')" />
       </div>
       <div class="field">
         <div class="field-label-row">

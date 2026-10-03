@@ -14,7 +14,7 @@
     </div>
     <div class="field">
       <label for="urgentContactMobile">{{ 'registration.urgentContact.mobileLabel' | translate }} <span class="required">*</span></label>
-      <input id="urgentContactMobile" type="text" formControlName="urgentContactMobile" />
+      <app-phone-input inputId="urgentContactMobile" formControlName="urgentContactMobile" [invalid]="showError('urgentContactMobile') || mobileInvalid()" />
       @if (showError('urgentContactMobile')) {
         <p class="field-error">{{ 'registration.urgentContact.mobileRequired' | translate }}</p>
       } @else if (mobileInvalid()) {

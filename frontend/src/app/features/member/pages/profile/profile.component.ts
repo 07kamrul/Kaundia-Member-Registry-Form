@@ -20,6 +20,8 @@ import {
 } from '../../../../core/services/member.service';
 import { AttachmentService } from '../../../../core/services/attachment.service';
 import { IconComponent } from '../../../../shared/icon/icon.component';
+import { PhoneInputComponent } from '../../../../shared/phone-input/phone-input.component';
+import { isValidInternationalPhone } from '../../../../shared/phone-input/phone-number';
 
 const CORE_FIELDS: (keyof MemberProfileUpdatePayload)[] = [
   'fullName',
@@ -48,7 +50,7 @@ const CORE_FIELDS: (keyof MemberProfileUpdatePayload)[] = [
   selector: 'app-member-profile',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, FormsModule, IconComponent],
+  imports: [TranslatePipe, FormsModule, IconComponent, PhoneInputComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
@@ -361,6 +363,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   saveProfile(): void {
     if (!this.profile) return;
+    if (this.draft.mobile && !isValidInternationalPhone(this.draft.mobile)) {
+      this.saveError = this.translate.instant('member.profile.mobileInvalid');
+      return;
+    }
     this.saving = true;
     this.saveError = '';
     this.photoUploadError = '';

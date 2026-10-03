@@ -2,12 +2,13 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DatePickerComponent } from '../../../../shared/date-picker/date-picker.component';
+import { PhoneInputComponent } from '../../../../shared/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-member-info',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, DatePickerComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, DatePickerComponent, PhoneInputComponent],
   templateUrl: './member-info.component.html',
 })
 export class MemberInfoComponent {

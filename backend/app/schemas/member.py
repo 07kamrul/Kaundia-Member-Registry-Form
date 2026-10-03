@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.models.member import MemberStatus
 from app.schemas.installment import InstallmentOut
 from app.schemas.picnic_payment import PicnicPaymentOut
-from app.schemas.common import ApplicableDocIn, CoOwner, Nominee, PropertyIn
+from app.schemas.common import ApplicableDocIn, CoOwner, Nominee, PropertyIn, validate_phone
 
 
 class SubmissionCreateResponse(BaseModel):
@@ -45,6 +45,8 @@ class MemberProfileUpdate(BaseModel):
     urgent_contact_relation: str | None = None
     urgent_contact_mobile: str | None = None
     urgent_contact_address: str | None = None
+
+    _validate_phones = field_validator("mobile", "urgent_contact_mobile")(validate_phone)
 
 
 class ApplicableDocOut(BaseModel):

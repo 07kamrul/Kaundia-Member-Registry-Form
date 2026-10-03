@@ -17,7 +17,12 @@ from app.models.nominee import Nominee
 from app.schemas.member import SubmissionCreateResponse
 from app.schemas.submission import SubmissionPayload
 from app.services.fee_calculation import calculate_monthly_subscription
-from app.services.normalization import normalize_email, normalize_mobile, normalize_nid
+from app.services.normalization import (
+    mobile_lookup_variants,
+    normalize_email,
+    normalize_mobile,
+    normalize_nid,
+)
 from app.services.storage import save_upload_file, slugify_path_segment
 
 router = APIRouter(tags=["submissions"])
@@ -41,7 +46,11 @@ async def _reject_duplicate_submission(
     result = await db.execute(
         select(Member.status).where(
             Member.status.in_(_BLOCKING_STATUSES),
-            or_(Member.nid == nid, Member.mobile == mobile, Member.email == email),
+            or_(
+                Member.nid == nid,
+                Member.mobile.in_(mobile_lookup_variants(mobile)),
+                Member.email == email,
+            ),
         )
     )
     matched_statuses = set(result.scalars().all())

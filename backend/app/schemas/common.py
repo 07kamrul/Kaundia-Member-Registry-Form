@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 
 from pydantic import BaseModel, field_validator
 
+from app.services.normalization import normalize_mobile
+
 DIGITS_ONLY_PATTERN = r"^\d+$"
 
 
@@ -9,6 +11,13 @@ def validate_digits_only(value: str | None) -> str | None:
     if value is not None and value != "" and not value.isdigit():
         raise ValueError("must contain digits only")
     return value
+
+
+def validate_phone(value: str | None) -> str | None:
+    """Normalise an optional international phone number to E.164."""
+    if value is None or value.strip() == "":
+        return value
+    return normalize_mobile(value)
 
 
 def as_utc(value: datetime | None) -> datetime | None:
@@ -40,6 +49,8 @@ class Nominee(BaseModel):
     relation: str
     mobile: str
     address: str | None = None
+
+    _validate_mobile = field_validator("mobile")(validate_phone)
 
 
 class CoOwner(BaseModel):

@@ -20,7 +20,7 @@
     </div>
     <div class="field">
       <label for="nominee0_mobile">{{ 'registration.nominee.mobileLabel' | translate }} <span class="required">*</span></label>
-      <input id="nominee0_mobile" type="text" formControlName="mobile" />
+      <app-phone-input inputId="nominee0_mobile" formControlName="mobile" [invalid]="showError(0, 'mobile') || mobileInvalid(0)" />
       @if (showError(0, 'mobile')) {
         <p class="field-error">{{ 'registration.nominee.mobileRequired' | translate }}</p>
       } @else if (mobileInvalid(0)) {
@@ -60,7 +60,7 @@
             </div>
             <div class="field">
               <label [attr.for]="'nominee' + i + '_mobile'">{{ 'registration.nominee.mobileLabel' | translate }} <span class="required">*</span></label>
-              <input [id]="'nominee' + i + '_mobile'" type="text" formControlName="mobile" />
+              <app-phone-input [inputId]="'nominee' + i + '_mobile'" formControlName="mobile" [invalid]="showError(i, 'mobile') || mobileInvalid(i)" />
               @if (showError(i, 'mobile')) {
                 <p class="field-error">{{ 'registration.nominee.mobileRequired' | translate }}</p>
               } @else if (mobileInvalid(i)) {

@@ -3,12 +3,13 @@ import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { buildNomineeGroup } from '../../registration-form.builder';
 import { FormBuilder } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { PhoneInputComponent } from '../../../../shared/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-nominee-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, PhoneInputComponent],
   templateUrl: './nominee-list.component.html',
 })
 export class NomineeListComponent {

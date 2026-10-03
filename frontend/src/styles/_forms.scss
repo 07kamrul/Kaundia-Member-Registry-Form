@@ -263,3 +263,115 @@ input[type='radio']:not(.gender-toggle input) {
     cursor: not-allowed;
   }
 }
+
+/* ---------- International phone input (app-phone-input) ---------- */
+
+.phone-input {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+
+  > input[type='tel'] {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &.is-invalid > .phone-country-trigger {
+    border-color: var(--field-error);
+  }
+}
+
+.phone-country-trigger {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: var(--field-height);
+  padding: 0 0.65rem;
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+  color: var(--field-text);
+  font-size: var(--field-font-size);
+  font-family: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--field-border-hover);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--field-border-focus);
+    box-shadow: var(--field-focus-ring);
+  }
+
+  &:disabled {
+    background: var(--field-disabled-bg);
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.phone-flag {
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.phone-caret {
+  font-size: 0.75em;
+  color: var(--field-placeholder);
+}
+
+.phone-country-panel {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 40;
+  width: min(22rem, 100%);
+  padding: 0.5rem;
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+  box-shadow: var(--shadow-lg);
+}
+
+.phone-country-list {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  max-height: 16rem;
+  overflow-y: auto;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.5rem;
+    border-radius: var(--radius-sm);
+    color: var(--field-text);
+    cursor: pointer;
+
+    &:hover,
+    &.is-selected {
+      background: var(--surface-2);
+    }
+  }
+
+  .phone-country-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .phone-dial {
+    color: var(--field-placeholder);
+  }
+
+  .phone-country-empty {
+    cursor: default;
+    color: var(--field-placeholder);
+  }
+}

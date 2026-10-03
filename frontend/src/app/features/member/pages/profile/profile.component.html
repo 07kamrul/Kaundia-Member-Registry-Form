@@ -116,10 +116,10 @@
             <span>{{ 'member.profile.occupationLabel' | translate }}</span>
             <input type="text" [(ngModel)]="draft.occupation" name="occupation" (ngModelChange)="checkRequeue()" />
           </label>
-          <label class="profile-field">
-            <span>{{ 'member.profile.mobileLabel' | translate }}</span>
-            <input type="text" [(ngModel)]="draft.mobile" name="mobile" />
-          </label>
+          <div class="profile-field">
+            <label for="profile-mobile">{{ 'member.profile.mobileLabel' | translate }}</label>
+            <app-phone-input inputId="profile-mobile" [(ngModel)]="draft.mobile" name="mobile" />
+          </div>
         </div>
         @if (saveError) {
           <p class="error-box">{{ saveError }}</p>

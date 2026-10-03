@@ -27,6 +27,7 @@ import { DatePickerComponent } from '../../shared/date-picker/date-picker.compon
 import { ConfirmModalComponent } from '../../shared/confirm-modal/confirm-modal.component';
 import { buildRegistrationForm, propertiesArray, nomineesArray } from './registration-form.builder';
 import { mapSubmissionError } from './services/submission-error.mapper';
+import { isValidInternationalPhone } from '../../shared/phone-input/phone-number';
 
 interface DuplicateSubmissionError {
   success: false;
@@ -42,8 +43,6 @@ function isDuplicateSubmissionError(body: unknown): body is DuplicateSubmissionE
       (body as { code?: unknown }).code === 'ALREADY_REGISTERED')
   );
 }
-
-const MOBILE_PATTERN = /^01[3-9]\d{8}$/;
 
 export interface RegistrationStep {
   id: number;
@@ -245,7 +244,7 @@ export class RegistrationPageComponent implements OnInit {
     if (!v.dob) errs.push(this.translate.instant('registration.validation.dobRequired'));
     if (!v.mobile?.trim())
       errs.push(this.translate.instant('registration.validation.mobileRequired'));
-    else if (!MOBILE_PATTERN.test(v.mobile.trim()))
+    else if (!isValidInternationalPhone(v.mobile))
       errs.push(this.translate.instant('registration.validation.mobileInvalid'));
     if (!v.gender?.trim())
       errs.push(this.translate.instant('registration.validation.genderRequired'));
@@ -392,7 +391,7 @@ export class RegistrationPageComponent implements OnInit {
       errs.push(
         `${urgentContactLabel}: ${this.translate.instant('registration.validation.mobileRequired')}`,
       );
-    else if (!MOBILE_PATTERN.test(v.urgentContactMobile.trim()))
+    else if (!isValidInternationalPhone(v.urgentContactMobile))
       errs.push(
         `${urgentContactLabel}: ${this.translate.instant('registration.validation.mobileInvalid')}`,
       );
@@ -405,7 +404,7 @@ export class RegistrationPageComponent implements OnInit {
         errs.push(`${label}: ${this.translate.instant('registration.validation.nameRequired')}`);
       if (!nominee.mobile?.trim())
         errs.push(`${label}: ${this.translate.instant('registration.validation.mobileRequired')}`);
-      else if (!MOBILE_PATTERN.test(nominee.mobile.trim()))
+      else if (!isValidInternationalPhone(nominee.mobile))
         errs.push(`${label}: ${this.translate.instant('registration.validation.mobileInvalid')}`);
     });
 

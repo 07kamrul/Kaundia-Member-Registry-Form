@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
-from app.schemas.common import AddressDetail, Nominee, PropertyIn
+from app.schemas.common import AddressDetail, Nominee, PropertyIn, validate_phone
 
 
 class SubmissionPayload(BaseModel):
@@ -39,3 +39,5 @@ class SubmissionPayload(BaseModel):
 
     member_signature: str | None = None
     submission_date: str
+
+    _validate_phones = field_validator("mobile", "urgent_contact_mobile")(validate_phone)
