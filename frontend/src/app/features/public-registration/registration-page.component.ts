@@ -26,6 +26,7 @@ import { ReviewSummaryComponent } from './components/review-summary/review-summa
 import { DatePickerComponent } from '../../shared/date-picker/date-picker.component';
 import { ConfirmModalComponent } from '../../shared/confirm-modal/confirm-modal.component';
 import { buildRegistrationForm, propertiesArray, nomineesArray } from './registration-form.builder';
+import { mapSubmissionError } from './services/submission-error.mapper';
 
 interface DuplicateSubmissionError {
   success: false;
@@ -531,9 +532,14 @@ export class RegistrationPageComponent implements OnInit {
         if (err.status === 409 && isDuplicateSubmissionError(err.error?.detail)) {
           this.duplicateSubmission = err.error.detail;
         } else {
-          this.serverError = this.translate.instant(
-            err.status > 0 ? 'registration.submit.genericError' : 'registration.submit.networkError',
+          const mapped = mapSubmissionError(err, (key, params) =>
+            this.translate.instant(key, params),
           );
+          // goToStep clears `errors`, so jump first, then show the messages.
+          if (mapped.step) {
+            this.goToStep(mapped.step);
+          }
+          this.errors = mapped.messages;
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
         this.cdr.markForCheck();

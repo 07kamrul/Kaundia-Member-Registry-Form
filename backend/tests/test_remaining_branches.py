@@ -63,7 +63,8 @@ class TestSubmissionLandShareDecimalError:
         assert response.status_code == 422
         # The schema's digits-only validator catches it first (422 either
         # way); the route-level Decimal guard remains as defense-in-depth.
-        assert "my_share_quantity" in response.json()["detail"]
+        fields = [e["field"] for e in response.json()["detail"]["errors"]]
+        assert "properties.0.my_share_quantity" in fields
 
 
 import json

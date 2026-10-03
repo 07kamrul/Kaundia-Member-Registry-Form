@@ -86,9 +86,31 @@ async def resolve_active_fee(db: AsyncSession, key: str, on_date: date) -> str:
     if value is None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"No active fee setting configured for '{key}'",
+            detail={
+                "success": False,
+                "code": "FEE_NOT_CONFIGURED",
+                "message": f"No active fee setting configured for '{key}'",
+            },
         )
     return str(value)
+
+
+def _validation_error_detail(exc: ValidationError) -> dict:
+    """Structured 422 body: one entry per failing field so the frontend can
+    name the field and jump to its step instead of showing raw Pydantic text."""
+    return {
+        "success": False,
+        "code": "VALIDATION_ERROR",
+        "message": "Some fields are invalid.",
+        "errors": [
+            {
+                "field": ".".join(str(part) for part in err["loc"]),
+                "code": err["type"],
+                "message": err["msg"],
+            }
+            for err in exc.errors()
+        ],
+    }
 
 
 def _total_share_quantity(data: SubmissionPayload) -> Decimal:
@@ -99,7 +121,11 @@ def _total_share_quantity(data: SubmissionPayload) -> Decimal:
         except InvalidOperation:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Invalid land share quantity",
+                detail={
+                    "success": False,
+                    "code": "INVALID_SHARE_QUANTITY",
+                    "message": "Invalid land share quantity",
+                },
             )
     return total
 
@@ -122,8 +148,15 @@ async def create_submission(
     """
     try:
         data = SubmissionPayload.model_validate(json.loads(payload))
-    except (json.JSONDecodeError, ValidationError) as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"success": False, "code": "INVALID_PAYLOAD", "message": "Payload is not valid JSON."},
+        ) from exc
+    except ValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=_validation_error_detail(exc)
+        ) from exc
 
     normalized_nid = normalize_nid(data.nid)
     normalized_mobile = normalize_mobile(data.mobile)
