@@ -393,6 +393,7 @@
       "fileMissing": "The file is missing on the server. Please upload it again.",
       "viewFile": "View file",
       "replaceFile": "Replace file",
+      "uploadAgain": "Upload again",
       "uploading": "Uploading…",
       "notProvided": "Not provided",
       "decimalUnit": "decimal",

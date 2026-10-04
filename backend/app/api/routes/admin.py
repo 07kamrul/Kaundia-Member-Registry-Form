@@ -40,7 +40,7 @@ from app.schemas.member import (
 from app.schemas.picnic_payment import PicnicPaymentOut
 from app.core.config import get_settings
 from app.services.email import send_email, send_with_retries
-from app.services.storage import save_upload_file
+from app.services.storage import save_upload_file, slugify_path_segment
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -124,6 +124,31 @@ async def replace_attachment(
     await db.commit()
     # expire_on_commit=False keeps the eager-loaded graph loaded on `member`,
     # so returning it directly skips re-running the 5-query detail fetch.
+    return member
+
+
+@router.put("/submissions/{member_id}/documents/{doc_id}", response_model=MemberDetail)
+async def replace_document(
+    member_id: int,
+    doc_id: int,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("membership.review")),
+) -> Member:
+    """Replace a property's applicable document, e.g. when the stored file is lost."""
+    member = await _get_member_or_404(db, member_id)
+    doc = await db.scalar(
+        select(ApplicableDoc)
+        .join(Property, ApplicableDoc.property_id == Property.id)
+        .where(ApplicableDoc.id == doc_id, Property.member_id == member.id)
+    )
+    if doc is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+
+    doc.file_path = await save_upload_file(
+        file, f"documents/member_{member.id}/{slugify_path_segment(doc.doc_type)}"
+    )
+    await db.commit()
     return member
 
 

@@ -330,7 +330,7 @@ async def test_admin_replaces_missing_attachment(
 
     assert replace_response.status_code == 200
     new_path = replace_response.json()["member_photo_path"]
-    assert new_path.startswith(f"photos/member_{member_pk}/")
+    assert new_path.replace("\\", "/").startswith(f"photos/member_{member_pk}/")
     assert (tmp_path / new_path).is_file()
 
 
@@ -368,6 +368,62 @@ async def test_submission_ignores_client_sent_subscription_amount(
         f"/api/admin/submissions/{member_pk}", headers=admin_headers
     )
     assert Decimal(detail_response.json()["subscription"]) == Decimal("120")
+
+
+async def test_admin_replaces_missing_document(
+    client: AsyncClient, admin_user: AdminUser, tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.services import storage
+
+    monkeypatch.setattr(storage.settings, "upload_dir", str(tmp_path))
+    payload = _submission_payload()
+    payload["properties"][0]["applicable_docs"] = [{"doc_type": "খতিয়ান/পর্চা"}]
+    response = await client.post(
+        "/api/submissions",
+        data={"payload": json.dumps(payload)},
+    )
+    member_pk = response.json()["id"]
+    login_response = await client.post(
+        "/api/admin/login", json={"email": "admin@example.com", "password": "adminpass123"}
+    )
+    admin_headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+    detail = (await client.get(f"/api/admin/submissions/{member_pk}", headers=admin_headers)).json()
+    doc_id = detail["properties"][0]["applicable_docs"][0]["id"]
+
+    replace_response = await client.put(
+        f"/api/admin/submissions/{member_pk}/documents/{doc_id}",
+        files={"file": ("porcha.pdf", b"%PDF-fake", "application/pdf")},
+        headers=admin_headers,
+    )
+
+    assert replace_response.status_code == 200
+    doc = replace_response.json()["properties"][0]["applicable_docs"][0]
+    assert doc["file_path"].replace("\\", "/").startswith(
+        f"documents/member_{member_pk}/khatian_porcha/"
+    )
+    assert (tmp_path / doc["file_path"]).is_file()
+
+
+async def test_replace_document_rejects_doc_of_other_member(
+    client: AsyncClient, admin_user: AdminUser
+) -> None:
+    response = await client.post(
+        "/api/submissions",
+        data={"payload": json.dumps(_submission_payload())},
+    )
+    member_pk = response.json()["id"]
+    login_response = await client.post(
+        "/api/admin/login", json={"email": "admin@example.com", "password": "adminpass123"}
+    )
+    admin_headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+
+    replace_response = await client.put(
+        f"/api/admin/submissions/{member_pk}/documents/999999",
+        files={"file": ("porcha.pdf", b"%PDF-fake", "application/pdf")},
+        headers=admin_headers,
+    )
+
+    assert replace_response.status_code == 404
 
 
 async def test_replace_attachment_rejects_unknown_kind(

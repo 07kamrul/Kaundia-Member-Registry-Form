@@ -55,6 +55,8 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
   brokenFileUrls: ReadonlySet<string> = new Set<string>();
   /** Attachment currently being re-uploaded, if any. */
   uploadingKind: AttachmentKind | null = null;
+  /** Document currently being re-uploaded, if any. */
+  uploadingDocId: string | null = null;
   uploadError = '';
   copiedKey: string | null = null;
   expandedPropertyIds = new Set<string>();
@@ -443,6 +445,31 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy {
     this.brokenFileUrls = new Set([...this.brokenFileUrls, url]);
     // The (error) handlers that call us run outside Angular's zone under OnPush.
     this.cdr.markForCheck();
+  }
+
+  /** Upload a replacement for a missing or wrong property document. */
+  replaceDocument(doc: ApplicableDoc, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!this.submission || !file || this.uploadingKind || this.uploadingDocId) return;
+
+    this.uploadingDocId = doc.id;
+    this.uploadError = '';
+    this.adminService.replaceDocument(this.submission.id, doc.id, file).subscribe({
+      next: (data) => {
+        this.submission = data;
+        this.uploadingDocId = null;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        const detail = typeof err?.error?.detail === 'string' ? err.error.detail : '';
+        this.uploadError =
+          detail || this.translate.instant('admin.submissionDetail.errors.uploadFailed');
+        this.uploadingDocId = null;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   /** Upload a replacement for a missing or wrong member photo / receipt. */

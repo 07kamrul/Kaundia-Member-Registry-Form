@@ -424,6 +424,18 @@ export class AdminService {
       .pipe(map(toSubmissionDetail));
   }
 
+  /** Replace a property's applicable document, e.g. when the stored file is lost. */
+  replaceDocument(id: string, docId: string, file: File): Observable<SubmissionDetail> {
+    const body = new FormData();
+    body.append('file', file);
+    return this.http
+      .put<SubmissionDetailApiModel>(
+        `${this.base}/submissions/${id}/documents/${docId}`,
+        body,
+      )
+      .pipe(map(toSubmissionDetail));
+  }
+
   approveSubmission(id: string): Observable<{ member_id: string }> {
     return this.http.post<{ member_id: string }>(`${this.base}/submissions/${id}/approve`, {});
   }

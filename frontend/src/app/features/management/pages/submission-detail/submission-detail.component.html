@@ -808,6 +808,21 @@
                                     <span class="ds-empty">{{
                                       'admin.submissionDetail.fileMissing' | translate
                                     }}</span>
+                                    <label class="btn btn-secondary btn-sm attachment-replace">
+                                      <input
+                                        type="file"
+                                        accept=".jpg,.jpeg,.png,.pdf"
+                                        hidden
+                                        [disabled]="uploadingDocId !== null"
+                                        (change)="replaceDocument(doc, $event)"
+                                      />
+                                      {{
+                                        (uploadingDocId === doc.id
+                                          ? 'admin.submissionDetail.uploading'
+                                          : 'admin.submissionDetail.uploadAgain'
+                                        ) | translate
+                                      }}
+                                    </label>
                                   } @else {
                                     <button
                                       type="button"
