@@ -34,6 +34,7 @@ from app.schemas.fee_settings import FeeSettingCreate, FeeSettingOut
 from app.schemas.installment import InstallmentCreate, InstallmentOut, InstallmentUpdate
 from app.models.audit_log import AuditLog
 from app.services.audit import record_audit
+from app.services.registration_installment import add_registration_installment
 from app.schemas.member import (
     ApproveResponse,
     MemberAuditEntry,
@@ -225,6 +226,7 @@ async def approve_submission(
         must_change_password=True,
     )
     db.add(credential)
+    await add_registration_installment(db, member)
     record_audit(
         db,
         actor_admin_id=admin.id,
