@@ -1332,5 +1332,40 @@
       "discardDraft": "Discard and start fresh",
       "reattachFilesNotice": "Please re-attach any files from the restored draft"
     }
+  },
+  "idCard": {
+    "button": "ID Card",
+    "title": "Member ID Card",
+    "societyName": "Uttar Kaundia Society",
+    "societyOrg": "Uttar Kaundia Housing Owners' Welfare Council",
+    "cardTitleEn": "Member ID Card",
+    "footer": "Member ID Card · 2026",
+    "verify": "Verifiable via QR code",
+    "front": "Front",
+    "back": "Back",
+    "backTitle": "Member ID Card",
+    "dob": "Date of Birth",
+    "mobile": "Mobile",
+    "address": "Address",
+    "sectionPersonal": "Personal",
+    "father": "Father/Husband",
+    "nid": "NID",
+    "sectionContact": "Contact",
+    "emergency": "Emergency",
+    "sectionMembership": "Membership",
+    "issuedOn": "Issued on",
+    "receiptNo": "Receipt No.",
+    "terms": "This card is the property of Uttar Kaundia Housing Owners' Welfare Council. It must be shown on request and returned upon termination of membership. Report loss to the authority immediately.",
+    "authority": "Authority",
+    "download": "Download Card (PNG)",
+    "preparing": "Preparing...",
+    "downloadError": "Could not generate the card. Please try again.",
+    "loadError": "Could not load profile data.",
+    "status": {
+      "approved": "Member",
+      "applicant": "Applicant",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    }
   }
 }

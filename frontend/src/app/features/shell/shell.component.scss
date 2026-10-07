@@ -186,6 +186,29 @@
   font-size: 0.78rem;
 }
 
+/* Opens the society ID card modal (front + back preview, PNG download). */
+.sidebar-idcard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  padding: 0.34rem 0.8rem;
+  border: 1px solid var(--emerald-700);
+  border-radius: 999px;
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.sidebar-idcard-btn:hover {
+  background: var(--emerald-700);
+  color: var(--surface);
+}
+
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -280,7 +303,9 @@
 }
 
 @media (min-width: 900px) {
-  .topbar-menu-btn {
+  /* Hide only the sidebar hamburger; the 3-dot user menu (theme/lang/logout)
+     must stay visible on desktop. */
+  .app-shell .topbar-menu-btn:not(.topbar-more-btn) {
     display: none;
   }
 

@@ -9,6 +9,7 @@ import {
 import { ThemeService } from '../../core/services/theme.service';
 import { LanguageService } from '../../core/services/language.service';
 import { MemberService } from '../../core/services/member.service';
+import { IdCardModalComponent } from '../member/components/id-card-modal/id-card-modal.component';
 import { IconComponent, type IconName } from '../../shared/icon/icon.component';
 
 interface NavItem {
@@ -124,7 +125,7 @@ const NAV_ITEMS: NavItem[] = [
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, IconComponent, TranslatePipe],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, IconComponent, TranslatePipe, IdCardModalComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
   host: { '(document:keydown.escape)': 'closeUserMenu()' },
@@ -135,6 +136,16 @@ export class ShellComponent implements OnInit {
   readonly displayName = signal('');
   readonly memberId = signal('');
   readonly avatarPhotoUrl = signal<string | undefined>(undefined);
+  readonly isIdCardOpen = signal(false);
+
+  openIdCard(): void {
+    this.closeSidebar();
+    this.isIdCardOpen.set(true);
+  }
+
+  closeIdCard(): void {
+    this.isIdCardOpen.set(false);
+  }
 
   constructor(
     public auth: AuthService,

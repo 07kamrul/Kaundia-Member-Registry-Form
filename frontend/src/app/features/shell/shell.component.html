@@ -93,6 +93,12 @@
           @if (memberId()) {
             <p class="sidebar-user-id">{{ memberId() }}</p>
           }
+          @if (auth.role === 'member') {
+            <button type="button" class="sidebar-idcard-btn" (click)="openIdCard()">
+              <app-icon name="id-card" [size]="15" />
+              <span>{{ 'idCard.button' | translate }}</span>
+            </button>
+          }
         </div>
       }
 
@@ -125,3 +131,7 @@
     {{ 'footer.prototypeNotice' | translate }}
   </footer>
 </div>
+
+@if (isIdCardOpen()) {
+  <app-id-card-modal [open]="true" (closed)="closeIdCard()" />
+}

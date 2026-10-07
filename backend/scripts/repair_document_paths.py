@@ -16,11 +16,21 @@ Two classes of damage are healed:
    in ASCII folders (`slugify_path_segment()`), so those files are moved to
    their canonical path and the DB updated to match.
 
+3. Dangling rows (opt-in, --clear-missing) - the file is gone from disk
+   entirely (typically uploaded before the persistent volume was mounted, then
+   wiped by a redeploy). The stored path is set to NULL so the API stops
+   returning a URL that 404s and the member is prompted to upload again.
+   Never runs when the upload root is completely empty: that indicates a
+   missing volume mount, not lost files, and clearing would destroy every
+   reference.
+
 The saved name is a random uuid4 hex, so a basename match is unambiguous.
 
 Usage:
     python -m scripts.repair_document_paths            # dry run, prints a report
     python -m scripts.repair_document_paths --apply     # writes the fixes to the DB
+    python -m scripts.repair_document_paths --apply --clear-missing
+                                                        # also NULLs paths whose file is gone
 """
 
 import argparse
@@ -95,10 +105,17 @@ def _targets(docs, members):
             )
 
 
-async def repair(apply: bool) -> None:
+def _has_any_file(root: Path) -> bool:
+    return root.is_dir() and any(p.is_file() and not p.name.startswith(".") for p in root.rglob("*"))
+
+
+async def repair(apply: bool, clear_missing: bool = False, session_factory=AsyncSessionLocal) -> None:
     root = _upload_root()
     print(f"upload root: {root}")
-    async with AsyncSessionLocal() as db:
+    if clear_missing and not _has_any_file(root):
+        print("[SKIP] --clear-missing ignored: upload root has no files (volume not mounted?)")
+        clear_missing = False
+    async with session_factory() as db:
         docs = (
             await db.execute(
                 select(ApplicableDoc)
@@ -114,7 +131,7 @@ async def repair(apply: bool) -> None:
             )
         ).scalars().all()
 
-        checked = missing = fixed = moved = unresolved = 0
+        checked = missing = fixed = moved = unresolved = cleared = 0
 
         for label, row, attr, canonical in _targets(docs, members):
             checked += 1
@@ -122,6 +139,12 @@ async def repair(apply: bool) -> None:
             actual = _locate(root, stored)
             if actual is None:
                 missing += 1
+                if clear_missing:
+                    print(f"[CLEAR] {label} path={stored!r} -> file gone, clearing stored path")
+                    if apply:
+                        setattr(row, attr, None)
+                        cleared += 1
+                    continue
                 unresolved += 1
                 print(f"[UNRESOLVED] {label} path={stored!r} -> no file with that name on disk")
                 continue
@@ -152,7 +175,7 @@ async def repair(apply: bool) -> None:
                 setattr(row, attr, str(canonical))
                 fixed += 1
 
-        if apply and fixed:
+        if apply and (fixed or cleared):
             await db.commit()
 
         print(
@@ -162,6 +185,8 @@ async def repair(apply: bool) -> None:
         )
         if apply and moved:
             print(f"{moved} file(s) physically moved to their canonical ASCII folder.")
+        if cleared:
+            print(f"{cleared} dangling path(s) cleared; those members must re-upload.")
         if unresolved:
             print(f"{unresolved} could not be resolved automatically and need manual review.")
 
@@ -171,5 +196,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--apply", action="store_true", help="Write corrected file_path values to the database"
     )
+    parser.add_argument(
+        "--clear-missing",
+        action="store_true",
+        help="NULL stored paths whose file no longer exists anywhere under the upload root",
+    )
     args = parser.parse_args()
-    asyncio.run(repair(apply=args.apply))
+    asyncio.run(repair(apply=args.apply, clear_missing=args.clear_missing))

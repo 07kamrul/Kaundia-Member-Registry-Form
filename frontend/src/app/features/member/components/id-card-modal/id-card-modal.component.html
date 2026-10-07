@@ -1,0 +1,121 @@
+@if (open) {
+  <div class="idcard-backdrop" (click)="onBackdropClick($event)">
+    <div class="idcard-modal" role="dialog" aria-modal="true">
+      <div class="idcard-modal-head">
+        <h3 class="idcard-title">{{ 'idCard.title' | translate }}</h3>
+        <button type="button" class="idcard-close" (click)="close()" [attr.aria-label]="'common.close' | translate">
+          <app-icon name="close" [size]="20" />
+        </button>
+      </div>
+
+      <div class="idcard-modal-body">
+        @if (loading()) {
+          <p class="idcard-state">{{ 'common.loading' | translate }}</p>
+        } @else if (loadError()) {
+          <p class="idcard-state idcard-state-error">
+            <app-icon name="alert" [size]="18" />
+            {{ 'idCard.loadError' | translate }}
+          </p>
+        } @else if (profile(); as p) {
+          <div class="idcard-cards">
+            <!-- Front -->
+            <div class="idcard" aria-label="{{ 'idCard.front' | translate }}">
+              <div class="idcard-head">
+                <div class="idcard-logo">
+                  <img src="/images/logo.jpeg" alt="" />
+                </div>
+                <div class="idcard-head-text">
+                  <p class="idcard-society">{{ 'idCard.societyName' | translate }}</p>
+                  <p class="idcard-org">{{ 'idCard.societyOrg' | translate }}</p>
+                  <p class="idcard-kind">{{ 'idCard.cardTitleEn' | translate }}</p>
+                </div>
+              </div>
+              <div class="idcard-photo-wrap">
+                @if (p.memberPhotoUrl && !photoFailed()) {
+                  <img class="idcard-photo" [src]="p.memberPhotoUrl" [alt]="p.fullName" (error)="photoFailed.set(true)" />
+                } @else {
+                  <div class="idcard-photo idcard-photo-fallback">{{ p.fullName.charAt(0) }}</div>
+                }
+              </div>
+              <p class="idcard-name">{{ p.fullName }}</p>
+              <span class="idcard-chip">{{ p.memberId }}</span>
+              <dl class="idcard-fields">
+                <div class="idcard-field">
+                  <dt>{{ 'idCard.dob' | translate }}</dt>
+                  <dd>{{ p.dob || '—' }}</dd>
+                </div>
+                <div class="idcard-field">
+                  <dt>{{ 'idCard.mobile' | translate }}</dt>
+                  <dd>{{ p.mobile || '—' }}</dd>
+                </div>
+                <div class="idcard-field">
+                  <dt>{{ 'idCard.address' | translate }}</dt>
+                  <dd>{{ shortAddress(p) }}</dd>
+                </div>
+              </dl>
+              <div class="idcard-foot">
+                <span class="idcard-verify">{{ 'idCard.verify' | translate }}</span>
+                <span class="idcard-brand">{{ 'idCard.footer' | translate }}</span>
+              </div>
+            </div>
+
+            <!-- Back -->
+            <div class="idcard" aria-label="{{ 'idCard.back' | translate }}">
+              <div class="idcard-head idcard-head-back">
+                <p class="idcard-society">{{ 'idCard.backTitle' | translate }}</p>
+                <span class="idcard-head-id">{{ p.memberId }}</span>
+              </div>
+              <div class="idcard-back-body">
+                <div class="idcard-section">
+                  <h4>{{ 'idCard.sectionPersonal' | translate }}</h4>
+                  <div class="idcard-row"><span>{{ 'idCard.father' | translate }}</span><strong>{{ p.fatherOrHusband || '—' }}</strong></div>
+                  <div class="idcard-row"><span>{{ 'idCard.nid' | translate }}</span><strong>{{ p.nid || '—' }}</strong></div>
+                </div>
+                <div class="idcard-section">
+                  <h4>{{ 'idCard.sectionContact' | translate }}</h4>
+                  <div class="idcard-row"><span>{{ 'idCard.mobile' | translate }}</span><strong>{{ p.mobile || '—' }}</strong></div>
+                  <div class="idcard-row">
+                    <span>{{ 'idCard.emergency' | translate }}</span>
+                    <strong>{{ p.urgentContactMobile ? (p.urgentContactName ? p.urgentContactName + ' · ' : '') + p.urgentContactMobile : '—' }}</strong>
+                  </div>
+                </div>
+                <div class="idcard-section">
+                  <h4>{{ 'idCard.sectionMembership' | translate }}</h4>
+                  <div class="idcard-row"><span>{{ 'idCard.issuedOn' | translate }}</span><strong>{{ p.submissionDate || '—' }}</strong></div>
+                  <div class="idcard-row"><span>{{ 'idCard.receiptNo' | translate }}</span><strong>{{ p.receiptNo || '—' }}</strong></div>
+                </div>
+                <div class="idcard-section">
+                  <h4>{{ 'idCard.address' | translate }}</h4>
+                  <p class="idcard-address">{{ fullAddress(p) }}</p>
+                </div>
+                <p class="idcard-terms">{{ 'idCard.terms' | translate }}</p>
+                <div class="idcard-sign">
+                  <span>{{ 'idCard.authority' | translate }}</span>
+                </div>
+              </div>
+              <div class="idcard-foot">
+                <span class="idcard-brand">{{ 'idCard.footer' | translate }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="idcard-actions">
+            <button type="button" class="btn btn-secondary" (click)="close()">
+              {{ 'common.close' | translate }}
+            </button>
+            <button type="button" class="btn btn-primary" [disabled]="downloading()" [attr.aria-busy]="downloading()" (click)="download()">
+              <app-icon name="download" [size]="17" />
+              {{ (downloading() ? 'idCard.preparing' : 'idCard.download') | translate }}
+            </button>
+          </div>
+          @if (downloadError()) {
+            <p class="idcard-state idcard-state-error">
+              <app-icon name="alert" [size]="16" />
+              {{ 'idCard.downloadError' | translate }}
+            </p>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}
