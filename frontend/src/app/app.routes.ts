@@ -167,6 +167,45 @@ export const routes: Routes = [
             (m) => m.FundTransparencyComponent,
           ),
       },
+      // Society roadmap: read-only progress view for every authenticated tier.
+      {
+        path: 'roadmap',
+        loadComponent: () =>
+          import('./features/member/pages/roadmap/roadmap.component').then((m) => m.RoadmapComponent),
+      },
+      // Resolution book - readable by every authenticated account; the
+      // add/edit routes are separately committee-gated (the server
+      // enforces the same split via manage_resolution_book).
+      {
+        path: 'resolution-book',
+        loadComponent: () =>
+          import('./features/member/pages/resolution-book/resolution-book.component').then(
+            (m) => m.ResolutionBookComponent,
+          ),
+      },
+      {
+        path: 'resolution-book/meeting/:id',
+        loadComponent: () =>
+          import('./features/member/pages/resolution-book/meeting-detail.component').then(
+            (m) => m.MeetingDetailComponent,
+          ),
+      },
+      {
+        path: 'resolution-book/add',
+        canActivate: [permissionGuard(['manage_resolution_book'])],
+        loadComponent: () =>
+          import('./features/member/pages/resolution-book/meeting-form.component').then(
+            (m) => m.MeetingFormComponent,
+          ),
+      },
+      {
+        path: 'resolution-book/edit/:id',
+        canActivate: [permissionGuard(['manage_resolution_book'])],
+        loadComponent: () =>
+          import('./features/member/pages/resolution-book/meeting-form.component').then(
+            (m) => m.MeetingFormComponent,
+          ),
+      },
       // Management area - Executive Committee/Administrator (any manage_*/
       // approve_*/view_* key from their default tuples), Super Admin included.
       {
@@ -245,6 +284,22 @@ export const routes: Routes = [
               import(
                 './features/management/pages/finance-management/finance-management.component'
               ).then((m) => m.FinanceManagementComponent),
+          },
+          {
+            path: 'payment-verifications',
+            canActivate: [permissionGuard(['manage_finance'])],
+            loadComponent: () =>
+              import(
+                './features/management/pages/payment-verifications/payment-verifications.component'
+              ).then((m) => m.PaymentVerificationsComponent),
+          },
+          {
+            path: 'roadmap-management',
+            canActivate: [permissionGuard(['manage_roadmap'])],
+            loadComponent: () =>
+              import(
+                './features/management/pages/roadmap-management/roadmap-management.component'
+              ).then((m) => m.RoadmapManagementComponent),
           },
           {
             path: 'config-lists',

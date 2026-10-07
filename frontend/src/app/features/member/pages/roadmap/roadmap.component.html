@@ -1,0 +1,243 @@
+<div class="roadmap-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'member.roadmap.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'member.roadmap.subtitle' | translate }}</p>
+      @if (roadmap()?.lastUpdated; as updated) {
+        <p class="last-updated">
+          <app-icon name="check-circle" [size]="14" />
+          {{ 'member.roadmap.lastUpdated' | translate: { date: date(updated) } }}
+        </p>
+      }
+    </div>
+    @if (roadmap()) {
+      <div class="header-actions">
+        <button type="button" class="btn btn-primary" (click)="slidesOpen.set(true)">
+          <app-icon name="dashboard" [size]="16" /> {{ 'member.roadmap.actions.slides' | translate }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="downloadPdf()" [disabled]="pdfBusy()">
+          @if (pdfBusy()) {
+            <span class="spinner"></span>
+          } @else {
+            <app-icon name="download" [size]="16" />
+          }
+          {{ 'member.roadmap.actions.pdf' | translate }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="downloadImage()" [disabled]="imageBusy()">
+          @if (imageBusy()) {
+            <span class="spinner"></span>
+          } @else {
+            <app-icon name="sparkle" [size]="16" />
+          }
+          {{ 'member.roadmap.actions.image' | translate }}
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (exportError()) {
+    <div class="error-box" role="alert"><p style="margin:0">{{ exportError() | translate }}</p></div>
+  }
+
+  @if (loading()) {
+    <div class="card roadmap-loading"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else if (error()) {
+    <div class="error-box" role="alert">
+      <p style="margin:0 0 0.5rem">{{ 'member.roadmap.loadError' | translate }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (roadmap(); as data) {
+    <!-- আমরা এখন কোথায় আছি: the one-glance answer -->
+    <section class="card where-card" aria-labelledby="where-title">
+      <div class="where-overall">
+        <div
+          class="ring"
+          role="img"
+          [style.--pct]="data.totals.percent"
+          [attr.aria-label]="'member.roadmap.overallAria' | translate: { pct: data.totals.percent }"
+        >
+          <span class="ring-value">{{ digits(data.totals.percent) }}%</span>
+        </div>
+        <div class="where-text">
+          <h2 id="where-title" class="where-title">{{ 'member.roadmap.whereTitle' | translate }}</h2>
+          <p class="where-summary">
+            {{
+              'member.roadmap.whereSummary'
+                | translate: { done: digits(data.totals.done), total: digits(data.totals.total) }
+            }}
+          </p>
+          <div class="where-counts">
+            <span class="status-pill status-done">
+              {{ 'member.roadmap.status.done' | translate }} · {{ digits(data.totals.done) }}
+            </span>
+            <span class="status-pill status-in_progress">
+              {{ 'member.roadmap.status.in_progress' | translate }} · {{ digits(data.totals.inProgress) }}
+            </span>
+            <span class="status-pill status-planned">
+              {{ 'member.roadmap.status.planned' | translate }} · {{ digits(data.totals.planned) }}
+            </span>
+          </div>
+        </div>
+      </div>
+      @if (currentTimeframe(); as current) {
+        <div class="where-now">
+          <p class="where-now-label">{{ 'member.roadmap.focusNow' | translate }}</p>
+          <button type="button" class="where-now-link" (click)="jumpTo(current)">
+            {{ name(current) }} <span class="muted">({{ windowLabel(current) }})</span>
+            <app-icon name="chevron-right" [size]="16" />
+          </button>
+          @if (inProgressItems().length) {
+            <ul class="where-now-list">
+              @for (item of inProgressItems().slice(0, 3); track item.id) {
+                <li><span class="dot dot-in_progress"></span>{{ item.text }}</li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Horizontal roadmap stepper: ১ মাস → ৪ মাস → ১ বছর -->
+    <nav class="stepper" [attr.aria-label]="'member.roadmap.stepperAria' | translate">
+      @for (tf of data.timeframes; track tf.id; let i = $index) {
+        <button
+          type="button"
+          class="step"
+          [class.step-current]="i === currentIndex()"
+          [class.step-complete]="tf.total > 0 && tf.done === tf.total"
+          (click)="jumpTo(tf)"
+        >
+          <span class="step-marker">
+            @if (tf.total > 0 && tf.done === tf.total) {
+              <app-icon name="check" [size]="18" />
+            } @else {
+              {{ digits(i + 1) }}
+            }
+          </span>
+          <span class="step-window">{{ windowLabel(tf) }}</span>
+          <span class="step-name">{{ name(tf) }}</span>
+          <span class="step-bar"><span [style.width.%]="tf.percent"></span></span>
+          <span class="step-pct">{{ digits(tf.percent) }}%</span>
+          @if (i === currentIndex()) {
+            <span class="step-here">{{ 'member.roadmap.weAreHere' | translate }}</span>
+          }
+        </button>
+      }
+    </nav>
+
+    <!-- Status filter -->
+    <div class="filter-chips" role="group" [attr.aria-label]="'member.roadmap.filterAria' | translate">
+      @for (status of statusFilters; track status) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.filter-chip-active]="filter() === status"
+          [attr.aria-pressed]="filter() === status"
+          (click)="filter.set(status)"
+        >
+          {{ 'member.roadmap.filter.' + status | translate }}
+          <span class="chip-count">{{ digits(filterCount(status)) }}</span>
+        </button>
+      }
+    </div>
+
+    @for (tf of data.timeframes; track tf.id; let i = $index) {
+      <section class="card tf-section" [id]="'roadmap-tf-' + tf.key" [class.tf-current]="i === currentIndex()">
+        <button
+          type="button"
+          class="tf-header"
+          (click)="toggleSection(tf)"
+          [attr.aria-expanded]="!isCollapsed(tf)"
+          [attr.aria-controls]="'roadmap-items-' + tf.key"
+        >
+          <span class="tf-index">{{ digits(i + 1) }}</span>
+          <span class="tf-heading">
+            <span class="tf-name">{{ name(tf) }}</span>
+            <span class="tf-window">
+              {{ windowLabel(tf) }} · {{ 'member.roadmap.itemCount' | translate: { n: digits(tf.total) } }}
+            </span>
+          </span>
+          <span class="tf-chevron" [class.tf-chevron-open]="!isCollapsed(tf)">
+            <app-icon name="chevron-down" [size]="20" />
+          </span>
+        </button>
+
+        <div class="tf-progress">
+          <div
+            class="progress-track"
+            role="progressbar"
+            [attr.aria-valuenow]="tf.percent"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-label]="name(tf)"
+          >
+            <div class="progress-done" [style.width.%]="tf.percent"></div>
+            <div class="progress-active" [style.width.%]="tf.total ? (tf.inProgress * 100) / tf.total : 0"></div>
+          </div>
+          <p class="progress-label">
+            {{
+              'member.roadmap.progressLabel'
+                | translate: { name: name(tf), done: digits(tf.done), total: digits(tf.total), pct: digits(tf.percent) }
+            }}
+          </p>
+        </div>
+
+        @if (!isCollapsed(tf)) {
+          <ol class="timeline" [id]="'roadmap-items-' + tf.key">
+            @for (item of visibleItems(tf); track item.id) {
+              <li [class]="'tl-item tl-' + item.status">
+                <span class="tl-dot" aria-hidden="true">
+                  @if (item.status === 'done') {
+                    <app-icon name="check" [size]="14" />
+                  }
+                </span>
+                <div class="tl-body">
+                  <div class="tl-top">
+                    <span [class]="'status-pill status-' + item.status">
+                      {{ 'member.roadmap.status.' + item.status | translate }}
+                    </span>
+                    <p class="tl-text">{{ item.text }}</p>
+                  </div>
+                  @if (item.note) {
+                    <p class="tl-note">{{ item.note }}</p>
+                  }
+                  @if (item.owner || item.targetDate || item.completedAt) {
+                    <p class="tl-meta">
+                      @if (item.status === 'done' && item.completedAt) {
+                        <span class="meta-done">
+                          <app-icon name="check-circle" [size]="14" />
+                          {{ 'member.roadmap.completedOn' | translate: { date: date(item.completedAt) } }}
+                        </span>
+                      } @else if (item.targetDate) {
+                        <span>
+                          <app-icon name="pin" [size]="14" />
+                          {{ 'member.roadmap.target' | translate: { date: date(item.targetDate) } }}
+                        </span>
+                      }
+                      @if (item.owner) {
+                        <span>
+                          <app-icon name="user" [size]="14" />
+                          {{ item.owner }}
+                        </span>
+                      }
+                    </p>
+                  }
+                </div>
+              </li>
+            } @empty {
+              <li class="tl-empty">
+                {{ (tf.total ? 'member.roadmap.emptyFiltered' : 'member.roadmap.empty') | translate }}
+              </li>
+            }
+          </ol>
+        }
+      </section>
+    }
+
+    @if (slidesOpen()) {
+      <app-roadmap-slides [roadmap]="data" (closed)="slidesOpen.set(false)" />
+    }
+  }
+</div>

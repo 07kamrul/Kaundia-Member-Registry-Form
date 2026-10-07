@@ -1,0 +1,700 @@
+// Roadmap page - built only from the global design tokens (styles.scss), so
+// light/dark themes follow automatically. Status semantics:
+//   done        -> dark green (--emerald-800)
+//   in_progress -> gold       (--gold)
+//   planned     -> neutral    (--gray-500)
+
+.roadmap-page {
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.last-updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.roadmap-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem;
+}
+
+.muted {
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+/* ---------- Status pills (shared vocabulary) ---------- */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.status-done {
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+  border-color: color-mix(in srgb, var(--emerald-800) 25%, transparent);
+}
+
+.status-in_progress {
+  background: var(--amber-50);
+  color: var(--gold-strong);
+  border-color: color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+.status-planned {
+  background: var(--surface-2);
+  color: var(--gray-700);
+  border-color: var(--gray-200);
+}
+
+/* ---------- "আমরা এখন কোথায় আছি" ---------- */
+.where-card {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  border-top: 3px solid var(--gold);
+}
+
+.where-overall {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.where-text {
+  min-width: 0;
+}
+
+.ring {
+  --size: 6.5rem;
+  flex-shrink: 0;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--emerald-800) calc(var(--pct, 0) * 1%), var(--surface-2) 0);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0.55rem;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+}
+
+.ring-value {
+  position: relative;
+  font-family: 'Tiro Bangla', 'Hind Siliguri', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--emerald-800);
+}
+
+.where-title {
+  margin: 0 0 0.25rem;
+  font-family: 'Tiro Bangla', 'Hind Siliguri', serif;
+  font-size: 1.35rem;
+  color: var(--gray-800);
+}
+
+.where-summary {
+  margin: 0 0 0.6rem;
+  color: var(--gray-700);
+}
+
+.where-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.where-now {
+  border-left: 1px solid var(--gray-200);
+  padding-left: 1.5rem;
+  min-width: 0;
+}
+
+.where-now-label {
+  margin: 0 0 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+.where-now-link {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--red-700);
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
+.where-now-list {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+
+  li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  transform: translateY(-1px);
+}
+
+.dot-in_progress {
+  background: var(--gold);
+}
+
+/* ---------- Horizontal stepper ---------- */
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1.25rem;
+  position: relative;
+
+  // The connecting road behind the markers.
+  &::before {
+    content: '';
+    position: absolute;
+    top: 1.35rem;
+    left: 16.66%;
+    right: 16.66%;
+    height: 3px;
+    background: repeating-linear-gradient(90deg, var(--gold) 0 10px, transparent 10px 16px);
+    opacity: 0.6;
+  }
+}
+
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0 0.5rem 0.5rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--gray-700);
+  cursor: pointer;
+  text-align: center;
+  border-radius: var(--radius-md);
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+}
+
+.step-marker {
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  background: var(--surface);
+  border: 2px solid var(--gray-300);
+  color: var(--gray-700);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 1;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.step-current .step-marker {
+  border-color: var(--red-700);
+  color: var(--red-700);
+  transform: scale(1.1);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--red-700) 15%, transparent);
+}
+
+.step-complete .step-marker {
+  background: var(--emerald-800);
+  border-color: var(--emerald-800);
+  color: var(--surface);
+}
+
+.step-window {
+  margin-top: 0.35rem;
+  font-family: 'Tiro Bangla', 'Hind Siliguri', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--gray-800);
+}
+
+.step-name {
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+}
+
+.step-bar {
+  width: min(8rem, 90%);
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+  margin-top: 0.25rem;
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--emerald-800);
+    border-radius: inherit;
+  }
+}
+
+.step-pct {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--emerald-800);
+}
+
+.step-here {
+  margin-top: 0.15rem;
+  padding: 0.05rem 0.55rem;
+  border-radius: 999px;
+  background: var(--red-700);
+  color: var(--surface);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+/* ---------- Filter chips ---------- */
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 38px;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--gray-200);
+  background: var(--surface);
+  color: var(--gray-700);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--emerald-800);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+}
+
+.filter-chip-active {
+  background: var(--emerald-50);
+  border-color: var(--emerald-800);
+  color: var(--emerald-800);
+}
+
+.chip-count {
+  min-width: 1.4rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* ---------- Timeframe sections ---------- */
+.tf-section {
+  padding: 0;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  scroll-margin-top: 5rem;
+}
+
+.tf-current {
+  border-color: color-mix(in srgb, var(--red-700) 45%, var(--gray-200));
+}
+
+.tf-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.1rem 1.25rem 0.6rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: -2px;
+  }
+}
+
+.tf-index {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--emerald-800);
+  color: var(--surface);
+  font-weight: 700;
+}
+
+.tf-current .tf-index {
+  background: var(--red-700);
+}
+
+.tf-heading {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tf-name {
+  font-family: 'Tiro Bangla', 'Hind Siliguri', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.tf-window {
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+}
+
+.tf-chevron {
+  display: inline-flex;
+  color: var(--gray-500);
+  transition: transform 0.2s ease;
+}
+
+.tf-chevron-open {
+  transform: rotate(180deg);
+}
+
+.tf-progress {
+  padding: 0 1.25rem 1rem;
+}
+
+.progress-track {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.progress-done {
+  background: var(--emerald-800);
+  transition: width 0.4s ease;
+}
+
+.progress-active {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--gold) 0 6px,
+    color-mix(in srgb, var(--gold) 70%, transparent) 6px 12px
+  );
+  transition: width 0.4s ease;
+}
+
+.progress-label {
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+/* ---------- Item timeline ---------- */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 1.25rem 1.25rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.tl-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.85rem 0;
+
+  // Vertical road connecting the dots.
+  &::before {
+    content: '';
+    position: absolute;
+    left: calc(0.75rem - 1px);
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--gray-200);
+  }
+
+  &:first-child::before {
+    top: 1.4rem;
+  }
+
+  &:last-child::before {
+    bottom: calc(100% - 1.4rem);
+  }
+
+  & + & {
+    border-top: 1px dashed var(--gray-200);
+  }
+}
+
+.tl-dot {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 2px solid var(--gray-300);
+  color: var(--surface);
+}
+
+.tl-done .tl-dot {
+  background: var(--emerald-800);
+  border-color: var(--emerald-800);
+}
+
+.tl-in_progress .tl-dot {
+  border-color: var(--gold);
+  background: radial-gradient(circle, var(--gold) 0 35%, var(--surface) 38%);
+}
+
+.tl-body {
+  min-width: 0;
+}
+
+.tl-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.tl-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--gray-800);
+  overflow-wrap: anywhere;
+}
+
+.tl-done .tl-text {
+  color: var(--gray-700);
+}
+
+.tl-note {
+  margin: 0.45rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--amber-50);
+  color: var(--gray-800);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.tl-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+}
+
+.meta-done {
+  color: var(--emerald-800);
+  font-weight: 600;
+}
+
+.tl-empty {
+  padding: 1rem 0 0.25rem;
+  color: var(--gray-500);
+  font-size: 0.875rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .where-card {
+    grid-template-columns: 1fr;
+  }
+
+  .where-now {
+    border-left: 0;
+    border-top: 1px solid var(--gray-200);
+    padding: 1rem 0 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-actions {
+    width: 100%;
+
+    .btn {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 520px) {
+  .where-card {
+    padding: 1.1rem;
+  }
+
+  .where-overall {
+    align-items: flex-start;
+  }
+
+  .ring {
+    --size: 4.75rem;
+  }
+
+  .ring-value {
+    font-size: 1.2rem;
+  }
+
+  .step {
+    padding: 0 0.15rem 0.4rem;
+  }
+
+  .step-name {
+    display: none;
+  }
+
+  .step-window {
+    font-size: 0.875rem;
+  }
+
+  .tf-header {
+    padding: 0.9rem 1rem 0.5rem;
+  }
+
+  .tf-progress,
+  .timeline {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .tl-top {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .step-marker {
+    width: 2.3rem;
+    height: 2.3rem;
+  }
+
+  .stepper::before {
+    top: 1.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-done,
+  .progress-active,
+  .step-marker,
+  .tf-chevron {
+    transition: none;
+  }
+}

@@ -14,6 +14,7 @@ const CATEGORIES = [
   'event_category',
   'finance_income_category',
   'finance_expense_category',
+  'payment_account',
 ];
 
 @Component({

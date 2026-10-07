@@ -58,7 +58,7 @@ describe('MemberInstallmentsComponent', () => {
     });
     TestBed.configureTestingModule({
       imports: [InstallmentsComponent],
-      providers: [provideTranslateService(), provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideRouter([]), provideTranslateService(), provideHttpClient(), provideHttpClientTesting()],
     });
     http = TestBed.inject(HttpTestingController);
     const fixture = TestBed.createComponent(InstallmentsComponent);

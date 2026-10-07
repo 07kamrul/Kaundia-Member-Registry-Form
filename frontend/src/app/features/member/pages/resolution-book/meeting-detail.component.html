@@ -1,0 +1,269 @@
+<div class="rb-page">
+  <div class="page-header">
+    <div>
+      <a routerLink="/resolution-book" class="rb-back">
+        <app-icon name="pin" [size]="14" /> {{ 'rb.detail.back' | translate }}
+      </a>
+      @if (meeting(); as m) {
+        <h1 class="page-title">{{ m.meetingNo }}</h1>
+        <p class="page-subtitle">
+          {{ date(m.date) }}@if (m.time) { · {{ m.time }}} · {{ typeLabel(m.meetingType) }} ·
+          {{ 'rb.detail.chair' | translate }}: {{ m.chairperson }}
+        </p>
+      }
+    </div>
+    @if (meeting()) {
+      <div class="header-actions">
+        @if (canManage()) {
+          <a class="btn btn-secondary" [routerLink]="['/resolution-book/edit', meetingId()]">
+            <app-icon name="doc" [size]="16" /> {{ 'rb.actions.edit' | translate }}
+          </a>
+        }
+        <button type="button" class="btn btn-primary" (click)="downloadPdf()" [disabled]="pdfBusy()">
+          @if (pdfBusy()) {
+            <span class="spinner"></span>
+          } @else {
+            <app-icon name="download" [size]="16" />
+          }
+          {{ 'rb.actions.pdf' | translate }}
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (exportError()) {
+    <div class="error-box" role="alert"><p style="margin: 0">{{ exportError() | translate }}</p></div>
+  }
+
+  @if (loading()) {
+    <div class="rb-skeletons" aria-hidden="true">
+      <div class="card skeleton-line skeleton-lg"></div>
+      @for (i of [1, 2, 3]; track i) {
+        <div class="card skeleton-line" style="height: 88px"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="error-box" role="alert">
+      <p style="margin: 0 0 0.5rem">{{ 'rb.loadError' | translate }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (meeting(); as m) {
+    <nav class="rb-tabs" role="tablist">
+      @for (t of tabs; track t) {
+        <button
+          type="button"
+          role="tab"
+          class="rb-tab"
+          [class.rb-tab-active]="tab() === t"
+          [attr.aria-selected]="tab() === t"
+          (click)="setTab(t)"
+        >
+          {{ 'rb.tabs.' + t | translate }}
+        </button>
+      }
+    </nav>
+
+    <!-- ওভারভিউ -->
+    @if (tab() === 'overview') {
+      <section class="card rb-section">
+        <h2 class="rb-section-title">{{ 'rb.detail.agenda' | translate }}</h2>
+        <p class="rb-text">{{ m.agenda }}</p>
+        <h2 class="rb-section-title">{{ 'rb.detail.summary' | translate }}</h2>
+        <p class="rb-text">{{ m.summary || ('rb.detail.noSummary' | translate) }}</p>
+        <div class="rb-overview-grid">
+          <div>
+            <span class="rb-stat-label">{{ 'rb.detail.nextMeeting' | translate }}</span>
+            <strong>{{ m.nextMeetingDate ? date(m.nextMeetingDate) : ('rb.detail.notSet' | translate) }}</strong>
+          </div>
+          <div>
+            <span class="rb-stat-label">{{ 'rb.detail.status' | translate }}</span>
+            <span class="status-pill" [class]="'status-pill status-' + m.status">{{ statusLabel(m.status) }}</span>
+          </div>
+        </div>
+        @if (m.createdBy) {
+          <p class="rb-edited">
+            {{ 'rb.detail.createdBy' | translate: { name: m.createdBy } }}
+            @if (m.updatedAt) {
+              · {{ 'rb.detail.lastUpdated' | translate: { date: date(m.updatedAt) } }}
+            }
+          </p>
+        }
+      </section>
+    }
+
+    <!-- উপস্থিতি -->
+    @if (tab() === 'attendance') {
+      <section class="card rb-section">
+        <div class="rb-section-head">
+          <h2 class="rb-section-title">{{ 'rb.detail.attendanceTitle' | translate }}</h2>
+          <span class="rb-stat-chip">
+            {{ 'rb.list.attendance' | translate: { present: digits(m.attendancePresent), total: digits(m.attendanceTotal) } }}
+            · {{ digits(m.attendancePercent) }}%
+          </span>
+        </div>
+        <div class="rb-vote-bar" aria-hidden="true">
+          <span class="rb-vote-seg rb-seg-present" [style.width.%]="m.attendancePercent"></span>
+        </div>
+        @if (m.attendance.length === 0) {
+          <div class="rb-empty-inline">{{ 'rb.detail.noAttendance' | translate }}</div>
+        } @else {
+          <ul class="rb-attendance-list">
+            @for (entry of m.attendance; track entry.member.id) {
+              <li class="rb-attendance-row">
+                <span class="rb-attendance-name">{{ entry.member.fullName }}</span>
+                <span
+                  class="status-pill"
+                  [class]="entry.status === 'present' ? 'status-pill status-done' : 'status-pill status-planned'"
+                >
+                  {{ attendanceStatusLabel(entry.status) }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <!-- সিদ্ধান্ত -->
+    @if (tab() === 'resolutions') {
+      <section class="rb-section">
+        @for (resolution of m.resolutions; track resolution.id) {
+          <article class="card rb-resolution">
+            <div class="rb-resolution-head">
+              <strong class="rb-resolution-no">
+                {{ 'rb.detail.resolutionNo' | translate: { no: digits(resolution.resolutionNo) } }}
+              </strong>
+              @if (canManage()) {
+                <select
+                  class="rb-select rb-select-sm"
+                  [disabled]="statusSaving() === resolution.id"
+                  [value]="resolution.status"
+                  (change)="setResolutionStatus(resolution.id, $any($event.target).value)"
+                  [attr.aria-label]="'rb.detail.resolutionStatus' | translate"
+                >
+                  <option value="pending">{{ 'rb.resolution.pending' | translate }}</option>
+                  <option value="in_progress">{{ 'rb.resolution.in_progress' | translate }}</option>
+                  <option value="done">{{ 'rb.resolution.done' | translate }}</option>
+                </select>
+              } @else {
+                <span class="status-pill" [class]="'status-pill status-' + resolution.status">
+                  {{ resolutionStatusLabel(resolution.status) }}
+                </span>
+              }
+            </div>
+            <p class="rb-text">{{ resolution.decision }}</p>
+
+            <div
+              class="rb-vote-bar"
+              role="img"
+              [attr.aria-label]="
+                'rb.detail.votesAria'
+                  | translate
+                    : {
+                        for: digits(resolution.voteFor),
+                        against: digits(resolution.voteAgainst),
+                        neutral: digits(resolution.voteNeutral)
+                      }
+              "
+            >
+              @if (resolution.voteFor > 0) {
+                <span
+                  class="rb-vote-seg rb-seg-for"
+                  [style.width.%]="(resolution.voteFor * 100) / (resolution.voteFor + resolution.voteAgainst + resolution.voteNeutral)"
+                ></span>
+              }
+              @if (resolution.voteAgainst > 0) {
+                <span
+                  class="rb-vote-seg rb-seg-against"
+                  [style.width.%]="(resolution.voteAgainst * 100) / (resolution.voteFor + resolution.voteAgainst + resolution.voteNeutral)"
+                ></span>
+              }
+              @if (resolution.voteNeutral > 0) {
+                <span
+                  class="rb-vote-seg rb-seg-neutral"
+                  [style.width.%]="(resolution.voteNeutral * 100) / (resolution.voteFor + resolution.voteAgainst + resolution.voteNeutral)"
+                ></span>
+              }
+            </div>
+            <div class="rb-vote-legend">
+              <span class="rb-legend-item"><span class="rb-dot rb-dot-for"></span> {{ 'rb.vote.for' | translate }}: {{ digits(resolution.voteFor) }}</span>
+              <span class="rb-legend-item"><span class="rb-dot rb-dot-against"></span> {{ 'rb.vote.against' | translate }}: {{ digits(resolution.voteAgainst) }}</span>
+              <span class="rb-legend-item"><span class="rb-dot rb-dot-neutral"></span> {{ 'rb.vote.neutral' | translate }}: {{ digits(resolution.voteNeutral) }}</span>
+            </div>
+
+            @if (resolution.assignedTo || resolution.task || resolution.dueDate) {
+              <div class="rb-resolution-meta">
+                @if (resolution.assignedTo; as assignee) {
+                  <span><app-icon name="user" [size]="14" /> {{ assignee.fullName }}</span>
+                }
+                @if (resolution.task) {
+                  <span><app-icon name="doc" [size]="14" /> {{ resolution.task }}</span>
+                }
+                @if (resolution.dueDate) {
+                  <span><app-icon name="pin" [size]="14" /> {{ date(resolution.dueDate) }}</span>
+                }
+              </div>
+            }
+          </article>
+        } @empty {
+          <div class="card rb-empty">
+            <p style="margin: 0">{{ 'rb.detail.noResolutions' | translate }}</p>
+          </div>
+        }
+      </section>
+    }
+
+    <!-- রেকর্ডিং -->
+    @if (tab() === 'recordings') {
+      <section class="card rb-section">
+        <div class="rb-section-head">
+          <h2 class="rb-section-title">{{ 'rb.recordings.title' | translate }}</h2>
+          @if (canManage()) {
+            <label class="btn btn-secondary btn-sm rb-upload-label">
+              @if (uploadBusy()) {
+                <span class="spinner"></span>
+              } @else {
+                <app-icon name="plus" [size]="14" />
+              }
+              {{ 'rb.recordings.upload' | translate }}
+              <input type="file" class="rb-upload-input" (change)="onFileSelected($event)" [disabled]="uploadBusy()" />
+            </label>
+          }
+        </div>
+        @if (uploadError()) {
+          <div class="error-box" role="alert"><p style="margin: 0">{{ uploadError() }}</p></div>
+        }
+        @if (m.recordings.length === 0) {
+          <div class="rb-empty-inline">{{ 'rb.recordings.empty' | translate }}</div>
+        } @else {
+          <ul class="rb-recordings">
+            @for (recording of m.recordings; track recording.id) {
+              <li class="rb-recording">
+                <span class="rb-recording-icon" aria-hidden="true">
+                  {{ { video: '🎬', audio: '🎧', screenshot: '🖼️', chat_log: '💬' }[recording.fileType] }}
+                </span>
+                <div class="rb-recording-info">
+                  <span class="rb-recording-name">{{ recording.originalName }}</span>
+                  <span class="rb-recording-meta">
+                    {{ recordingTypeLabel(recording.fileType) }} · {{ fileSize(recording.fileSize) }}
+                    @if (recording.uploadedBy) {
+                      · {{ recording.uploadedBy }}
+                    }
+                    @if (recording.uploadedAt) {
+                      · {{ date(recording.uploadedAt) }}
+                    }
+                  </span>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" (click)="downloadRecording(recording)">
+                  <app-icon name="download" [size]="14" /> {{ 'rb.recordings.download' | translate }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+</div>

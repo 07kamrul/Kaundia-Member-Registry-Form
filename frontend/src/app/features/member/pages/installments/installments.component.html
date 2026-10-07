@@ -11,6 +11,22 @@
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
+    @if (successMessage) {
+      <div class="success-box" role="status"><p style="margin:0">{{ successMessage }}</p></div>
+    }
+
+    @if (canPay) {
+      <div class="pay-banner">
+        <div class="pay-banner-text">
+          <p class="pay-banner-title">{{ 'member.payDues.bannerTitle' | translate: { count: payableCount } }}</p>
+          <p class="pay-banner-amount">৳ {{ formatAmount(payable!.totalDue) }}</p>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="openPayDialog()">
+          <app-icon name="coin" [size]="16" /> {{ 'member.payDues.payNow' | translate }}
+        </button>
+      </div>
+    }
+
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-card-icon stat-icon-paid">
@@ -84,13 +100,17 @@
                 <span class="amount-cell">৳ {{ formatAmount(i.amount) }}</span>
               </td>
               <td [attr.data-label]="'member.installments.statusColumn' | translate">
-                <span
-                  class="status-badge"
-                  [class.status-paid]="i.status === 'paid'"
-                  [class.status-due]="i.status !== 'paid'"
-                >
-                  {{ (i.status === 'paid' ? 'member.installments.statusPaid' : 'member.installments.statusDue') | translate }}
-                </span>
+                @if (i.status !== 'paid' && isPending(i.id)) {
+                  <span class="status-badge status-pending">{{ 'member.payDues.statusPending' | translate }}</span>
+                } @else {
+                  <span
+                    class="status-badge"
+                    [class.status-paid]="i.status === 'paid'"
+                    [class.status-due]="i.status !== 'paid'"
+                  >
+                    {{ (i.status === 'paid' ? 'member.installments.statusPaid' : 'member.installments.statusDue') | translate }}
+                  </span>
+                }
               </td>
               <td [attr.data-label]="'member.installments.paidAtColumn' | translate">
                 @if (i.paidAt) {
@@ -115,8 +135,40 @@
       </table>
     </div>
 
-    @if (filtered.length) {
-      <p class="payment-note">{{ 'member.installments.paymentNotice' | translate }}</p>
+    @if (recentPayments.length) {
+      <section class="payment-history" aria-labelledby="paymentHistoryTitle">
+        <h2 class="payment-history-title" id="paymentHistoryTitle">{{ 'member.payDues.historyTitle' | translate }}</h2>
+        <ul class="payment-history-list">
+          @for (p of recentPayments; track p.id) {
+            <li class="payment-history-item">
+              <div class="payment-history-main">
+                <span class="payment-history-months">{{ paymentMonths(p) }}</span>
+                <span class="payment-history-meta">{{ p.method }} · {{ p.transactionRef }} · {{ formatDate(p.paidOn) }}</span>
+                @if (p.status === 'rejected' && p.rejectionReason) {
+                  <span class="payment-history-reason">{{ 'member.payDues.rejectedReason' | translate }}: {{ p.rejectionReason }}</span>
+                }
+              </div>
+              <div class="payment-history-side">
+                <strong>৳ {{ formatAmount(p.amount) }}</strong>
+                <span
+                  class="status-badge"
+                  [class.status-paid]="p.status === 'approved'"
+                  [class.status-pending]="p.status === 'pending'"
+                  [class.status-due]="p.status === 'rejected'"
+                >{{ 'member.payDues.paymentStatus.' + p.status | translate }}</span>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
     }
+
+    @if (filtered.length) {
+      <p class="payment-note">{{ (canPay ? 'member.payDues.notice' : 'member.installments.paymentNotice') | translate }}</p>
+    }
+  }
+
+  @if (payDialogOpen && payable) {
+    <app-pay-dues-dialog [summary]="payable" (closed)="closePayDialog()" (submitted)="onPaymentSubmitted()" />
   }
 </div>

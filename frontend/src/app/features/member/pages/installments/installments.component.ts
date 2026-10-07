@@ -5,8 +5,15 @@ import {
   ChangeDetectorRef,
   inject,
 } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService } from '../../../../core/services/member.service';
+import {
+  InstallmentPaymentService,
+  type InstallmentPayment,
+  type PayableSummary,
+} from '../../../../core/services/installment-payment.service';
+import { PayDuesDialogComponent } from './pay-dues-dialog.component';
 import type { Installment } from '../../../../core/models/admin.model';
 import { monthNameKey } from '../../../../shared/constants/months';
 import { IconComponent } from '../../../../shared/icon/icon.component';
@@ -17,7 +24,7 @@ type YearFilter = 'all' | number;
   selector: 'app-member-installments',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, IconComponent],
+  imports: [TranslatePipe, IconComponent, PayDuesDialogComponent],
   templateUrl: './installments.component.html',
   styleUrl: './installments.component.scss',
 })
@@ -26,8 +33,14 @@ export class InstallmentsComponent implements OnInit {
   selectedYear: YearFilter = 'all';
   loading = false;
   error = '';
+  payable: PayableSummary | null = null;
+  payDialogOpen = false;
+  successMessage = '';
 
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly paymentService = inject(InstallmentPaymentService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   constructor(
     private memberService: MemberService,
@@ -50,6 +63,69 @@ export class InstallmentsComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+    this.loadPayable(this.route.snapshot.queryParamMap.get('pay') === '1');
+  }
+
+  /** Online pay is optional: if it fails to load, the history still shows. */
+  private loadPayable(openDialog = false): void {
+    this.paymentService.getPayable().subscribe({
+      next: (summary) => {
+        this.payable = summary;
+        this.payDialogOpen = openDialog && this.canPay;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.payable = null;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  get pendingIds(): ReadonlySet<number> {
+    return new Set(this.payable?.pendingInstallmentIds ?? []);
+  }
+
+  get payableCount(): number {
+    const pending = this.pendingIds;
+    return (this.payable?.due ?? []).filter((i) => !pending.has(i.id)).length;
+  }
+
+  get canPay(): boolean {
+    return !!this.payable && this.payable.accounts.length > 0 && this.payableCount > 0;
+  }
+
+  get recentPayments(): InstallmentPayment[] {
+    return (this.payable?.payments ?? []).slice(0, 5);
+  }
+
+  isPending(id: string): boolean {
+    return this.pendingIds.has(Number(id));
+  }
+
+  openPayDialog(): void {
+    this.successMessage = '';
+    this.payDialogOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  closePayDialog(): void {
+    this.payDialogOpen = false;
+    if (this.route.snapshot.queryParamMap.has('pay')) {
+      this.router.navigate([], { queryParams: { pay: null }, queryParamsHandling: 'merge', replaceUrl: true });
+    }
+    this.cdr.markForCheck();
+  }
+
+  onPaymentSubmitted(): void {
+    this.closePayDialog();
+    this.successMessage = this.translate.instant('member.payDues.submitted');
+    this.loadPayable();
+  }
+
+  paymentMonths(payment: InstallmentPayment): string {
+    return payment.installments
+      .map((i) => `${this.translate.instant(monthNameKey(i.month))} ${i.year}`)
+      .join(', ');
   }
 
   get years(): number[] {

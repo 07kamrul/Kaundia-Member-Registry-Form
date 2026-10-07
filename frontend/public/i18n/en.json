@@ -1,4 +1,145 @@
 {
+  "rb": {
+    "title": "Resolution Book",
+    "subtitle": "Meeting records, decisions and attendance — all in one place",
+    "loadError": "Could not load data. Please try again.",
+    "exportError": "Could not generate the PDF. Please try again.",
+    "actions": {
+      "addMeeting": "New Meeting",
+      "edit": "Edit",
+      "pdf": "Download PDF"
+    },
+    "summary": {
+      "title": "Summary",
+      "totalMeetings": "Total meetings",
+      "thisYear": "Meetings this year",
+      "avgAttendance": "Average attendance",
+      "openActions": "Pending action items"
+    },
+    "upcoming": {
+      "label": "Next meeting"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search by meeting no, subject or chairperson…",
+      "type": "Meeting type",
+      "allTypes": "All types",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "dateFrom": "Date from",
+      "dateTo": "Date to",
+      "apply": "Search",
+      "clear": "Clear"
+    },
+    "list": {
+      "title": "Recent meetings",
+      "resolutions": "{{count}} resolutions",
+      "attendance": "{{present}}/{{total}} present",
+      "empty": "No meeting records yet.",
+      "emptyFiltered": "No meetings matched your search."
+    },
+    "nav": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "type": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "attendance": "Attendance",
+      "resolutions": "Resolutions",
+      "recordings": "Recordings"
+    },
+    "detail": {
+      "back": "Resolution Book",
+      "chair": "Chair",
+      "agenda": "Agenda",
+      "summary": "Summary of discussion",
+      "noSummary": "No summary recorded.",
+      "nextMeeting": "Next meeting",
+      "notSet": "Not set",
+      "status": "Status",
+      "createdBy": "Recorded by {{name}}",
+      "lastUpdated": "last updated {{date}}",
+      "attendanceTitle": "Attendance",
+      "noAttendance": "Attendance has not been recorded.",
+      "resolutionNo": "Resolution-{{no}}",
+      "resolutionStatus": "Resolution status",
+      "votesAria": "For {{for}}, against {{against}}, neutral {{neutral}}",
+      "noResolutions": "No resolutions recorded."
+    },
+    "resolution": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "attendance": {
+      "present": "Present",
+      "absent": "Absent"
+    },
+    "vote": {
+      "for": "For",
+      "against": "Against",
+      "neutral": "Neutral"
+    },
+    "recordings": {
+      "title": "Recordings & attachments",
+      "upload": "Upload file",
+      "empty": "No recordings or attachments yet.",
+      "download": "Download",
+      "uploadError": "Upload failed. Check the file type and size.",
+      "downloadError": "Download failed."
+    },
+    "form": {
+      "title": "New Meeting Record",
+      "editTitle": "Edit Meeting",
+      "subtitle": "Meeting, attendance and resolutions are saved together in one submission.",
+      "meetingInfo": "Meeting information",
+      "meetingNo": "Meeting no",
+      "autoNo": "auto-suggested",
+      "date": "Date",
+      "time": "Time",
+      "type": "Meeting type",
+      "chairperson": "Chairperson",
+      "chairpersonPlaceholder": "Select a member…",
+      "nextMeeting": "Next meeting date (optional)",
+      "status": "Status",
+      "agendaSummary": "Agenda & summary",
+      "agenda": "Agenda",
+      "summary": "Summary of discussion",
+      "attendance": "Attendance",
+      "presentCount": "{{present}}/{{total}} present",
+      "markAllPresent": "Mark all present",
+      "attendancePlaceholder": "Select members…",
+      "resolutions": "Resolutions",
+      "decision": "Decision",
+      "removeResolution": "Remove",
+      "addResolution": "Add resolution",
+      "assignee": "Assigned to (optional)",
+      "assigneePlaceholder": "No one",
+      "dueDate": "Due date (optional)",
+      "task": "Task (optional)",
+      "attachments": "Recordings & attachments (optional)",
+      "dropzone": "Tap to add files — video, audio, photo or chat log",
+      "dropzoneHint": "Maximum 100 MB per file",
+      "removeFile": "Remove",
+      "fileTooLarge": "A file exceeds the 100 MB limit.",
+      "duplicateNo": "This meeting number is already in use. Please choose another.",
+      "votesExceed": "Total votes cannot exceed the number of members present.",
+      "votesExceedInline": "Total votes of a resolution cannot exceed members present ({{present}}).",
+      "submitError": "Could not save the meeting. Please try again.",
+      "notify": "Publish a notice for members",
+      "submit": "Save meeting record",
+      "save": "Save changes"
+    }
+  },
   "common": {
     "switchToEnglish": "Switch to English",
     "switchToBangla": "বাংলায় দেখুন",
@@ -61,7 +202,11 @@
     "societyCosts": "Society Costs",
     "costShares": "Cost Shares",
     "fundTransparency": "Fund Transparency",
-    "financeManagement": "Finance Management"
+    "financeManagement": "Finance Management",
+    "resolutionBook": "Resolution Book",
+    "roadmap": "Our Roadmap",
+    "roadmapManagement": "Roadmap Management",
+    "paymentVerifications": "Payment Verifications"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -442,6 +587,96 @@
       "empty": {
         "title": "No transactions published yet",
         "hint": "Once the committee records and approves transactions, all income and expenses will appear here."
+      }
+    },
+    "roadmap": {
+      "title": "Our Roadmap",
+      "subtitle": "Where we are, where we are going, and how we get there.",
+      "lastUpdated": "Last updated: {{date}}",
+      "loadError": "Could not load the roadmap. Please try again.",
+      "exportError": "Could not prepare the download. Please try again.",
+      "actions": {
+        "slides": "View as slides",
+        "pdf": "A4 print / PDF",
+        "image": "Image for sharing"
+      },
+      "whereTitle": "Where we are now",
+      "whereSummary": "{{done}} of {{total}} planned items are done.",
+      "overallAria": "Overall progress {{pct}} percent",
+      "overallProgress": "Overall progress",
+      "focusNow": "Current focus",
+      "weAreHere": "We are here",
+      "stepperAria": "Roadmap timeline",
+      "filterAria": "Filter by status",
+      "filter": {
+        "all": "All",
+        "in_progress": "In progress",
+        "done": "Done",
+        "planned": "Planned"
+      },
+      "status": {
+        "planned": "Planned",
+        "in_progress": "In progress",
+        "done": "Done"
+      },
+      "itemCount": "{{n}} items",
+      "progressLabel": "{{name}}: {{done}}/{{total}} done — {{pct}}%",
+      "progressShort": "{{done}}/{{total}} done — {{pct}}%",
+      "completedOn": "Completed {{date}}",
+      "target": "Target: {{date}}",
+      "empty": "No plans have been added to this timeframe yet.",
+      "emptyFiltered": "No items match this filter.",
+      "slides": {
+        "prev": "Previous slide",
+        "next": "Next slide",
+        "hint": "Use ← → keys or swipe to move · Esc to close"
+      }
+    },
+    "payDues": {
+      "title": "Pay monthly dues",
+      "close": "Close",
+      "step1": "Select months",
+      "step2": "Send payment",
+      "step3": "Confirm",
+      "selectHint": "Oldest dues are pre-selected. Untick any month you are not paying now.",
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "oldest": "Oldest",
+      "totalLabel": "Total for {{count}} month(s)",
+      "continue": "Continue",
+      "methodHint": "Choose how you will pay, then send the exact amount to this account.",
+      "sendTo": "Send to",
+      "amount": "Amount",
+      "copy": "Copy",
+      "copied": "Copied",
+      "keepReceipt": "Keep the transaction ID from your SMS/receipt — you will need it next.",
+      "back": "Back",
+      "iHavePaid": "I've paid",
+      "transactionRef": "Transaction ID",
+      "transactionRefPlaceholder": "e.g. 9KX7AB12CD",
+      "transactionRefError": "Enter a valid transaction ID (4–64 letters/numbers).",
+      "paidOn": "Payment date",
+      "senderAccount": "Paid from (your number / account)",
+      "proof": "Receipt / screenshot (optional)",
+      "proofHint": "JPG, PNG or PDF, up to 5 MB.",
+      "proofTypeError": "Only JPG, PNG or PDF files are allowed.",
+      "proofSizeError": "File must be 5 MB or smaller.",
+      "note": "Note (optional)",
+      "months": "month(s)",
+      "submit": "Submit for verification",
+      "submitting": "Submitting...",
+      "submitError": "Could not submit the payment. Please try again.",
+      "submitted": "Payment submitted! The committee will verify it shortly and you will be notified by email.",
+      "bannerTitle": "You have {{count}} month(s) outstanding",
+      "payNow": "Pay dues",
+      "statusPending": "Verifying",
+      "historyTitle": "Recent online payments",
+      "rejectedReason": "Reason",
+      "notice": "Pay online with “Pay dues”. Each payment is verified by the committee before it is marked paid.",
+      "paymentStatus": {
+        "pending": "Pending verification",
+        "approved": "Verified",
+        "rejected": "Rejected"
       }
     }
   },
@@ -830,7 +1065,8 @@
         "notice_category": "Notice Categories",
         "event_category": "Event Categories",
         "finance_income_category": "Fund income categories",
-        "finance_expense_category": "Fund expense categories"
+        "finance_expense_category": "Fund expense categories",
+        "payment_account": "Payment accounts (value = method, label = account details)"
       },
       "addItem": "Add New Item",
       "form": {
@@ -1390,6 +1626,73 @@
         "attachmentFailed": "Attachment upload failed.",
         "actionFailed": "The action failed. Please retry."
       }
+    },
+    "roadmap": {
+      "title": "Roadmap Management",
+      "subtitle": "Add, edit and update progress on short, mid and long term plans. Every change is recorded in the audit log.",
+      "viewAsMember": "Member view",
+      "add": "New item",
+      "addHere": "Add",
+      "overall": "{{done}} of {{total}} done",
+      "notifyOnDone": "Notify members when an item is completed",
+      "statusAria": "Change status",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "form": {
+        "createTitle": "Add roadmap item",
+        "editTitle": "Edit roadmap item",
+        "timeframe": "Timeframe",
+        "moveHint": "On save the item moves to the end of the selected timeframe.",
+        "text": "Plan",
+        "status": "Status",
+        "targetDate": "Target date (optional)",
+        "owner": "Responsible (optional)",
+        "ownerPlaceholder": "e.g. General Secretary",
+        "note": "Update / note (optional)",
+        "notePlaceholder": "e.g. Sand filling has started, expected to finish by November",
+        "notify": "Notify members"
+      },
+      "delete": {
+        "title": "Delete this roadmap item?"
+      },
+      "archive": {
+        "button": "Archive cycle",
+        "title": "Archive roadmap cycle",
+        "message": "Archived items leave the member page but stay in the history.",
+        "onlyDone": "Archive completed items only (the rest carry over)",
+        "all": "Archive everything and start a new cycle",
+        "confirm": "Archive",
+        "done": "{{n}} items archived.",
+        "history": "Archived cycles",
+        "cycleSummary": "{{done}} of {{total}} done",
+        "empty": "No cycles archived yet."
+      },
+      "errors": {
+        "generic": "The action could not be completed. Please try again.",
+        "timeframe": "Choose a timeframe.",
+        "textRequired": "Describe the plan.",
+        "textTooLong": "The plan can be at most 500 characters.",
+        "ownerTooLong": "The responsible person can be at most 120 characters.",
+        "noteTooLong": "The note can be at most 1000 characters."
+      }
+    },
+    "paymentVerifications": {
+      "title": "Payment Verifications",
+      "subtitle": "Verify installment payments submitted by members against your account statement.",
+      "method": "Method",
+      "reference": "Transaction ID",
+      "paidOn": "Paid on",
+      "sender": "Paid from",
+      "viewProof": "View receipt",
+      "approve": "Approve",
+      "reject": "Reject",
+      "empty": "Nothing here — all caught up.",
+      "rejectTitle": "Reject payment",
+      "reason": "Reason shown to the member",
+      "reasonPlaceholder": "e.g. Transaction ID not found in bKash statement",
+      "cancel": "Cancel",
+      "loadError": "Failed to load payments.",
+      "actionError": "Action failed. Please try again."
     }
   },
   "registration": {

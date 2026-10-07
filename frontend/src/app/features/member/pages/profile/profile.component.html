@@ -42,6 +42,9 @@
         </div>
       </div>
       <div class="profile-hero-actions">
+        <a routerLink="/installments" [queryParams]="{ pay: 1 }" class="btn btn-secondary">
+          <app-icon name="coin" [size]="16" /> {{ 'member.payDues.payNow' | translate }}
+        </a>
         @if (!editing) {
           <button type="button" class="btn btn-primary" (click)="startEdit()">
             {{ 'member.profile.editButton' | translate }}

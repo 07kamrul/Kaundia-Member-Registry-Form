@@ -1,0 +1,120 @@
+<div class="deck">
+  <header class="deck-bar">
+    <span class="deck-brand">{{ 'member.roadmap.title' | translate }}</span>
+    <span class="deck-count">{{ digits(position() + 1) }} / {{ digits(slides().length) }}</span>
+    <button type="button" class="deck-icon-btn" (click)="close()" [attr.aria-label]="'common.close' | translate">
+      <app-icon name="close" [size]="22" />
+    </button>
+  </header>
+
+  <main class="deck-stage" aria-live="polite">
+    @if (slide(); as s) {
+      @if (s.kind === 'overview') {
+        <section class="slide slide-overview">
+          <p class="slide-kicker">{{ 'member.roadmap.subtitle' | translate }}</p>
+          <h2 class="slide-title">{{ 'member.roadmap.title' | translate }}</h2>
+          <div class="overview-track">
+            @for (tf of roadmap().timeframes; track tf.id; let i = $index) {
+              <div class="overview-step" [class.overview-current]="i === currentIndex()">
+                <span class="overview-marker">{{ digits(i + 1) }}</span>
+                <span class="overview-window">{{ windowLabel(tf) }}</span>
+                <span class="overview-name">{{ name(tf) }}</span>
+                <span class="overview-bar"><span [style.width.%]="tf.percent"></span></span>
+                <span class="overview-pct">
+                  {{ digits(tf.done) }}/{{ digits(tf.total) }} · {{ digits(tf.percent) }}%
+                </span>
+                @if (i === currentIndex()) {
+                  <span class="overview-here">{{ 'member.roadmap.weAreHere' | translate }}</span>
+                }
+              </div>
+            }
+          </div>
+          <p class="overview-total">
+            {{ 'member.roadmap.overallProgress' | translate }}:
+            <strong>{{ digits(roadmap().totals.percent) }}%</strong>
+          </p>
+        </section>
+      } @else {
+        <section class="slide">
+          <div class="slide-head">
+            <span class="slide-index">{{ digits(s.index + 1) }}</span>
+            <div class="slide-head-text">
+              <h2 class="slide-title">{{ name(s.tf) }}</h2>
+              <p class="slide-kicker">
+                {{ windowLabel(s.tf) }}
+                @if (s.pages > 1) {
+                  · {{ digits(s.page) }}/{{ digits(s.pages) }}
+                }
+              </p>
+            </div>
+            <div class="slide-progress">
+              <span class="slide-pct">{{ digits(s.tf.percent) }}%</span>
+              <span class="slide-pct-sub">
+                {{ digits(s.tf.done) }}/{{ digits(s.tf.total) }} {{ 'member.roadmap.status.done' | translate }}
+              </span>
+            </div>
+          </div>
+          <div class="slide-bar"><span [style.width.%]="s.tf.percent"></span></div>
+          <ul class="slide-items">
+            @for (item of s.items; track item.id) {
+              <li [class]="'slide-item slide-' + item.status">
+                <span class="slide-dot" aria-hidden="true">
+                  @if (item.status === 'done') {
+                    <app-icon name="check" [size]="18" />
+                  }
+                </span>
+                <div class="slide-item-body">
+                  <p class="slide-item-text">{{ item.text }}</p>
+                  @if (item.note) {
+                    <p class="slide-item-note">{{ item.note }}</p>
+                  }
+                </div>
+                <span class="slide-status">
+                  {{ 'member.roadmap.status.' + item.status | translate }}
+                  @if (item.status === 'done' && item.completedAt) {
+                    <small>{{ date(item.completedAt) }}</small>
+                  }
+                </span>
+              </li>
+            } @empty {
+              <li class="slide-empty">{{ 'member.roadmap.empty' | translate }}</li>
+            }
+          </ul>
+        </section>
+      }
+    }
+  </main>
+
+  <footer class="deck-nav">
+    <button
+      type="button"
+      class="deck-icon-btn"
+      (click)="prev()"
+      [disabled]="position() === 0"
+      [attr.aria-label]="'member.roadmap.slides.prev' | translate"
+    >
+      <app-icon name="chevron-left" [size]="26" />
+    </button>
+    <div class="deck-dots">
+      @for (s of slides(); track $index) {
+        <button
+          type="button"
+          class="deck-dot"
+          [class.deck-dot-active]="$index === position()"
+          (click)="position.set($index)"
+          [attr.aria-label]="digits($index + 1)"
+        ></button>
+      }
+    </div>
+    <button
+      type="button"
+      class="deck-icon-btn"
+      (click)="next()"
+      [disabled]="position() === slides().length - 1"
+      [attr.aria-label]="'member.roadmap.slides.next' | translate"
+    >
+      <app-icon name="chevron-right" [size]="26" />
+    </button>
+  </footer>
+  <p class="deck-hint">{{ 'member.roadmap.slides.hint' | translate }}</p>
+</div>

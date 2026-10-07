@@ -1,0 +1,194 @@
+.rb-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.rb-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rb-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.rb-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.15rem;
+}
+
+.rb-stat-label {
+  font-size: 0.82rem;
+  color: var(--gray-600, #5b6b5f);
+}
+
+.rb-stat-value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--emerald-800, #1f3d2a);
+  font-variant-numeric: tabular-nums;
+}
+
+.rb-stat-warn {
+  color: var(--red-600, #9c3a2c);
+}
+
+.rb-upcoming {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.15rem;
+  border-left: 4px solid var(--gold, #a9791e);
+
+  app-icon {
+    color: var(--gold, #a9791e);
+  }
+
+  .rb-upcoming-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--gray-600, #5b6b5f);
+  }
+}
+
+.rb-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem;
+}
+
+.rb-filter-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.rb-search {
+  flex: 1 1 220px;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface, #fff);
+  color: inherit;
+  font-size: 0.92rem;
+}
+
+.rb-select {
+  min-height: 44px;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface, #fff);
+  color: inherit;
+  font-size: 0.9rem;
+}
+
+.rb-meeting-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  margin-bottom: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--gold, #a9791e);
+  }
+}
+
+.rb-meeting-no {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-weight: 700;
+  color: var(--emerald-800, #1f3d2a);
+}
+
+.rb-meeting-meta {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+  font-size: 0.86rem;
+  color: var(--gray-600, #5b6b5f);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+}
+
+.rb-meeting-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-end;
+}
+
+.rb-stat-chip {
+  font-size: 0.8rem;
+  color: var(--gray-600, #5b6b5f);
+  white-space: nowrap;
+}
+
+.rb-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-2, #f3efe3);
+  color: var(--gray-700, #47564a);
+}
+
+.rb-tag-online {
+  background: rgba(46, 81, 56, 0.12);
+  color: var(--emerald-600, #2e5138);
+}
+
+.rb-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--gray-600, #5b6b5f);
+}
+
+.rb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .rb-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .rb-meeting-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rb-meeting-stats {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

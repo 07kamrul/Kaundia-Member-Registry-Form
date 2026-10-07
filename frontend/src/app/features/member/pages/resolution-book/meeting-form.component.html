@@ -1,0 +1,338 @@
+<div class="rb-page">
+  <div class="page-header">
+    <div>
+      <a routerLink="/resolution-book" class="rb-back">
+        <app-icon name="pin" [size]="14" /> {{ 'rb.detail.back' | translate }}
+      </a>
+      <h1 class="page-title">
+        {{ (editId() !== null ? 'rb.form.editTitle' : 'rb.form.title') | translate }}
+      </h1>
+      @if (editId() === null) {
+        <p class="page-subtitle">{{ 'rb.form.subtitle' | translate }}</p>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="card skeleton-line skeleton-lg"></div>
+  } @else {
+    @if (error()) {
+      <div class="error-box" role="alert">
+        <p style="margin: 0; overflow-wrap: anywhere">{{ error() }}</p>
+      </div>
+    }
+
+    <form class="rb-form" (submit)="$event.preventDefault(); submit()">
+      <!-- সভার তথ্য -->
+      <section class="card rb-form-section">
+        <h2 class="rb-section-title">{{ 'rb.form.meetingInfo' | translate }}</h2>
+
+        <div class="rb-field">
+          <label class="rb-label" for="meeting-no">{{ 'rb.form.meetingNo' | translate }}</label>
+          <div class="rb-meeting-no-row">
+            <input
+              id="meeting-no"
+              type="text"
+              class="rb-input"
+              [value]="meetingNo()"
+              (input)="meetingNoAuto.set(false); meetingNo.set($any($event.target).value)"
+            />
+            @if (meetingNoAuto()) {
+              <span class="rb-hint">{{ 'rb.form.autoNo' | translate }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="rb-field-grid">
+          <div class="rb-field">
+            <span class="rb-label">{{ 'rb.form.date' | translate }}</span>
+            <app-date-picker [value]="date()" [inputId]="'meeting-date'" (valueChange)="onDateChange($event)" />
+          </div>
+          <div class="rb-field">
+            <span class="rb-label">{{ 'rb.form.time' | translate }}</span>
+            <app-time-picker [value]="time()" [inputId]="'meeting-time'" (valueChange)="time.set($event)" />
+          </div>
+        </div>
+
+        <div class="rb-field">
+          <span class="rb-label">{{ 'rb.form.type' | translate }}</span>
+          <div class="rb-toggle" role="radiogroup" aria-label="{{ 'rb.form.type' | translate }}">
+            <button
+              type="button"
+              role="radio"
+              class="rb-toggle-btn"
+              [class.rb-toggle-active]="meetingType() === 'online'"
+              [attr.aria-checked]="meetingType() === 'online'"
+              (click)="meetingType.set('online')"
+            >
+              {{ 'rb.type.online' | translate }}
+            </button>
+            <button
+              type="button"
+              role="radio"
+              class="rb-toggle-btn"
+              [class.rb-toggle-active]="meetingType() === 'offline'"
+              [attr.aria-checked]="meetingType() === 'offline'"
+              (click)="meetingType.set('offline')"
+            >
+              {{ 'rb.type.offline' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div class="rb-field">
+          <span class="rb-label">{{ 'rb.form.chairperson' | translate }}</span>
+          <app-member-picker
+            [options]="memberOptions()"
+            [selected]="chairpersonId()"
+            [multiple]="false"
+            [placeholder]="'rb.form.chairpersonPlaceholder' | translate"
+            (selectionChange)="onChairpersonChange($event)"
+          />
+        </div>
+
+        <div class="rb-field-grid">
+          <div class="rb-field">
+            <span class="rb-label">{{ 'rb.form.nextMeeting' | translate }}</span>
+            <app-date-picker
+              [value]="nextMeetingDate()"
+              (valueChange)="nextMeetingDate.set($event)"
+            />
+          </div>
+          <div class="rb-field">
+            <span class="rb-label">{{ 'rb.form.status' | translate }}</span>
+            <select class="rb-select" [value]="status()" (change)="status.set($any($event.target).value)">
+              <option value="completed">{{ 'rb.status.completed' | translate }}</option>
+              <option value="scheduled">{{ 'rb.status.scheduled' | translate }}</option>
+              <option value="cancelled">{{ 'rb.status.cancelled' | translate }}</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- এজেন্ডা ও সারসংক্ষেপ -->
+      <section class="card rb-form-section">
+        <h2 class="rb-section-title">{{ 'rb.form.agendaSummary' | translate }}</h2>
+        <div class="rb-field">
+          <label class="rb-label" for="agenda">{{ 'rb.form.agenda' | translate }}</label>
+          <textarea
+            id="agenda"
+            class="rb-textarea"
+            rows="4"
+            maxlength="5000"
+            [value]="agenda()"
+            (input)="agenda.set($any($event.target).value)"
+          ></textarea>
+          <span class="rb-char-count">{{ charCount(agenda(), agendaMax) }}</span>
+        </div>
+        <div class="rb-field">
+          <label class="rb-label" for="summary">{{ 'rb.form.summary' | translate }}</label>
+          <textarea
+            id="summary"
+            class="rb-textarea"
+            rows="6"
+            maxlength="8000"
+            [value]="summary()"
+            (input)="summary.set($any($event.target).value)"
+          ></textarea>
+          <span class="rb-char-count">{{ charCount(summary(), summaryMax) }}</span>
+        </div>
+      </section>
+
+      <!-- উপস্থিতি -->
+      <section class="card rb-form-section">
+        <div class="rb-section-head">
+          <h2 class="rb-section-title">{{ 'rb.form.attendance' | translate }}</h2>
+          @if (attendanceIds().length > 0) {
+            <div class="rb-section-head-actions">
+              <span class="rb-hint">
+                {{ 'rb.form.presentCount' | translate: { present: digits(presentCount()), total: digits(attendanceIds().length) } }}
+              </span>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="markAllPresent()">
+                {{ 'rb.form.markAllPresent' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+        <app-member-picker
+          [options]="memberOptions()"
+          [selected]="attendanceIds()"
+          [placeholder]="'rb.form.attendancePlaceholder' | translate"
+          (selectionChange)="onAttendanceChange($event)"
+        />
+        @if (attendanceIds().length > 0) {
+          <ul class="rb-attendance-editor">
+            @for (id of attendanceIds(); track id) {
+              <li class="rb-attendance-edit-row">
+                <span class="rb-attendance-name">{{ memberName(id) }}</span>
+                <div class="rb-toggle rb-toggle-sm" role="radiogroup" [attr.aria-label]="memberName(id)">
+                  <button
+                    type="button"
+                    role="radio"
+                    class="rb-toggle-btn"
+                    [class.rb-toggle-active]="(attendanceStatus()[id] ?? 'absent') === 'present'"
+                    [attr.aria-checked]="(attendanceStatus()[id] ?? 'absent') === 'present'"
+                    (click)="setAttendanceStatus(id, 'present')"
+                  >
+                    {{ 'rb.attendance.present' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    class="rb-toggle-btn"
+                    [class.rb-toggle-active]="(attendanceStatus()[id] ?? 'absent') === 'absent'"
+                    [attr.aria-checked]="(attendanceStatus()[id] ?? 'absent') === 'absent'"
+                    (click)="setAttendanceStatus(id, 'absent')"
+                  >
+                    {{ 'rb.attendance.absent' | translate }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <!-- সিদ্ধান্ত -->
+      <section class="card rb-form-section">
+        <h2 class="rb-section-title">{{ 'rb.form.resolutions' | translate }}</h2>
+        @if (votesInvalid()) {
+          <div class="rb-warn-box" role="alert">{{ 'rb.form.votesExceedInline' | translate: { present: digits(presentCount()) } }}</div>
+        }
+        @for (row of resolutions(); track $index) {
+          <div class="rb-resolution-editor">
+            <div class="rb-resolution-editor-head">
+              <strong>{{ 'rb.detail.resolutionNo' | translate: { no: digits($index + 1) } }}</strong>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="removeResolution($index)">
+                {{ 'rb.form.removeResolution' | translate }}
+              </button>
+            </div>
+            <div class="rb-field">
+              <label class="rb-label" [for]="'decision-' + $index">{{ 'rb.form.decision' | translate }}</label>
+              <textarea
+                [id]="'decision-' + $index"
+                class="rb-textarea"
+                rows="2"
+                maxlength="2000"
+                [value]="row.decision"
+                (input)="updateResolution($index, { decision: $any($event.target).value })"
+              ></textarea>
+            </div>
+            <div class="rb-votes-grid">
+              <div class="rb-field">
+                <label class="rb-label" [for]="'vote-for-' + $index">{{ 'rb.vote.for' | translate }}</label>
+                <input
+                  [id]="'vote-for-' + $index"
+                  type="number"
+                  min="0"
+                  class="rb-input"
+                  [value]="row.voteFor"
+                  (input)="updateResolution($index, { voteFor: toInt($any($event.target).value) })"
+                />
+              </div>
+              <div class="rb-field">
+                <label class="rb-label" [for]="'vote-against-' + $index">{{ 'rb.vote.against' | translate }}</label>
+                <input
+                  [id]="'vote-against-' + $index"
+                  type="number"
+                  min="0"
+                  class="rb-input"
+                  [value]="row.voteAgainst"
+                  (input)="updateResolution($index, { voteAgainst: toInt($any($event.target).value) })"
+                />
+              </div>
+              <div class="rb-field">
+                <label class="rb-label" [for]="'vote-neutral-' + $index">{{ 'rb.vote.neutral' | translate }}</label>
+                <input
+                  [id]="'vote-neutral-' + $index"
+                  type="number"
+                  min="0"
+                  class="rb-input"
+                  [value]="row.voteNeutral"
+                  (input)="updateResolution($index, { voteNeutral: toInt($any($event.target).value) })"
+                />
+              </div>
+            </div>
+            <div class="rb-field-grid">
+              <div class="rb-field">
+                <span class="rb-label">{{ 'rb.form.assignee' | translate }}</span>
+                <app-member-picker
+                  [options]="memberOptions()"
+                  [selected]="row.assignedTo"
+                  [multiple]="false"
+                  [placeholder]="'rb.form.assigneePlaceholder' | translate"
+                  (selectionChange)="updateResolution($index, { assignedTo: $event })"
+                />
+              </div>
+              <div class="rb-field">
+                <span class="rb-label">{{ 'rb.form.dueDate' | translate }}</span>
+                <app-date-picker
+                  [value]="row.dueDate"
+                  (valueChange)="updateResolution($index, { dueDate: $event })"
+                />
+              </div>
+            </div>
+            <div class="rb-field">
+              <label class="rb-label" [for]="'task-' + $index">{{ 'rb.form.task' | translate }}</label>
+              <input
+                [id]="'task-' + $index"
+                type="text"
+                class="rb-input"
+                [value]="row.task"
+                (input)="updateResolution($index, { task: $any($event.target).value })"
+              />
+            </div>
+          </div>
+        }
+        <button type="button" class="btn btn-secondary btn-sm" (click)="addResolution()">
+          <app-icon name="plus" [size]="14" /> {{ 'rb.form.addResolution' | translate }}
+        </button>
+      </section>
+
+      <!-- ফাইল সংযুক্তি -->
+      @if (editId() === null) {
+        <section class="card rb-form-section">
+          <h2 class="rb-section-title">{{ 'rb.form.attachments' | translate }}</h2>
+          <label class="rb-dropzone">
+            <input
+              type="file"
+              class="rb-upload-input"
+              multiple
+              accept="video/*,audio/*,image/*,text/plain"
+              (change)="onFilesSelected($event)"
+            />
+            <app-icon name="plus" [size]="20" />
+            <span>{{ 'rb.form.dropzone' | translate }}</span>
+            <span class="rb-hint">{{ 'rb.form.dropzoneHint' | translate }}</span>
+          </label>
+          @if (files().length > 0) {
+            <ul class="rb-file-list">
+              @for (item of files(); track $index) {
+                <li class="rb-file-row">
+                  <span class="rb-recording-name">{{ item.name }}</span>
+                  <span class="rb-hint">{{ formatFileSize(item.size) }}</span>
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="removeFile($index)">
+                    {{ 'rb.form.removeFile' | translate }}
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      <div class="rb-form-actions">
+        <label class="rb-notify">
+          <input type="checkbox" [checked]="notify()" (change)="notify.set($any($event.target).checked)" />
+          {{ 'rb.form.notify' | translate }}
+        </label>
+        <button type="submit" class="btn btn-primary" [disabled]="!formValid() || saving()">
+          @if (saving()) {
+            <span class="spinner"></span>
+          }
+          {{ (editId() !== null ? 'rb.form.save' : 'rb.form.submit') | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

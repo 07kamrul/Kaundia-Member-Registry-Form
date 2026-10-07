@@ -95,3 +95,89 @@
   color: var(--gray-600);
   font-size: 0.85rem;
 }
+
+.pay-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--red-50);
+  border-left: 4px solid var(--red-700);
+  border-radius: 0.85rem;
+  background: var(--surface);
+  box-shadow: 0 6px 18px -12px rgba(0, 0, 0, 0.35);
+}
+
+.pay-banner-title {
+  margin: 0;
+  color: var(--gray-700);
+  font-weight: 600;
+}
+
+.pay-banner-amount {
+  margin: 0.15rem 0 0;
+  color: var(--red-700);
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-pending {
+  background: var(--amber-50);
+  color: var(--gold-strong);
+}
+
+.payment-history {
+  margin-top: 1.5rem;
+}
+
+.payment-history-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.payment-history-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.payment-history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 0.7rem;
+  background: var(--surface);
+}
+
+.payment-history-main,
+.payment-history-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.payment-history-side {
+  align-items: flex-end;
+}
+
+.payment-history-months {
+  font-weight: 600;
+}
+
+.payment-history-meta {
+  color: var(--gray-600);
+  font-size: 0.8rem;
+}
+
+.payment-history-reason {
+  color: var(--red-700);
+  font-size: 0.8rem;
+}

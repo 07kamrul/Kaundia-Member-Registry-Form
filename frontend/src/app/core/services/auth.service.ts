@@ -49,6 +49,7 @@ export const MANAGEMENT_AREA_PERMISSIONS = [
   'report.view_operational',
   'manage_costs',
   'manage_finance',
+  'manage_roadmap',
 ];
 
 interface TokenResponse {

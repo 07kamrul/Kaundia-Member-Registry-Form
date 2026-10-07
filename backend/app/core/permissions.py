@@ -83,6 +83,12 @@ PERMISSION_CATALOG: tuple[PermissionDef, ...] = (
     PermissionDef(
         "manage_roadmap", "roadmap", "manage", "Add, edit, reorder and update the status of society roadmap items"
     ),
+    PermissionDef(
+        "manage_resolution_book",
+        "resolution_book",
+        "manage",
+        "Record meetings, attendance, resolutions and attachments in the online resolution book",
+    ),
     PermissionDef("notice.view", "notice", "view", "View notices"),
     PermissionDef("event.view", "event", "view", "View events"),
     # Reports
@@ -113,6 +119,7 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "manage_costs",
         "manage_finance",
         "manage_roadmap",
+        "manage_resolution_book",
     ),
     AdminRole.ADMINISTRATOR.value: (
         "member.register",
@@ -127,6 +134,7 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "manage_fee_settings",
         "manage_finance",
         "manage_roadmap",
+        "manage_resolution_book",
     ),
     "member": (
         "profile.view_own",

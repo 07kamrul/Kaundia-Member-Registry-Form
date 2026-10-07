@@ -1,0 +1,290 @@
+.rb-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.rb-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--gray-600, #5b6b5f);
+  text-decoration: none;
+  margin-bottom: 0.35rem;
+
+  &:hover {
+    color: var(--emerald-600, #2e5138);
+  }
+}
+
+.rb-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rb-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 2px solid var(--border, #ddd);
+  overflow-x: auto;
+}
+
+.rb-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0.65rem 1rem;
+  font-size: 0.92rem;
+  color: var(--gray-600, #5b6b5f);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  min-height: 44px;
+
+  &.rb-tab-active {
+    color: var(--emerald-700, #244a31);
+    font-weight: 600;
+    border-bottom-color: var(--gold, #a9791e);
+  }
+}
+
+.rb-section {
+  padding: 1.15rem 1.25rem;
+}
+
+.rb-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--emerald-800, #1f3d2a);
+  margin: 0 0 0.5rem;
+}
+
+.rb-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.rb-text {
+  white-space: pre-wrap;
+  color: var(--gray-700, #47564a);
+  font-size: 0.93rem;
+  margin: 0 0 1rem;
+}
+
+.rb-overview-grid {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+.rb-edited {
+  margin: 1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--gray-500, #75846f);
+}
+
+.rb-attendance-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem 1.5rem;
+}
+
+.rb-attendance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-2, #f3efe3);
+}
+
+.rb-attendance-name {
+  font-size: 0.9rem;
+}
+
+.rb-resolution {
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 0.9rem;
+}
+
+.rb-resolution-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.rb-resolution-no {
+  color: var(--emerald-700, #244a31);
+}
+
+.rb-resolution-meta {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--gray-600, #5b6b5f);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+}
+
+.rb-vote-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-2, #e8e5da);
+  margin: 0.5rem 0;
+}
+
+.rb-vote-seg {
+  height: 100%;
+}
+
+.rb-seg-for {
+  background: var(--emerald-600, #2e5138);
+}
+
+.rb-seg-against {
+  background: var(--red-600, #9c3a2c);
+}
+
+.rb-seg-neutral {
+  background: var(--gold, #a9791e);
+}
+
+.rb-seg-present {
+  background: var(--emerald-600, #2e5138);
+}
+
+.rb-vote-legend {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: var(--gray-600, #5b6b5f);
+}
+
+.rb-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rb-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.rb-dot-for {
+  background: var(--emerald-600, #2e5138);
+}
+
+.rb-dot-against {
+  background: var(--red-600, #9c3a2c);
+}
+
+.rb-dot-neutral {
+  background: var(--gold, #a9791e);
+}
+
+.rb-select-sm {
+  min-height: 36px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.rb-empty-inline {
+  padding: 1rem 0;
+  color: var(--gray-600, #5b6b5f);
+  font-size: 0.9rem;
+}
+
+.rb-recordings {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.rb-recording {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: var(--radius-md, 10px);
+}
+
+.rb-recording-icon {
+  font-size: 1.4rem;
+}
+
+.rb-recording-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.rb-recording-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.rb-recording-meta {
+  font-size: 0.78rem;
+  color: var(--gray-600, #5b6b5f);
+}
+
+.rb-upload-label {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.rb-upload-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .rb-attendance-list {
+    grid-template-columns: 1fr;
+  }
+
+  .rb-recording {
+    flex-wrap: wrap;
+  }
+}

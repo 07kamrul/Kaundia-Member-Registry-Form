@@ -25,6 +25,8 @@ RED = (156, 58, 44)            # --red-600
 INK = (26, 42, 32)             # --gray-800
 INK_SOFT = (71, 86, 74)        # --gray-700
 
+FINANCE_REPORT_TITLE = "আর্থিক স্বচ্ছতা রিপোর্ট  •  Fund Transparency Report"
+
 HEADER_ROW_FILL = FontFace(emphasis="BOLD", color=(255, 255, 255), fill_color=GREEN_DARK)
 TOTAL_ROW_FILL = FontFace(emphasis="BOLD", color=INK, fill_color=CREAM)
 
@@ -51,15 +53,25 @@ def _date_label(value: date) -> str:
     return f"{value.day} {BN_MONTHS[value.month - 1]} {value.year}"
 
 
-class _ReportPDF(FPDF):
+class ReportPDF(FPDF):
     """Base A4 document with the letterhead band and the system-report footer
     drawn on every page."""
 
-    def __init__(self, org_name: str, period_label: str, generated_at_label: str):
+    def __init__(
+        self,
+        org_name: str,
+        period_label: str,
+        generated_at_label: str,
+        *,
+        report_title: str = FINANCE_REPORT_TITLE,
+        meta_line: str | None = None,
+    ):
         super().__init__(orientation="P", unit="mm", format="A4")
         self.org_name = org_name
         self.period_label = period_label
         self.generated_at_label = generated_at_label
+        self.report_title = report_title
+        self.meta_line = meta_line or f"সময়কাল: {period_label}   |   তৈরি: {generated_at_label}"
         self.set_margins(14, 34, 14)
         self.set_auto_page_break(auto=True, margin=20)
 
@@ -76,16 +88,14 @@ class _ReportPDF(FPDF):
         self.set_font("bn", "", 10)
         self.set_text_color(*GOLD)
         self.set_x(14)
-        self.cell(text="আর্থিক স্বচ্ছতা রিপোর্ট  •  Fund Transparency Report", new_y="NEXT")
+        self.cell(text=self.report_title, new_y="NEXT")
 
-        self.set_text_color(255, 255, 255)
+        # The meta line sits below the green band on the white page; white
+        # text here would be invisible against the paper.
+        self.set_text_color(*INK_SOFT)
         self.set_font("bn", "", 9.5)
         self.set_xy(self.l_margin, 33)
-        self.cell(
-            text=f"সময়কাল: {self.period_label}   |   তৈরি: {self.generated_at_label}",
-            new_x="LMARGIN",
-            new_y="NEXT",
-        )
+        self.cell(text=self.meta_line, new_x="LMARGIN", new_y="NEXT")
         self.ln(2)
 
     def footer(self) -> None:
@@ -105,7 +115,18 @@ class _ReportPDF(FPDF):
         self.cell(0, text=f"Page {self.page_no()}/{{nb}}", align="R")
 
 
-def _section_title(pdf: _ReportPDF, title: str) -> None:
+def register_report_fonts(pdf: FPDF) -> None:
+    """Noto Sans Bengali (HarfBuzz-shaped) with Noto Sans as Latin fallback."""
+    pdf.add_font("bn", "", str(FONT_DIR / "NotoSansBengali-Regular.ttf"))
+    pdf.add_font("bn", "B", str(FONT_DIR / "NotoSansBengali-Bold.ttf"))
+    pdf.add_font("latin", "", str(FONT_DIR / "NotoSans-Regular.ttf"))
+    pdf.add_font("latin", "B", str(FONT_DIR / "NotoSans-Bold.ttf"))
+    pdf.set_fallback_fonts(["latin"])
+    pdf.set_text_shaping(True)
+    pdf.set_text_color(*INK)
+
+
+def section_title(pdf: ReportPDF, title: str) -> None:
     pdf.ln(2)
     pdf.set_font("bn", "B", 11.5)
     pdf.set_text_color(*GREEN_MID)
@@ -116,7 +137,7 @@ def _section_title(pdf: _ReportPDF, title: str) -> None:
     pdf.ln(2.5)
 
 
-def _kpi_row(pdf: _ReportPDF, data: FinanceReportData) -> None:
+def _kpi_row(pdf: ReportPDF, data: FinanceReportData) -> None:
     net = data.income_total - data.expense_total
     cells = [
         ("সর্বমোট আয়", _taka(data.income_total), GREEN_MID),
@@ -157,7 +178,7 @@ def _kpi_row(pdf: _ReportPDF, data: FinanceReportData) -> None:
 
 
 def _breakdown_table(
-    pdf: _ReportPDF, rows: list[tuple[str, Decimal, str]], total: Decimal
+    pdf: ReportPDF, rows: list[tuple[str, Decimal, str]], total: Decimal
 ) -> None:
     with pdf.table(
         col_widths=(86, 52, 28),
@@ -182,14 +203,8 @@ def _breakdown_table(
 
 
 def build_finance_report_pdf(data: FinanceReportData) -> bytes:
-    pdf = _ReportPDF(data.org_name, data.period_label, data.generated_at_label)
-    pdf.add_font("bn", "", str(FONT_DIR / "NotoSansBengali-Regular.ttf"))
-    pdf.add_font("bn", "B", str(FONT_DIR / "NotoSansBengali-Bold.ttf"))
-    pdf.add_font("latin", "", str(FONT_DIR / "NotoSans-Regular.ttf"))
-    pdf.add_font("latin", "B", str(FONT_DIR / "NotoSans-Bold.ttf"))
-    pdf.set_fallback_fonts(["latin"])
-    pdf.set_text_shaping(True)
-    pdf.set_text_color(*INK)
+    pdf = ReportPDF(data.org_name, data.period_label, data.generated_at_label)
+    register_report_fonts(pdf)
     pdf.add_page()
 
     _kpi_row(pdf, data)
@@ -199,21 +214,21 @@ def build_finance_report_pdf(data: FinanceReportData) -> bytes:
         pdf.set_text_color(*INK_SOFT)
         pdf.multi_cell(0, text=f"প্রয়োগকৃত ফিল্টার: {data.filter_note}", new_x="LMARGIN", new_y="NEXT")
 
-    _section_title(pdf, "আয়ের বিবরণ (খাতভিত্তিক)")
+    section_title(pdf, "আয়ের বিবরণ (খাতভিত্তিক)")
     if data.income_breakdown:
         _breakdown_table(pdf, data.income_breakdown, data.income_total)
     else:
         pdf.set_font("bn", "", 9.5)
         pdf.cell(text="এই সময়কালে কোনো আয় নেই।", new_x="LMARGIN", new_y="NEXT")
 
-    _section_title(pdf, "ব্যয়ের বিবরণ (খাতভিত্তিক)")
+    section_title(pdf, "ব্যয়ের বিবরণ (খাতভিত্তিক)")
     if data.expense_breakdown:
         _breakdown_table(pdf, data.expense_breakdown, data.expense_total)
     else:
         pdf.set_font("bn", "", 9.5)
         pdf.cell(text="এই সময়কালে কোনো ব্যয় নেই।", new_x="LMARGIN", new_y="NEXT")
 
-    _section_title(pdf, "লেনদেনের তালিকা")
+    section_title(pdf, "লেনদেনের তালিকা")
     if data.transactions:
         with pdf.table(
             col_widths=(26, 70, 34, 14, 28),

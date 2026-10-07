@@ -1,0 +1,179 @@
+<div class="rb-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'rb.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'rb.subtitle' | translate }}</p>
+    </div>
+    @if (canManage()) {
+      <div class="header-actions">
+        <a routerLink="/resolution-book/add" class="btn btn-primary">
+          <app-icon name="plus" [size]="16" /> {{ 'rb.actions.addMeeting' | translate }}
+        </a>
+      </div>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="rb-skeletons" aria-hidden="true">
+      <div class="rb-summary-grid">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="card skeleton-line skeleton-lg"></div>
+        }
+      </div>
+      @for (i of [1, 2, 3]; track i) {
+        <div class="card skeleton-line" style="height: 88px"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="error-box" role="alert">
+      <p style="margin: 0 0 0.5rem">{{ 'rb.loadError' | translate }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else {
+    <!-- সারসংক্ষেপ: what matters without digging -->
+    @if (summary(); as data) {
+      <section class="rb-summary-grid" aria-label="{{ 'rb.summary.title' | translate }}">
+        <div class="card rb-stat">
+          <span class="rb-stat-label">{{ 'rb.summary.totalMeetings' | translate }}</span>
+          <span class="rb-stat-value">{{ digits(data.totalMeetings) }}</span>
+        </div>
+        <div class="card rb-stat">
+          <span class="rb-stat-label">{{ 'rb.summary.thisYear' | translate }}</span>
+          <span class="rb-stat-value">{{ digits(data.meetingsThisYear) }}</span>
+        </div>
+        <div class="card rb-stat">
+          <span class="rb-stat-label">{{ 'rb.summary.avgAttendance' | translate }}</span>
+          <span class="rb-stat-value">{{ digits(data.averageAttendancePercent) }}%</span>
+        </div>
+        <div class="card rb-stat rb-stat-actions">
+          <span class="rb-stat-label">{{ 'rb.summary.openActions' | translate }}</span>
+          <span class="rb-stat-value" [class.rb-stat-warn]="data.openActionItems > 0">
+            {{ digits(data.openActionItems) }}
+          </span>
+        </div>
+      </section>
+
+      @if (data.upcomingMeetingDate) {
+        <section class="card rb-upcoming">
+          <app-icon name="pin" [size]="18" />
+          <div>
+            <span class="rb-upcoming-label">{{ 'rb.upcoming.label' | translate }}</span>
+            <strong>{{ date(data.upcomingMeetingDate) }}</strong>
+          </div>
+        </section>
+      }
+    }
+
+    <!-- ফিল্টার: date range, type, free text -->
+    <section class="card rb-filters">
+      <div class="rb-filter-row">
+        <input
+          type="text"
+          class="rb-search"
+          [value]="query()"
+          (input)="query.set($any($event.target).value)"
+          (keydown.enter)="applyFilters()"
+          [placeholder]="'rb.filters.searchPlaceholder' | translate"
+          [attr.aria-label]="'rb.filters.search' | translate"
+        />
+        <select
+          class="rb-select"
+          [value]="typeFilter()"
+          (change)="typeFilter.set($any($event.target).value); applyFilters()"
+          [attr.aria-label]="'rb.filters.type' | translate"
+        >
+          <option value="">{{ 'rb.filters.allTypes' | translate }}</option>
+          <option value="online">{{ 'rb.type.online' | translate }}</option>
+          <option value="offline">{{ 'rb.type.offline' | translate }}</option>
+        </select>
+        <select
+          class="rb-select"
+          [value]="statusFilter()"
+          (change)="statusFilter.set($any($event.target).value); applyFilters()"
+          [attr.aria-label]="'rb.filters.status' | translate"
+        >
+          <option value="">{{ 'rb.filters.allStatuses' | translate }}</option>
+          <option value="scheduled">{{ 'rb.status.scheduled' | translate }}</option>
+          <option value="completed">{{ 'rb.status.completed' | translate }}</option>
+          <option value="cancelled">{{ 'rb.status.cancelled' | translate }}</option>
+        </select>
+      </div>
+      <div class="rb-filter-row">
+        <app-date-picker
+          [value]="dateFrom()"
+          [placeholder]="'rb.filters.dateFrom' | translate"
+          (valueChange)="dateFrom.set($event)"
+        />
+        <app-date-picker
+          [value]="dateTo()"
+          [placeholder]="'rb.filters.dateTo' | translate"
+          (valueChange)="dateTo.set($event)"
+        />
+        <button type="button" class="btn btn-primary btn-sm" (click)="applyFilters()">
+          {{ 'rb.filters.apply' | translate }}
+        </button>
+        @if (hasFilters()) {
+          <button type="button" class="btn btn-secondary btn-sm" (click)="clearFilters()">
+            {{ 'rb.filters.clear' | translate }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- সাম্প্রতিক সভা -->
+    <section aria-label="{{ 'rb.list.title' | translate }}">
+      @for (meeting of meetings(); track meeting.id) {
+        <a class="card rb-meeting-card" [routerLink]="['/resolution-book/meeting', meeting.id]">
+          <div class="rb-meeting-main">
+            <div class="rb-meeting-no">
+              {{ meeting.meetingNo }}
+              <span class="rb-tag" [class.rb-tag-online]="meeting.meetingType === 'online'">
+                {{ typeLabel(meeting.meetingType) }}
+              </span>
+              <span class="status-pill" [class]="'status-pill status-' + meeting.status">
+                {{ statusLabel(meeting.status) }}
+              </span>
+            </div>
+            <div class="rb-meeting-meta">
+              <span><app-icon name="pin" [size]="14" /> {{ date(meeting.date) }}@if (meeting.time) { · {{ meeting.time }}}</span>
+              <span><app-icon name="user" [size]="14" /> {{ meeting.chairperson }}</span>
+            </div>
+          </div>
+          <div class="rb-meeting-stats">
+            <span class="rb-stat-chip">
+              {{ 'rb.list.resolutions' | translate: { count: digits(meeting.resolutionCount) } }}
+            </span>
+            <span class="rb-stat-chip">
+              {{ 'rb.list.attendance' | translate: { present: digits(meeting.attendancePresent), total: digits(meeting.attendanceTotal) } }}
+            </span>
+          </div>
+        </a>
+      } @empty {
+        <div class="card rb-empty">
+          <p style="margin: 0">
+            {{ (hasFilters() ? 'rb.list.emptyFiltered' : 'rb.list.empty') | translate }}
+          </p>
+        </div>
+      }
+
+      @if (totalPages() > 1) {
+        <div class="rb-pagination">
+          <button type="button" class="btn btn-secondary btn-sm" [disabled]="page() === 0" (click)="goToPage(page() - 1)">
+            {{ 'rb.nav.previous' | translate }}
+          </button>
+          <span>{{ digits(page() + 1) }} / {{ digits(totalPages()) }}</span>
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            [disabled]="page() >= totalPages() - 1"
+            (click)="goToPage(page() + 1)"
+          >
+            {{ 'rb.nav.next' | translate }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+</div>

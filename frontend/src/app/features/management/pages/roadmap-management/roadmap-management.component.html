@@ -1,0 +1,347 @@
+<div class="rm-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.roadmap.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.roadmap.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/roadmap" class="btn btn-secondary">
+        <app-icon name="eye" [size]="16" /> {{ 'admin.roadmap.viewAsMember' | translate }}
+      </a>
+      <button type="button" class="btn btn-secondary" (click)="openArchive()" [disabled]="!roadmap()?.totals?.total">
+        <app-icon name="inbox" [size]="16" /> {{ 'admin.roadmap.archive.button' | translate }}
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openCreate()" [disabled]="!roadmap()">
+        <app-icon name="plus" [size]="16" /> {{ 'admin.roadmap.add' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (actionError()) {
+    <div class="error-box" role="alert"><p style="margin:0">{{ actionError() }}</p></div>
+  }
+  @if (archiveDone(); as archived) {
+    <div class="success-note" role="status">
+      <app-icon name="check-circle" [size]="16" />
+      {{ 'admin.roadmap.archive.done' | translate: { n: digits(archived) } }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="card rm-loading"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else if (loadError()) {
+    <div class="error-box" role="alert">
+      <p style="margin:0 0 0.5rem">{{ 'member.roadmap.loadError' | translate }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">{{ 'common.retry' | translate }}</button>
+    </div>
+  } @else if (roadmap(); as data) {
+    <div class="card rm-toolbar">
+      <div class="rm-overall">
+        <span class="rm-overall-pct">{{ digits(data.totals.percent) }}%</span>
+        <span class="rm-overall-label">
+          {{ 'admin.roadmap.overall' | translate: { done: digits(data.totals.done), total: digits(data.totals.total) } }}
+        </span>
+      </div>
+      <label class="rm-notify">
+        <input type="checkbox" [checked]="notifyOnDone()" (change)="notifyOnDone.set($any($event.target).checked)" />
+        <span>{{ 'admin.roadmap.notifyOnDone' | translate }}</span>
+      </label>
+    </div>
+
+    @for (tf of data.timeframes; track tf.id) {
+      <section class="card rm-section">
+        <header class="rm-section-head">
+          <div class="rm-section-title">
+            <h2>{{ name(tf) }}</h2>
+            <span class="rm-window">{{ windowLabel(tf) }}</span>
+          </div>
+          <div class="rm-section-progress">
+            <div
+              class="rm-bar"
+              role="progressbar"
+              [attr.aria-valuenow]="tf.percent"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="name(tf)"
+            >
+              <span [style.width.%]="tf.percent"></span>
+            </div>
+            <span class="rm-bar-label">
+              {{
+                'member.roadmap.progressShort'
+                  | translate: { done: digits(tf.done), total: digits(tf.total), pct: digits(tf.percent) }
+              }}
+            </span>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="openCreate(tf)">
+            <app-icon name="plus" [size]="14" /> {{ 'admin.roadmap.addHere' | translate }}
+          </button>
+        </header>
+
+        <ol class="rm-list">
+          @for (item of tf.items; track item.id; let i = $index; let first = $first; let last = $last) {
+            <li class="rm-item" [class.rm-item-busy]="busyItemId() === item.id">
+              <div class="rm-order">
+                <button
+                  type="button"
+                  class="icon-btn flip"
+                  (click)="move(tf, i, -1)"
+                  [disabled]="first || busyItemId() !== null"
+                  [attr.aria-label]="'admin.roadmap.moveUp' | translate"
+                >
+                  <app-icon name="chevron-down" [size]="16" />
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  (click)="move(tf, i, 1)"
+                  [disabled]="last || busyItemId() !== null"
+                  [attr.aria-label]="'admin.roadmap.moveDown' | translate"
+                >
+                  <app-icon name="chevron-down" [size]="16" />
+                </button>
+              </div>
+
+              <div class="rm-main">
+                <p class="rm-text">{{ item.text }}</p>
+                @if (item.note) {
+                  <p class="rm-note">{{ item.note }}</p>
+                }
+                @if (item.completedAt || item.targetDate || item.owner) {
+                  <p class="rm-meta">
+                    @if (item.status === 'done' && item.completedAt) {
+                      <span>{{ 'member.roadmap.completedOn' | translate: { date: date(item.completedAt) } }}</span>
+                    } @else if (item.targetDate) {
+                      <span>{{ 'member.roadmap.target' | translate: { date: date(item.targetDate) } }}</span>
+                    }
+                    @if (item.owner) {
+                      <span>{{ item.owner }}</span>
+                    }
+                  </p>
+                }
+              </div>
+
+              <div class="rm-status" role="group" [attr.aria-label]="'admin.roadmap.statusAria' | translate">
+                @for (status of statuses; track status) {
+                  <button
+                    type="button"
+                    [class]="'seg seg-' + status"
+                    [class.seg-active]="item.status === status"
+                    [attr.aria-pressed]="item.status === status"
+                    [disabled]="busyItemId() !== null"
+                    (click)="setStatus(item, status)"
+                  >
+                    {{ 'member.roadmap.status.' + status | translate }}
+                  </button>
+                }
+              </div>
+
+              <div class="rm-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  (click)="openEdit(item)"
+                  [attr.aria-label]="'common.edit' | translate"
+                >
+                  <app-icon name="edit" [size]="16" />
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn-danger"
+                  (click)="deleteTarget.set(item)"
+                  [attr.aria-label]="'common.delete' | translate"
+                >
+                  <app-icon name="trash" [size]="16" />
+                </button>
+              </div>
+            </li>
+          } @empty {
+            <li class="rm-empty">{{ 'member.roadmap.empty' | translate }}</li>
+          }
+        </ol>
+      </section>
+    }
+
+    <!-- Archived cycles -->
+    <section class="card rm-history">
+      <button type="button" class="rm-history-toggle" (click)="toggleHistory()" [attr.aria-expanded]="historyOpen()">
+        <app-icon name="inbox" [size]="16" />
+        <span>{{ 'admin.roadmap.archive.history' | translate }}</span>
+        <span class="rm-chevron" [class.rm-chevron-open]="historyOpen()">
+          <app-icon name="chevron-down" [size]="16" />
+        </span>
+      </button>
+      @if (historyOpen()) {
+        @if (history(); as cycles) {
+          @for (cycle of cycles; track cycle.archivedAt) {
+            <details class="rm-cycle">
+              <summary>
+                {{ date(cycle.archivedAt) }} —
+                {{
+                  'admin.roadmap.archive.cycleSummary'
+                    | translate: { done: digits(cycle.done), total: digits(cycle.total) }
+                }}
+              </summary>
+              <ul>
+                @for (item of cycle.items; track item.id) {
+                  <li>
+                    <span [class]="'mini-pill mini-' + item.status">
+                      {{ 'member.roadmap.status.' + item.status | translate }}
+                    </span>
+                    {{ item.text }}
+                  </li>
+                }
+              </ul>
+            </details>
+          } @empty {
+            <p class="rm-muted">{{ 'admin.roadmap.archive.empty' | translate }}</p>
+          }
+        } @else {
+          <p class="rm-muted"><span class="spinner"></span></p>
+        }
+      }
+    </section>
+  }
+</div>
+
+<!-- Add / edit modal -->
+@if (formOpen()) {
+  <div class="modal-backdrop" (click)="closeForm()">
+    <div class="modal-card modal-card-wide" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">
+        {{ (editing() ? 'admin.roadmap.form.editTitle' : 'admin.roadmap.form.createTitle') | translate }}
+      </h3>
+      @if (formError()) {
+        <div class="error-box" role="alert"><p style="margin:0">{{ formError() }}</p></div>
+      }
+
+      <div class="field">
+        <label for="rmTimeframe">{{ 'admin.roadmap.form.timeframe' | translate }} *</label>
+        <select id="rmTimeframe" [(ngModel)]="form.timeframeId">
+          @for (tf of roadmap()?.timeframes ?? []; track tf.id) {
+            <option [ngValue]="tf.id">{{ name(tf) }} ({{ windowLabel(tf) }})</option>
+          }
+        </select>
+        @if (editing(); as current) {
+          @if (form.timeframeId !== current.timeframeId) {
+            <p class="field-hint">{{ 'admin.roadmap.form.moveHint' | translate }}</p>
+          }
+        }
+      </div>
+
+      <div class="field">
+        <label for="rmText">{{ 'admin.roadmap.form.text' | translate }} *</label>
+        <textarea id="rmText" rows="2" [(ngModel)]="form.text" [attr.maxlength]="textMax"></textarea>
+      </div>
+
+      @if (!editing()) {
+        <div class="field">
+          <label>{{ 'admin.roadmap.form.status' | translate }}</label>
+          <div class="rm-status rm-status-form">
+            @for (status of statuses; track status) {
+              <button
+                type="button"
+                [class]="'seg seg-' + status"
+                [class.seg-active]="form.status === status"
+                [attr.aria-pressed]="form.status === status"
+                (click)="form.status = status"
+              >
+                {{ 'member.roadmap.status.' + status | translate }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="form-grid">
+        <div class="field">
+          <label>{{ 'admin.roadmap.form.targetDate' | translate }}</label>
+          <app-date-picker [value]="form.targetDate" (valueChange)="form.targetDate = $event" [clearable]="true" />
+        </div>
+        <div class="field">
+          <label for="rmOwner">{{ 'admin.roadmap.form.owner' | translate }}</label>
+          <input
+            id="rmOwner"
+            type="text"
+            [(ngModel)]="form.owner"
+            [attr.maxlength]="ownerMax"
+            [placeholder]="'admin.roadmap.form.ownerPlaceholder' | translate"
+          />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="rmNote">{{ 'admin.roadmap.form.note' | translate }}</label>
+        <textarea
+          id="rmNote"
+          rows="2"
+          [(ngModel)]="form.note"
+          [attr.maxlength]="noteMax"
+          [placeholder]="'admin.roadmap.form.notePlaceholder' | translate"
+        ></textarea>
+      </div>
+
+      @if (!editing()) {
+        <label class="rm-notify">
+          <input type="checkbox" [(ngModel)]="form.notify" />
+          <span>{{ 'admin.roadmap.form.notify' | translate }}</span>
+        </label>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeForm()" [disabled]="formBusy()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveForm()" [disabled]="formBusy()">
+          @if (formBusy()) {
+            <span class="spinner"></span>
+          }
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Archive modal -->
+@if (archiveOpen()) {
+  <div class="modal-backdrop" (click)="archiveOpen.set(false)">
+    <div class="modal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ 'admin.roadmap.archive.title' | translate }}</h3>
+      <p class="modal-message">{{ 'admin.roadmap.archive.message' | translate }}</p>
+      <label class="rm-radio">
+        <input type="radio" name="archiveScope" [value]="true" [(ngModel)]="archiveOnlyDone" />
+        <span>{{ 'admin.roadmap.archive.onlyDone' | translate }}</span>
+      </label>
+      <label class="rm-radio">
+        <input type="radio" name="archiveScope" [value]="false" [(ngModel)]="archiveOnlyDone" />
+        <span>{{ 'admin.roadmap.archive.all' | translate }}</span>
+      </label>
+      @if (archiveError()) {
+        <div class="error-box" role="alert"><p style="margin:0">{{ archiveError() }}</p></div>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="archiveOpen.set(false)" [disabled]="archiveBusy()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="button" class="btn btn-primary" (click)="confirmArchive()" [disabled]="archiveBusy()">
+          @if (archiveBusy()) {
+            <span class="spinner"></span>
+          }
+          {{ 'admin.roadmap.archive.confirm' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<app-confirm-modal
+  [open]="deleteTarget() !== null"
+  [title]="'admin.roadmap.delete.title' | translate"
+  [message]="deleteTarget()?.text ?? ''"
+  [confirmLabel]="'common.delete' | translate"
+  [danger]="true"
+  [loading]="deleteBusy()"
+  (confirm)="confirmDelete()"
+  (cancel)="deleteTarget.set(null)"
+/>

@@ -1,0 +1,178 @@
+<div class="modal-backdrop" (click)="!submitting() && closed.emit()">
+  <div
+    class="modal-card modal-card-wide pay-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="payDuesTitle"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="pay-head">
+      <h3 class="modal-title" id="payDuesTitle">{{ 'member.payDues.title' | translate }}</h3>
+      <button type="button" class="btn-icon" [attr.aria-label]="'member.payDues.close' | translate" (click)="closed.emit()">
+        <app-icon name="x" [size]="18" />
+      </button>
+    </div>
+
+    <ol class="pay-steps">
+      @for (s of [1, 2, 3]; track s) {
+        <li [class.active]="step() === s" [class.done]="step() > s">
+          <span class="pay-step-dot">
+            @if (step() > s) { <app-icon name="check" [size]="12" /> } @else { {{ s }} }
+          </span>
+          <span class="pay-step-label">{{ 'member.payDues.step' + s | translate }}</span>
+        </li>
+      }
+    </ol>
+
+    @if (error()) {
+      <div class="error-box" role="alert"><p style="margin:0">{{ error() }}</p></div>
+    }
+
+    @switch (step()) {
+      @case (1) {
+        <div class="pay-body">
+          <div class="pay-select-head">
+            <p class="field-hint">{{ 'member.payDues.selectHint' | translate }}</p>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="toggleAll()">
+              {{ (allSelected ? 'member.payDues.clearAll' : 'member.payDues.selectAll') | translate }}
+            </button>
+          </div>
+          <ul class="pay-month-list">
+            @for (i of payable(); track i.id; let first = $first) {
+              <li>
+                <label class="pay-month" [class.selected]="selectedIds().has(i.id)">
+                  <input type="checkbox" [checked]="selectedIds().has(i.id)" (change)="toggle(i.id)" />
+                  <span class="pay-month-name">
+                    {{ monthLabel(i.month) | translate }} {{ i.year }}
+                    @if (first) {
+                      <span class="pay-oldest">{{ 'member.payDues.oldest' | translate }}</span>
+                    }
+                  </span>
+                  <span class="pay-month-amount">৳ {{ formatAmount(i.amount) }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        </div>
+        <div class="pay-footer">
+          <div class="pay-total">
+            <span>{{ 'member.payDues.totalLabel' | translate: { count: selectedIds().size } }}</span>
+            <strong>৳ {{ formatAmount(selectedTotal()) }}</strong>
+          </div>
+          <button type="button" class="btn btn-primary" [disabled]="selectedIds().size === 0" (click)="goTo(2)">
+            {{ 'member.payDues.continue' | translate }}
+          </button>
+        </div>
+      }
+
+      @case (2) {
+        <div class="pay-body">
+          <p class="field-hint">{{ 'member.payDues.methodHint' | translate }}</p>
+          <div class="pay-methods" role="radiogroup">
+            @for (a of summary.accounts; track a.method) {
+              <button
+                type="button"
+                role="radio"
+                class="pay-method"
+                [class.active]="method() === a.method"
+                [attr.aria-checked]="method() === a.method"
+                (click)="method.set(a.method)"
+              >
+                {{ a.method }}
+              </button>
+            }
+          </div>
+
+          @if (selectedAccount(); as account) {
+            <div class="pay-instructions">
+              <div class="pay-instruction-row">
+                <span class="pay-instruction-label">{{ 'member.payDues.sendTo' | translate }}</span>
+                <span class="pay-instruction-value">{{ account.details }}</span>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="copy(account.details)">
+                  <app-icon [name]="copied() === account.details ? 'check' : 'copy'" [size]="14" />
+                  {{ (copied() === account.details ? 'member.payDues.copied' : 'member.payDues.copy') | translate }}
+                </button>
+              </div>
+              <div class="pay-instruction-row">
+                <span class="pay-instruction-label">{{ 'member.payDues.amount' | translate }}</span>
+                <span class="pay-instruction-value pay-amount">৳ {{ formatAmount(selectedTotal()) }}</span>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="copy(selectedTotal().toString())">
+                  <app-icon [name]="copied() === selectedTotal().toString() ? 'check' : 'copy'" [size]="14" />
+                  {{ (copied() === selectedTotal().toString() ? 'member.payDues.copied' : 'member.payDues.copy') | translate }}
+                </button>
+              </div>
+              <p class="pay-tip">
+                <app-icon name="shield" [size]="14" /> {{ 'member.payDues.keepReceipt' | translate }}
+              </p>
+            </div>
+          }
+        </div>
+        <div class="pay-footer">
+          <button type="button" class="btn btn-secondary" (click)="goTo(1)">{{ 'member.payDues.back' | translate }}</button>
+          <button type="button" class="btn btn-primary" [disabled]="!method()" (click)="goTo(3)">
+            {{ 'member.payDues.iHavePaid' | translate }}
+          </button>
+        </div>
+      }
+
+      @case (3) {
+        <form class="pay-body" (ngSubmit)="submit()" novalidate>
+          <div class="form-grid">
+            <div class="field form-grid-full">
+              <label for="payRef">{{ 'member.payDues.transactionRef' | translate }} *</label>
+              <input
+                id="payRef"
+                name="transactionRef"
+                type="text"
+                autocomplete="off"
+                maxlength="64"
+                [(ngModel)]="transactionRef"
+                (blur)="refTouched = true"
+                [attr.aria-invalid]="refTouched && !refValid"
+                [placeholder]="'member.payDues.transactionRefPlaceholder' | translate"
+              />
+              @if (refTouched && !refValid) {
+                <p class="field-error">{{ 'member.payDues.transactionRefError' | translate }}</p>
+              }
+            </div>
+            <div class="field">
+              <label>{{ 'member.payDues.paidOn' | translate }} *</label>
+              <app-date-picker [value]="paidOn" [max]="today" (valueChange)="paidOn = $event" />
+            </div>
+            <div class="field">
+              <label for="paySender">{{ 'member.payDues.senderAccount' | translate }}</label>
+              <input id="paySender" name="senderAccount" type="text" maxlength="64" [(ngModel)]="senderAccount" />
+            </div>
+            <div class="field form-grid-full">
+              <label for="payProof">{{ 'member.payDues.proof' | translate }}</label>
+              <input id="payProof" type="file" accept="image/jpeg,image/png,application/pdf" (change)="onProofSelected($event)" />
+              <p class="field-hint">{{ 'member.payDues.proofHint' | translate }}</p>
+              @if (proofError) {
+                <p class="field-error">{{ proofError }}</p>
+              }
+            </div>
+            <div class="field form-grid-full">
+              <label for="payNote">{{ 'member.payDues.note' | translate }}</label>
+              <textarea id="payNote" name="note" rows="2" maxlength="500" [(ngModel)]="note"></textarea>
+            </div>
+          </div>
+
+          <div class="pay-review">
+            <span>{{ selectedIds().size }} {{ 'member.payDues.months' | translate }} · {{ method() }}</span>
+            <strong>৳ {{ formatAmount(selectedTotal()) }}</strong>
+          </div>
+
+          <div class="pay-footer">
+            <button type="button" class="btn btn-secondary" [disabled]="submitting()" (click)="goTo(2)">
+              {{ 'member.payDues.back' | translate }}
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="!canSubmit">
+              @if (submitting()) { <span class="spinner"></span> {{ 'member.payDues.submitting' | translate }} }
+              @else { {{ 'member.payDues.submit' | translate }} }
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </div>
+</div>

@@ -16,9 +16,20 @@ from app.models.password_reset import PasswordResetToken
 from app.models.property_change_request import PropertyChangeRequest
 from app.models.society_cost import SocietyCost, CostSplit, CostSplitShare
 from app.models.financial_transaction import FinancialTransaction
+from app.models.installment_payment import InstallmentPayment
 from app.models.roadmap import RoadmapItem, RoadmapTimeframe
+from app.models.resolution_book import (
+    Meeting,
+    MeetingAttendance,
+    MeetingRecording,
+    Resolution,
+)
 
 __all__ = [
+    "Meeting",
+    "MeetingAttendance",
+    "MeetingRecording",
+    "Resolution",
     "Member",
     "PasswordResetToken",
     "PropertyChangeRequest",
@@ -48,4 +59,5 @@ __all__ = [
     "FinancialTransaction",
     "RoadmapTimeframe",
     "RoadmapItem",
+    "InstallmentPayment",
 ]

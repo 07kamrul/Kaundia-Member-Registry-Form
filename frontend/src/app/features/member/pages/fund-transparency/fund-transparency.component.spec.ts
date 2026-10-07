@@ -60,7 +60,11 @@ describe('finance formatting helpers', () => {
 
 describe('FundTransparencyComponent', () => {
   function setup() {
-    const getSummary = vi.fn((_period: string, _from?: string, _to?: string) => of(summary));
+    const summaryYear: FinanceSummary = {
+      ...summary,
+      period: { type: 'year', dateFrom: '2026-01-01', dateTo: '2026-10-08' },
+    };
+    const getSummary = vi.fn((period: string) => of(period === 'year' ? summaryYear : summary));
     const getTransactions = vi.fn((_filters: unknown) =>
       of({
         items: [],

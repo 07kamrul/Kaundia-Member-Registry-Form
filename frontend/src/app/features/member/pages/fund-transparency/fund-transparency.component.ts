@@ -154,10 +154,9 @@ export class FundTransparencyComponent implements OnInit, OnDestroy {
       }
     }
     this.periodError = '';
+    // The ledger reload is chained onto the summary so its date bounds can
+    // never be computed from a stale period.
     this.loadSummary();
-    // The period switch re-renders the whole page: the ledger's date filter
-    // follows the new period so no stale numbers survive anywhere.
-    this.loadLedgerWithPeriodDates();
   }
 
   private periodQuery(): { period: FinancePeriod; dateFrom?: string; dateTo?: string } {
@@ -171,11 +170,15 @@ export class FundTransparencyComponent implements OnInit, OnDestroy {
     this.summaryLoading = true;
     this.summaryError = '';
     const { period, dateFrom, dateTo } = this.periodQuery();
-    this.finance.getSummary(period, dateFrom, dateTo).subscribe({
+    // Only 'custom' carries dates; other periods are single-argument calls.
+    const request$ =
+      period === 'custom' ? this.finance.getSummary(period, dateFrom, dateTo) : this.finance.getSummary(period);
+    request$.subscribe({
       next: (summary) => {
         this.summary = summary;
         this.summaryLoading = false;
         this.trendTab = summary.granularity === 'year' ? 'yearly' : 'monthly';
+        this.loadLedgerWithPeriodDates();
         this.cdr.markForCheck();
       },
       error: () => {

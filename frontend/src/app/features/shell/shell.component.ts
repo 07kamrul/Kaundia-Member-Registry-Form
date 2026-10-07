@@ -26,6 +26,14 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { labelKey: 'nav.dashboard', route: '/dashboard', icon: 'dashboard' },
+  {
+    labelKey: 'nav.resolutionBook',
+    route: '/resolution-book',
+    icon: 'doc',
+    // Members read via profile.view_own; committee/admin tiers hold
+    // member.view_all - the nav shows the item when either key is held.
+    requiredPermission: ['profile.view_own', 'member.view_all'],
+  },
   { labelKey: 'nav.profile', route: '/profile', icon: 'user', requiredPermission: ['profile.view_own'] },
   {
     labelKey: 'nav.installments',
@@ -52,6 +60,12 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: 'nav.fundTransparency',
     route: '/fund-transparency',
     icon: 'chart',
+  },
+  // Society roadmap: visible to every authenticated account.
+  {
+    labelKey: 'nav.roadmap',
+    route: '/roadmap',
+    icon: 'map',
   },
   { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
   // Published notices/events - the same public pages logged-out visitors read.
@@ -120,6 +134,18 @@ const NAV_ITEMS: NavItem[] = [
     route: '/finance-management',
     icon: 'chart',
     requiredPermission: ['manage_finance'],
+  },
+  {
+    labelKey: 'nav.paymentVerifications',
+    route: '/payment-verifications',
+    icon: 'check-circle',
+    requiredPermission: ['manage_finance'],
+  },
+  {
+    labelKey: 'nav.roadmapManagement',
+    route: '/roadmap-management',
+    icon: 'map',
+    requiredPermission: ['manage_roadmap'],
   },
   {
     labelKey: 'nav.auditLog',

@@ -1,0 +1,94 @@
+<div class="pv-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.paymentVerifications.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.paymentVerifications.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="pv-filters" role="tablist">
+    @for (f of filters; track f) {
+      <button type="button" role="tab" class="pv-filter" [class.active]="filter() === f" [attr.aria-selected]="filter() === f" (click)="setFilter(f)">
+        {{ 'member.payDues.paymentStatus.' + f | translate }}
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="error-box" role="alert"><p style="margin:0">{{ error() }}</p></div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else {
+    <ul class="pv-list">
+      @for (p of payments(); track p.id) {
+        <li class="pv-card card">
+          <div class="pv-card-head">
+            <div>
+              <p class="pv-member">{{ p.memberName || '—' }} <span class="pv-member-id">{{ p.memberDisplayId }}</span></p>
+              <p class="pv-months">{{ months(p) }}</p>
+            </div>
+            <strong class="pv-amount">৳ {{ formatAmount(p.amount) }}</strong>
+          </div>
+
+          <dl class="pv-details">
+            <div><dt>{{ 'admin.paymentVerifications.method' | translate }}</dt><dd>{{ p.method }}</dd></div>
+            <div><dt>{{ 'admin.paymentVerifications.reference' | translate }}</dt><dd class="pv-mono">{{ p.transactionRef }}</dd></div>
+            <div><dt>{{ 'admin.paymentVerifications.paidOn' | translate }}</dt><dd>{{ p.paidOn }}</dd></div>
+            @if (p.senderAccount) {
+              <div><dt>{{ 'admin.paymentVerifications.sender' | translate }}</dt><dd>{{ p.senderAccount }}</dd></div>
+            }
+          </dl>
+          @if (p.note) {
+            <p class="pv-note">“{{ p.note }}”</p>
+          }
+          @if (p.rejectionReason) {
+            <p class="pv-reason">{{ 'member.payDues.rejectedReason' | translate }}: {{ p.rejectionReason }}</p>
+          }
+
+          <div class="pv-actions">
+            @if (p.proofUrl) {
+              <a class="btn btn-ghost btn-sm" [href]="p.proofUrl" target="_blank" rel="noopener">
+                <app-icon name="eye" [size]="14" /> {{ 'admin.paymentVerifications.viewProof' | translate }}
+              </a>
+            }
+            @if (p.status === 'pending') {
+              <button type="button" class="btn btn-danger btn-sm" [disabled]="busyId() === p.id" (click)="openReject(p)">
+                {{ 'admin.paymentVerifications.reject' | translate }}
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" [disabled]="busyId() === p.id" (click)="approve(p)">
+                <app-icon name="check" [size]="14" /> {{ 'admin.paymentVerifications.approve' | translate }}
+              </button>
+            }
+          </div>
+        </li>
+      } @empty {
+        <li class="empty-state">
+          <app-icon class="empty-icon" name="check-circle" [size]="34" />
+          <p class="empty-title">{{ 'admin.paymentVerifications.empty' | translate }}</p>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (rejecting(); as r) {
+    <div class="modal-backdrop" (click)="rejecting.set(null)">
+      <div class="modal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'admin.paymentVerifications.rejectTitle' | translate }}</h3>
+        <p class="modal-message">{{ r.memberName }} · ৳ {{ formatAmount(r.amount) }} · {{ r.transactionRef }}</p>
+        <div class="field">
+          <label for="rejectReason">{{ 'admin.paymentVerifications.reason' | translate }} *</label>
+          <textarea id="rejectReason" rows="3" maxlength="500" [(ngModel)]="rejectReason"
+            [placeholder]="'admin.paymentVerifications.reasonPlaceholder' | translate"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="rejecting.set(null)">{{ 'admin.paymentVerifications.cancel' | translate }}</button>
+          <button type="button" class="btn btn-danger" [disabled]="!canReject" (click)="confirmReject()">
+            {{ 'admin.paymentVerifications.reject' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
