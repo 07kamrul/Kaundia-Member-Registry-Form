@@ -304,11 +304,31 @@
         @if (profile.properties.length) {
           <span class="profile-count-pill">{{ profile.properties.length }}</span>
         }
+        <a routerLink="/property-requests/new" class="btn btn-primary btn-sm profile-add-property-btn">
+          <app-icon name="plus" [size]="14" />
+          {{ 'member.propertyRequests.addButton' | translate }}
+        </a>
       </div>
       @if (profile.properties.length) {
         <div class="profile-grid">
           @for (property of profile.properties; track property.id; let i = $index) {
             <div class="card profile-section">
+              <div class="profile-card-actions">
+                <a
+                  [routerLink]="['/property-requests', property.id, 'edit']"
+                  class="btn btn-secondary btn-sm"
+                >
+                  <app-icon name="edit" [size]="14" />
+                  {{ 'common.edit' | translate }}
+                </a>
+                <button type="button" class="btn btn-danger btn-sm" (click)="requestDelete(property)">
+                  <app-icon name="trash" [size]="14" />
+                  {{ 'common.delete' | translate }}
+                </button>
+                @if (hasPendingRequest(property.id)) {
+                  <span class="pr-pending-pill">{{ 'member.propertyRequests.pendingPill' | translate }}</span>
+                }
+              </div>
               <div class="profile-rows">
                 <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.propertyItemLabel' | translate }}</span><span class="profile-row-value">#{{ i + 1 }} — {{ propertyTypes(property) || '—' }}</span></div>
                 <div class="profile-row"><span class="profile-row-label">{{ 'member.profile.khatianLabel' | translate }}</span><span class="profile-row-value profile-row-mono">{{ property.khatianNo || '—' }}</span></div>
@@ -347,7 +367,96 @@
           <p>{{ 'member.profile.noPropertyInfo' | translate }}</p>
         </div>
       }
+
+      <div class="profile-requests-block">
+        <h4 class="profile-requests-title">
+          {{ 'member.propertyRequests.listTitle' | translate }}
+          @if (!requestsLoading && !requestsError && requests.length) {
+            <span class="profile-count-pill">{{ requests.length }}</span>
+          }
+        </h4>
+        @if (requestSuccess) {
+          <div class="success-box pr-success-banner" role="status">
+            <p style="margin:0">{{ requestSuccess }}</p>
+            <button type="button" class="pr-dismiss" (click)="dismissRequestSuccess()" aria-label="Close">
+              <app-icon name="close" [size]="14" />
+            </button>
+          </div>
+        }
+        @if (requestActionError) {
+          <div class="error-box" role="alert"><p style="margin:0">{{ requestActionError }}</p></div>
+        }
+        @if (requestsLoading) {
+          <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+        } @else if (requestsError) {
+          <div class="error-box"><p style="margin:0">{{ requestsError }}</p></div>
+        } @else if (requests.length) {
+          <div class="profile-requests-list">
+            @for (request of requests; track request.id) {
+              <div class="card profile-request-card">
+                <div class="profile-request-main">
+                  <div class="profile-request-line">
+                    <span class="profile-request-ref">{{ referenceFor(request) }}</span>
+                    <span
+                      class="status-badge"
+                      [class.status-pending]="request.status === 'pending'"
+                      [class.status-approved]="request.status === 'approved'"
+                      [class.status-cancelled]="request.status === 'cancelled'"
+                    >
+                      {{ requestStatusLabel(request.status) }}
+                    </span>
+                    <span class="pr-action-chip">{{ requestActionLabel(request.action) }}</span>
+                  </div>
+                  <div class="profile-request-line profile-request-summary">
+                    {{ requestPropertySummary(request) || '—' }}
+                  </div>
+                  <div class="profile-request-line pr-submitted">
+                    {{ 'member.propertyRequests.submittedLabel' | translate }}: {{ request.createdAt | date: 'yyyy-MM-dd' }}
+                  </div>
+                  @if (request.status === 'cancelled' && request.cancelReason) {
+                    <div class="pr-cancel-reason">
+                      <strong>{{ 'member.propertyRequests.cancelReasonLabel' | translate }}:</strong>
+                      {{ request.cancelReason }}
+                    </div>
+                  }
+                </div>
+                @if (request.status === 'pending') {
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="requestWithdraw(request)">
+                    {{ 'member.propertyRequests.withdrawButton' | translate }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="card profile-empty profile-empty-block">
+            <p>{{ 'member.propertyRequests.noRequests' | translate }}</p>
+          </div>
+        }
+      </div>
     </section>
+
+    <app-confirm-modal
+      [open]="showDeleteModal"
+      [title]="'member.propertyRequests.deleteModal.title' | translate"
+      [message]="'member.propertyRequests.deleteModal.message' | translate"
+      [confirmLabel]="'member.propertyRequests.deleteModal.confirmLabel' | translate"
+      [danger]="true"
+      [loading]="deleteSubmitting"
+      (confirm)="confirmDelete()"
+      (cancel)="showDeleteModal = false"
+    ></app-confirm-modal>
+
+    <app-confirm-modal
+      [open]="showWithdrawModal"
+      [title]="'member.propertyRequests.withdrawModal.title' | translate"
+      [message]="'member.propertyRequests.withdrawModal.message' | translate"
+      [confirmLabel]="'member.propertyRequests.withdrawModal.confirmLabel' | translate"
+      [danger]="true"
+      [loading]="withdrawSubmitting"
+      (confirm)="confirmWithdraw()"
+      (cancel)="showWithdrawModal = false"
+    ></app-confirm-modal>
 
     @if (previewUrl || previewLoading || previewError) {
       <div class="modal-backdrop" (click)="closePreview()">

@@ -13,10 +13,12 @@ from app.models.notice import Notice
 from app.models.picnic_payment import PicnicPayment
 from app.models.member_id_sequence import MemberIdSequence
 from app.models.password_reset import PasswordResetToken
+from app.models.property_change_request import PropertyChangeRequest
 
 __all__ = [
     "Member",
     "PasswordResetToken",
+    "PropertyChangeRequest",
     "MemberStatus",
     "Property",
     "CoOwner",

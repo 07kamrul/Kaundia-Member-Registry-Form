@@ -24,6 +24,7 @@ import {
   type Notice,
   type NoticeApiModel,
 } from '../models/content.model';
+import { toPropertyRequest, type MemberPropertyRequest, type PropertyRequestStatus } from './member.service';
 
 export type AttachmentKind = 'member_photo' | 'receipt_photo';
 
@@ -455,6 +456,33 @@ export class AdminService {
         {},
       )
       .pipe(map((res) => ({ emailSent: res.email_sent })));
+  }
+
+  listPropertyRequests(status?: PropertyRequestStatus): Observable<MemberPropertyRequest[]> {
+    const url = status
+      ? `${this.base}/property-requests?status=${status}`
+      : `${this.base}/property-requests`;
+    return this.http
+      .get<Parameters<typeof toPropertyRequest>[0][]>(url)
+      .pipe(map((rows) => rows.map(toPropertyRequest)));
+  }
+
+  approvePropertyRequest(id: number): Observable<MemberPropertyRequest> {
+    return this.http
+      .post<Parameters<typeof toPropertyRequest>[0]>(
+        `${this.base}/property-requests/${id}/approve`,
+        {},
+      )
+      .pipe(map(toPropertyRequest));
+  }
+
+  cancelPropertyRequest(id: number, reason: string): Observable<MemberPropertyRequest> {
+    return this.http
+      .post<Parameters<typeof toPropertyRequest>[0]>(
+        `${this.base}/property-requests/${id}/cancel`,
+        { reason },
+      )
+      .pipe(map(toPropertyRequest));
   }
 
   listMembers(): Observable<Member[]> {

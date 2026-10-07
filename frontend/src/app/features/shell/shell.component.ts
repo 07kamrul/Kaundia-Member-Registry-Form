@@ -60,6 +60,12 @@ const NAV_ITEMS: NavItem[] = [
     requiredPermission: ['membership.review'],
   },
   {
+    labelKey: 'nav.propertyRequests',
+    route: '/property-requests',
+    icon: 'doc',
+    requiredPermission: ['property.review'],
+  },
+  {
     labelKey: 'nav.membersList',
     route: '/members',
     icon: 'users',

@@ -1,0 +1,233 @@
+<div class="property-request-form">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        {{ (mode === 'edit' ? 'member.propertyRequests.editTitle' : 'member.propertyRequests.addTitle') | translate }}
+      </h1>
+      <p class="page-subtitle">{{ 'member.propertyRequests.formSubtitle' | translate }}</p>
+    </div>
+    <button type="button" class="btn btn-secondary" (click)="backToProfile()">
+      <app-icon name="arrowleft" [size]="16" />
+      {{ 'member.propertyRequests.backButton' | translate }}
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else if (submitted) {
+    <div class="success-box" role="status">
+      <p style="margin:0">{{ 'member.propertyRequests.successSent' | translate }}</p>
+    </div>
+  } @else {
+    @if (submitError) {
+      <div class="error-box" role="alert"><p style="margin:0">{{ submitError }}</p></div>
+    }
+
+    <div class="card profile-section">
+      <div class="field">
+        <label>{{ 'registration.property.typeLabel' | translate }} <span class="required">*</span></label>
+        <div class="checkbox-row">
+          @for (t of propertyTypes; track t) {
+            <label class="checkbox-item">
+              <input type="checkbox" [checked]="isTypeChecked(t)" (change)="toggleType(t)" />
+              {{ t }}
+            </label>
+          }
+        </div>
+        @if (isTypeChecked('অন্যান্য')) {
+          <input
+            type="text"
+            [(ngModel)]="propertyTypeOther"
+            [placeholder]="'registration.property.typeOtherPlaceholder' | translate"
+            style="max-width:14rem;width:100%;margin-top:0.5rem"
+          />
+        }
+        @if (showPropertyTypeError()) {
+          <p class="field-error">{{ 'registration.property.typeRequired' | translate }}</p>
+        }
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="pr-khatianNo">{{ 'registration.property.khatianNoLabel' | translate }} <span class="required">*</span></label>
+          <input id="pr-khatianNo" type="text" [(ngModel)]="khatianNo" />
+          @if (showKhatianNoError()) {
+            <p class="field-error">{{ 'registration.property.khatianNoRequired' | translate }}</p>
+          }
+        </div>
+        <div class="field">
+          <label for="pr-holdingNumber">{{ 'registration.property.holdingNumberLabel' | translate }}</label>
+          <input id="pr-holdingNumber" type="text" [(ngModel)]="holdingNumber" />
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="field">
+          <label>{{ 'registration.property.dagNoLabel' | translate }} <span class="required">*</span></label>
+          <div class="flex-row-wrap">
+            <div style="display:flex;align-items:center;gap:0.5rem;flex:1 1 8rem">
+              <label for="pr-dagNoCs" style="font-size:0.875rem;color:#4b5563">CS:</label>
+              <input id="pr-dagNoCs" type="text" [(ngModel)]="dagNoCs" />
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex:1 1 8rem">
+              <label for="pr-dagNoRs" style="font-size:0.875rem;color:#4b5563">RS:</label>
+              <input id="pr-dagNoRs" type="text" [(ngModel)]="dagNoRs" />
+            </div>
+          </div>
+          @if (showDagNoError('cs')) {
+            <p class="field-error">{{ 'registration.property.dagNoCsRequired' | translate }}</p>
+          }
+          @if (showDagNoError('rs')) {
+            <p class="field-error">{{ 'registration.property.dagNoRsRequired' | translate }}</p>
+          }
+        </div>
+        <div class="field">
+          <label for="pr-landQuantity">{{ 'registration.property.landQuantityLabel' | translate }} <span class="required">*</span></label>
+          <input
+            id="pr-landQuantity"
+            type="text"
+            inputmode="decimal"
+            [(ngModel)]="landQuantity"
+            [placeholder]="'registration.property.landQuantityPlaceholder' | translate"
+          />
+          @if (showLandQuantityError()) {
+            <p class="field-error">{{ 'registration.property.landQuantityRequired' | translate }}</p>
+          }
+          @if (showLandQuantityInvalidError()) {
+            <p class="field-error">{{ 'registration.property.landQuantityInvalid' | translate }}</p>
+          }
+        </div>
+        <div class="field">
+          <label for="pr-myShareQuantity">{{ 'registration.property.myShareQuantityLabel' | translate }} <span class="required">*</span></label>
+          <input
+            id="pr-myShareQuantity"
+            type="text"
+            inputmode="decimal"
+            [(ngModel)]="myShareQuantity"
+            [placeholder]="'registration.property.myShareQuantityPlaceholder' | translate"
+          />
+          @if (showMyShareQuantityError()) {
+            <p class="field-error">{{ 'registration.property.myShareQuantityRequired' | translate }}</p>
+          }
+          @if (showMyShareQuantityInvalidError()) {
+            <p class="field-error">{{ 'registration.property.myShareQuantityInvalid' | translate }}</p>
+          }
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:0">
+        <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>
+        <div class="radio-group">
+          @for (t of ownershipTypes; track t) {
+            <label class="radio-item">
+              <input type="radio" [value]="t" name="pr-ownership" [(ngModel)]="ownership" />
+              {{ t }}
+            </label>
+          }
+        </div>
+        @if (showOwnershipError()) {
+          <p class="field-error">{{ 'registration.property.ownershipRequired' | translate }}</p>
+        }
+
+        @if (ownership === 'যৌথ') {
+          <div class="field" style="margin-top:0.75rem;margin-bottom:0">
+            <label>{{ 'member.propertyRequests.coOwnersLabel' | translate }}</label>
+            @for (owner of coOwners; track $index; let i = $index) {
+              <div class="pr-co-owner-row">
+                <input
+                  type="text"
+                  [(ngModel)]="owner.ownerName"
+                  [placeholder]="'member.propertyRequests.coOwnerNamePlaceholder' | translate"
+                />
+                <input
+                  type="text"
+                  [(ngModel)]="owner.ownerPhone"
+                  [placeholder]="'member.profile.mobileLabel' | translate"
+                />
+                <button type="button" class="btn btn-danger btn-sm" (click)="removeCoOwner(i)">
+                  <app-icon name="trash" [size]="14" />
+                </button>
+              </div>
+            }
+            @if (showCoOwnersError()) {
+              <p class="field-error">{{ 'member.propertyRequests.coOwnerNameRequired' | translate }}</p>
+            }
+            <button type="button" class="btn btn-secondary btn-sm" (click)="addCoOwner()">
+              <app-icon name="plus" [size]="14" />
+              {{ 'member.propertyRequests.addCoOwnerButton' | translate }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card profile-section">
+      <div class="field" style="margin-bottom:0">
+        <label>{{ 'member.propertyRequests.docsLabel' | translate }}</label>
+        <p class="field-hint">{{ 'registration.property.maxFileSizeNote' | translate: { maxMb: maxDocFileMb } }}</p>
+
+        @if (mode === 'edit') {
+          <h4 class="pr-docs-subhead">{{ 'member.propertyRequests.existingDocsLabel' | translate }}</h4>
+          @if (existingDocs.length === 0) {
+            <p class="field-hint">{{ 'member.propertyRequests.noExistingDocs' | translate }}</p>
+          }
+          @for (doc of existingDocs; track doc.docType) {
+            <div class="pr-doc-row">
+              <label class="checkbox-item">
+                <input type="checkbox" [(ngModel)]="doc.keep" />
+                {{ doc.docType }}
+              </label>
+              @if (doc.filePath) {
+                <span class="pr-doc-kept" [class.pr-doc-dropped]="!doc.keep">
+                  {{ doc.keep ? ('member.propertyRequests.docKept' | translate) : ('member.propertyRequests.docDropped' | translate) }}
+                </span>
+              }
+            </div>
+          }
+        }
+
+        <h4 class="pr-docs-subhead">{{ 'member.propertyRequests.newDocsLabel' | translate }}</h4>
+        @for (doc of newDocs; track $index; let i = $index) {
+          <div class="pr-new-doc-row">
+            <div class="field" style="margin-bottom:0">
+              <select [(ngModel)]="doc.docType">
+                <option [ngValue]="''" disabled>{{ 'common.select' | translate }}</option>
+                @for (option of documentOptions; track option) {
+                  <option [ngValue]="option">{{ option }}</option>
+                }
+              </select>
+            </div>
+            <label class="pr-file-button">
+              📎 {{ (doc.file ? doc.file.name : ('registration.property.attachFileButton' | translate)) }}
+              <input type="file" accept="image/jpeg,image/png,application/pdf" (change)="onNewDocFileChange(i, $event)" style="display:none" />
+            </label>
+            <button type="button" class="btn btn-danger btn-sm" (click)="removeNewDoc(i)">
+              <app-icon name="trash" [size]="14" />
+            </button>
+          </div>
+          @if (doc.error) {
+            <p class="field-error">{{ doc.error }}</p>
+          }
+          @if (!doc.error && submitAttempted && (!doc.docType || !doc.file)) {
+            <p class="field-error">{{ 'member.propertyRequests.docIncomplete' | translate }}</p>
+          }
+        }
+        <button type="button" class="btn btn-secondary btn-sm" (click)="addNewDoc()">
+          <app-icon name="plus" [size]="14" />
+          {{ 'member.propertyRequests.addDocButton' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <div class="pr-form-actions">
+      <button type="button" class="btn btn-secondary" (click)="backToProfile()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button type="button" class="btn btn-primary" [disabled]="submitting" (click)="submit()">
+        {{ 'member.propertyRequests.submitButton' | translate }}
+      </button>
+    </div>
+  }
+</div>

@@ -1,9 +1,22 @@
 from datetime import date
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
-from sqlalchemy import select
+import json
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
+from pydantic import ValidationError
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.deps import (
     AccountActor,
@@ -17,6 +30,16 @@ from app.models.credential import MemberCredential
 from app.models.installment import Installment
 from app.models.member import Member, MemberStatus
 from app.models.picnic_payment import PicnicPayment
+from app.models.property import Property
+from app.models.property_change_request import (
+    PropertyChangeAction,
+    PropertyChangeRequest,
+    PropertyChangeStatus,
+)
+from app.schemas.property_request import (
+    PropertyRequestOut,
+    PropertyRequestPayload,
+)
 from app.schemas.auth import ChangePasswordRequest, validate_new_password
 from app.schemas.installment import InstallmentOut
 from app.schemas.member import MemberDetail, MemberProfileUpdate
@@ -24,7 +47,7 @@ from app.schemas.picnic_payment import PicnicPaymentIn, PicnicPaymentOut
 from app.services.audit import record_audit
 from app.services.email import send_email
 from app.services.fee_calculation import calculate_picnic_fee, resolve_picnic_rates
-from app.services.storage import save_upload_file
+from app.services.storage import save_upload_file, slugify_path_segment
 
 from fastapi import Query
 
@@ -279,3 +302,200 @@ async def change_password(
     credential.password_hash = await hash_password_async(payload.new_password)
     credential.must_change_password = False
     await db.commit()
+
+# --- Property change requests ----------------------------------------------
+# Members never write to `properties` directly once approved; every add,
+# edit or delete lands here as a PENDING request that the management
+# committee approves or cancels with a reason.
+
+
+async def _load_own_property(db: AsyncSession, member: Member, property_id: int) -> Property:
+    result = await db.execute(
+        select(Property)
+        .options(
+            selectinload(Property.co_owners),
+            selectinload(Property.applicable_docs),
+        )
+        .where(Property.id == property_id, Property.member_id == member.id)
+    )
+    property_ = result.scalar_one_or_none()
+    if property_ is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+    return property_
+
+
+def _property_request_snapshot(property_: Property) -> PropertyRequestPayload:
+    """Read-only snapshot stored on a delete request so the reviewer can see
+    exactly what would be removed."""
+    return PropertyRequestPayload(
+        property_type=property_.property_type or [],
+        property_type_other=property_.property_type_other,
+        khatian_no=property_.khatian_no,
+        dag_no_cs=property_.dag_no_cs,
+        dag_no_rs=property_.dag_no_rs,
+        holding_number=property_.holding_number,
+        land_quantity=property_.land_quantity,
+        my_share_quantity=property_.my_share_quantity,
+        ownership=property_.ownership,
+        co_owners=[
+            {"owner_name": co.owner_name, "owner_phone": co.owner_phone}
+            for co in property_.co_owners
+        ],
+        docs=[
+            {"doc_type": doc.doc_type, "keep_path": doc.file_path}
+            for doc in property_.applicable_docs
+        ],
+    )
+
+
+@router.get("/property-requests", response_model=list[PropertyRequestOut])
+async def list_my_property_requests(
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+) -> list[PropertyChangeRequest]:
+    result = await db.execute(
+        select(PropertyChangeRequest)
+        .where(PropertyChangeRequest.member_id == member.id)
+        .order_by(PropertyChangeRequest.created_at.desc(), PropertyChangeRequest.id.desc())
+    )
+    return list(result.scalars().all())
+
+
+@router.post(
+    "/property-requests",
+    response_model=PropertyRequestOut,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_property_request(
+    action: PropertyChangeAction = Form(...),
+    payload: str = Form(..., description="JSON-encoded PropertyRequestPayload"),
+    property_id: int | None = Form(default=None),
+    doc_files: list[UploadFile] = File(default=[]),
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+) -> PropertyChangeRequest:
+    try:
+        data = PropertyRequestPayload.model_validate(json.loads(payload))
+    except (json.JSONDecodeError, ValidationError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": "Invalid property payload", "errors": str(exc)},
+        )
+
+    target: Property | None = None
+    if action in (PropertyChangeAction.EDIT, PropertyChangeAction.DELETE):
+        if property_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="property_id is required for edit and delete requests",
+            )
+        target = await _load_own_property(db, member, property_id)
+    elif property_id is not None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="property_id is only valid for edit and delete requests",
+        )
+
+    if target is not None:
+        # One pending request per property: a second change must wait for the
+        # first decision, otherwise two approvals would race on the same row.
+        pending_duplicate = await db.scalar(
+            select(func.count())
+            .select_from(PropertyChangeRequest)
+            .where(
+                PropertyChangeRequest.member_id == member.id,
+                PropertyChangeRequest.property_id == target.id,
+                PropertyChangeRequest.status == PropertyChangeStatus.PENDING,
+            )
+        )
+        if pending_duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This property already has a request waiting for review.",
+            )
+
+    if action == PropertyChangeAction.DELETE:
+        # The member's payload is ignored for deletes: the stored snapshot is
+        # taken from the live row so the reviewer sees the real state.
+        data = _property_request_snapshot(target)
+    else:
+        # Resolve document entries. Uploads are written to their final
+        # member-scoped folder now - the path is only linked to a Property row
+        # on approval - and any client-supplied existing path must stay inside
+        # that folder so paths belonging to other accounts cannot be adopted.
+        uploads = [f for f in doc_files if f is not None and f.filename]
+        expected = sum(1 for doc in data.docs if doc.keep_path is None)
+        if expected != len(uploads):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Document files do not match the submitted document list.",
+            )
+        upload_iter = iter(uploads)
+        for doc in data.docs:
+            if doc.keep_path is None:
+                doc.keep_path = await save_upload_file(
+                    next(upload_iter),
+                    f"documents/member_{member.id}/{slugify_path_segment(doc.doc_type)}",
+                )
+            elif not doc.keep_path.startswith(f"documents/member_{member.id}/"):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="Invalid document reference.",
+                )
+
+    request = PropertyChangeRequest(
+        member_id=member.id,
+        property_id=target.id if target is not None else None,
+        action=action,
+        payload=data.model_dump(),
+        status=PropertyChangeStatus.PENDING,
+    )
+    db.add(request)
+    await db.flush()
+    record_audit(
+        db,
+        actor_admin_id=None,
+        action="property.request.create",
+        entity_type="property_change_request",
+        entity_id=str(request.id),
+        detail=f"member_id={member.id} action={action.value} property_id={property_id}",
+    )
+    await db.commit()
+    await db.refresh(request)
+    return request
+
+
+@router.post("/property-requests/{request_id}/withdraw", response_model=PropertyRequestOut)
+async def withdraw_property_request(
+    request_id: int,
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+) -> PropertyChangeRequest:
+    result = await db.execute(
+        select(PropertyChangeRequest).where(
+            PropertyChangeRequest.id == request_id,
+            PropertyChangeRequest.member_id == member.id,
+        )
+    )
+    request = result.scalar_one_or_none()
+    if request is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Request not found")
+    if request.status != PropertyChangeStatus.PENDING:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only pending requests can be withdrawn.",
+        )
+
+    request.status = PropertyChangeStatus.CANCELLED
+    request.cancel_reason = "Withdrawn by the member."
+    record_audit(
+        db,
+        actor_admin_id=None,
+        action="property.request.withdraw",
+        entity_type="property_change_request",
+        entity_id=str(request.id),
+        detail=f"member_id={member.id} action={request.action.value}",
+    )
+    await db.commit()
+    await db.refresh(request)
+    return request

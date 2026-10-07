@@ -56,7 +56,8 @@
     "eventsManagement": "অনুষ্ঠান ব্যবস্থাপনা",
     "picnicPayment": "পিকনিক ফি",
     "picnicPayments": "পিকনিক পরিশোধ",
-    "moreOptions": "আরও বিকল্প"
+    "moreOptions": "আরও বিকল্প",
+    "propertyRequests": "সম্পত্তি সংক্রান্ত অনুরোধ"
   },
   "forbidden": {
     "title": "প্রবেশাধিকার নেই",
@@ -273,6 +274,60 @@
         "Nagad": "নগদ",
         "Bank Transfer": "ব্যাংক ট্রান্সফার",
         "Other": "অন্যান্য"
+      }
+    },
+    "propertyRequests": {
+      "addButton": "সম্পত্তি যোগ করুন",
+      "addTitle": "সম্পত্তি সংযোজনের অনুরোধ",
+      "editTitle": "সম্পত্তি সংশোধনের অনুরোধ",
+      "formSubtitle": "আপনার পরিবর্তনটি প্রশাসকের পর্যালোচনার জন্য জমা দিন।",
+      "backButton": "ফিরে যান",
+      "submitButton": "অনুরোধ পাঠান",
+      "successSent": "আপনার অনুরোধ পর্যালোচনার জন্য পাঠানো হয়েছে।",
+      "withdrawnSuccess": "অনুরোধটি প্রত্যাহার করা হয়েছে।",
+      "listTitle": "সম্পত্তি সংক্রান্ত অনুরোধ",
+      "submittedLabel": "জমাদান",
+      "cancelReasonLabel": "বাতিলের কারণ",
+      "withdrawButton": "প্রত্যাহার",
+      "pendingPill": "অনুরোধ অপেক্ষমাণ",
+      "noRequests": "এখনও কোনো সম্পত্তি সংক্রান্ত অনুরোধ নেই।",
+      "actions": {
+        "add": "সংযোজন",
+        "edit": "সংশোধন",
+        "delete": "মুছে ফেলা"
+      },
+      "statusLabels": {
+        "pending": "অপেক্ষমাণ",
+        "approved": "অনুমোদিত",
+        "cancelled": "বাতিল"
+      },
+      "deleteModal": {
+        "title": "সম্পত্তি অপসারণের অনুরোধ",
+        "message": "এই সম্পত্তিটি মুছে ফেলার আগে একজন প্রশাসক আপনার অনুরোধটি পর্যালোচনা করবেন।",
+        "confirmLabel": "অপসারণের অনুরোধ পাঠান"
+      },
+      "withdrawModal": {
+        "title": "অনুরোধ প্রত্যাহার",
+        "message": "আপনার অপেক্ষমাণ অনুরোধটি বাতিল হবে। এটি আর ফেরানো যাবে না।",
+        "confirmLabel": "প্রত্যাহার করুন"
+      },
+      "coOwnersLabel": "যৌথ মালিকগণ",
+      "coOwnerNamePlaceholder": "যৌথ মালিকের নাম",
+      "coOwnerNameRequired": "প্রত্যেক যৌথ মালিকের নাম দিতে হবে।",
+      "addCoOwnerButton": "যৌথ মালিক যোগ করুন",
+      "docsLabel": "নথিপত্র",
+      "existingDocsLabel": "বিদ্যমান নথি",
+      "noExistingDocs": "এই সম্পত্তিতে কোনো বিদ্যমান নথি নেই।",
+      "docKept": "রাখা হবে",
+      "docDropped": "বাদ দেওয়া হবে",
+      "newDocsLabel": "নতুন নথি যোগ করুন",
+      "addDocButton": "নথি যোগ করুন",
+      "docIncomplete": "নথির ধরন নির্বাচন করে ফাইল সংযুক্ত করুন।",
+      "errors": {
+        "loadFailed": "সম্পত্তি সংক্রান্ত অনুরোধ লোড করা যায়নি।",
+        "submitFailed": "অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন।",
+        "withdrawFailed": "অনুরোধ প্রত্যাহার করা যায়নি।",
+        "propertyNotFound": "অনুরোধকৃত সম্পত্তিটি পাওয়া যায়নি।"
       }
     }
   },
@@ -929,6 +984,52 @@
       "receiptPhoto": "পেমেন্ট রশিদ",
       "signature": "স্বাক্ষর",
       "docsNone": "কোনো ডকুমেন্ট আপলোড করা হয়নি।"
+    },
+    "propertyRequests": {
+      "title": "সম্পত্তি সংক্রান্ত অনুরোধ",
+      "subtitle": "সদস্যদের সম্পত্তি সংযোজন, সংশোধন বা মুছে ফেলার অনুরোধ পর্যালোচনা করুন",
+      "statusLabels": {
+        "all": "সব",
+        "pending": "অপেক্ষমাণ",
+        "approved": "অনুমোদিত",
+        "cancelled": "বাতিল"
+      },
+      "actions": {
+        "add": "সংযোজন",
+        "edit": "সংশোধন",
+        "delete": "মুছে ফেলা"
+      },
+      "tableHeaders": {
+        "reference": "রেফারেন্স",
+        "member": "সদস্য",
+        "action": "কার্য",
+        "property": "সম্পত্তি",
+        "status": "অবস্থা",
+        "date": "জমাদান",
+        "actions": "কার্যক্রম"
+      },
+      "approveButton": "অনুমোদন",
+      "cancelButton": "বাতিল",
+      "cancelReasonLabel": "বাতিলের কারণ",
+      "deleteRequestNote": "সদস্য এই সম্পত্তিটি মুছে ফেলার অনুরোধ করেছেন।",
+      "approveModal": {
+        "title": "অনুরোধ অনুমোদন",
+        "messageSuffix": "সদস্যের তথ্যে প্রয়োগ করা হবে।",
+        "confirmLabel": "অনুমোদন করুন"
+      },
+      "cancelModal": {
+        "title": "অনুরোধ বাতিল",
+        "messageSuffix": "বাতিল করা হবে।",
+        "confirmLabel": "অনুরোধ বাতিল করুন",
+        "placeholder": "বাতিলের কারণ লিখুন..."
+      },
+      "noRequests": "কোনো সম্পত্তি সংক্রান্ত অনুরোধ পাওয়া যায়নি",
+      "errors": {
+        "loadFailed": "তালিকা লোড করা যায়নি।",
+        "approveFailed": "অনুরোধ অনুমোদন করা যায়নি।",
+        "cancelFailed": "অনুরোধ বাতিল করা যায়নি।",
+        "reasonRequired": "বাতিল করতে কারণ দিতে হবে।"
+      }
     }
   },
   "registration": {

@@ -35,7 +35,9 @@ export type IconName =
   | 'chevron-down'
   | 'check-circle'
   | 'more-vertical'
-  | 'key';
+  | 'key'
+  | 'edit'
+  | 'plus';
 
 const ICON_PATHS: Record<IconName, string> = {
   dashboard:
@@ -83,6 +85,9 @@ const ICON_PATHS: Record<IconName, string> = {
   'check-circle': '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
   'more-vertical':
     '<circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/>',
+  edit:
+    '<path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M13.5 6.5l3 3"/>',
+  plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
 };
 
 const SAFE_ICON_HTML = new Map<IconName, SafeHtml>();

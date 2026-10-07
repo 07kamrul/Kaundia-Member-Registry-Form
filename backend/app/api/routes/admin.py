@@ -21,6 +21,13 @@ from app.models.member_id_sequence import MemberIdSequence
 from app.models.picnic_payment import PicnicPayment
 from app.models.nominee import Nominee
 from app.models.property import ApplicableDoc, CoOwner, Property
+from app.models.property import ApplicableDoc, CoOwner, Property
+from app.models.property_change_request import (
+    PropertyChangeAction,
+    PropertyChangeRequest,
+    PropertyChangeStatus,
+)
+from app.schemas.property_request import PropertyRequestAdminOut, PropertyRequestPayload
 from app.schemas.audit_log import AuditLogOut
 from app.schemas.config_list import ConfigListItemCreate, ConfigListItemOut, ConfigListItemUpdate
 from app.schemas.fee_settings import FeeSettingCreate, FeeSettingOut
@@ -322,6 +329,258 @@ async def resend_rejection_notification(
         )
     email_sent = await _notify_rejection(db, member)
     return RejectResponse(status="rejected", email_sent=email_sent)
+
+
+# --- Property change requests ----------------------------------------------
+# Members submit add/edit/delete requests against their own properties; these
+# endpoints are the committee's review desk. Approval applies the stored
+# payload to the `properties` tables in one commit; cancellation records the
+# reason and emails it to the member.
+
+
+async def _load_request_or_404(db: AsyncSession, request_id: int) -> PropertyChangeRequest:
+    result = await db.execute(
+        select(PropertyChangeRequest).where(PropertyChangeRequest.id == request_id)
+    )
+    request = result.scalar_one_or_none()
+    if request is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Request not found")
+    return request
+
+
+def _request_admin_out(
+    request: PropertyChangeRequest, member: Member
+) -> PropertyRequestAdminOut:
+    return PropertyRequestAdminOut(
+        id=request.id,
+        member_id=request.member_id,
+        action=request.action.value,
+        property_id=request.property_id,
+        payload=request.payload,
+        status=request.status.value,
+        cancel_reason=request.cancel_reason,
+        reviewed_at=request.reviewed_at,
+        created_at=request.created_at,
+        member_name=member.full_name,
+        member_code=member.member_id,
+    )
+
+
+async def _apply_property_payload(db: AsyncSession, request: PropertyChangeRequest) -> None:
+    """Apply an approved request to the property tables. Raises 409 when the
+    target property no longer exists (e.g. the member was deleted while the
+    request sat in the queue)."""
+    payload = PropertyRequestPayload.model_validate(request.payload)
+
+    if request.action == PropertyChangeAction.ADD:
+        db.add(
+            Property(
+                member_id=request.member_id,
+                property_type=payload.property_type,
+                property_type_other=payload.property_type_other,
+                khatian_no=payload.khatian_no,
+                dag_no_cs=payload.dag_no_cs,
+                dag_no_rs=payload.dag_no_rs,
+                holding_number=payload.holding_number,
+                land_quantity=payload.land_quantity,
+                my_share_quantity=payload.my_share_quantity,
+                ownership=payload.ownership,
+                co_owners=[
+                    CoOwner(owner_name=co.owner_name, owner_phone=co.owner_phone)
+                    for co in payload.co_owners
+                ],
+                applicable_docs=[
+                    ApplicableDoc(doc_type=doc.doc_type, file_path=doc.keep_path)
+                    for doc in payload.docs
+                ],
+            )
+        )
+        return
+
+    property_result = await db.execute(
+        select(Property)
+        .options(
+            selectinload(Property.co_owners),
+            selectinload(Property.applicable_docs),
+        )
+        .where(Property.id == request.property_id)
+    )
+    property_ = property_result.scalar_one_or_none()
+    if property_ is None or property_.member_id != request.member_id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The property this request targets no longer exists.",
+        )
+
+    if request.action == PropertyChangeAction.EDIT:
+        property_.property_type = payload.property_type
+        property_.property_type_other = payload.property_type_other
+        property_.khatian_no = payload.khatian_no
+        property_.dag_no_cs = payload.dag_no_cs
+        property_.dag_no_rs = payload.dag_no_rs
+        property_.holding_number = payload.holding_number
+        property_.land_quantity = payload.land_quantity
+        property_.my_share_quantity = payload.my_share_quantity
+        property_.ownership = payload.ownership
+        # Replacing the relationship collections lets the delete-orphan
+        # cascade retire removed co-owners/docs in the same commit.
+        property_.co_owners = [
+            CoOwner(owner_name=co.owner_name, owner_phone=co.owner_phone)
+            for co in payload.co_owners
+        ]
+        property_.applicable_docs = [
+            ApplicableDoc(doc_type=doc.doc_type, file_path=doc.keep_path)
+            for doc in payload.docs
+        ]
+        return
+
+    # DELETE: explicit child-first deletes (same pattern as delete_member)
+    # instead of the ORM cascade's per-property lazy loads.
+    for table in (CoOwner, ApplicableDoc):
+        await db.execute(table.__table__.delete().where(table.property_id == property_.id))
+    await db.execute(Property.__table__.delete().where(Property.id == property_.id))
+
+
+_PROPERTY_ACTION_PAST_TENSE = {
+    PropertyChangeAction.ADD: "added",
+    PropertyChangeAction.EDIT: "updated",
+    PropertyChangeAction.DELETE: "removed",
+}
+
+
+def _property_decision_email_body(full_name: str, action: PropertyChangeAction, reason: str | None) -> str:
+    """Bilingual (Bangla + English) decision notice; the cancel reason is
+    admin-typed free text and is HTML-escaped."""
+    name = html.escape(full_name)
+    contact = html.escape(get_settings().smtp_from)
+    bn_action = {"add": "সম্পত্তি যুক্ত", "edit": "সম্পত্তির তথ্য হালনাগাদ", "delete": "সম্পত্তি মুছে ফেলা"}
+    en_action = _PROPERTY_ACTION_PAST_TENSE[action]
+    if reason is None:
+        return (
+            f"<p>প্রিয় {name},</p>"
+            f"<p>আপনার {bn_action[action.value]}-এর অনুরোধটি পরীক্ষা করে অনুমোদন করা হয়েছে।</p>"
+            f"<p>যোগাযোগ: {contact}</p>"
+            "<hr/>"
+            f"<p>Dear {name},</p>"
+            f"<p>Your property {en_action} request has been reviewed and approved.</p>"
+            f"<p>Contact: {contact}</p>"
+        )
+    safe_reason = html.escape(reason)
+    return (
+        f"<p>প্রিয় {name},</p>"
+        f"<p>আপনার {bn_action[action.value]}-এর অনুরোধটি অনুমোদিত হয়নি।</p>"
+        f"<p><b>কারণ:</b> {safe_reason}</p>"
+        "<p>প্রয়োজনীয় সংশোধন করে আপনি নতুন করে অনুরোধ করতে পারবেন। "
+        f"যোগাযোগ: {contact}</p>"
+        "<hr/>"
+        f"<p>Dear {name},</p>"
+        f"<p>Your property {en_action} request was not approved.</p>"
+        f"<p><b>Reason:</b> {safe_reason}</p>"
+        "<p>You may correct the issue and submit a new request. "
+        f"Contact: {contact}</p>"
+    )
+
+
+@router.get("/property-requests", response_model=list[PropertyRequestAdminOut])
+async def list_property_requests(
+    status_filter: PropertyChangeStatus | None = Query(default=None, alias="status"),
+    limit: int | None = Query(default=None, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    db: AsyncSession = Depends(get_db),
+    _admin: AdminUser = Depends(require_permission("property.review")),
+) -> list[PropertyRequestAdminOut]:
+    query = (
+        select(PropertyChangeRequest, Member)
+        .join(Member, Member.id == PropertyChangeRequest.member_id)
+        .order_by(PropertyChangeRequest.created_at.desc(), PropertyChangeRequest.id.desc())
+    )
+    if status_filter is not None:
+        query = query.where(PropertyChangeRequest.status == status_filter)
+    if offset:
+        query = query.offset(offset)
+    if limit is not None:
+        query = query.limit(limit)
+    rows = (await db.execute(query)).all()
+    return [_request_admin_out(request, member) for request, member in rows]
+
+
+@router.post("/property-requests/{request_id}/approve", response_model=PropertyRequestAdminOut)
+async def approve_property_request(
+    request_id: int,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(require_permission("property.review")),
+) -> PropertyRequestAdminOut:
+    request = await _load_request_or_404(db, request_id)
+    member = await _get_member_or_404(db, request.member_id, eager=False)
+    if request.status != PropertyChangeStatus.PENDING:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only pending requests can be approved.",
+        )
+
+    await _apply_property_payload(db, request)
+    request.status = PropertyChangeStatus.APPROVED
+    request.reviewed_by = admin.id
+    request.reviewed_at = datetime.now(timezone.utc)
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="property.request.approve",
+        entity_type="property_change_request",
+        entity_id=str(request.id),
+        detail=f"member_id={request.member_id} action={request.action.value} property_id={request.property_id}",
+    )
+    await db.commit()
+
+    # A failed notification must not fail the committed decision, matching
+    # how member approvals treat email failures.
+    await send_email(
+        to=member.email,
+        subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - Property Request Approved",
+        html_body=_property_decision_email_body(member.full_name, request.action, None),
+    )
+    return _request_admin_out(request, member)
+
+
+@router.post("/property-requests/{request_id}/cancel", response_model=PropertyRequestAdminOut)
+async def cancel_property_request(
+    request_id: int,
+    payload: RejectRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(require_permission("property.review")),
+) -> PropertyRequestAdminOut:
+    request = await _load_request_or_404(db, request_id)
+    member = await _get_member_or_404(db, request.member_id, eager=False)
+    if request.status != PropertyChangeStatus.PENDING:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only pending requests can be cancelled.",
+        )
+
+    request.status = PropertyChangeStatus.CANCELLED
+    request.cancel_reason = payload.reason
+    request.reviewed_by = admin.id
+    request.reviewed_at = datetime.now(timezone.utc)
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="property.request.cancel",
+        entity_type="property_change_request",
+        entity_id=str(request.id),
+        detail=f"member_id={request.member_id} action={request.action.value} reason={payload.reason}",
+    )
+    await db.commit()
+
+    email_sent = await send_with_retries(
+        lambda: send_email(
+            to=member.email,
+            subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - Property Request Update",
+            html_body=_property_decision_email_body(
+                member.full_name, request.action, request.cancel_reason
+            ),
+        )
+    )
+    return _request_admin_out(request, member)
 
 
 @router.get("/members", response_model=list[MemberSummary])

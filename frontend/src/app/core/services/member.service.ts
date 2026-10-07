@@ -15,6 +15,8 @@ export interface MemberPropertyDoc {
   id: number;
   docType: string;
   fileUrl?: string;
+  /** Server-side path, used as keep_path when re-submitting docs on requests. */
+  filePath?: string;
 }
 
 export interface MemberProperty {
@@ -166,6 +168,7 @@ function toProperty(api: PropertyApiModel): MemberProperty {
       id: d.id,
       docType: d.doc_type,
       fileUrl: toFileUrl(d.file_path),
+      filePath: d.file_path ?? undefined,
     })),
   };
 }
@@ -221,6 +224,111 @@ function toMemberProfile(api: MemberProfileApiModel): MemberProfile {
     properties: (api.properties ?? []).map(toProperty),
     nominees: (api.nominees ?? []).map(toNominee),
   };
+}
+
+/** Property fields carried inside a property change request's payload. */
+export interface PropertyRequestPayload {
+  propertyType: string[];
+  propertyTypeOther: string | null;
+  khatianNo: string | null;
+  dagNoCs: string | null;
+  dagNoRs: string | null;
+  holdingNumber: string | null;
+  landQuantity: string | null;
+  myShareQuantity: string | null;
+  ownership: string | null;
+  coOwners: { ownerName: string; ownerPhone: string }[];
+  docs: { docType: string; keepPath: string | null }[];
+}
+
+export type PropertyRequestAction = 'add' | 'edit' | 'delete';
+export type PropertyRequestStatus = 'pending' | 'approved' | 'cancelled';
+
+export interface MemberPropertyRequest {
+  id: number;
+  action: PropertyRequestAction;
+  propertyId: number | null;
+  payload: PropertyRequestPayload;
+  status: PropertyRequestStatus;
+  cancelReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+  /** Admin listings only; undefined on member-owned requests. */
+  memberName?: string;
+  memberCode?: string | null;
+}
+
+interface PropertyRequestApiModel {
+  id: number;
+  action: PropertyRequestAction;
+  property_id: number | null;
+  payload: Record<string, unknown>;
+  status: PropertyRequestStatus;
+  cancel_reason: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  member_name?: string;
+  member_code?: string | null;
+}
+
+function str(value: unknown): string | null {
+  return typeof value === 'string' && value.length > 0 ? value : null;
+}
+
+export function toPropertyRequest(api: PropertyRequestApiModel): MemberPropertyRequest {
+  const p = api.payload ?? {};
+  const coOwners = Array.isArray(p['co_owners']) ? p['co_owners'] : [];
+  const docs = Array.isArray(p['docs']) ? p['docs'] : [];
+  return {
+    id: api.id,
+    action: api.action,
+    propertyId: api.property_id,
+    payload: {
+      propertyType: Array.isArray(p['property_type']) ? (p['property_type'] as string[]) : [],
+      propertyTypeOther: str(p['property_type_other']),
+      khatianNo: str(p['khatian_no']),
+      dagNoCs: str(p['dag_no_cs']),
+      dagNoRs: str(p['dag_no_rs']),
+      holdingNumber: str(p['holding_number']),
+      landQuantity: str(p['land_quantity']),
+      myShareQuantity: str(p['my_share_quantity']),
+      ownership: str(p['ownership']),
+      coOwners: (coOwners as Record<string, unknown>[]).map((c) => ({
+        ownerName: str(c['owner_name']) ?? '',
+        ownerPhone: str(c['owner_phone']) ?? '',
+      })),
+      docs: (docs as Record<string, unknown>[]).map((d) => ({
+        docType: str(d['doc_type']) ?? '',
+        keepPath: str(d['keep_path']),
+      })),
+    },
+    status: api.status,
+    cancelReason: api.cancel_reason,
+    reviewedAt: api.reviewed_at,
+    createdAt: api.created_at,
+    memberName: api.member_name,
+    memberCode: api.member_code ?? undefined,
+  };
+}
+
+export interface PropertyRequestFormData {
+  action: PropertyRequestAction;
+  propertyId?: number;
+  payload: {
+    propertyType: string[];
+    propertyTypeOther: string | null;
+    khatianNo: string;
+    dagNoCs: string;
+    dagNoRs: string;
+    holdingNumber: string;
+    landQuantity: string;
+    myShareQuantity: string;
+    ownership: string;
+    coOwners: { ownerName: string; ownerPhone: string }[];
+    docs: { docType: string; keepPath: string | null }[];
+  };
+  /** One file per docs[] entry whose keepPath is null, in the same order. */
+  newDocFiles: File[];
 }
 
 export interface MemberProfileUpdatePayload {
@@ -300,6 +408,50 @@ export class MemberService {
     return this.http
       .post<MemberProfileApiModel>(`${this.base}/me/photo`, form)
       .pipe(map(toMemberProfile));
+  }
+
+  getPropertyRequests(): Observable<MemberPropertyRequest[]> {
+    return this.http
+      .get<PropertyRequestApiModel[]>(`${this.base}/property-requests`)
+      .pipe(map((rows) => rows.map(toPropertyRequest)));
+  }
+
+  /** POSTs a property change request (multipart: payload JSON + new doc files). */
+  createPropertyRequest(form: PropertyRequestFormData): Observable<MemberPropertyRequest> {
+    const body = new FormData();
+    body.append('action', form.action);
+    if (form.propertyId !== undefined) {
+      body.append('property_id', String(form.propertyId));
+    }
+    const payloadBody =
+      form.action === 'delete'
+        ? {}
+        : {
+            property_type: form.payload.propertyType,
+            property_type_other: form.payload.propertyTypeOther,
+            khatian_no: form.payload.khatianNo,
+            dag_no_cs: form.payload.dagNoCs,
+            dag_no_rs: form.payload.dagNoRs,
+            holding_number: form.payload.holdingNumber,
+            land_quantity: form.payload.landQuantity,
+            my_share_quantity: form.payload.myShareQuantity,
+            ownership: form.payload.ownership,
+            co_owners: form.payload.coOwners,
+            docs: form.payload.docs,
+          };
+    body.append('payload', JSON.stringify(payloadBody));
+    for (const file of form.newDocFiles) {
+      body.append('doc_files', file);
+    }
+    return this.http
+      .post<PropertyRequestApiModel>(`${this.base}/property-requests`, body)
+      .pipe(map(toPropertyRequest));
+  }
+
+  withdrawPropertyRequest(id: number): Observable<MemberPropertyRequest> {
+    return this.http
+      .post<PropertyRequestApiModel>(`${this.base}/property-requests/${id}/withdraw`, {})
+      .pipe(map(toPropertyRequest));
   }
 
   getInstallments(): Observable<Installment[]> {

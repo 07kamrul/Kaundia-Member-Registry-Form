@@ -1,0 +1,183 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        {{ 'admin.propertyRequests.title' | translate }}
+        @if (!loading && !error && requests.length > 0) {
+          <span
+            class="status-badge"
+            [class.status-pending]="statusFilter === 'pending'"
+            [class.status-approved]="statusFilter === 'approved'"
+            [class.status-cancelled]="statusFilter === 'cancelled'"
+            style="margin-left: 0.5rem"
+          >
+            {{ requests.length }}
+          </span>
+        }
+      </h1>
+      <p class="page-subtitle">{{ 'admin.propertyRequests.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="field filter-field property-requests-filter">
+    <label>{{ 'admin.submissionsList.filterLabel' | translate }}</label>
+    <select [value]="statusFilter" (change)="onFilterChange($event)">
+      @for (s of statuses; track s) {
+        <option [value]="s">{{ s ? statusLabel(s) : ('admin.submissionsList.allOption' | translate) }}</option>
+      }
+    </select>
+  </div>
+
+  @if (actionError) {
+    <div class="error-box" role="alert"><p style="margin:0">{{ actionError }}</p></div>
+  }
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else {
+    <div class="data-table-wrap">
+      <table class="data-table data-table-cards">
+        <thead>
+          <tr>
+            <th>{{ 'admin.propertyRequests.tableHeaders.reference' | translate }}</th>
+            <th>{{ 'admin.propertyRequests.tableHeaders.member' | translate }}</th>
+            <th>{{ 'admin.propertyRequests.tableHeaders.action' | translate }}</th>
+            <th>{{ 'admin.propertyRequests.tableHeaders.property' | translate }}</th>
+            <th>{{ 'admin.propertyRequests.tableHeaders.status' | translate }}</th>
+            <th>{{ 'admin.propertyRequests.tableHeaders.date' | translate }}</th>
+            <th>{{ 'admin.propertyRequests.tableHeaders.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of requests; track r.id) {
+            <tr>
+              <td [attr.data-label]="'admin.propertyRequests.tableHeaders.reference' | translate">
+                <button type="button" class="pr-reference-btn" (click)="toggleExpanded(r.id)">
+                  {{ referenceFor(r) }}
+                  <app-icon [name]="isExpanded(r.id) ? 'chevron-down' : 'chevron-right'" [size]="14" />
+                </button>
+              </td>
+              <td [attr.data-label]="'admin.propertyRequests.tableHeaders.member' | translate">
+                {{ r.memberName }}@if (r.memberCode) {<span class="pr-member-code"> ({{ r.memberCode }})</span>}
+              </td>
+              <td [attr.data-label]="'admin.propertyRequests.tableHeaders.action' | translate">{{ actionLabel(r.action) }}</td>
+              <td [attr.data-label]="'admin.propertyRequests.tableHeaders.property' | translate">{{ propertySummary(r) || '—' }}</td>
+              <td [attr.data-label]="'admin.propertyRequests.tableHeaders.status' | translate">
+                <span
+                  class="status-badge"
+                  [class.status-pending]="r.status === 'pending'"
+                  [class.status-approved]="r.status === 'approved'"
+                  [class.status-cancelled]="r.status === 'cancelled'"
+                >
+                  {{ statusLabel(r.status) }}
+                </span>
+              </td>
+              <td [attr.data-label]="'admin.propertyRequests.tableHeaders.date' | translate">{{ r.createdAt | date: 'yyyy-MM-dd' }}</td>
+              <td [attr.data-label]="'admin.propertyRequests.tableHeaders.actions' | translate">
+                @if (r.status === 'pending') {
+                  <div class="pr-action-buttons">
+                    <button type="button" class="btn btn-primary btn-sm" (click)="openApproveModal(r)">
+                      {{ 'admin.propertyRequests.approveButton' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="openCancelModal(r)">
+                      {{ 'admin.propertyRequests.cancelButton' | translate }}
+                    </button>
+                  </div>
+                } @else {
+                  —
+                }
+              </td>
+            </tr>
+            @if (isExpanded(r.id)) {
+              <tr class="pr-detail-row">
+                <td [attr.colspan]="7">
+                  <div class="pr-detail">
+                    @if (r.cancelReason) {
+                      <p class="pr-cancel-reason">
+                        <strong>{{ 'admin.propertyRequests.cancelReasonLabel' | translate }}:</strong>
+                        {{ r.cancelReason }}
+                      </p>
+                    }
+                    @if (r.action === 'delete') {
+                      <p class="pr-detail-note">{{ 'admin.propertyRequests.deleteRequestNote' | translate }}</p>
+                    }
+                    <dl class="pr-payload-rows">
+                      @for (row of payloadRows(r); track row.label) {
+                        <div class="pr-payload-row">
+                          <dt>{{ row.label }}</dt>
+                          <dd>{{ row.value }}</dd>
+                        </div>
+                      }
+                    </dl>
+                    @if (r.payload.docs.length) {
+                      <div class="pr-doc-list">
+                        @for (doc of r.payload.docs; track $index) {
+                          <span class="pr-doc-entry">
+                            {{ doc.docType }}
+                            @if (doc.keepPath) {
+                              <a class="pr-doc-link" [href]="docUrl(r, doc)" target="_blank" rel="noopener">
+                                {{ 'member.profile.viewFile' | translate }}
+                              </a>
+                            }
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          } @empty {
+            <tr><td colspan="7" class="empty-state">{{ 'admin.propertyRequests.noRequests' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-confirm-modal
+    [open]="showApproveModal"
+    [title]="'admin.propertyRequests.approveModal.title' | translate"
+    [message]="
+      activeRequest
+        ? referenceFor(activeRequest) +
+          ' — ' +
+          actionLabel(activeRequest.action) +
+          ' ' +
+          ('admin.propertyRequests.approveModal.messageSuffix' | translate)
+        : ''
+    "
+    [confirmLabel]="'admin.propertyRequests.approveModal.confirmLabel' | translate"
+    [loading]="approving"
+    (confirm)="approve()"
+    (cancel)="showApproveModal = false"
+  ></app-confirm-modal>
+
+  <app-confirm-modal
+    [open]="showCancelModal"
+    [title]="'admin.propertyRequests.cancelModal.title' | translate"
+    [message]="
+      activeRequest
+        ? referenceFor(activeRequest) +
+          ' — ' +
+          actionLabel(activeRequest.action) +
+          ' ' +
+          ('admin.propertyRequests.cancelModal.messageSuffix' | translate)
+        : ''
+    "
+    [confirmLabel]="'admin.propertyRequests.cancelModal.confirmLabel' | translate"
+    [danger]="true"
+    [confirmDisabled]="!cancelReason.trim()"
+    [loading]="cancelling"
+    (confirm)="cancel()"
+    (cancel)="showCancelModal = false"
+  >
+    <textarea
+      rows="3"
+      [(ngModel)]="cancelReason"
+      [placeholder]="'admin.propertyRequests.cancelModal.placeholder' | translate"
+    ></textarea>
+  </app-confirm-modal>
+</div>

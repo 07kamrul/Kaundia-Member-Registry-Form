@@ -8,7 +8,9 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
+import { RouterLink } from '@angular/router';
 import { of } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
@@ -16,9 +18,11 @@ import {
   type MemberProfile,
   type MemberProperty,
   type MemberPropertyDoc,
+  type MemberPropertyRequest,
   type MemberProfileUpdatePayload,
 } from '../../../../core/services/member.service';
 import { AttachmentService } from '../../../../core/services/attachment.service';
+import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
 import { IconComponent } from '../../../../shared/icon/icon.component';
 import { PhoneInputComponent } from '../../../../shared/phone-input/phone-input.component';
 import { isValidInternationalPhone } from '../../../../shared/phone-input/phone-number';
@@ -50,7 +54,15 @@ const CORE_FIELDS: (keyof MemberProfileUpdatePayload)[] = [
   selector: 'app-member-profile',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, FormsModule, IconComponent, PhoneInputComponent],
+  imports: [
+    TranslatePipe,
+    FormsModule,
+    DatePipe,
+    RouterLink,
+    IconComponent,
+    PhoneInputComponent,
+    ConfirmModalComponent,
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
@@ -79,6 +91,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
   previewLoading = false;
   previewError = '';
   downloadError = '';
+
+  /* ---------- property change requests ---------- */
+  requests: MemberPropertyRequest[] = [];
+  requestsLoading = false;
+  requestsError = '';
+  requestSuccess = '';
+  requestActionError = '';
+  deleteTarget: MemberProperty | null = null;
+  showDeleteModal = false;
+  deleteSubmitting = false;
+  withdrawTarget: MemberPropertyRequest | null = null;
+  showWithdrawModal = false;
+  withdrawSubmitting = false;
 
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly attachments = inject(AttachmentService);
@@ -113,6 +138,140 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
     });
+    this.loadRequests();
+  }
+
+  /* ---------- property change requests ---------- */
+
+  loadRequests(): void {
+    this.requestsLoading = true;
+    this.requestsError = '';
+    this.memberService.getPropertyRequests().subscribe({
+      next: (rows) => {
+        this.requests = rows;
+        this.requestsLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.requestsError = this.translate.instant(
+          'member.propertyRequests.errors.loadFailed',
+        );
+        this.requestsLoading = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  referenceFor(request: MemberPropertyRequest): string {
+    const year = new Date(request.createdAt).getFullYear() || new Date().getFullYear();
+    return `PR-${year}-${String(request.id).padStart(4, '0')}`;
+  }
+
+  requestStatusLabel(status: MemberPropertyRequest['status']): string {
+    return this.translate.instant(`member.propertyRequests.statusLabels.${status}`);
+  }
+
+  requestActionLabel(action: MemberPropertyRequest['action']): string {
+    return this.translate.instant(`member.propertyRequests.actions.${action}`);
+  }
+
+  /** Short property description from a request payload (khatian / dag numbers). */
+  requestPropertySummary(request: MemberPropertyRequest): string {
+    const p = request.payload;
+    const parts: string[] = [];
+    const types = [...p.propertyType, p.propertyTypeOther ?? ''].filter(Boolean);
+    if (types.length) parts.push(types.join(' / '));
+    if (p.khatianNo) parts.push(`Khatian ${p.khatianNo}`);
+    if (p.dagNoCs) parts.push(`CS ${p.dagNoCs}`);
+    if (p.dagNoRs) parts.push(`RS ${p.dagNoRs}`);
+    return parts.join(' · ');
+  }
+
+  hasPendingRequest(propertyId: number): boolean {
+    return this.requests.some(
+      (r) => r.status === 'pending' && r.propertyId === propertyId,
+    );
+  }
+
+  requestDelete(property: MemberProperty): void {
+    this.deleteTarget = property;
+    this.requestActionError = '';
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete(): void {
+    if (!this.deleteTarget || this.deleteSubmitting) return;
+    this.deleteSubmitting = true;
+    this.requestActionError = '';
+    this.memberService
+      .createPropertyRequest({
+        action: 'delete',
+        propertyId: this.deleteTarget.id,
+        payload: {
+          propertyType: [],
+          propertyTypeOther: null,
+          khatianNo: '',
+          dagNoCs: '',
+          dagNoRs: '',
+          holdingNumber: '',
+          landQuantity: '',
+          myShareQuantity: '',
+          ownership: '',
+          coOwners: [],
+          docs: [],
+        },
+        newDocFiles: [],
+      })
+      .subscribe({
+        next: () => {
+          this.deleteSubmitting = false;
+          this.showDeleteModal = false;
+          this.requestSuccess = this.translate.instant('member.propertyRequests.successSent');
+          this.loadRequests();
+        },
+        error: (err) => {
+          this.deleteSubmitting = false;
+          this.showDeleteModal = false;
+          const detail = typeof err?.error?.detail === 'string' ? err.error.detail : '';
+          this.requestActionError =
+            detail || this.translate.instant('member.propertyRequests.errors.submitFailed');
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  requestWithdraw(request: MemberPropertyRequest): void {
+    this.withdrawTarget = request;
+    this.requestActionError = '';
+    this.showWithdrawModal = true;
+  }
+
+  confirmWithdraw(): void {
+    if (!this.withdrawTarget || this.withdrawSubmitting) return;
+    this.withdrawSubmitting = true;
+    this.requestActionError = '';
+    this.memberService.withdrawPropertyRequest(this.withdrawTarget.id).subscribe({
+      next: () => {
+        this.withdrawSubmitting = false;
+        this.showWithdrawModal = false;
+        this.requestSuccess = this.translate.instant(
+          'member.propertyRequests.withdrawnSuccess',
+        );
+        this.loadRequests();
+      },
+      error: (err) => {
+        this.withdrawSubmitting = false;
+        this.showWithdrawModal = false;
+        const detail = typeof err?.error?.detail === 'string' ? err.error.detail : '';
+        this.requestActionError =
+          detail || this.translate.instant('member.propertyRequests.errors.withdrawFailed');
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  dismissRequestSuccess(): void {
+    this.requestSuccess = '';
   }
 
   ngOnDestroy(): void {

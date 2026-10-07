@@ -56,7 +56,8 @@
     "eventsManagement": "Manage Events",
     "picnicPayment": "Picnic Fee",
     "picnicPayments": "Picnic Payments",
-    "moreOptions": "More options"
+    "moreOptions": "More options",
+    "propertyRequests": "Property Requests"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -273,6 +274,60 @@
         "Nagad": "Nagad",
         "Bank Transfer": "Bank Transfer",
         "Other": "Other"
+      }
+    },
+    "propertyRequests": {
+      "addButton": "Add property",
+      "addTitle": "Request property addition",
+      "editTitle": "Request property edit",
+      "formSubtitle": "Submit your change for admin review.",
+      "backButton": "Back",
+      "submitButton": "Send request",
+      "successSent": "Your request has been sent for review.",
+      "withdrawnSuccess": "The request has been withdrawn.",
+      "listTitle": "Property requests",
+      "submittedLabel": "Submitted",
+      "cancelReasonLabel": "Cancel reason",
+      "withdrawButton": "Withdraw",
+      "pendingPill": "Request pending",
+      "noRequests": "No property requests yet.",
+      "actions": {
+        "add": "Add",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "statusLabels": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "cancelled": "Cancelled"
+      },
+      "deleteModal": {
+        "title": "Request property removal",
+        "message": "An admin will review your request to remove this property before it is deleted.",
+        "confirmLabel": "Send removal request"
+      },
+      "withdrawModal": {
+        "title": "Withdraw request",
+        "message": "Your pending request will be cancelled. This cannot be undone.",
+        "confirmLabel": "Withdraw request"
+      },
+      "coOwnersLabel": "Co-owners",
+      "coOwnerNamePlaceholder": "Co-owner name",
+      "coOwnerNameRequired": "Each co-owner needs a name.",
+      "addCoOwnerButton": "Add co-owner",
+      "docsLabel": "Documents",
+      "existingDocsLabel": "Existing documents",
+      "noExistingDocs": "This property has no existing documents.",
+      "docKept": "Kept",
+      "docDropped": "Removed",
+      "newDocsLabel": "Add new documents",
+      "addDocButton": "Add document",
+      "docIncomplete": "Select a document type and attach a file.",
+      "errors": {
+        "loadFailed": "Could not load property requests.",
+        "submitFailed": "Could not send the request. Please try again.",
+        "withdrawFailed": "Could not withdraw the request.",
+        "propertyNotFound": "The requested property was not found."
       }
     }
   },
@@ -929,6 +984,52 @@
       "receiptPhoto": "Payment receipt",
       "signature": "Signature",
       "docsNone": "No documents uploaded."
+    },
+    "propertyRequests": {
+      "title": "Property Requests",
+      "subtitle": "Review member requests to add, edit, or delete properties",
+      "statusLabels": {
+        "all": "All",
+        "pending": "Pending",
+        "approved": "Approved",
+        "cancelled": "Cancelled"
+      },
+      "actions": {
+        "add": "Add",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "tableHeaders": {
+        "reference": "Reference",
+        "member": "Member",
+        "action": "Action",
+        "property": "Property",
+        "status": "Status",
+        "date": "Submitted",
+        "actions": "Actions"
+      },
+      "approveButton": "Approve",
+      "cancelButton": "Cancel",
+      "cancelReasonLabel": "Cancel reason",
+      "deleteRequestNote": "This member requested deletion of this property.",
+      "approveModal": {
+        "title": "Approve request",
+        "messageSuffix": "will be applied to the member's records.",
+        "confirmLabel": "Approve"
+      },
+      "cancelModal": {
+        "title": "Cancel request",
+        "messageSuffix": "will be cancelled.",
+        "confirmLabel": "Cancel request",
+        "placeholder": "Enter the reason for cancelling..."
+      },
+      "noRequests": "No property requests found",
+      "errors": {
+        "loadFailed": "Could not load list.",
+        "approveFailed": "Could not approve the request.",
+        "cancelFailed": "Could not cancel the request.",
+        "reasonRequired": "A reason is required to cancel."
+      }
     }
   },
   "registration": {

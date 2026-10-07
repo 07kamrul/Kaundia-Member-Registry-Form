@@ -110,6 +110,20 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'property-requests/new',
+            loadComponent: () =>
+              import(
+                './features/member/pages/property-request-form/property-request-form.component'
+              ).then((m) => m.PropertyRequestFormComponent),
+          },
+          {
+            path: 'property-requests/:propertyId/edit',
+            loadComponent: () =>
+              import(
+                './features/member/pages/property-request-form/property-request-form.component'
+              ).then((m) => m.PropertyRequestFormComponent),
+          },
+          {
             path: 'picnic-payment',
             // Member payers only (MEMBER_PAYMENT_ROLES): fee managers are
             // redirected to Fee Settings, never shown the payment form.
@@ -158,6 +172,14 @@ export const routes: Routes = [
               import('./features/management/pages/submission-detail/submission-detail.component').then(
                 (m) => m.SubmissionDetailComponent,
               ),
+          },
+          {
+            path: 'property-requests',
+            canActivate: [permissionGuard(['property.review'])],
+            loadComponent: () =>
+              import(
+                './features/management/pages/property-requests/property-requests.component'
+              ).then((m) => m.PropertyRequestsComponent),
           },
           {
             path: 'members',
