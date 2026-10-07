@@ -47,6 +47,10 @@ export class MembersListComponent implements OnInit {
     });
   }
 
+  statusLabel(status: string): string {
+    return this.translate.instant(`admin.statusLabels.${status}`);
+  }
+
   contributionLabel(member: Member): string {
     if (member.status !== 'approved') return '—';
     return member.dueInstallments > 0

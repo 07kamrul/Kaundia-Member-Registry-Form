@@ -417,6 +417,12 @@
       "collapse": "সংকুচিত করুন",
       "expand": "বিস্তারিত"
     },
+    "statusLabels": {
+      "all": "সব",
+      "pending": "বিচারাধীন",
+      "approved": "অনুমোদিত",
+      "rejected": "প্রত্যাখ্যাত"
+    },
     "roleManagement": {
       "title": "ভূমিকা ও অনুমতি ব্যবস্থাপনা",
       "subtitle": "প্রতিটি ভূমিকার জন্য অনুমতি নির্ধারণ করুন",
@@ -465,7 +471,8 @@
         "name": "নাম",
         "mobile": "মোবাইল",
         "status": "অবস্থা",
-        "contributionStatus": "চাঁদার অবস্থা"
+        "contributionStatus": "চাঁদার অবস্থা",
+        "actions": "কার্যক্রম"
       },
       "viewContributionsTitle": "চাঁদার অবস্থা দেখুন",
       "deleteMemberTitle": "সদস্য মুছে ফেলুন",
@@ -658,12 +665,6 @@
       "noSubmissions": "কোনো আবেদন পাওয়া যায়নি",
       "errors": {
         "loadFailed": "তালিকা লোড করা যায়নি।"
-      },
-      "statusLabels": {
-        "all": "সব",
-        "pending": "বিচারাধীন",
-        "approved": "অনুমোদিত",
-        "rejected": "প্রত্যাখ্যাত"
       }
     },
     "dashboard": {

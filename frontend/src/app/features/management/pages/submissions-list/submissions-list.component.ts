@@ -54,7 +54,7 @@ export class SubmissionsListComponent implements OnInit {
   }
 
   statusLabel(status: SubmissionStatus | ''): string {
-    return this.translate.instant(`admin.submissionsList.statusLabels.${status || 'all'}`);
+    return this.translate.instant(`admin.statusLabels.${status || 'all'}`);
   }
 
   onFilterChange(event: Event): void {

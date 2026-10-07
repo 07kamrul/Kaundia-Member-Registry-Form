@@ -1,7 +1,12 @@
 <div>
   <div class="page-header">
     <div>
-      <h1 class="page-title">{{ 'admin.membersList.title' | translate }}</h1>
+      <h1 class="page-title">
+        {{ 'admin.membersList.title' | translate }}
+        @if (!loading && !error && members.length > 0) {
+          <span class="status-badge status-approved" style="margin-left: 0.5rem">{{ members.length }}</span>
+        }
+      </h1>
       <p class="page-subtitle">{{ 'admin.membersList.subtitle' | translate }}</p>
     </div>
   </div>
@@ -12,7 +17,7 @@
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
     <div class="data-table-wrap">
-      <table class="data-table">
+      <table class="data-table data-table-cards">
         <thead>
           <tr>
             <th>{{ 'admin.membersList.tableHeaders.memberId' | translate }}</th>
@@ -26,20 +31,20 @@
         <tbody>
           @for (m of members; track m.id) {
             <tr>
-              <td>{{ m.memberId ?? '—' }}</td>
-              <td>{{ m.fullName }}</td>
-              <td>{{ m.mobile }}</td>
-              <td>
+              <td [attr.data-label]="'admin.membersList.tableHeaders.memberId' | translate">{{ m.memberId ?? '—' }}</td>
+              <td [attr.data-label]="'admin.membersList.tableHeaders.name' | translate">{{ m.fullName }}</td>
+              <td [attr.data-label]="'admin.membersList.tableHeaders.mobile' | translate">{{ m.mobile }}</td>
+              <td [attr.data-label]="'admin.membersList.tableHeaders.status' | translate">
                 <span
                   class="status-badge"
                   [class.status-pending]="m.status === 'pending'"
                   [class.status-approved]="m.status === 'approved'"
                   [class.status-rejected]="m.status === 'rejected'"
                 >
-                  {{ m.status }}
+                  {{ statusLabel(m.status) }}
                 </span>
               </td>
-              <td>
+              <td [attr.data-label]="'admin.membersList.tableHeaders.contributionStatus' | translate">
                 @if (m.status === 'approved') {
                   <span class="status-badge" [class.status-paid]="m.dueInstallments === 0" [class.status-due]="m.dueInstallments > 0">
                     {{ contributionLabel(m) }}
@@ -48,8 +53,8 @@
                   {{ contributionLabel(m) }}
                 }
               </td>
-              <td>
-                <div class="flex-row-wrap">
+              <td [attr.data-label]="'admin.membersList.actions' | translate">
+                <div class="flex-row-wrap row-actions">
                   <button
                     type="button"
                     class="btn btn-secondary btn-sm btn-icon"

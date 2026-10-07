@@ -1404,6 +1404,18 @@ a {
     width: 100%;
     justify-content: center;
   }
+
+  /* Action-icon cells keep their buttons on one row instead of stretching
+     each icon button to full card width. */
+  .data-table-cards tbody td:last-child .row-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  .data-table-cards tbody td:last-child .row-actions .btn {
+    width: auto;
+  }
 }
 
 .status-badge {

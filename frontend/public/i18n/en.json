@@ -417,6 +417,12 @@
       "collapse": "Collapse",
       "expand": "Expand"
     },
+    "statusLabels": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
     "roleManagement": {
       "title": "Role & Permission Management",
       "subtitle": "Set permissions for each role",
@@ -465,7 +471,8 @@
         "name": "Name",
         "mobile": "Mobile",
         "status": "Status",
-        "contributionStatus": "Contribution Status"
+        "contributionStatus": "Contribution Status",
+        "actions": "Actions"
       },
       "viewContributionsTitle": "View contribution status",
       "deleteMemberTitle": "Delete member",
@@ -658,12 +665,6 @@
       "noSubmissions": "No applications found",
       "errors": {
         "loadFailed": "Could not load list."
-      },
-      "statusLabels": {
-        "all": "All",
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected"
       }
     },
     "dashboard": {
