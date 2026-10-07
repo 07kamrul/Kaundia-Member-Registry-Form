@@ -134,6 +134,13 @@ export const routes: Routes = [
               ).then((m) => m.PicnicPaymentComponent),
           },
           {
+            path: 'cost-shares',
+            loadComponent: () =>
+              import('./features/member/pages/cost-shares/cost-shares.component').then(
+                (m) => m.CostSharesComponent,
+              ),
+          },
+          {
             path: 'change-password',
             loadComponent: () =>
               import('./features/member/pages/change-password/change-password.component').then(
@@ -212,6 +219,14 @@ export const routes: Routes = [
               import('./features/management/pages/fee-settings/fee-settings.component').then(
                 (m) => m.FeeSettingsComponent,
               ),
+          },
+          {
+            path: 'society-costs',
+            canActivate: [permissionGuard(['manage_costs'])],
+            loadComponent: () =>
+              import(
+                './features/management/pages/society-costs/society-costs.component'
+              ).then((m) => m.SocietyCostsComponent),
           },
           {
             path: 'config-lists',

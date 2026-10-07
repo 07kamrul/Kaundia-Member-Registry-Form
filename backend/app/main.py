@@ -9,7 +9,7 @@ from sqlalchemy import text
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from app.api.routes import admin, auth, member, notices, public, rbac, submissions
+from app.api.routes import admin, auth, member, notices, public, rbac, society_costs, submissions
 from app.core.config import get_settings
 from app.db.session import engine
 from app.services.storage import UploadStaticFiles, check_upload_root
@@ -101,6 +101,7 @@ app.include_router(notices.router, prefix=api_router_prefix)
 app.include_router(member.router, prefix=api_router_prefix)
 app.include_router(rbac.router, prefix=api_router_prefix)
 app.include_router(public.router, prefix=api_router_prefix)
+app.include_router(society_costs.router, prefix=api_router_prefix)
 
 app.mount("/uploads", UploadStaticFiles(), name="uploads")
 

@@ -76,6 +76,7 @@ PERMISSION_CATALOG: tuple[PermissionDef, ...] = (
     PermissionDef("request.create", "request", "create", "Create a request"),
     # Notices & events
     PermissionDef("manage_notices", "notice", "manage", "Manage notices and events"),
+    PermissionDef("manage_costs", "cost", "manage", "Record society costs, split them among members and collect payments"),
     PermissionDef("notice.view", "notice", "view", "View notices"),
     PermissionDef("event.view", "event", "view", "View events"),
     # Reports
@@ -103,6 +104,7 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "report.view",
         "manage_fee_settings",
         "manage_system_config",
+        "manage_costs",
     ),
     AdminRole.ADMINISTRATOR.value: (
         "member.register",

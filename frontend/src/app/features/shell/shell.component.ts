@@ -40,6 +40,12 @@ const NAV_ITEMS: NavItem[] = [
     requiredPermission: ['profile.view_own'],
     requiredRoles: MEMBER_PAYMENT_ROLES,
   },
+  {
+    labelKey: 'nav.costShares',
+    route: '/cost-shares',
+    icon: 'coin',
+    requiredPermission: ['profile.view_own'],
+  },
   { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
   // Published notices/events - the same public pages logged-out visitors read.
   {
@@ -95,6 +101,12 @@ const NAV_ITEMS: NavItem[] = [
     route: '/fee-settings',
     icon: 'coin',
     requiredPermission: ['manage_fee_settings'],
+  },
+  {
+    labelKey: 'nav.societyCosts',
+    route: '/society-costs',
+    icon: 'coin',
+    requiredPermission: ['manage_costs'],
   },
   {
     labelKey: 'nav.auditLog',

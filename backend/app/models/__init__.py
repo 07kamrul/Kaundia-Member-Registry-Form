@@ -14,6 +14,7 @@ from app.models.picnic_payment import PicnicPayment
 from app.models.member_id_sequence import MemberIdSequence
 from app.models.password_reset import PasswordResetToken
 from app.models.property_change_request import PropertyChangeRequest
+from app.models.society_cost import SocietyCost, CostSplit, CostSplitShare
 
 __all__ = [
     "Member",
@@ -39,4 +40,7 @@ __all__ = [
     "Permission",
     "UserPermissionOverride",
     "role_permissions",
+    "SocietyCost",
+    "CostSplit",
+    "CostSplitShare",
 ]

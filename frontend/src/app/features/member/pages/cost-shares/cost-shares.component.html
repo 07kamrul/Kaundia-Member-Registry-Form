@@ -1,0 +1,83 @@
+<div class="cost-shares-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'member.costShares.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'member.costShares.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else {
+    @if (hasOutstanding) {
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon stat-icon-due">
+            <app-icon name="alert" [size]="22" />
+          </div>
+          <div>
+            <p class="stat-card-label">{{ 'member.costShares.totalOutstanding' | translate }}</p>
+            <p class="stat-card-value">৳ {{ formatAmount(outstandingTotal) }}</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="data-table-wrap">
+      <table class="data-table data-table-cards">
+        <thead>
+          <tr>
+            <th>{{ 'member.costShares.table.cost' | translate }}</th>
+            <th>{{ 'member.costShares.table.date' | translate }}</th>
+            <th>{{ 'member.costShares.table.due' | translate }}</th>
+            <th>{{ 'member.costShares.table.paid' | translate }}</th>
+            <th>{{ 'member.costShares.table.status' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of shares; track s.id) {
+            <tr>
+              <td [attr.data-label]="'member.costShares.table.cost' | translate">
+                <span class="cost-cell">
+                  <span class="cost-name">{{ s.costTitle }}</span>
+                  @if (s.costCategory) {
+                    <span class="cost-category">{{ s.costCategory }}</span>
+                  }
+                </span>
+              </td>
+              <td [attr.data-label]="'member.costShares.table.date' | translate">
+                {{ s.costIncurredDate | date: 'yyyy-MM-dd' }}
+              </td>
+              <td [attr.data-label]="'member.costShares.table.due' | translate">
+                <span class="amount-cell">৳ {{ formatAmount(s.amountDue) }}</span>
+              </td>
+              <td [attr.data-label]="'member.costShares.table.paid' | translate">
+                ৳ {{ formatAmount(s.amountPaid) }}
+              </td>
+              <td [attr.data-label]="'member.costShares.table.status' | translate">
+                <span
+                  class="status-badge"
+                  [class.status-paid]="s.status === 'paid'"
+                  [class.status-pending]="s.status === 'partial'"
+                  [class.status-due]="s.status === 'unpaid'"
+                >
+                  {{ 'member.costShares.status.' + s.status | translate }}
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="empty-state">
+                <app-icon class="empty-icon" name="check-circle" [size]="34" />
+                <p class="empty-title">{{ 'member.costShares.emptyState' | translate }}</p>
+                <p class="empty-hint">{{ 'member.costShares.emptyHint' | translate }}</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

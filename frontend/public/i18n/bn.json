@@ -57,7 +57,9 @@
     "picnicPayment": "পিকনিক ফি",
     "picnicPayments": "পিকনিক পরিশোধ",
     "moreOptions": "আরও বিকল্প",
-    "propertyRequests": "সম্পত্তি সংক্রান্ত অনুরোধ"
+    "propertyRequests": "সম্পত্তি সংক্রান্ত অনুরোধ",
+    "societyCosts": "সোসাইটি খরচ",
+    "costShares": "খরচের ভাগ"
   },
   "forbidden": {
     "title": "প্রবেশাধিকার নেই",
@@ -337,6 +339,26 @@
       },
       "propertySectionTitle": "সম্পত্তির তথ্য",
       "documentsSectionTitle": "নথিপত্র"
+    },
+    "costShares": {
+      "title": "খরচের ভাগ",
+      "subtitle": "সোসাইটির যেসব খরচ আপনার অ্যাকাউন্টে ভাগ হয়েছে",
+      "totalOutstanding": "মোট বকেয়া",
+      "loadError": "আপনার খরচের ভাগ লোড করা যায়নি। আবার চেষ্টা করুন।",
+      "emptyState": "আপনার কোনো বকেয়া নেই",
+      "emptyHint": "সদস্যদের মধ্যে ভাগ করা খরচ এখানে দেখা যাবে।",
+      "table": {
+        "cost": "খরচ",
+        "date": "তারিখ",
+        "due": "দেয়",
+        "paid": "পরিশোধিত",
+        "status": "অবস্থা"
+      },
+      "status": {
+        "unpaid": "অনাদায়ী",
+        "partial": "আংশিক",
+        "paid": "পরিশোধিত"
+      }
     }
   },
   "auth": {
@@ -786,6 +808,12 @@
       "noPending": "কোনো বিচারাধীন আবেদন নেই",
       "errors": {
         "loadFailed": "আবেদনের তালিকা লোড করা যায়নি।"
+      },
+      "costs": {
+        "title": "এই ত্রৈমাসিকের সোসাইটি খরচ",
+        "viewAll": "সব খরচ দেখুন",
+        "quarterTotal": "এই ত্রৈমাসিকের মোট",
+        "outstanding": "সদস্যদের বকেয়া"
       }
     },
     "notices": {
@@ -1037,6 +1065,105 @@
         "approveFailed": "অনুরোধ অনুমোদন করা যায়নি।",
         "cancelFailed": "অনুরোধ বাতিল করা যায়নি।",
         "reasonRequired": "বাতিল করতে কারণ দিতে হবে।"
+      }
+    },
+    "societyCosts": {
+      "title": "সোসাইটি খরচ",
+      "subtitle": "সোসাইটির প্রতিটি খরচ লিপিবদ্ধ করুন, প্রয়োজনে সদস্যদের মধ্যে ভাগ করুন",
+      "create": "নতুন খরচ",
+      "createTitle": "খরচ লিপিবদ্ধ করুন",
+      "editTitle": "খরচ সম্পাদনা",
+      "edit": "সম্পাদনা",
+      "exportCsv": "CSV এক্সপোর্ট",
+      "splitAction": "ভাগ করুন",
+      "recordPayment": "পেমেন্ট রেকর্ড করুন",
+      "notBilled": "বিল করা হয়নি",
+      "viewReceipt": "রসিদ দেখুন",
+      "emptyState": "এখনো কোনো খরচ লিপিবদ্ধ হয়নি",
+      "summary": {
+        "total": "মোট খরচ",
+        "societyFund": "সোসাইটি ফান্ড থেকে",
+        "outstanding": "সদস্যদের বকেয়া"
+      },
+      "source": {
+        "society_fund": "সোসাইটি ফান্ড",
+        "member_billed": "সদস্যদের কাছে বিল"
+      },
+      "splitMethod": {
+        "equal": "সমান ভাগ",
+        "by_land_quantity": "জমির পরিমাণ অনুযায়ী",
+        "manual": "ম্যানুয়াল"
+      },
+      "shareStatus": {
+        "unpaid": "অনাদায়ী",
+        "partial": "আংশিক",
+        "paid": "পরিশোধিত"
+      },
+      "filters": {
+        "search": "খুঁজুন",
+        "searchPlaceholder": "শিরোনাম দিয়ে খুঁজুন…",
+        "category": "ক্যাটাগরি",
+        "allCategories": "সব ক্যাটাগরি",
+        "source": "পেমেন্ট সোর্স",
+        "allSources": "সব",
+        "billed": "বিলিং অবস্থা",
+        "all": "সব",
+        "billedOnly": "সদস্যদের বিল করা",
+        "unbilledOnly": "বিল করা হয়নি",
+        "dateRange": "তারিখের পরিসর",
+        "reset": "রিসেট"
+      },
+      "table": {
+        "title": "শিরোনাম",
+        "category": "ক্যাটাগরি",
+        "amount": "পরিমাণ",
+        "date": "তারিখ",
+        "source": "সোর্স",
+        "split": "ভাগ"
+      },
+      "form": {
+        "title": "শিরোনাম",
+        "category": "ক্যাটাগরি",
+        "noCategory": "ক্যাটাগরি নেই",
+        "addCategory": "ক্যাটাগরি যোগ + Enter",
+        "amount": "পরিমাণ (৳)",
+        "date": "খরচের তারিখ",
+        "source": "পরিশোধ সূত্র",
+        "receipt": "রসিদ (ছবি/PDF)",
+        "description": "বিবরণ",
+        "notes": "নোট"
+      },
+      "split": {
+        "title": "খরচ ভাগ করুন",
+        "method": "ভাগ করার পদ্ধতি",
+        "summaryLine": "৳{{total}} সক্রিয় সদস্যদের মধ্যে ভাগ হচ্ছে ({{method}})",
+        "confirm": "ভাগ নিশ্চিত করুন",
+        "noMembers": "ভাগ করার মতো কোনো সক্রিয় সদস্য নেই।",
+        "runningTotal": "চলতি মোট",
+        "mismatchWarning": "পরিমাণগুলো খরচের মোটের সাথে মিলছে না। ঠিক করুন, অথবা এভাবেই সেভ করতে ওভাররাইড নিশ্চিত করুন।",
+        "override": "অমিল সত্ত্বেও সেভ করুন"
+      },
+      "payment": {
+        "title": "পেমেন্ট রেকর্ড করুন",
+        "amount": "এখন পরিশোধিত পরিমাণ (৳)",
+        "remaining": "বাকি"
+      },
+      "delete": {
+        "title": "খরচ মুছুন",
+        "message": "খরচ ও তার ভাগ মুছে যাবে। এটি ফিরিয়ে আনা যাবে না।"
+      },
+      "errors": {
+        "loadFailed": "সোসাইটি খরচ লোড করা যায়নি। আবার চেষ্টা করুন।",
+        "saveFailed": "খরচ সেভ করা যায়নি। আবার চেষ্টা করুন।",
+        "receiptUploadFailed": "খরচ সেভ হয়েছে, কিন্তু রসিদ আপলোড ব্যর্থ হয়েছে। সম্পাদনা থেকে আবার চেষ্টা করুন।",
+        "categoryAddFailed": "ক্যাটাগরি যোগ করা যায়নি।",
+        "splitPreviewFailed": "ভাগের প্রিভিউ হিসাব করা যায়নি।",
+        "splitFailed": "ভাগ সেভ করা যায়নি। আবার চেষ্টা করুন।",
+        "paymentFailed": "পেমেন্ট রেকর্ড করা যায়নি। আবার চেষ্টা করুন।",
+        "deleteFailed": "খরচ মুছা যায়নি। এর বিপক্ষে পেমেন্ট রেকর্ড থাকতে পারে।",
+        "titleRequired": "শিরোনাম দিতে হবে।",
+        "amountRequired": "শূন্যের বেশি পরিমাণ লিখুন।",
+        "dateRequired": "খরচের তারিখ দিতে হবে।"
       }
     }
   },

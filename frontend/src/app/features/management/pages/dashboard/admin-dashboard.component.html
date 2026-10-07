@@ -11,6 +11,54 @@
     </div>
   </div>
 
+  @if (canManageCosts) {
+    <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+        <h2 style="margin:0;font-size:1.125rem">{{ 'admin.dashboard.costs.title' | translate }}</h2>
+        <a [routerLink]="['/society-costs']" class="btn btn-secondary btn-sm" style="text-decoration:none">
+          {{ 'admin.dashboard.costs.viewAll' | translate }} <app-icon name="chevron-right" [size]="14" />
+        </a>
+      </div>
+      @if (costSummaryLoading) {
+        <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+      } @else if (costSummary) {
+        <div class="stat-grid" style="margin-top:1rem;margin-bottom:0.5rem">
+          <div class="stat-card">
+            <div class="stat-card-icon stat-icon-count">
+              <app-icon name="coin" [size]="22" />
+            </div>
+            <div>
+              <p class="stat-card-label">{{ 'admin.dashboard.costs.quarterTotal' | translate }}</p>
+              <p class="stat-card-value">৳ {{ formatAmount(costSummary.totalAmount) }}</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon stat-icon-due">
+              <app-icon name="alert" [size]="22" />
+            </div>
+            <div>
+              <p class="stat-card-label">{{ 'admin.dashboard.costs.outstanding' | translate }}</p>
+              <p class="stat-card-value">৳ {{ formatAmount(costSummary.outstandingTotal) }}</p>
+            </div>
+          </div>
+        </div>
+        @if (costSummary.byCategory.length) {
+          <div class="category-bars">
+            @for (row of costSummary.byCategory; track row.category) {
+              <div class="category-bar-row">
+                <span class="category-bar-label">{{ row.category }}</span>
+                <div class="category-bar-track">
+                  <div class="category-bar-fill" [style.width]="categoryBarWidth(row.total)"></div>
+                </div>
+                <span class="category-bar-value">৳ {{ formatCategoryTotal(row.total) }}</span>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+
   @if (loading) {
     <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {

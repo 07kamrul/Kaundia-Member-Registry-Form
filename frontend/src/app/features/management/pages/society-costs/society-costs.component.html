@@ -1,0 +1,515 @@
+<div style="max-width:72rem;margin:0 auto">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.societyCosts.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.societyCosts.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-secondary" (click)="exportCsv()" [disabled]="!costs.length">
+        <app-icon name="doc" [size]="16" /> {{ 'admin.societyCosts.exportCsv' | translate }}
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openCreateForm()">
+        <app-icon name="plus" [size]="16" /> {{ 'admin.societyCosts.create' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (summary) {
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-icon stat-icon-count">
+          <app-icon name="coin" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'admin.societyCosts.summary.total' | translate }}</p>
+          <p class="stat-card-value">৳ {{ formatAmount(summary.totalAmount) }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon stat-icon-paid">
+          <app-icon name="check-circle" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'admin.societyCosts.summary.societyFund' | translate }}</p>
+          <p class="stat-card-value">৳ {{ formatAmount(summary.societyFundTotal) }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon stat-icon-due">
+          <app-icon name="alert" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'admin.societyCosts.summary.outstanding' | translate }}</p>
+          <p class="stat-card-value">৳ {{ formatAmount(summary.outstandingTotal) }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+    <div class="filters-grid">
+      <div class="field">
+        <label for="costSearch">{{ 'admin.societyCosts.filters.search' | translate }}</label>
+        <input
+          id="costSearch"
+          type="text"
+          [(ngModel)]="search"
+          (ngModelChange)="applyFilters()"
+          [placeholder]="'admin.societyCosts.filters.searchPlaceholder' | translate"
+        />
+      </div>
+      <div class="field">
+        <label for="costCategory">{{ 'admin.societyCosts.filters.category' | translate }}</label>
+        <select id="costCategory" [(ngModel)]="categoryFilter" (ngModelChange)="applyFilters()">
+          <option value="">{{ 'admin.societyCosts.filters.allCategories' | translate }}</option>
+          @for (c of categories; track c.id) {
+            <option [value]="c.id">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="costSource">{{ 'admin.societyCosts.filters.source' | translate }}</label>
+        <select id="costSource" [(ngModel)]="sourceFilter" (ngModelChange)="applyFilters()">
+          <option value="">{{ 'admin.societyCosts.filters.allSources' | translate }}</option>
+          <option value="society_fund">{{ 'admin.societyCosts.source.society_fund' | translate }}</option>
+          <option value="member_billed">{{ 'admin.societyCosts.source.member_billed' | translate }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="costBilled">{{ 'admin.societyCosts.filters.billed' | translate }}</label>
+        <select id="costBilled" [(ngModel)]="billedFilter" (ngModelChange)="applyFilters()">
+          <option value="">{{ 'admin.societyCosts.filters.all' | translate }}</option>
+          <option value="true">{{ 'admin.societyCosts.filters.billedOnly' | translate }}</option>
+          <option value="false">{{ 'admin.societyCosts.filters.unbilledOnly' | translate }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>{{ 'admin.societyCosts.filters.dateRange' | translate }}</label>
+        <div style="display:flex;gap:0.5rem">
+          <app-date-picker
+            [value]="dateFrom"
+            (valueChange)="dateFrom = $event; applyFilters()"
+            [max]="dateTo"
+            [clearable]="true"
+          />
+          <app-date-picker
+            [value]="dateTo"
+            (valueChange)="dateTo = $event; applyFilters()"
+            [min]="dateFrom"
+            [clearable]="true"
+          />
+        </div>
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <button type="button" class="btn btn-secondary" (click)="resetFilters()">
+          {{ 'admin.societyCosts.filters.reset' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+  } @else if (error) {
+    <div class="error-box"><p style="margin:0">{{ error }}</p></div>
+  } @else {
+    <div class="data-table-wrap">
+      <table class="data-table data-table-cards">
+        <thead>
+          <tr>
+            <th>{{ 'admin.societyCosts.table.title' | translate }}</th>
+            <th>{{ 'admin.societyCosts.table.category' | translate }}</th>
+            <th>{{ 'admin.societyCosts.table.amount' | translate }}</th>
+            <th>{{ 'admin.societyCosts.table.date' | translate }}</th>
+            <th>{{ 'admin.societyCosts.table.source' | translate }}</th>
+            <th>{{ 'admin.societyCosts.table.split' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of costs; track c.id) {
+            <tr>
+              <td [attr.data-label]="'admin.societyCosts.table.title' | translate">
+                <span class="cost-title-cell">{{ c.title }}</span>
+              </td>
+              <td [attr.data-label]="'admin.societyCosts.table.category' | translate">
+                {{ c.categoryLabel || '—' }}
+              </td>
+              <td [attr.data-label]="'admin.societyCosts.table.amount' | translate">
+                <span class="amount-cell">৳ {{ formatAmount(c.totalAmount) }}</span>
+              </td>
+              <td [attr.data-label]="'admin.societyCosts.table.date' | translate">
+                {{ c.incurredDate | date: 'yyyy-MM-dd' }}
+              </td>
+              <td [attr.data-label]="'admin.societyCosts.table.source' | translate">
+                <span
+                  class="status-badge"
+                  [class.status-approved]="c.paymentSource === 'society_fund'"
+                  [class.status-pending]="c.paymentSource === 'member_billed'"
+                >
+                  {{ 'admin.societyCosts.source.' + c.paymentSource | translate }}
+                </span>
+              </td>
+              <td [attr.data-label]="'admin.societyCosts.table.split' | translate">
+                @if (c.split) {
+                  <button type="button" class="link-button" (click)="toggleExpanded(c.id)">
+                    {{ methodLabel(c.split.splitMethod) }} · {{ c.split.shares.length }}
+                    <app-icon name="chevron-right" [size]="14" />
+                  </button>
+                } @else {
+                  <span class="muted">{{ 'admin.societyCosts.notBilled' | translate }}</span>
+                }
+              </td>
+              <td class="row-actions">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="openEditForm(c)">
+                  {{ 'admin.societyCosts.edit' | translate }}
+                </button>
+                @if (!c.split) {
+                  <button type="button" class="btn btn-primary btn-sm" (click)="openSplitModal(c)">
+                    {{ 'admin.societyCosts.splitAction' | translate }}
+                  </button>
+                }
+                <button type="button" class="btn btn-danger btn-sm" (click)="openDeleteModal(c)">
+                  {{ 'common.delete' | translate }}
+                </button>
+              </td>
+            </tr>
+            @if (expandedId === c.id && c.split) {
+              <tr class="detail-row">
+                <td colspan="7">
+                  <div class="shares-panel">
+                    @if (c.receiptFileUrl) {
+                      <a [href]="c.receiptFileUrl" target="_blank" rel="noopener" class="receipt-link">
+                        <app-icon name="doc" [size]="16" />
+                        {{ 'admin.societyCosts.viewReceipt' | translate }}
+                      </a>
+                    }
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>{{ 'admin.societyCosts.shares.member' | translate }}</th>
+                          <th>{{ 'admin.societyCosts.shares.due' | translate }}</th>
+                          <th>{{ 'admin.societyCosts.shares.paid' | translate }}</th>
+                          <th>{{ 'admin.societyCosts.shares.status' | translate }}</th>
+                          <th>{{ 'admin.societyCosts.shares.receiptNo' | translate }}</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (s of c.split.shares; track s.id) {
+                          <tr>
+                            <td>
+                              {{ s.memberName }}
+                              @if (s.memberDisplayId) {
+                                <span class="muted">({{ s.memberDisplayId }})</span>
+                              }
+                            </td>
+                            <td>৳ {{ formatAmount(s.amountDue) }}</td>
+                            <td>৳ {{ formatAmount(s.amountPaid) }}</td>
+                            <td>
+                              <span
+                                class="status-badge"
+                                [class.status-paid]="s.status === 'paid'"
+                                [class.status-partial]="s.status === 'partial'"
+                                [class.status-due]="s.status === 'unpaid'"
+                              >
+                                {{ statusLabel(s.status) }}
+                              </span>
+                            </td>
+                            <td>{{ s.receiptNo || '—' }}</td>
+                            <td>
+                              @if (s.status !== 'paid') {
+                                <button
+                                  type="button"
+                                  class="btn btn-primary btn-sm"
+                                  (click)="openPaymentModal(s)"
+                                >
+                                  {{ 'admin.societyCosts.recordPayment' | translate }}
+                                </button>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            }
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-state">
+                <app-icon class="empty-icon" name="coin" [size]="34" />
+                <p class="empty-title">{{ 'admin.societyCosts.emptyState' | translate }}</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- Create / edit modal -->
+@if (showFormModal) {
+  <div class="modal-backdrop" (click)="closeFormModal()">
+    <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">
+        {{ (editingCost ? 'admin.societyCosts.editTitle' : 'admin.societyCosts.createTitle') | translate }}
+      </h3>
+      @if (formError) {
+        <div class="error-box"><p style="margin:0">{{ formError }}</p></div>
+      }
+      <div class="form-grid">
+        <div class="field">
+          <label for="costTitle">{{ 'admin.societyCosts.form.title' | translate }} *</label>
+          <input id="costTitle" type="text" [(ngModel)]="formTitle" />
+          @if (formFieldErrors['title']) {
+            <p class="field-error">{{ formFieldErrors['title'] }}</p>
+          }
+        </div>
+        <div class="field">
+          <label for="costFormCategory">{{ 'admin.societyCosts.form.category' | translate }}</label>
+          <div style="display:flex;gap:0.5rem">
+            <select id="costFormCategory" [(ngModel)]="formCategory" style="flex:1">
+              <option value="">{{ 'admin.societyCosts.form.noCategory' | translate }}</option>
+              @for (c of categories; track c.id) {
+                <option [value]="c.id">{{ c.label }}</option>
+              }
+            </select>
+            @if (canManageConfig) {
+              <input
+                type="text"
+                class="inline-add-input"
+                [placeholder]="'admin.societyCosts.form.addCategory' | translate"
+                #newCategoryInput
+                (keyup.enter)="addCategory(newCategoryInput.value); newCategoryInput.value = ''"
+              />
+            }
+          </div>
+        </div>
+        <div class="field">
+          <label for="costAmount">{{ 'admin.societyCosts.form.amount' | translate }} *</label>
+          <input id="costAmount" type="number" min="0.01" step="0.01" [(ngModel)]="formAmount" />
+          @if (formFieldErrors['totalAmount']) {
+            <p class="field-error">{{ formFieldErrors['totalAmount'] }}</p>
+          }
+        </div>
+        <div class="field">
+          <label for="costDate">{{ 'admin.societyCosts.form.date' | translate }} *</label>
+          <input id="costDate" type="date" [(ngModel)]="formDate" />
+          @if (formFieldErrors['incurredDate']) {
+            <p class="field-error">{{ formFieldErrors['incurredDate'] }}</p>
+          }
+        </div>
+        <div class="field">
+          <label>{{ 'admin.societyCosts.form.source' | translate }}</label>
+          <div class="toggle-group">
+            <button
+              type="button"
+              class="toggle-option"
+              [class.active]="formSource === 'society_fund'"
+              (click)="formSource = 'society_fund'"
+            >
+              {{ 'admin.societyCosts.source.society_fund' | translate }}
+            </button>
+            <button
+              type="button"
+              class="toggle-option"
+              [class.active]="formSource === 'member_billed'"
+              (click)="formSource = 'member_billed'"
+            >
+              {{ 'admin.societyCosts.source.member_billed' | translate }}
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="costReceipt">{{ 'admin.societyCosts.form.receipt' | translate }}</label>
+          <input id="costReceipt" type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onReceiptSelected($event)" />
+          @if (receiptPreviewUrl) {
+            <img [src]="receiptPreviewUrl" alt="" class="receipt-preview" />
+          }
+        </div>
+        <div class="field form-grid-full">
+          <label for="costDescription">{{ 'admin.societyCosts.form.description' | translate }}</label>
+          <textarea id="costDescription" rows="2" [(ngModel)]="formDescription"></textarea>
+        </div>
+        <div class="field form-grid-full">
+          <label for="costNotes">{{ 'admin.societyCosts.form.notes' | translate }}</label>
+          <textarea id="costNotes" rows="2" [(ngModel)]="formNotes"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeFormModal()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="button" class="btn btn-primary" [disabled]="saving" (click)="saveCost()">
+          @if (saving) {
+            <span class="spinner"></span>
+          }
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Split modal -->
+@if (showSplitModal && splitCost) {
+  <div class="modal-backdrop" (click)="closeSplitModal()">
+    <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ 'admin.societyCosts.split.title' | translate }} — {{ splitCost.title }}</h3>
+      <p class="modal-message">
+        {{ 'admin.societyCosts.split.summaryLine' | translate: {
+          total: formatAmount(splitCost.totalAmount),
+          method: methodLabel(splitMethod)
+        } }}
+      </p>
+      @if (splitError) {
+        <div class="error-box"><p style="margin:0">{{ splitError }}</p></div>
+      }
+      <div class="field">
+        <label>{{ 'admin.societyCosts.split.method' | translate }}</label>
+        <div class="toggle-group">
+          <button
+            type="button"
+            class="toggle-option"
+            [class.active]="splitMethod === 'equal'"
+            (click)="splitMethod = 'equal'; onSplitMethodChange()"
+          >
+            {{ 'admin.societyCosts.splitMethod.equal' | translate }}
+          </button>
+          <button
+            type="button"
+            class="toggle-option"
+            [class.active]="splitMethod === 'by_land_quantity'"
+            (click)="splitMethod = 'by_land_quantity'; onSplitMethodChange()"
+          >
+            {{ 'admin.societyCosts.splitMethod.by_land_quantity' | translate }}
+          </button>
+          <button
+            type="button"
+            class="toggle-option"
+            [class.active]="splitMethod === 'manual'"
+            (click)="splitMethod = 'manual'; onSplitMethodChange()"
+          >
+            {{ 'admin.societyCosts.splitMethod.manual' | translate }}
+          </button>
+        </div>
+      </div>
+
+      @if (splitLoading) {
+        <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+      } @else if (splitMethod === 'manual') {
+        <div class="manual-split">
+          @for (m of manualAmounts; track m.memberId) {
+            <div class="manual-row">
+              <span>{{ m.memberName }}</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                [ngModel]="m.amount"
+                (ngModelChange)="setManualAmount(m, $event)"
+              />
+            </div>
+          } @empty {
+            <p class="muted">{{ 'admin.societyCosts.split.noMembers' | translate }}</p>
+          }
+          <div class="manual-total" [class.mismatch]="manualMismatch">
+            {{ 'admin.societyCosts.split.runningTotal' | translate }}:
+            ৳ {{ formatAmount(manualTotal) }} / ৳ {{ formatAmount(splitCost.totalAmount) }}
+          </div>
+          @if (manualMismatch) {
+            <div class="error-box">
+              <p style="margin:0">{{ 'admin.societyCosts.split.mismatchWarning' | translate }}</p>
+              <label style="display:flex;gap:0.5rem;margin-top:0.5rem;align-items:center">
+                <input type="checkbox" [(ngModel)]="allowMismatch" />
+                {{ 'admin.societyCosts.split.override' | translate }}
+              </label>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{{ 'admin.societyCosts.shares.member' | translate }}</th>
+                <th>{{ 'admin.societyCosts.shares.due' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of splitPreview; track row.memberId) {
+                <tr>
+                  <td>{{ row.memberName }}</td>
+                  <td>৳ {{ formatAmount(row.amountDue) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeSplitModal()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="splitSaving || (splitMethod === 'manual' && manualMismatch && !allowMismatch)"
+          (click)="confirmSplit()"
+        >
+          @if (splitSaving) {
+            <span class="spinner"></span>
+          }
+          {{ 'admin.societyCosts.split.confirm' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Payment modal -->
+@if (showPaymentModal && paymentShare) {
+  <div class="modal-backdrop" (click)="closePaymentModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ 'admin.societyCosts.payment.title' | translate }}</h3>
+      <p class="modal-message">
+        {{ paymentShare.memberName }} — ৳ {{ formatAmount(paymentShare.amountDue - paymentShare.amountPaid) }}
+        {{ 'admin.societyCosts.payment.remaining' | translate }}
+      </p>
+      @if (paymentError) {
+        <div class="error-box"><p style="margin:0">{{ paymentError }}</p></div>
+      }
+      <div class="field">
+        <label for="paymentAmount">{{ 'admin.societyCosts.payment.amount' | translate }}</label>
+        <input id="paymentAmount" type="number" min="0" step="0.01" [(ngModel)]="paymentAmount" />
+      </div>
+      <div class="field">
+        <label for="paymentReceipt">{{ 'admin.societyCosts.shares.receiptNo' | translate }}</label>
+        <input id="paymentReceipt" type="text" [(ngModel)]="paymentReceiptNo" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closePaymentModal()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="button" class="btn btn-primary" (click)="savePayment()">
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<app-confirm-modal
+  [open]="showDeleteModal"
+  [title]="'admin.societyCosts.delete.title' | translate"
+  [message]="'admin.societyCosts.delete.message' | translate"
+  [confirmLabel]="'common.delete' | translate"
+  [danger]="true"
+  [loading]="false"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()"
+></app-confirm-modal>

@@ -57,7 +57,9 @@
     "picnicPayment": "Picnic Fee",
     "picnicPayments": "Picnic Payments",
     "moreOptions": "More options",
-    "propertyRequests": "Property Requests"
+    "propertyRequests": "Property Requests",
+    "societyCosts": "Society Costs",
+    "costShares": "Cost Shares"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -337,6 +339,26 @@
       },
       "propertySectionTitle": "Property details",
       "documentsSectionTitle": "Documents"
+    },
+    "costShares": {
+      "title": "Cost Shares",
+      "subtitle": "Costs the society split to your account",
+      "totalOutstanding": "Total outstanding",
+      "loadError": "Could not load your cost shares. Please try again.",
+      "emptyState": "You have no outstanding dues",
+      "emptyHint": "Costs split among members will appear here.",
+      "table": {
+        "cost": "Cost",
+        "date": "Date",
+        "due": "Due",
+        "paid": "Paid",
+        "status": "Status"
+      },
+      "status": {
+        "unpaid": "Unpaid",
+        "partial": "Partial",
+        "paid": "Paid"
+      }
     }
   },
   "auth": {
@@ -786,6 +808,12 @@
       "noPending": "No pending applications",
       "errors": {
         "loadFailed": "Could not load application list."
+      },
+      "costs": {
+        "title": "Society costs this quarter",
+        "viewAll": "View all costs",
+        "quarterTotal": "This quarter's total",
+        "outstanding": "Outstanding member dues"
       }
     },
     "notices": {
@@ -1037,6 +1065,105 @@
         "approveFailed": "Could not approve the request.",
         "cancelFailed": "Could not cancel the request.",
         "reasonRequired": "A reason is required to cancel."
+      }
+    },
+    "societyCosts": {
+      "title": "Society Costs",
+      "subtitle": "Record every society expense, optionally split it among members",
+      "create": "New Cost",
+      "createTitle": "Record a society cost",
+      "editTitle": "Edit cost",
+      "edit": "Edit",
+      "exportCsv": "Export CSV",
+      "splitAction": "Split",
+      "recordPayment": "Record payment",
+      "notBilled": "Not billed",
+      "viewReceipt": "View receipt",
+      "emptyState": "No costs recorded yet",
+      "summary": {
+        "total": "Total costs",
+        "societyFund": "Paid from society fund",
+        "outstanding": "Outstanding member dues"
+      },
+      "source": {
+        "society_fund": "Society fund",
+        "member_billed": "Member billed"
+      },
+      "splitMethod": {
+        "equal": "Equal split",
+        "by_land_quantity": "By land quantity",
+        "manual": "Manual"
+      },
+      "shareStatus": {
+        "unpaid": "Unpaid",
+        "partial": "Partial",
+        "paid": "Paid"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search by title…",
+        "category": "Category",
+        "allCategories": "All categories",
+        "source": "Payment source",
+        "allSources": "All sources",
+        "billed": "Billing status",
+        "all": "All",
+        "billedOnly": "Billed to members",
+        "unbilledOnly": "Not billed",
+        "dateRange": "Date range",
+        "reset": "Reset"
+      },
+      "table": {
+        "title": "Title",
+        "category": "Category",
+        "amount": "Amount",
+        "date": "Date",
+        "source": "Source",
+        "split": "Split"
+      },
+      "form": {
+        "title": "Title",
+        "category": "Category",
+        "noCategory": "No category",
+        "addCategory": "Add category + Enter",
+        "amount": "Amount (৳)",
+        "date": "Incurred date",
+        "source": "Paid from",
+        "receipt": "Receipt (image/PDF)",
+        "description": "Description",
+        "notes": "Notes"
+      },
+      "split": {
+        "title": "Split cost",
+        "method": "Split method",
+        "summaryLine": "Splitting ৳{{total}} across active members ({{method}})",
+        "confirm": "Confirm split",
+        "noMembers": "No active members to split across.",
+        "runningTotal": "Running total",
+        "mismatchWarning": "The amounts do not add up to the cost total. Adjust them, or confirm the override to save anyway.",
+        "override": "Save anyway with mismatched total"
+      },
+      "payment": {
+        "title": "Record payment",
+        "amount": "Amount paid now (৳)",
+        "remaining": "remaining"
+      },
+      "delete": {
+        "title": "Delete cost",
+        "message": "This will delete the cost and its split. This cannot be undone."
+      },
+      "errors": {
+        "loadFailed": "Could not load society costs. Please try again.",
+        "saveFailed": "Could not save the cost. Please try again.",
+        "receiptUploadFailed": "The cost was saved, but the receipt upload failed. Try uploading it again from Edit.",
+        "categoryAddFailed": "Could not add the category.",
+        "splitPreviewFailed": "Could not compute the split preview.",
+        "splitFailed": "Could not save the split. Please try again.",
+        "paymentFailed": "Could not record the payment. Please try again.",
+        "deleteFailed": "Could not delete the cost. It may already have payments recorded.",
+        "titleRequired": "A title is required.",
+        "amountRequired": "Enter an amount greater than zero.",
+        "dateRequired": "The incurred date is required."
       }
     }
   },
