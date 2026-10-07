@@ -69,11 +69,11 @@
   "welcome": "Welcome, {{name}}",
   "brand": {
     "name": "Uttar Kaundia Society",
-    "org": "Uttar Kaundia Housing Owners' Welfare Council"
+    "org": "Uttar Kaundia Abashon Malik Kalyan Society"
   },
   "footer": {
-    "prototypeNotice": "© 2026 Uttar Kaundia Housing Owners' Welfare Council. Developed by Anshin Tech.",
-    "publicNotice": "This is a member management portal. © 2026 Uttar Kaundia Housing Owners' Welfare Council. Developed by Anshin Tech."
+    "prototypeNotice": "© 2026 Uttar Kaundia Abashon Malik Kalyan Society. Developed by Anshin Tech.",
+    "publicNotice": "This is a member management portal. © 2026 Uttar Kaundia Abashon Malik Kalyan Society. Developed by Anshin Tech."
   },
   "home": {
     "hero": {
@@ -98,7 +98,7 @@
   },
   "notices": {
     "title": "Notices",
-    "subtitle": "Announcements from the Uttar Kaundia Housing Owners' Welfare Council",
+    "subtitle": "Announcements from the Uttar Kaundia Abashon Malik Kalyan Society",
     "empty": "No notices have been published yet.",
     "backToList": "All notices",
     "notFound": "This notice is no longer available.",
@@ -363,7 +363,7 @@
   },
   "auth": {
     "login": {
-      "logoAlt": "Uttar Kaundia Housing Owners' Welfare Council Logo",
+      "logoAlt": "Uttar Kaundia Abashon Malik Kalyan Society Logo",
       "title": "Log In",
       "subtitle": "Enter as a member or administrator",
       "identifierLabel": "Username / Email / Member ID",
@@ -1361,7 +1361,7 @@
     },
     "header": {
       "logoAlt": "Organization logo",
-      "orgName": "Uttar Kaundia Housing Owners Welfare Council",
+      "orgName": "Uttar Kaundia Abashon Malik Kalyan Society",
       "orgSubtitle": "(A united non-political housing organization for all land, house, and flat owners)",
       "orgLocation": "Uttar Kaundia, Savar, Dhaka. | Established: 2026",
       "formBadge": "Member Registration & Ownership Information Form",
@@ -1371,7 +1371,7 @@
     },
     "declaration": {
       "title": "Declaration",
-      "text": "I pledge to abide by the constitution, rules, discipline, and decisions of the Uttar Kaundia Housing Owners Welfare Council, and I will not participate in any activity contrary to the organization's purpose and interests. I will responsibly cooperate with the organization's decisions regarding members' rights, property security, mutual cooperation, social welfare, and local development. The above information is correct to the best of my knowledge and belief.",
+      "text": "I pledge to abide by the constitution, rules, discipline, and decisions of the Uttar Kaundia Abashon Malik Kalyan Society, and I will not participate in any activity contrary to the organization's purpose and interests. I will responsibly cooperate with the organization's decisions regarding members' rights, property security, mutual cooperation, social welfare, and local development. The above information is correct to the best of my knowledge and belief.",
       "consentLabel": "I agree to all the terms and conditions.",
       "consentRequired": "Consent to the declaration is required"
     },
@@ -1464,7 +1464,7 @@
     "button": "ID Card",
     "title": "Member ID Card",
     "societyName": "Uttar Kaundia Society",
-    "societyOrg": "Uttar Kaundia Housing Owners' Welfare Council",
+    "societyOrg": "Uttar Kaundia Abashon Malik Kalyan Society",
     "cardTitleEn": "Member ID Card",
     "footer": "Member ID Card · 2026",
     "verify": "Verifiable via QR code",
@@ -1482,7 +1482,7 @@
     "sectionMembership": "Membership",
     "issuedOn": "Issued on",
     "receiptNo": "Receipt No.",
-    "terms": "This card is the property of Uttar Kaundia Housing Owners' Welfare Council. It must be shown on request and returned upon termination of membership. Report loss to the authority immediately.",
+    "terms": "This card is the property of Uttar Kaundia Abashon Malik Kalyan Society. It must be shown on request and returned upon termination of membership. Report loss to the authority immediately.",
     "authority": "Authority",
     "download": "Download Card (PNG)",
     "preparing": "Preparing...",
