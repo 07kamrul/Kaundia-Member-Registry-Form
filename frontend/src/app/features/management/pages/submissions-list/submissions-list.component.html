@@ -1,16 +1,29 @@
 <div>
   <div class="page-header">
     <div>
-      <h1 class="page-title">{{ 'admin.submissionsList.title' | translate }}</h1>
+      <h1 class="page-title">
+        {{ 'admin.submissionsList.title' | translate }}
+        @if (!loading && !error && submissions.length > 0) {
+          <span
+            class="status-badge"
+            [class.status-pending]="statusFilter === 'pending'"
+            [class.status-approved]="statusFilter === 'approved'"
+            [class.status-rejected]="statusFilter === 'rejected'"
+            style="margin-left: 0.5rem"
+          >
+            {{ submissions.length }}
+          </span>
+        }
+      </h1>
       <p class="page-subtitle">{{ 'admin.submissionsList.subtitle' | translate }}</p>
     </div>
   </div>
 
-  <div class="field filter-field">
+  <div class="field filter-field submissions-filter">
     <label>{{ 'admin.submissionsList.filterLabel' | translate }}</label>
     <select [value]="statusFilter" (change)="onFilterChange($event)">
       @for (s of statuses; track s) {
-        <option [value]="s">{{ s || ('admin.submissionsList.allOption' | translate) }}</option>
+        <option [value]="s">{{ s ? statusLabel(s) : ('admin.submissionsList.allOption' | translate) }}</option>
       }
     </select>
   </div>
@@ -21,9 +34,10 @@
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
     <div class="data-table-wrap">
-      <table class="data-table">
+      <table class="data-table data-table-cards">
         <thead>
           <tr>
+            <th>{{ 'admin.submissionsList.tableHeaders.reference' | translate }}</th>
             <th>{{ 'admin.submissionsList.tableHeaders.name' | translate }}</th>
             <th>{{ 'admin.submissionsList.tableHeaders.mobile' | translate }}</th>
             <th>{{ 'admin.submissionsList.tableHeaders.status' | translate }}</th>
@@ -34,27 +48,32 @@
         <tbody>
           @for (s of submissions; track s.id) {
             <tr>
-              <td>{{ s.fullName }}</td>
-              <td>{{ s.mobile }}</td>
-              <td>
+              <td [attr.data-label]="'admin.submissionsList.tableHeaders.reference' | translate">{{ referenceFor(s) }}</td>
+              <td [attr.data-label]="'admin.submissionsList.tableHeaders.name' | translate">{{ s.fullName }}</td>
+              <td [attr.data-label]="'admin.submissionsList.tableHeaders.mobile' | translate">{{ s.mobile }}</td>
+              <td [attr.data-label]="'admin.submissionsList.tableHeaders.status' | translate">
                 <span
                   class="status-badge"
                   [class.status-pending]="s.status === 'pending'"
                   [class.status-approved]="s.status === 'approved'"
                   [class.status-rejected]="s.status === 'rejected'"
                 >
-                  {{ s.status }}
+                  {{ statusLabel(s.status) }}
                 </span>
               </td>
-              <td>{{ s.createdAt }}</td>
-              <td>
-                <a [routerLink]="['/submissions', s.id]" class="btn-icon table-link">
+              <td [attr.data-label]="'admin.submissionsList.tableHeaders.date' | translate">{{ s.createdAt | date: 'yyyy-MM-dd' }}</td>
+              <td [attr.data-label]="'admin.submissionsList.detailsLink' | translate">
+                <a
+                  [routerLink]="['/submissions', s.id]"
+                  class="btn btn-primary btn-sm"
+                  style="text-decoration:none"
+                >
                   {{ 'admin.submissionsList.detailsLink' | translate }} <app-icon name="chevron-right" [size]="16" />
                 </a>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="5" class="empty-state">{{ 'admin.submissionsList.noSubmissions' | translate }}</td></tr>
+            <tr><td colspan="6" class="empty-state">{{ 'admin.submissionsList.noSubmissions' | translate }}</td></tr>
           }
         </tbody>
       </table>

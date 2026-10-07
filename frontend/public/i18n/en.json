@@ -648,6 +648,7 @@
       "filterLabel": "Filter by Status",
       "allOption": "All",
       "tableHeaders": {
+        "reference": "Reference",
         "name": "Name",
         "mobile": "Mobile",
         "status": "Status",
@@ -657,6 +658,12 @@
       "noSubmissions": "No applications found",
       "errors": {
         "loadFailed": "Could not load list."
+      },
+      "statusLabels": {
+        "all": "All",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
       }
     },
     "dashboard": {

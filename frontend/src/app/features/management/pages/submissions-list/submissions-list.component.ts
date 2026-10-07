@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -9,7 +10,7 @@ import { IconComponent } from '../../../../shared/icon/icon.component';
   selector: 'app-submissions-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, IconComponent, TranslatePipe],
+  imports: [RouterLink, IconComponent, DatePipe, TranslatePipe],
   templateUrl: './submissions-list.component.html',
 })
 export class SubmissionsListComponent implements OnInit {
@@ -45,6 +46,15 @@ export class SubmissionsListComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  referenceFor(submission: SubmissionSummary): string {
+    const year = new Date(submission.createdAt).getFullYear() || new Date().getFullYear();
+    return `REF-${year}-${submission.id.padStart(4, '0')}`;
+  }
+
+  statusLabel(status: SubmissionStatus | ''): string {
+    return this.translate.instant(`admin.submissionsList.statusLabels.${status || 'all'}`);
   }
 
   onFilterChange(event: Event): void {

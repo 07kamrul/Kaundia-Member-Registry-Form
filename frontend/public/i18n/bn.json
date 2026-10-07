@@ -648,6 +648,7 @@
       "filterLabel": "স্ট্যাটাস অনুযায়ী ফিল্টার",
       "allOption": "সব",
       "tableHeaders": {
+        "reference": "রেফারেন্স",
         "name": "নাম",
         "mobile": "মোবাইল",
         "status": "স্ট্যাটাস",
@@ -657,6 +658,12 @@
       "noSubmissions": "কোনো আবেদন পাওয়া যায়নি",
       "errors": {
         "loadFailed": "তালিকা লোড করা যায়নি।"
+      },
+      "statusLabels": {
+        "all": "সব",
+        "pending": "বিচারাধীন",
+        "approved": "অনুমোদিত",
+        "rejected": "প্রত্যাখ্যাত"
       }
     },
     "dashboard": {
