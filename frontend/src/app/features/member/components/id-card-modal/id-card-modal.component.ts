@@ -18,8 +18,8 @@ import { IconComponent } from '../../../../shared/icon/icon.component';
  * looks like the physical card it stands in for, on screen and in the PNG.
  */
 const CARD = {
-  width: 640,
-  height: 1010,
+  width: 1010,
+  height: 640,
   green900: '#122718',
   green700: '#1f3d2a',
   gold: '#a9791e',
@@ -31,10 +31,10 @@ const CARD = {
   line: '#d8d2c2',
 };
 
-/** Logical card scale used for the exported PNG (2x = ~1300 dpi at CR80). */
-const EXPORT_SCALE = 2;
-
 const FONT = '"Hind Siliguri", "Noto Sans Bengali", sans-serif';
+
+/** Logical card scale used for the exported PNG (2x ≈ print quality at CR80). */
+const EXPORT_SCALE = 2;
 
 @Component({
   selector: 'app-id-card-modal',
@@ -201,191 +201,220 @@ export class IdCardModalComponent implements OnInit {
     logoImg: HTMLImageElement | null,
   ): void {
     const W = CARD.width;
-    this.roundRect(ctx, 0, 0, W, CARD.height, 24);
+    const H = CARD.height;
+    this.roundRect(ctx, 0, 0, W, H, 24);
     ctx.fillStyle = CARD.white;
     ctx.fill();
     ctx.save();
     ctx.clip();
 
     // Header band with society identity
-    const header = ctx.createLinearGradient(0, 0, W, 175);
+    const header = ctx.createLinearGradient(0, 0, W, 110);
     header.addColorStop(0, CARD.green900);
     header.addColorStop(1, CARD.green700);
     ctx.fillStyle = header;
-    ctx.fillRect(0, 0, W, 175);
+    ctx.fillRect(0, 0, W, 110);
     ctx.fillStyle = CARD.gold;
-    ctx.fillRect(0, 175, W, 5);
+    ctx.fillRect(0, 110, W, 4);
 
     ctx.beginPath();
-    ctx.arc(88, 84, 46, 0, Math.PI * 2);
+    ctx.arc(72, 57, 36, 0, Math.PI * 2);
     ctx.fillStyle = CARD.cream;
     ctx.fill();
     if (logoImg) {
-      this.drawCover(ctx, logoImg, 52, 48, 72, 72);
+      this.drawCover(ctx, logoImg, 42, 27, 60, 60);
     } else {
-      this.drawLogoFallback(ctx, 88, 84);
+      this.drawLogoFallback(ctx, 72, 57);
     }
 
     ctx.fillStyle = CARD.cream;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.font = `700 30px ${FONT}`;
-    ctx.fillText(this.instant('idCard.societyName'), 156, 76);
-    ctx.font = `500 17px ${FONT}`;
+    ctx.font = `700 26px ${FONT}`;
+    ctx.fillText(this.instant('idCard.societyName'), 126, 50);
+    ctx.font = `500 15px ${FONT}`;
     ctx.fillStyle = CARD.goldLight;
-    this.wrapText(ctx, this.instant('idCard.societyOrg'), 156, 106, W - 186, 24, 2);
+    this.wrapText(ctx, this.instant('idCard.societyOrg'), 126, 78, 560, 20, 2);
 
-    ctx.font = `600 15px ${FONT}`;
-    ctx.fillStyle = 'rgba(247, 243, 232, 0.75)';
-    ctx.textAlign = 'right';
-    ctx.fillText(this.instant('idCard.cardTitleEn').toUpperCase(), W - 36, 158);
+    // "MEMBER ID CARD" pill, right side of the header
+    ctx.font = `700 15px ${FONT}`;
+    const kind = this.instant('idCard.cardTitleEn').toUpperCase();
+    const kindW = ctx.measureText(kind).width + 28;
+    this.roundRect(ctx, W - 40 - kindW, 40, kindW, 34, 17);
+    ctx.strokeStyle = 'rgba(230, 207, 148, 0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(247, 243, 232, 0.85)';
+    ctx.textAlign = 'center';
+    ctx.fillText(kind, W - 40 - kindW / 2, 62);
     ctx.textAlign = 'left';
 
-    // Photo overlapping the header
-    const photo = { x: W / 2 - 95, y: 118, w: 190, h: 228 };
+    // Membership status under the header, right-aligned
+    if (profile.status) {
+      ctx.font = `700 16px ${FONT}`;
+      ctx.fillStyle = CARD.green700;
+      ctx.textAlign = 'right';
+      ctx.fillText(this.instant('idCard.status.' + profile.status.toLowerCase(), profile.status), W - 44, 152);
+      ctx.textAlign = 'left';
+    }
+
+    // Photo, left column
+    const photo = { x: 48, y: 152, w: 204, h: 252 };
     ctx.save();
-    ctx.shadowColor = 'rgba(18, 39, 24, 0.35)';
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetY = 6;
-    this.roundRect(ctx, photo.x, photo.y, photo.w, photo.h, 14);
+    ctx.shadowColor = 'rgba(18, 39, 24, 0.3)';
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 5;
+    this.roundRect(ctx, photo.x, photo.y, photo.w, photo.h, 12);
     ctx.fillStyle = CARD.white;
     ctx.fill();
     ctx.restore();
 
     ctx.save();
     ctx.beginPath();
-    this.roundRectPath(ctx, photo.x + 6, photo.y + 6, photo.w - 12, photo.h - 12, 10);
+    this.roundRectPath(ctx, photo.x + 5, photo.y + 5, photo.w - 10, photo.h - 10, 9);
     ctx.clip();
     if (photoImg) {
-      this.drawCover(ctx, photoImg, photo.x + 6, photo.y + 6, photo.w - 12, photo.h - 12);
+      this.drawCover(ctx, photoImg, photo.x + 5, photo.y + 5, photo.w - 10, photo.h - 10);
     } else {
       ctx.fillStyle = CARD.cream;
-      ctx.fillRect(photo.x + 6, photo.y + 6, photo.w - 12, photo.h - 12);
+      ctx.fillRect(photo.x + 5, photo.y + 5, photo.w - 10, photo.h - 10);
       ctx.fillStyle = CARD.green700;
-      ctx.font = `700 84px ${FONT}`;
+      ctx.font = `700 92px ${FONT}`;
       ctx.textAlign = 'center';
-      ctx.fillText(this.initialOf(profile.fullName), W / 2, photo.y + 138);
+      ctx.fillText(this.initialOf(profile.fullName), photo.x + photo.w / 2, photo.y + 158);
       ctx.textAlign = 'left';
     }
     ctx.restore();
 
     // Name + member id chip
-    ctx.textAlign = 'center';
     ctx.fillStyle = CARD.green900;
     ctx.font = `700 30px ${FONT}`;
-    const nameY = photo.y + photo.h + 52;
-    this.wrapText(ctx, profile.fullName, W / 2, nameY, W - 120, 36, 2);
+    this.wrapText(ctx, profile.fullName, 296, 200, W - 296 - 300, 36, 2);
 
-    const chipY = nameY + 22;
-    const chipText = profile.memberId;
-    ctx.font = `700 20px ${FONT}`;
-    const chipW = ctx.measureText(chipText).width + 44;
-    this.roundRect(ctx, W / 2 - chipW / 2, chipY, chipW, 36, 18);
+    const chipY = 216;
+    ctx.font = `700 18px ${FONT}`;
+    const chipW = ctx.measureText(profile.memberId).width + 36;
+    this.roundRect(ctx, 296, chipY, chipW, 34, 17);
     ctx.fillStyle = CARD.green900;
     ctx.fill();
     ctx.fillStyle = CARD.goldLight;
-    ctx.fillText(chipText, W / 2, chipY + 25);
+    ctx.fillText(profile.memberId, 296 + 18, chipY + 24);
 
-    // Detail rows
-    const rows: { label: string; value: string }[] = [
-      { label: this.instant('idCard.dob'), value: this.formatDate(profile.dob) },
-      { label: this.instant('idCard.mobile'), value: profile.mobile || '—' },
-      { label: this.instant('idCard.nid'), value: profile.nid || '—' },
-      { label: this.instant('idCard.address'), value: this.shortAddress(profile) },
+    // Detail grid: 2 columns, gold accent bars
+    const cells: { x: number; y: number; label: string; value: string; wide?: boolean }[] = [
+      { x: 296, y: 296, label: this.instant('idCard.dob'), value: this.formatDate(profile.dob) },
+      { x: 660, y: 296, label: this.instant('idCard.mobile'), value: profile.mobile || '—' },
+      { x: 296, y: 372, label: this.instant('idCard.nid'), value: profile.nid || '—' },
+      { x: 660, y: 372, label: this.instant('idCard.address'), value: this.shortAddress(profile), wide: true },
     ];
-    let y = chipY + 100;
-    ctx.textAlign = 'left';
-    for (const row of rows) {
-      ctx.font = `600 15px ${FONT}`;
+    for (const cell of cells) {
       ctx.fillStyle = CARD.gold;
-      ctx.fillText(row.label.toUpperCase(), 56, y);
-      ctx.font = `500 19px ${FONT}`;
+      ctx.fillRect(cell.x, cell.y - 13, 4, 40);
+      ctx.font = `700 14px ${FONT}`;
+      ctx.fillStyle = CARD.gold;
+      ctx.fillText(cell.label.toUpperCase(), cell.x + 14, cell.y);
+      ctx.font = `600 19px ${FONT}`;
       ctx.fillStyle = CARD.ink;
-      y = this.wrapText(ctx, row.value, 56, y + 26, W - 112, 26, 2) + 24;
+      const maxW = cell.wide ? W - 48 - cell.x - 14 : 320;
+      this.wrapText(ctx, cell.value, cell.x + 14, cell.y + 26, maxW, 24, 2);
     }
 
     // QR + verify caption
-    const qrSize = 116;
-    const qrX = 56;
-    const qrY = CARD.height - 232;
+    const qrSize = 112;
+    const qrX = W - 48 - qrSize;
+    const qrY = H - 48 - qrSize;
     ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
     ctx.font = `500 14px ${FONT}`;
     ctx.fillStyle = CARD.inkSoft;
-    ctx.fillText(this.instant('idCard.verify'), qrX + qrSize + 14, qrY + qrSize / 2 + 4);
+    ctx.textAlign = 'right';
+    ctx.fillText(this.instant('idCard.verify'), qrX - 14, qrY + qrSize / 2 + 4);
+    ctx.textAlign = 'left';
 
-    // Status ribbon
-    if (profile.status) {
-      ctx.textAlign = 'right';
-      ctx.font = `700 15px ${FONT}`;
-      ctx.fillStyle = CARD.green700;
-      ctx.fillText(this.instant('idCard.status.' + profile.status.toLowerCase(), profile.status), W - 56, qrY + qrSize / 2 + 4);
-      ctx.textAlign = 'left';
-    }
+    this.drawWatermark(ctx, W / 2, 330);
 
     // Footer band
     ctx.fillStyle = CARD.green900;
-    ctx.fillRect(0, CARD.height - 52, W, 52);
+    ctx.fillRect(0, H - 44, W, 44);
     ctx.fillStyle = CARD.gold;
-    ctx.fillRect(0, CARD.height - 52, W, 3);
+    ctx.fillRect(0, H - 44, W, 3);
     ctx.fillStyle = CARD.cream;
-    ctx.font = `600 16px ${FONT}`;
+    ctx.font = `600 15px ${FONT}`;
     ctx.textAlign = 'center';
-    ctx.fillText(this.instant('idCard.footer'), W / 2, CARD.height - 18);
+    ctx.fillText(this.instant('idCard.footer'), W / 2, H - 15);
     ctx.textAlign = 'left';
 
     ctx.restore();
   }
 
+  /** Faint diagonal society name across the card body. */
+  private drawWatermark(ctx: CanvasRenderingContext2D, cx: number, cy: number): void {
+    ctx.save();
+    ctx.globalAlpha = 0.05;
+    ctx.fillStyle = CARD.green900;
+    ctx.font = `700 60px ${FONT}`;
+    ctx.textAlign = 'center';
+    ctx.translate(cx, cy);
+    ctx.rotate(-0.22);
+    ctx.fillText(this.instant('idCard.societyName'), 0, 0);
+    ctx.restore();
+  }
+
   private drawBack(ctx: CanvasRenderingContext2D, profile: MemberProfile, signatureImg: HTMLImageElement | null): void {
     const W = CARD.width;
-    this.roundRect(ctx, 0, 0, W, CARD.height, 24);
+    const H = CARD.height;
+    this.roundRect(ctx, 0, 0, W, H, 24);
     ctx.fillStyle = CARD.white;
     ctx.fill();
     ctx.save();
     ctx.clip();
 
-    const header = ctx.createLinearGradient(0, 0, W, 96);
+    const header = ctx.createLinearGradient(0, 0, W, 90);
     header.addColorStop(0, CARD.green900);
     header.addColorStop(1, CARD.green700);
     ctx.fillStyle = header;
-    ctx.fillRect(0, 0, W, 96);
+    ctx.fillRect(0, 0, W, 90);
     ctx.fillStyle = CARD.gold;
-    ctx.fillRect(0, 96, W, 4);
+    ctx.fillRect(0, 90, W, 4);
     ctx.fillStyle = CARD.cream;
     ctx.font = `700 22px ${FONT}`;
     ctx.textAlign = 'left';
-    ctx.fillText(this.instant('idCard.backTitle'), 48, 58);
-    ctx.font = `600 15px ${FONT}`;
+    ctx.fillText(this.instant('idCard.backTitle'), 48, 54);
+    ctx.font = `600 16px ${FONT}`;
     ctx.fillStyle = CARD.goldLight;
     ctx.textAlign = 'right';
-    ctx.fillText(profile.memberId, W - 48, 58);
+    ctx.fillText(profile.memberId, W - 48, 54);
     ctx.textAlign = 'left';
 
-    let y = 160;
-    const section = (title: string, lines: { label: string; value: string }[]) => {
-      ctx.font = `700 16px ${FONT}`;
+    const colL = { x: 48, right: 468 };
+    const colR = { x: 560, right: W - 48 };
+    let yL = 136;
+    let yR = 136;
+
+    const section = (x: number, right: number, atY: number, title: string, lines: { label: string; value: string }[]): number => {
+      let y = atY;
+      ctx.font = `700 15px ${FONT}`;
       ctx.fillStyle = CARD.gold;
-      ctx.fillText(title, 48, y);
-      y += 30;
+      ctx.fillText(title, x, y);
+      y += 26;
       for (const line of lines) {
-        ctx.font = `500 17px ${FONT}`;
+        ctx.font = `500 16px ${FONT}`;
         ctx.fillStyle = CARD.inkSoft;
-        ctx.fillText(line.label, 48, y);
+        ctx.fillText(line.label, x, y);
         ctx.textAlign = 'right';
         ctx.fillStyle = CARD.ink;
-        ctx.font = `600 17px ${FONT}`;
-        this.wrapText(ctx, line.value, W - 48, y, W / 2 - 60, 24, 2);
+        ctx.font = `600 16px ${FONT}`;
+        this.wrapText(ctx, line.value, right, y, right - x - 150, 22, 1);
         ctx.textAlign = 'left';
-        y += 30;
+        y += 27;
       }
-      y += 18;
+      return y + 16;
     };
 
-    section(this.instant('idCard.sectionPersonal'), [
+    yL = section(colL.x, colL.right, yL, this.instant('idCard.sectionPersonal'), [
       { label: this.instant('idCard.father'), value: profile.fatherOrHusband || '—' },
       { label: this.instant('idCard.nid'), value: profile.nid || '—' },
     ]);
-    section(this.instant('idCard.sectionContact'), [
+    yL = section(colL.x, colL.right, yL, this.instant('idCard.sectionContact'), [
       { label: this.instant('idCard.mobile'), value: profile.mobile || '—' },
       {
         label: this.instant('idCard.emergency'),
@@ -394,51 +423,56 @@ export class IdCardModalComponent implements OnInit {
           : '—',
       },
     ]);
-    section(this.instant('idCard.sectionMembership'), [
+    yR = section(colR.x, colR.right, yR, this.instant('idCard.sectionMembership'), [
       { label: this.instant('idCard.issuedOn'), value: this.formatDate(profile.submissionDate) },
       { label: this.instant('idCard.receiptNo'), value: profile.receiptNo || '—' },
     ]);
 
-    // Full address block
-    ctx.font = `700 16px ${FONT}`;
+    // Full address, right column
+    ctx.font = `700 15px ${FONT}`;
     ctx.fillStyle = CARD.gold;
-    ctx.fillText(this.instant('idCard.address'), 48, y);
-    y += 30;
-    ctx.font = `500 17px ${FONT}`;
+    ctx.fillText(this.instant('idCard.address'), colR.x, yR);
+    yR += 26;
+    ctx.font = `500 16px ${FONT}`;
     ctx.fillStyle = CARD.ink;
-    y = this.wrapText(ctx, this.fullAddress(profile), 48, y, W - 96, 25, 4);
-    y += 26;
+    yR = this.wrapText(ctx, this.fullAddress(profile), colR.x, yR, colR.right - colR.x, 23, 3);
+    yR += 16;
 
-    // Terms
-    ctx.font = `400 14px ${FONT}`;
+    // Terms, bottom-left
+    ctx.font = `400 13px ${FONT}`;
     ctx.fillStyle = CARD.inkSoft;
-    y = this.wrapText(ctx, this.instant('idCard.terms'), 48, y, W - 96, 21, 4);
+    this.wrapText(ctx, this.instant('idCard.terms'), colL.x, H - 158, colL.right - colL.x, 19, 4);
 
-    // Signature + authority line
-    const sigLineY = CARD.height - 130;
+    this.drawWatermark(ctx, W / 2, 320);
+
+    // Signature + authority line, bottom-right
+    const sigLineY = H - 116;
     if (signatureImg) {
-      const sigW = 150;
-      const sigH = Math.min(64, (signatureImg.height / signatureImg.width) * sigW);
-      ctx.drawImage(signatureImg, W - 232, sigLineY - sigH - 8, sigW, sigH);
+      const sigW = 140;
+      const sigH = Math.min(58, (signatureImg.height / signatureImg.width) * sigW);
+      ctx.drawImage(signatureImg, W - 238, sigLineY - sigH - 6, sigW, sigH);
     }
     ctx.strokeStyle = CARD.line;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(W - 252, sigLineY);
+    ctx.moveTo(W - 258, sigLineY);
     ctx.lineTo(W - 48, sigLineY);
     ctx.stroke();
-    ctx.font = `500 15px ${FONT}`;
+    ctx.font = `500 14px ${FONT}`;
     ctx.fillStyle = CARD.inkSoft;
     ctx.textAlign = 'center';
-    ctx.fillText(this.instant('idCard.authority'), W - 150, sigLineY + 26);
+    ctx.fillText(this.instant('idCard.authority'), W - 153, sigLineY + 24);
+    ctx.textAlign = 'left';
 
+    // Footer band
     ctx.fillStyle = CARD.green900;
-    ctx.fillRect(0, CARD.height - 52, W, 52);
+    ctx.fillRect(0, H - 44, W, 44);
     ctx.fillStyle = CARD.gold;
-    ctx.fillRect(0, CARD.height - 52, W, 3);
+    ctx.fillRect(0, H - 44, W, 3);
     ctx.fillStyle = CARD.cream;
-    ctx.font = `600 16px ${FONT}`;
-    ctx.fillText(this.instant('idCard.footer'), W / 2, CARD.height - 18);
+    ctx.font = `600 15px ${FONT}`;
+    ctx.textAlign = 'center';
+    ctx.fillText(this.instant('idCard.footer'), W / 2, H - 15);
     ctx.textAlign = 'left';
 
     ctx.restore();
