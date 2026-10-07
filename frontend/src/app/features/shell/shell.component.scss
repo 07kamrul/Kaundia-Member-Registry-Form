@@ -33,6 +33,101 @@
   white-space: nowrap;
 }
 
+/* 3-dot overflow menu — holds theme / language / logout actions so the app
+   bar stays uncluttered at every width. */
+.topbar-user-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.topbar-more-btn[aria-expanded='true'] {
+  background: var(--gray-50);
+  color: var(--emerald-700);
+}
+
+.topbar-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+}
+
+.topbar-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  right: 0;
+  z-index: 45;
+  min-width: 13.5rem;
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px -10px rgba(15, 23, 42, 0.28);
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  animation: topbar-menu-in 0.14s ease;
+  transform-origin: top right;
+}
+
+@keyframes topbar-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.topbar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--gray-700);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.topbar-menu-item:hover {
+  background: var(--surface-2);
+  color: var(--emerald-800);
+}
+
+.topbar-menu-lang {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--emerald-800);
+}
+
+.topbar-menu-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 0.3rem 0.4rem;
+}
+
+.topbar-menu-item-danger {
+  color: #b3423a;
+}
+
+.topbar-menu-item-danger:hover {
+  background: rgba(179, 66, 58, 0.08);
+  color: #9a322b;
+}
+
 .app-body {
   flex: 1;
   display: flex;
@@ -180,10 +275,6 @@
   }
 
   :host .topbar-welcome {
-    display: none;
-  }
-
-  :host .btn-label {
     display: none;
   }
 }

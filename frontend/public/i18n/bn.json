@@ -55,7 +55,8 @@
     "noticesManagement": "নোটিশ ব্যবস্থাপনা",
     "eventsManagement": "অনুষ্ঠান ব্যবস্থাপনা",
     "picnicPayment": "পিকনিক ফি",
-    "picnicPayments": "পিকনিক পরিশোধ"
+    "picnicPayments": "পিকনিক পরিশোধ",
+    "moreOptions": "আরও বিকল্প"
   },
   "forbidden": {
     "title": "প্রবেশাধিকার নেই",

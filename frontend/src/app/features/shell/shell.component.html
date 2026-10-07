@@ -22,27 +22,57 @@
         @if (welcomeName) {
           <span class="topbar-welcome">{{ 'welcome' | translate: { name: welcomeName } }}</span>
         }
-        <button type="button" class="btn btn-ghost btn-sm btn-icon" (click)="logout()">
-          <app-icon name="logout" [size]="16" /> <span class="btn-label">{{ 'nav.logout' | translate }}</span>
-        </button>
-        <button
-          type="button"
-          class="btn btn-ghost btn-sm"
-          (click)="theme.toggle()"
-          [attr.aria-label]="(theme.theme() === 'dark' ? 'nav.lightTheme' : 'nav.darkTheme') | translate"
-          [title]="'nav.changeTheme' | translate"
-        >
-          <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="16" />
-        </button>
-        <button
-          type="button"
-          class="btn btn-ghost btn-sm"
-          (click)="lang.toggle()"
-          [attr.aria-label]="(lang.lang() === 'bn' ? 'common.switchToEnglish' : 'common.switchToBangla') | translate"
-          [title]="(lang.lang() === 'bn' ? 'common.switchToEnglish' : 'common.switchToBangla') | translate"
-        >
-          {{ lang.lang() === 'bn' ? 'EN' : 'অ-A' }}
-        </button>
+        <div class="topbar-user-menu">
+          <button
+            type="button"
+            class="topbar-menu-btn topbar-more-btn"
+            (click)="toggleUserMenu()"
+            [attr.aria-expanded]="isUserMenuOpen"
+            aria-haspopup="menu"
+            [attr.aria-label]="'nav.moreOptions' | translate"
+            [title]="'nav.moreOptions' | translate"
+          >
+            <app-icon name="more-vertical" [size]="20" />
+          </button>
+
+          @if (isUserMenuOpen) {
+            <div class="topbar-menu-backdrop" (click)="closeUserMenu()"></div>
+            <div class="topbar-menu-panel" role="menu">
+              <button
+                type="button"
+                class="topbar-menu-item"
+                role="menuitem"
+                (click)="theme.toggle(); closeUserMenu()"
+              >
+                <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="18" />
+                <span>{{
+                  (theme.theme() === 'dark' ? 'nav.lightTheme' : 'nav.darkTheme') | translate
+                }}</span>
+              </button>
+              <button
+                type="button"
+                class="topbar-menu-item"
+                role="menuitem"
+                (click)="lang.toggle(); closeUserMenu()"
+              >
+                <span class="topbar-menu-lang">{{ lang.lang() === 'bn' ? 'EN' : 'অ-A' }}</span>
+                <span>{{
+                  (lang.lang() === 'bn' ? 'common.switchToEnglish' : 'common.switchToBangla') | translate
+                }}</span>
+              </button>
+              <div class="topbar-menu-divider" role="separator"></div>
+              <button
+                type="button"
+                class="topbar-menu-item topbar-menu-item-danger"
+                role="menuitem"
+                (click)="logout()"
+              >
+                <app-icon name="logout" [size]="18" />
+                <span>{{ 'nav.logout' | translate }}</span>
+              </button>
+            </div>
+          }
+        </div>
       </div>
     </div>
     <div class="gold-rule"></div>

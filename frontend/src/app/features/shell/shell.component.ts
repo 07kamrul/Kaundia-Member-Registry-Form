@@ -121,8 +121,10 @@ const NAV_ITEMS: NavItem[] = [
   imports: [RouterLink, RouterLinkActive, RouterOutlet, IconComponent, TranslatePipe],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
+  host: { '(document:keydown.escape)': 'closeUserMenu()' },
 })
 export class ShellComponent implements OnInit {
+  isUserMenuOpen = false;
   readonly sidebarOpen = signal(false);
   readonly displayName = signal('');
   readonly memberId = signal('');
@@ -194,7 +196,16 @@ export class ShellComponent implements OnInit {
     this.sidebarOpen.set(false);
   }
 
+  toggleUserMenu(): void {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+  }
+
+  closeUserMenu(): void {
+    this.isUserMenuOpen = false;
+  }
+
   logout(): void {
+    this.closeUserMenu();
     this.auth.logout();
     this.router.navigate(['/login']);
   }

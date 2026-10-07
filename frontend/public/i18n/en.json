@@ -55,7 +55,8 @@
     "noticesManagement": "Manage Notices",
     "eventsManagement": "Manage Events",
     "picnicPayment": "Picnic Fee",
-    "picnicPayments": "Picnic Payments"
+    "picnicPayments": "Picnic Payments",
+    "moreOptions": "More options"
   },
   "forbidden": {
     "title": "Access Denied",
