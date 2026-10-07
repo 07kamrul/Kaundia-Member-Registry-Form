@@ -36,6 +36,7 @@ from app.schemas.member import (
     MemberSummary,
     RejectRequest,
     RejectResponse,
+    ResetPasswordResponse,
 )
 from app.schemas.picnic_payment import PicnicPaymentOut
 from app.core.config import get_settings
@@ -506,6 +507,67 @@ async def delete_member(
     await db.execute(delete(Installment).where(Installment.member_id == member_id))
     await db.execute(delete(Member).where(Member.id == member_id))
     await db.commit()
+
+
+@router.post(
+    "/members/{member_id}/reset-password", response_model=ResetPasswordResponse
+)
+async def reset_member_password(
+    member_id: int,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(require_permission("member.manage")),
+) -> ResetPasswordResponse:
+    """Issue a new temporary password for the member's login and email it.
+
+    Only members with a credential (i.e. approved ones) can be reset - a
+    pending or rejected applicant has no login to reset.
+    """
+    member = await _get_member_or_404(db, member_id, eager=False)
+    credential_result = await db.execute(
+        select(MemberCredential).where(MemberCredential.member_id == member.id)
+    )
+    credential = credential_result.scalar_one_or_none()
+    if credential is None or not member.member_id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This member has no login yet. Reset is available after approval.",
+        )
+
+    temp_password = generate_temp_password()
+    credential.password_hash = await hash_password_async(temp_password)
+    credential.must_change_password = True
+    record_audit(
+        db,
+        actor_admin_id=admin.id,
+        action="member.reset_password",
+        entity_type="member",
+        entity_id=str(member.id),
+        detail=f"password reset for {member.member_id}",
+    )
+    await db.commit()
+
+    login_url = get_settings().frontend_base_url.rstrip("/") + "/login"
+    email_sent = await send_email(
+        to=member.email,
+        subject="Kaundia Member Registry - Password Reset",
+        html_body=(
+            f"<p>Dear {html.escape(member.full_name)},</p>"
+            "<p>Your account password has been reset by an administrator. "
+            "Please use the new credentials below to sign in.</p>"
+            f"<p>Member ID: <b>{member.member_id}</b><br/>"
+            f"Username: <b>{html.escape(credential.username)}</b><br/>"
+            f"New temporary password: <b>{temp_password}</b></p>"
+            f"<p>Website: <a href=\"{login_url}\">{login_url}</a></p>"
+            "<p>For your security, you will be asked to change this password "
+            "after signing in. Please do not share this email with anyone.</p>"
+            "<hr/>"
+            "<p style=\"color:#6b7280;font-size:12px\">This is an automated "
+            "message from the উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ "
+            "member registry. If you did not expect this reset, please "
+            "contact the association office.</p>"
+        ),
+    )
+    return ResetPasswordResponse(member_id=member.member_id, email_sent=email_sent)
 
 
 @router.patch("/installments/{installment_id}", response_model=InstallmentOut)

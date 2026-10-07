@@ -484,9 +484,18 @@
         "messageSuffix": "'s member record will be permanently deleted. This action cannot be undone.",
         "confirmLabel": "Delete"
       },
+            "resetPasswordTitle": "Reset password and email new credentials",
+      "resetModal": {
+        "title": "Reset Password?",
+        "messageSuffix": "'s login password will be reset, and the new password will be emailed to the member's registered email address.",
+        "confirmLabel": "Reset & Email",
+        "successMessage": "Password reset successfully. A new password has been emailed to {{name}}'s registered email address.",
+        "successNoEmail": "Password reset successfully, but the email could not be sent. Please share the new password with the member directly."
+      },
       "errors": {
         "loadFailed": "Could not load member list.",
-        "deleteFailed": "Could not delete member."
+        "deleteFailed": "Could not delete member.",
+        "resetFailed": "Could not reset the password."
       },
       "viewDetailsTitle": "View member details"
     },

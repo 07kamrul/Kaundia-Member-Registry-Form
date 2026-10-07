@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str = "http://localhost:9091"
 
+    # Public website link included in member emails (login page etc.)
+    frontend_base_url: str = "http://localhost:9091"
+
     @model_validator(mode="after")
     def _reject_insecure_secret_in_production(self) -> "Settings":
         if self.app_env == "production" and self.jwt_secret_key == _INSECURE_JWT_DEFAULT:

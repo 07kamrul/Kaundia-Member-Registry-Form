@@ -16,6 +16,9 @@
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
+    @if (success) {
+      <div class="success-box"><p style="margin:0">{{ success }}</p></div>
+    }
     <div class="data-table-wrap">
       <table class="data-table data-table-cards">
         <thead>
@@ -67,6 +70,15 @@
                   @if (auth.hasPermission('member.manage')) {
                     <button
                       type="button"
+                      class="btn btn-secondary btn-sm btn-icon"
+                      [title]="'admin.membersList.resetPasswordTitle' | translate"
+                      [attr.aria-label]="'admin.membersList.resetPasswordTitle' | translate"
+                      (click)="askResetPassword(m)"
+                    >
+                      <app-icon name="key" [size]="16" />
+                    </button>
+                    <button
+                      type="button"
                       class="btn btn-danger btn-sm btn-icon"
                       [title]="'admin.membersList.deleteMemberTitle' | translate"
                       (click)="askDelete(m)"
@@ -100,5 +112,15 @@
     [confirmDisabled]="deleting"
     (confirm)="confirmDelete()"
     (cancel)="deleteTarget = null"
+  ></app-confirm-modal>
+
+  <app-confirm-modal
+    [open]="!!resetTarget"
+    [title]="'admin.membersList.resetModal.title' | translate"
+    [message]="resetTarget ? resetTarget.fullName + ' ' + ('admin.membersList.resetModal.messageSuffix' | translate) : ''"
+    [confirmLabel]="'admin.membersList.resetModal.confirmLabel' | translate"
+    [confirmDisabled]="resetting"
+    (confirm)="confirmResetPassword()"
+    (cancel)="resetTarget = null"
   ></app-confirm-modal>
 </div>

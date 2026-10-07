@@ -167,6 +167,11 @@ class ApproveResponse(BaseModel):
     email_sent: bool
 
 
+class ResetPasswordResponse(BaseModel):
+    member_id: str
+    email_sent: bool
+
+
 class MemberAuditEntry(BaseModel):
     id: int
     action: str

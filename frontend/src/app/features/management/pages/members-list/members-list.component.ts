@@ -21,6 +21,9 @@ export class MembersListComponent implements OnInit {
   error = '';
   deleteTarget: Member | null = null;
   deleting = false;
+  resetTarget: Member | null = null;
+  resetting = false;
+  success = '';
   viewMemberId: string | null = null;
 
   constructor(
@@ -73,6 +76,7 @@ export class MembersListComponent implements OnInit {
 
   askDelete(member: Member): void {
     if (!this.auth.hasPermission('member.manage')) return;
+    this.success = '';
     this.deleteTarget = member;
   }
 
@@ -90,6 +94,36 @@ export class MembersListComponent implements OnInit {
         this.error = this.translate.instant('admin.membersList.errors.deleteFailed');
         this.deleteTarget = null;
         this.deleting = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  askResetPassword(member: Member): void {
+    if (!this.auth.hasPermission('member.manage')) return;
+    this.success = '';
+    this.resetTarget = member;
+  }
+
+  confirmResetPassword(): void {
+    if (!this.resetTarget) return;
+    this.resetting = true;
+    this.adminService.resetMemberPassword(this.resetTarget.id).subscribe({
+      next: ({ email_sent }) => {
+        this.success = this.translate.instant(
+          email_sent
+            ? 'admin.membersList.resetModal.successMessage'
+            : 'admin.membersList.resetModal.successNoEmail',
+          { name: this.resetTarget?.fullName },
+        );
+        this.resetTarget = null;
+        this.resetting = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.error = this.translate.instant('admin.membersList.errors.resetFailed');
+        this.resetTarget = null;
+        this.resetting = false;
         this.cdr.markForCheck();
       },
     });

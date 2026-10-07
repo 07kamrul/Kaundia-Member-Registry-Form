@@ -477,6 +477,13 @@ export class AdminService {
     return this.http.delete<void>(`${this.base}/members/${memberId}`);
   }
 
+  resetMemberPassword(memberId: string): Observable<{ member_id: string; email_sent: boolean }> {
+    return this.http.post<{ member_id: string; email_sent: boolean }>(
+      `${this.base}/members/${memberId}/reset-password`,
+      {},
+    );
+  }
+
   addInstallment(
     memberId: string,
     installment: { year: number; month: number; amount: number },

@@ -34,7 +34,8 @@ export type IconName =
   | 'alert'
   | 'chevron-down'
   | 'check-circle'
-  | 'more-vertical';
+  | 'more-vertical'
+  | 'key';
 
 const ICON_PATHS: Record<IconName, string> = {
   dashboard:
@@ -78,6 +79,7 @@ const ICON_PATHS: Record<IconName, string> = {
   mail:
     '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
   'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2"/><path d="M15 5l3.5 3.5M17.5 2.5 21 6"/>',
   'check-circle': '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
   'more-vertical':
     '<circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/>',
