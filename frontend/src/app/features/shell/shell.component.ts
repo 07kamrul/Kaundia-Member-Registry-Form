@@ -46,6 +46,13 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'coin',
     requiredPermission: ['profile.view_own'],
   },
+  // Fund transparency: every authenticated account (members and committee
+  // alike) can read the society's approved ledger.
+  {
+    labelKey: 'nav.fundTransparency',
+    route: '/fund-transparency',
+    icon: 'chart',
+  },
   { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
   // Published notices/events - the same public pages logged-out visitors read.
   {
@@ -107,6 +114,12 @@ const NAV_ITEMS: NavItem[] = [
     route: '/society-costs',
     icon: 'coin',
     requiredPermission: ['manage_costs'],
+  },
+  {
+    labelKey: 'nav.financeManagement',
+    route: '/finance-management',
+    icon: 'chart',
+    requiredPermission: ['manage_finance'],
   },
   {
     labelKey: 'nav.auditLog',

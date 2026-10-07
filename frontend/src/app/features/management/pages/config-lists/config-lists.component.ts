@@ -7,7 +7,14 @@ import { IconComponent } from '../../../../shared/icon/icon.component';
 import type { ConfigListItem } from '../../../../core/models/admin.model';
 
 const MANAGE_SYSTEM_CONFIG = 'manage_system_config';
-const CATEGORIES = ['property_type', 'document_type', 'notice_category', 'event_category'];
+const CATEGORIES = [
+  'property_type',
+  'document_type',
+  'notice_category',
+  'event_category',
+  'finance_income_category',
+  'finance_expense_category',
+];
 
 @Component({
   selector: 'app-config-lists',

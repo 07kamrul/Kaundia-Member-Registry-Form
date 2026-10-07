@@ -1,6 +1,6 @@
 # Kaundia Member Registry — Frontend
 
-Angular (standalone components, TypeScript strict mode) frontend for the উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ member registry. This replaces the previous Next.js app at the repo root. The backend (FastAPI/Node/etc, TBD) is being built separately in `backend/` and is not part of this project.
+Angular (standalone components, TypeScript strict mode) frontend for the উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি member registry. This replaces the previous Next.js app at the repo root. The backend (FastAPI/Node/etc, TBD) is being built separately in `backend/` and is not part of this project.
 
 ## Setup
 

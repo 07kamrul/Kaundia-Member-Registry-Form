@@ -280,7 +280,7 @@ async def _notify_rejection(db: AsyncSession, member: Member) -> bool:
     sent = await send_with_retries(
         lambda: send_email(
             to=member.email,
-            subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - আবেদনের আপডেট",
+            subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি - আবেদনের আপডেট",
             html_body=_rejection_email_body(member.full_name, member.rejection_reason or ""),
         )
     )
@@ -538,7 +538,7 @@ async def approve_property_request(
     # how member approvals treat email failures.
     await send_email(
         to=member.email,
-        subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - Property Request Approved",
+        subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি - Property Request Approved",
         html_body=_property_decision_email_body(member.full_name, request.action, None),
     )
     return _request_admin_out(request, member)
@@ -576,7 +576,7 @@ async def cancel_property_request(
     email_sent = await send_with_retries(
         lambda: send_email(
             to=member.email,
-            subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ - Property Request Update",
+            subject="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি - Property Request Update",
             html_body=_property_decision_email_body(
                 member.full_name, request.action, request.cancel_reason
             ),
@@ -825,7 +825,7 @@ async def reset_member_password(
             "after signing in. Please do not share this email with anyone.</p>"
             "<hr/>"
             "<p style=\"color:#6b7280;font-size:12px\">This is an automated "
-            "message from the উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ "
+            "message from the উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি "
             "member registry. If you did not expect this reset, please "
             "contact the association office.</p>"
         ),

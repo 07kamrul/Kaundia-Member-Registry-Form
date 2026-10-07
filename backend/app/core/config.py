@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_sender_email: str = Field(default="no-reply@example.com", validation_alias="SMTP_SENDER_EMAIL")
     smtp_sender_name: str = Field(
-        default="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ", validation_alias="SMTP_SENDER_NAME"
+        default="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি", validation_alias="SMTP_SENDER_NAME"
     )
 
     # Admin bootstrap
@@ -46,6 +46,15 @@ class Settings(BaseSettings):
 
     # Public website link included in member emails (login page etc.)
     frontend_base_url: str = "http://localhost:9091"
+
+    # Organization identity used on generated documents (PDF letterhead).
+    organization_name: str = Field(
+        default="উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি", validation_alias="ORGANIZATION_NAME"
+    )
+
+    # Approving a fund transaction at or above this amount auto-publishes a
+    # member notice, so notable money movement is always announced.
+    finance_notice_threshold: float = Field(default=50000, validation_alias="FINANCE_NOTICE_THRESHOLD")
 
     @model_validator(mode="after")
     def _reject_insecure_secret_in_production(self) -> "Settings":

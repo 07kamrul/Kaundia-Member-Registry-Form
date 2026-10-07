@@ -157,6 +157,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
+      // Fund transparency sits outside the member-area guard like /dashboard:
+      // every authenticated tier (member, committee, admin) may read it - the
+      // backend exposes approved transactions to any logged-in account.
+      {
+        path: 'fund-transparency',
+        loadComponent: () =>
+          import('./features/member/pages/fund-transparency/fund-transparency.component').then(
+            (m) => m.FundTransparencyComponent,
+          ),
+      },
       // Management area - Executive Committee/Administrator (any manage_*/
       // approve_*/view_* key from their default tuples), Super Admin included.
       {
@@ -227,6 +237,14 @@ export const routes: Routes = [
               import(
                 './features/management/pages/society-costs/society-costs.component'
               ).then((m) => m.SocietyCostsComponent),
+          },
+          {
+            path: 'finance-management',
+            canActivate: [permissionGuard(['manage_finance'])],
+            loadComponent: () =>
+              import(
+                './features/management/pages/finance-management/finance-management.component'
+              ).then((m) => m.FinanceManagementComponent),
           },
           {
             path: 'config-lists',

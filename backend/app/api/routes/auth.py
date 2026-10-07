@@ -155,7 +155,7 @@ def _reset_email_body(identifier: str, reset_url: str) -> str:
         "ignore this email - your current password will keep working.</p>"
         "<hr/>"
         '<p style="color:#6b7280;font-size:12px">This is an automated message '
-        "from the উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ member registry.</p>"
+        "from the উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি member registry.</p>"
     )
 
 

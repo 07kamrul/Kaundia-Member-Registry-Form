@@ -59,6 +59,46 @@
     </div>
   }
 
+  @if (canManageFinance && financeOverview) {
+    <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+        <h2 style="margin:0;font-size:1.125rem">{{ 'admin.dashboard.finance.title' | translate }}</h2>
+        <a [routerLink]="['/finance-management']" class="btn btn-secondary btn-sm" style="text-decoration:none">
+          {{ 'admin.dashboard.finance.viewAll' | translate }} <app-icon name="chevron-right" [size]="14" />
+        </a>
+      </div>
+      <div class="stat-grid" style="margin-top:1rem;margin-bottom:0.5rem">
+        <div class="stat-card">
+          <div class="stat-card-icon stat-icon-due">
+            <app-icon name="alert" [size]="22" />
+          </div>
+          <div>
+            <p class="stat-card-label">{{ 'admin.dashboard.finance.pending' | translate }}</p>
+            <p class="stat-card-value">{{ financeOverview.pendingCount }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon stat-icon-count">
+            <app-icon name="coin" [size]="22" />
+          </div>
+          <div>
+            <p class="stat-card-label">{{ 'admin.dashboard.finance.monthNet' | translate }}</p>
+            <p class="stat-card-value">{{ financeTaka(financeOverview.monthNet) }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon stat-icon-paid">
+            <app-icon name="check-circle" [size]="22" />
+          </div>
+          <div>
+            <p class="stat-card-label">{{ 'admin.dashboard.finance.balance' | translate }}</p>
+            <p class="stat-card-value">{{ financeTaka(financeOverview.balance) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
   @if (loading) {
     <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
   } @else if (error) {

@@ -1,6 +1,6 @@
 # Kaundia — Business Overview, Business Logic & User Stories
 
-**Organization:** উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ পরিষদ
+**Organization:** উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি
 (Uttar Kaundia Residential Landowners' Welfare Association, Bangladesh)
 
 **Application type:** Member registration, approval, and dues (subscription/installment)

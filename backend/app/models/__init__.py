@@ -15,6 +15,8 @@ from app.models.member_id_sequence import MemberIdSequence
 from app.models.password_reset import PasswordResetToken
 from app.models.property_change_request import PropertyChangeRequest
 from app.models.society_cost import SocietyCost, CostSplit, CostSplitShare
+from app.models.financial_transaction import FinancialTransaction
+from app.models.roadmap import RoadmapItem, RoadmapTimeframe
 
 __all__ = [
     "Member",
@@ -43,4 +45,7 @@ __all__ = [
     "SocietyCost",
     "CostSplit",
     "CostSplitShare",
+    "FinancialTransaction",
+    "RoadmapTimeframe",
+    "RoadmapItem",
 ]

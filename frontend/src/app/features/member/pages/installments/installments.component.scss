@@ -51,19 +51,9 @@
 }
 
 .month-cell {
-  display: block;
-  text-align: right;
-}
-
-.month-name {
-  display: block;
   font-weight: 600;
   color: var(--gray-800);
-}
-
-.month-year {
-  font-size: 0.78rem;
-  color: var(--gray-500);
+  white-space: nowrap;
 }
 
 .amount-cell {

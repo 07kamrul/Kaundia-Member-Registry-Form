@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SocietyCostService } from '../../../../core/services/society-cost.service';
+import { FinanceService, formatTaka, type FinanceOverview } from '../../../../core/services/finance.service';
 import type { SocietyCostSummary } from '../../../../core/services/society-cost.service';
 import type { SubmissionSummary } from '../../../../core/models/admin.model';
 import { IconComponent } from '../../../../shared/icon/icon.component';
@@ -26,19 +27,25 @@ export class AdminDashboardComponent implements OnInit {
   costSummary: SocietyCostSummary | null = null;
   costSummaryLoading = false;
 
+  readonly canManageFinance: boolean;
+  financeOverview: FinanceOverview | null = null;
+
   constructor(
     private adminService: AdminService,
     private costService: SocietyCostService,
+    private financeService: FinanceService,
     private auth: AuthService,
     private cdr: ChangeDetectorRef,
     private translate: TranslateService,
   ) {
     this.canManageCosts = this.auth.hasPermission('manage_costs');
+    this.canManageFinance = this.auth.hasPermission('manage_finance');
   }
 
   ngOnInit(): void {
     this.load();
     if (this.canManageCosts) this.loadCostSummary();
+    if (this.canManageFinance) this.loadFinanceOverview();
   }
 
   load(): void {
@@ -56,6 +63,24 @@ export class AdminDashboardComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  /** Fund widget: pending approvals, this month's net, current balance. */
+  private loadFinanceOverview(): void {
+    this.financeService.overview().subscribe({
+      next: (overview) => {
+        this.financeOverview = overview;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.financeOverview = null;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  financeTaka(value: number): string {
+    return formatTaka(value, this.translate.currentLang() || 'bn');
   }
 
   /** This quarter's costs: the reporting widget stays even when the range has no costs. */

@@ -48,6 +48,7 @@ export const MANAGEMENT_AREA_PERMISSIONS = [
   'complaint.process',
   'report.view_operational',
   'manage_costs',
+  'manage_finance',
 ];
 
 interface TokenResponse {

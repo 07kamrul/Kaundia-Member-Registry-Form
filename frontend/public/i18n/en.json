@@ -59,7 +59,9 @@
     "moreOptions": "More options",
     "propertyRequests": "Property Requests",
     "societyCosts": "Society Costs",
-    "costShares": "Cost Shares"
+    "costShares": "Cost Shares",
+    "fundTransparency": "Fund Transparency",
+    "financeManagement": "Finance Management"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -358,6 +360,88 @@
         "unpaid": "Unpaid",
         "partial": "Partial",
         "paid": "Paid"
+      }
+    },
+    "fundTransparency": {
+      "title": "Fund Transparency",
+      "subtitle": "Every taka in and out of the society fund — open to every member",
+      "downloadPdf": "Download report (PDF)",
+      "currentBalance": "Current Balance",
+      "totalIncome": "Total Income",
+      "totalExpense": "Total Expense",
+      "netSaved": "Net Saved",
+      "lastUpdated": "Last updated",
+      "topTag": "Top",
+      "summaryLine": "This period: income {{income}}, expense {{expense}}, net {{net}}.",
+      "incomeBreakdown": "Collections by category",
+      "expenseBreakdown": "Expenses by category",
+      "incomeBreakdownEmpty": "No income in this period.",
+      "expenseBreakdownEmpty": "No expenses in this period.",
+      "period": {
+        "month": "This month",
+        "year": "This year",
+        "custom": "Custom range",
+        "all": "All time",
+        "apply": "Apply"
+      },
+      "errors": {
+        "loadFailed": "Could not load the data. Please retry.",
+        "customRange": "Pick both start and end dates (start first).",
+        "pdfFailed": "Could not generate the report. Try again shortly."
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search description or reference…",
+        "type": "Type",
+        "allTypes": "All types",
+        "category": "Category",
+        "allCategories": "All categories",
+        "dateRange": "Date range",
+        "amountRange": "Amount range (৳)",
+        "min": "Min",
+        "max": "Max",
+        "reference": "Reference no.",
+        "approvedBy": "Approved by",
+        "reset": "Reset",
+        "clearAll": "✕ Clear all"
+      },
+      "type": {
+        "income": "Income",
+        "expense": "Expense"
+      },
+      "ledger": {
+        "date": "Date",
+        "description": "Description",
+        "category": "Category",
+        "type": "Type",
+        "amount": "Amount",
+        "reference": "Reference",
+        "approvedBy": "Approved by",
+        "reversalOf": "Reversal of transaction",
+        "viewAttachment": "View attachment",
+        "count": "{{count}} transactions",
+        "page": "Page {{page}} of {{total}}",
+        "empty": "No transactions found",
+        "emptyHint": "Try changing the filters."
+      },
+      "charts": {
+        "expenseDonut": "Expenses by category",
+        "trend": "Income vs expense trend",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "empty": "Not enough data for a chart yet."
+      },
+      "flags": {
+        "spike": "{{category}} spending is {{pct}} higher than the previous period",
+        "topCategories": "Biggest expenses: {{categories}}"
+      },
+      "preview": {
+        "title": "Attachment preview",
+        "missing": "The attachment is missing. Please notify the committee."
+      },
+      "empty": {
+        "title": "No transactions published yet",
+        "hint": "Once the committee records and approves transactions, all income and expenses will appear here."
       }
     }
   },
@@ -744,7 +828,9 @@
         "property_type": "Property Types",
         "document_type": "Document Types",
         "notice_category": "Notice Categories",
-        "event_category": "Event Categories"
+        "event_category": "Event Categories",
+        "finance_income_category": "Fund income categories",
+        "finance_expense_category": "Fund expense categories"
       },
       "addItem": "Add New Item",
       "form": {
@@ -814,6 +900,13 @@
         "viewAll": "View all costs",
         "quarterTotal": "This quarter's total",
         "outstanding": "Outstanding member dues"
+      },
+      "finance": {
+        "title": "Fund Transparency",
+        "viewAll": "View all",
+        "pending": "Pending approvals",
+        "monthNet": "This month's net",
+        "balance": "Current balance"
       }
     },
     "notices": {
@@ -1164,6 +1257,138 @@
         "titleRequired": "A title is required.",
         "amountRequired": "Enter an amount greater than zero.",
         "dateRequired": "The incurred date is required."
+      }
+    },
+    "financeManagement": {
+      "title": "Finance Management",
+      "subtitle": "Record, edit and approve fund transactions",
+      "create": "New transaction",
+      "createTitle": "Add a transaction",
+      "editTitle": "Edit transaction",
+      "notice": {
+        "period": "Report period",
+        "month": "This month",
+        "year": "This year",
+        "all": "All time",
+        "publish": "Publish report notice",
+        "done": "Notice published ✓"
+      },
+      "overview": {
+        "pending": "Pending approvals",
+        "monthNet": "This month's net",
+        "balance": "Current balance",
+        "recent": "Last 5 transactions",
+        "noRecent": "No transactions yet."
+      },
+      "status": {
+        "all": "All",
+        "pending": "Pending",
+        "draft": "Draft",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "type": {
+        "income": "Income",
+        "expense": "Expense"
+      },
+      "source": {
+        "installment": "Monthly subscription",
+        "picnic_payment": "Picnic fee",
+        "cost_share": "Cost share"
+      },
+      "filters": {
+        "type": "Type",
+        "allTypes": "All types",
+        "category": "Category",
+        "allCategories": "All categories",
+        "search": "Search description/reference…",
+        "reset": "Reset"
+      },
+      "ledger": {
+        "date": "Date",
+        "description": "Description",
+        "category": "Category",
+        "type": "Type",
+        "amount": "Amount",
+        "status": "Status",
+        "reference": "Reference",
+        "createdBy": "Created by",
+        "approvedBy": "Approved by",
+        "linkedPayment": "Linked payment",
+        "reversalOf": "Reversal of transaction",
+        "internalNotes": "Internal notes (committee only)",
+        "rejectionReason": "Rejection reason",
+        "viewAttachment": "View attachment",
+        "editWindowClosed": "Direct edits close 7 days after approval — create a reversal to correct it.",
+        "count": "{{count}} transactions",
+        "page": "Page {{page}} of {{total}}",
+        "empty": "No transactions",
+        "emptyHint": "Add the first entry with 'New transaction'."
+      },
+      "form": {
+        "type": "Type",
+        "date": "Date",
+        "amount": "Amount",
+        "category": "Category",
+        "categorySearch": "Search or type a category…",
+        "categoryNoMatch": "No matching category",
+        "addCategory": "Add new category (Enter)",
+        "description": "Description",
+        "reference": "Reference no.",
+        "referenceHint": "FT-…",
+        "referenceAuto": "Leave empty to auto-generate",
+        "attachment": "Attachment (image/PDF)",
+        "internalNotes": "Internal notes",
+        "internalNotesHint": "Members never see these notes."
+      },
+      "paymentLink": {
+        "title": "Link an existing payment (avoids double counting)",
+        "alreadyLinked": "Currently linked: {{source}} #{{id}}",
+        "allSources": "All sources",
+        "searchPlaceholder": "Search member name…",
+        "empty": "No unlinked payments match this filter."
+      },
+      "actions": {
+        "submit": "Submit for approval",
+        "approve": "Approve",
+        "reject": "Reject",
+        "reverse": "Reverse",
+        "saveDraft": "Save draft",
+        "savePending": "Save & submit"
+      },
+      "modals": {
+        "approve": {
+          "title": "Approve transaction",
+          "twoPerson": "Two-person control: the creator cannot approve their own entry — another committee member approves.",
+          "confirm": "Approve"
+        },
+        "reject": {
+          "title": "Reject transaction",
+          "reason": "Rejection reason",
+          "confirm": "Reject"
+        },
+        "reverse": {
+          "title": "Reversal (correction entry)",
+          "reason": "Correction reason",
+          "confirm": "Create reversal"
+        },
+        "delete": {
+          "title": "Delete transaction",
+          "reason": "Reason (kept in the audit log)",
+          "confirm": "Delete"
+        }
+      },
+      "errors": {
+        "loadFailed": "Could not load the list. Please retry.",
+        "saveFailed": "Could not save. Please retry.",
+        "dateRequired": "Pick a date.",
+        "amountRequired": "Enter an amount greater than zero.",
+        "categoryRequired": "Select a category.",
+        "descriptionRequired": "Enter a description.",
+        "reasonRequired": "A reason is required.",
+        "categoryAddFailed": "Could not add the category.",
+        "attachmentFailed": "Attachment upload failed.",
+        "actionFailed": "The action failed. Please retry."
       }
     }
   },

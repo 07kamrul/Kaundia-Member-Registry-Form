@@ -1,0 +1,599 @@
+<div class="fund-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'member.fundTransparency.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'member.fundTransparency.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="downloadPdf()"
+        [disabled]="pdfDownloading || summaryLoading"
+      >
+        @if (pdfDownloading) {
+          <span class="spinner"></span>
+        } @else {
+          <app-icon name="download" [size]="16" />
+        }
+        {{ 'member.fundTransparency.downloadPdf' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (pdfError) {
+    <div class="error-box"><p style="margin:0">{{ pdfError }}</p></div>
+  }
+
+  <!-- Period selector: re-renders the whole page -->
+  <div class="period-bar card">
+    <div class="filter-chips">
+      @for (period of periodTypes; track period) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.filter-chip-active]="periodType === period"
+          (click)="setPeriod(period)"
+        >
+          {{ 'member.fundTransparency.period.' + period | translate }}
+        </button>
+      }
+    </div>
+    @if (periodType === 'custom') {
+      <div class="custom-range">
+        <app-date-picker
+          [value]="customFrom"
+          (valueChange)="customFrom = $event"
+          [max]="customTo"
+          [clearable]="true"
+        />
+        <app-date-picker
+          [value]="customTo"
+          (valueChange)="customTo = $event"
+          [min]="customFrom"
+          [clearable]="true"
+        />
+        <button type="button" class="btn btn-secondary btn-sm" (click)="applyPeriod()">
+          {{ 'member.fundTransparency.period.apply' | translate }}
+        </button>
+      </div>
+    }
+    @if (periodError) {
+      <p class="field-error">{{ periodError }}</p>
+    }
+  </div>
+
+  <!-- Hero: balance + income/expense + one-line plain-language summary -->
+  @if (summaryLoading) {
+    <div class="hero-skeleton">
+      <div class="skeleton-block skeleton-hero"></div>
+      <div class="skeleton-row-group">
+        <div class="skeleton-block"></div>
+        <div class="skeleton-block"></div>
+        <div class="skeleton-block"></div>
+      </div>
+    </div>
+  } @else if (summaryError) {
+    <div class="card card-pad error-card">
+      <p>{{ summaryError }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="loadSummary()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (summary) {
+    <section class="hero card">
+      <div class="hero-main">
+        <p class="hero-balance-label">{{ 'member.fundTransparency.currentBalance' | translate }}</p>
+        <p class="hero-balance">{{ taka(summary.balance) }}</p>
+        <p class="hero-updated">
+          {{ 'member.fundTransparency.lastUpdated' | translate }}:
+          {{ formatTimestamp(summary.lastUpdated) }}
+        </p>
+      </div>
+      <div class="hero-side">
+        <div class="hero-stat">
+          <span class="hero-stat-label">
+            {{ 'member.fundTransparency.totalIncome' | translate }}
+            @if (incomeDelta !== null) {
+              <span class="delta" [class.delta-up]="incomeDelta >= 0" [class.delta-down]="incomeDelta < 0">
+                {{ incomeDelta >= 0 ? '▲' : '▼' }} {{ percent(abs(incomeDelta)) }}
+              </span>
+            }
+          </span>
+          <span class="hero-stat-value hero-income">{{ taka(summary.totals.income) }}</span>
+          <app-sparkline [values]="incomeSparkline" color="var(--emerald-600)" />
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-label">
+            {{ 'member.fundTransparency.totalExpense' | translate }}
+            @if (expenseDelta !== null) {
+              <span class="delta" [class.delta-up]="expenseDelta <= 0" [class.delta-down]="expenseDelta > 0">
+                {{ expenseDelta > 0 ? '▲' : '▼' }} {{ percent(abs(expenseDelta)) }}
+              </span>
+            }
+          </span>
+          <span class="hero-stat-value hero-expense">{{ taka(summary.totals.expense) }}</span>
+          <app-sparkline [values]="expenseSparkline" color="var(--red-600)" />
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-label">
+            {{ 'member.fundTransparency.netSaved' | translate }}
+            @if (netDelta !== null) {
+              <span class="delta" [class.delta-up]="netDelta >= 0" [class.delta-down]="netDelta < 0">
+                {{ netDelta >= 0 ? '▲' : '▼' }} {{ percent(abs(netDelta)) }}
+              </span>
+            }
+          </span>
+          <span class="hero-stat-value" [class.hero-net-negative]="summary.totals.net < 0">
+            {{ taka(summary.totals.net) }}
+          </span>
+          <app-sparkline [values]="netSparkline" color="var(--gold)" />
+        </div>
+      </div>
+      <p class="hero-summary-line">
+        <app-icon name="sparkle" [size]="16" />
+        {{ 'member.fundTransparency.summaryLine' | translate: summaryLineParams }}
+      </p>
+      @if (expenseSpikes.length) {
+        <div class="hero-flags">
+          @for (spike of expenseSpikes; track spike.category) {
+            <span class="flag-chip">
+              <app-icon name="alert" [size]="14" />
+              {{
+                'member.fundTransparency.flags.spike'
+                  | translate: { category: spike.category, pct: percent(spike.pct) }
+              }}
+            </span>
+          }
+        </div>
+      }
+    </section>
+
+    @if (isEmptyState) {
+      <div class="card card-pad empty-hero">
+        <span class="empty-state-icon"><app-icon name="coin" [size]="28" /></span>
+        <p class="empty-title">{{ 'member.fundTransparency.empty.title' | translate }}</p>
+        <p class="empty-hint">{{ 'member.fundTransparency.empty.hint' | translate }}</p>
+      </div>
+    }
+
+    <!-- Breakdowns: collections & expenses by category with bars -->
+    <div class="breakdown-grid">
+      <section class="card breakdown-card">
+        <h2 class="breakdown-title">{{ 'member.fundTransparency.incomeBreakdown' | translate }}</h2>
+        @if (summary.incomeByCategory.length) {
+          <ul class="breakdown-list">
+            @for (row of summary.incomeByCategory; track row.category) {
+              <li>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">
+                    {{ row.category }}
+                    @if (topIncomeCategories[0]?.category === row.category) {
+                      <span class="top-tag">{{ 'member.fundTransparency.topTag' | translate }}</span>
+                    }
+                  </span>
+                  <span class="breakdown-share">{{ percent(row.share) }}</span>
+                  <span class="breakdown-amount">{{ taka(row.amount) }}</span>
+                </div>
+                <div class="breakdown-track">
+                  <div class="breakdown-fill fill-income" [style.width]="breakdownBarWidth(row.share)"></div>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="breakdown-empty">{{ 'member.fundTransparency.incomeBreakdownEmpty' | translate }}</p>
+        }
+      </section>
+
+      <section class="card breakdown-card">
+        <h2 class="breakdown-title">{{ 'member.fundTransparency.expenseBreakdown' | translate }}</h2>
+        @if (summary.expenseByCategory.length) {
+          <ul class="breakdown-list">
+            @for (row of summary.expenseByCategory; track row.category) {
+              <li>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">
+                    {{ row.category }}
+                    @if (topExpenseCategories[0]?.category === row.category) {
+                      <span class="top-tag">{{ 'member.fundTransparency.topTag' | translate }}</span>
+                    }
+                  </span>
+                  <span class="breakdown-share">{{ percent(row.share) }}</span>
+                  <span class="breakdown-amount">{{ taka(row.amount) }}</span>
+                </div>
+                <div class="breakdown-track">
+                  <div class="breakdown-fill fill-expense" [style.width]="breakdownBarWidth(row.share)"></div>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="breakdown-empty">{{ 'member.fundTransparency.expenseBreakdownEmpty' | translate }}</p>
+        }
+      </section>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid">
+      <section class="card chart-card">
+        <h2 class="breakdown-title">{{ 'member.fundTransparency.charts.expenseDonut' | translate }}</h2>
+        @if (expenseDonutSegments.length) {
+          <app-donut-chart
+            [segments]="expenseDonutSegments"
+            [centerTitle]="'member.fundTransparency.totalExpense' | translate"
+            [centerValue]="taka(summary.totals.expense)"
+            [topTag]="'member.fundTransparency.topTag' | translate"
+            [formatValue]="taka.bind(this)"
+          />
+        } @else {
+          <p class="breakdown-empty">{{ 'member.fundTransparency.expenseBreakdownEmpty' | translate }}</p>
+        }
+      </section>
+
+      <section class="card chart-card">
+        <div class="trend-header">
+          <h2 class="breakdown-title">{{ 'member.fundTransparency.charts.trend' | translate }}</h2>
+          <div class="ds-tab-bar">
+            <button
+              type="button"
+              class="ds-tab"
+              [class.active]="trendTab === 'monthly'"
+              (click)="trendTab = 'monthly'"
+            >
+              {{ 'member.fundTransparency.charts.monthly' | translate }}
+            </button>
+            <button
+              type="button"
+              class="ds-tab"
+              [class.active]="trendTab === 'yearly'"
+              (click)="trendTab = 'yearly'"
+            >
+              {{ 'member.fundTransparency.charts.yearly' | translate }}
+            </button>
+          </div>
+        </div>
+        <app-trend-chart
+          [labels]="seriesLabels"
+          [incomeValues]="visibleSeries.map((p) => p.income)"
+          [expenseValues]="visibleSeries.map((p) => p.expense)"
+          [netValues]="visibleSeries.map((p) => p.net)"
+          [incomeLabel]="'member.fundTransparency.totalIncome' | translate"
+          [expenseLabel]="'member.fundTransparency.totalExpense' | translate"
+          [netLabel]="'member.fundTransparency.netSaved' | translate"
+          [emptyLabel]="'member.fundTransparency.charts.empty' | translate"
+          [formatValue]="taka.bind(this)"
+        />
+      </section>
+    </div>
+
+    @if (topExpenseCategories.length > 1) {
+      <div class="top-categories-line">
+        <span class="flag-chip flag-info">
+          {{
+            'member.fundTransparency.flags.topCategories'
+              | translate
+                : {
+                    categories: topExpenseCategories
+                      .slice(0, 2)
+                      .map((row) => row.category)
+                      .join(', ')
+                  }
+          }}
+        </span>
+      </div>
+    }
+  }
+
+  <!-- Ledger: full transaction list with combinable filters -->
+  <section class="ledger-section">
+    <div class="card ledger-filters-card">
+      <div class="filters-grid">
+        <div class="field">
+          <label for="ftSearch">{{ 'member.fundTransparency.filters.search' | translate }}</label>
+          <input
+            id="ftSearch"
+            type="text"
+            [(ngModel)]="searchText"
+            (ngModelChange)="applyFilters()"
+            [placeholder]="'member.fundTransparency.filters.searchPlaceholder' | translate"
+          />
+        </div>
+        <div class="field">
+          <label for="ftType">{{ 'member.fundTransparency.filters.type' | translate }}</label>
+          <select id="ftType" [(ngModel)]="typeFilter" (ngModelChange)="applyFilters()">
+            <option value="">{{ 'member.fundTransparency.filters.allTypes' | translate }}</option>
+            <option value="income">{{ 'member.fundTransparency.type.income' | translate }}</option>
+            <option value="expense">{{ 'member.fundTransparency.type.expense' | translate }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ftCategory">{{ 'member.fundTransparency.filters.category' | translate }}</label>
+          <select id="ftCategory" [(ngModel)]="categoryFilter" (ngModelChange)="applyFilters()">
+            <option value="">{{ 'member.fundTransparency.filters.allCategories' | translate }}</option>
+            @for (row of summary?.incomeByCategory ?? []; track row.categoryId) {
+              <option [value]="row.categoryId">{{ row.category }}</option>
+            }
+            @for (row of summary?.expenseByCategory ?? []; track row.categoryId) {
+              <option [value]="row.categoryId">{{ row.category }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label>{{ 'member.fundTransparency.filters.dateRange' | translate }}</label>
+          <div class="date-range-row">
+            <app-date-picker
+              [value]="ledgerDateFrom"
+              (valueChange)="ledgerDateFrom = $event; applyFilters()"
+              [max]="ledgerDateTo"
+              [clearable]="true"
+            />
+            <app-date-picker
+              [value]="ledgerDateTo"
+              (valueChange)="ledgerDateTo = $event; applyFilters()"
+              [min]="ledgerDateFrom"
+              [clearable]="true"
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label>{{ 'member.fundTransparency.filters.amountRange' | translate }}</label>
+          <div class="amount-range-row">
+            <input
+              type="number"
+              min="0"
+              [placeholder]="'member.fundTransparency.filters.min' | translate"
+              [(ngModel)]="minAmount"
+              (ngModelChange)="applyFilters()"
+            />
+            <input
+              type="number"
+              min="0"
+              [placeholder]="'member.fundTransparency.filters.max' | translate"
+              [(ngModel)]="maxAmount"
+              (ngModelChange)="applyFilters()"
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label for="ftReference">{{ 'member.fundTransparency.filters.reference' | translate }}</label>
+          <input
+            id="ftReference"
+            type="text"
+            [(ngModel)]="referenceFilter"
+            (ngModelChange)="applyFilters()"
+          />
+        </div>
+        <div class="field">
+          <label for="ftApprover">{{ 'member.fundTransparency.filters.approvedBy' | translate }}</label>
+          <input
+            id="ftApprover"
+            type="text"
+            [(ngModel)]="approvedByName"
+            (ngModelChange)="applyFilters()"
+          />
+        </div>
+        <div class="field field-actions">
+          <button type="button" class="btn btn-secondary" (click)="clearAllFilters()">
+            {{ 'member.fundTransparency.filters.reset' | translate }}
+          </button>
+        </div>
+      </div>
+
+      @if (activeChips.length) {
+        <div class="active-chips">
+          @for (chip of activeChips; track chip.key) {
+            <button type="button" class="active-chip" (click)="removeChip(chip.key)">
+              {{ chip.label }}
+              <app-icon name="x" [size]="12" />
+            </button>
+          }
+          <button type="button" class="active-chip-clear" (click)="clearAllFilters()">
+            {{ 'member.fundTransparency.filters.clearAll' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Filtered summary stays in sync with the table below -->
+    @if (ledger) {
+      <div class="ledger-totals">
+        <span class="ledger-total">
+          {{ 'member.fundTransparency.totalIncome' | translate }}:
+          <strong class="hero-income">{{ taka(ledger.totals.income) }}</strong>
+        </span>
+        <span class="ledger-total">
+          {{ 'member.fundTransparency.totalExpense' | translate }}:
+          <strong class="hero-expense">{{ taka(ledger.totals.expense) }}</strong>
+        </span>
+        <span class="ledger-total">
+          {{ 'member.fundTransparency.netSaved' | translate }}:
+          <strong [class.hero-expense]="ledger.totals.net < 0">{{ taka(ledger.totals.net) }}</strong>
+        </span>
+        <span class="ledger-total muted">
+          {{ 'member.fundTransparency.ledger.count' | translate: { count: ledger.total } }}
+        </span>
+      </div>
+    }
+
+    @if (ledgerLoading) {
+      <div class="card skeleton-card">
+        <div class="skeleton-rows">
+          @for (row of [1, 2, 3, 4, 5]; track row) {
+            <div class="skeleton-row"></div>
+          }
+        </div>
+      </div>
+    } @else if (ledgerError) {
+      <div class="card card-pad error-card">
+        <p>{{ ledgerError }}</p>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="loadLedger()">
+          {{ 'common.retry' | translate }}
+        </button>
+      </div>
+    } @else if (ledger) {
+      <div class="data-table-wrap">
+        <table class="data-table data-table-cards">
+          <thead>
+            <tr>
+              <th>{{ 'member.fundTransparency.ledger.date' | translate }}</th>
+              <th>{{ 'member.fundTransparency.ledger.description' | translate }}</th>
+              <th>{{ 'member.fundTransparency.ledger.category' | translate }}</th>
+              <th>{{ 'member.fundTransparency.ledger.type' | translate }}</th>
+              <th class="amount-col">{{ 'member.fundTransparency.ledger.amount' | translate }}</th>
+              <th>{{ 'member.fundTransparency.ledger.reference' | translate }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (txn of ledger.items; track txn.id) {
+              <tr class="ledger-row" (click)="toggleExpanded(txn.id)">
+                <td [attr.data-label]="'member.fundTransparency.ledger.date' | translate">
+                  {{ formatDate(txn.txnDate) }}
+                </td>
+                <td [attr.data-label]="'member.fundTransparency.ledger.description' | translate">
+                  <span class="desc-cell">{{ txn.description }}</span>
+                </td>
+                <td [attr.data-label]="'member.fundTransparency.ledger.category' | translate">
+                  {{ txn.categoryLabel || '—' }}
+                </td>
+                <td [attr.data-label]="'member.fundTransparency.ledger.type' | translate">
+                  <span class="type-pill" [class.type-income]="txn.type === 'income'" [class.type-expense]="txn.type === 'expense'">
+                    {{ 'member.fundTransparency.type.' + txn.type | translate }}
+                  </span>
+                </td>
+                <td
+                  class="amount-col"
+                  [attr.data-label]="'member.fundTransparency.ledger.amount' | translate"
+                >
+                  <span [class.amount-income]="txn.type === 'income'" [class.amount-expense]="txn.type === 'expense'">
+                    {{ signedAmount(txn) }}
+                  </span>
+                </td>
+                <td [attr.data-label]="'member.fundTransparency.ledger.reference' | translate">
+                  {{ txn.referenceNo || '—' }}
+                </td>
+                <td class="row-actions">
+                  @if (txn.attachmentUrl) {
+                    <button
+                      type="button"
+                      class="btn-icon receipt-btn"
+                      (click)="openPreview(txn); $event.stopPropagation()"
+                      [attr.aria-label]="'member.fundTransparency.ledger.viewAttachment' | translate"
+                    >
+                      <app-icon name="doc" [size]="16" />
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="btn-icon"
+                    (click)="toggleExpanded(txn.id); $event.stopPropagation()"
+                  >
+                    <app-icon name="chevron-down" [size]="16" />
+                  </button>
+                </td>
+              </tr>
+              @if (expandedId === txn.id) {
+                <tr class="detail-row">
+                  <td colspan="7">
+                    <div class="txn-detail">
+                      <div class="txn-detail-grid">
+                        <div>
+                          <p class="txn-detail-label">{{ 'member.fundTransparency.ledger.date' | translate }}</p>
+                          <p>{{ formatDate(txn.txnDate) }}</p>
+                        </div>
+                        <div>
+                          <p class="txn-detail-label">{{ 'member.fundTransparency.ledger.category' | translate }}</p>
+                          <p>{{ txn.categoryLabel || '—' }}</p>
+                        </div>
+                        <div>
+                          <p class="txn-detail-label">{{ 'member.fundTransparency.ledger.approvedBy' | translate }}</p>
+                          <p>{{ txn.approvedByName || '—' }}</p>
+                        </div>
+                        <div>
+                          <p class="txn-detail-label">{{ 'member.fundTransparency.ledger.reference' | translate }}</p>
+                          <p>{{ txn.referenceNo || '—' }}</p>
+                        </div>
+                        @if (txn.reversalOfId) {
+                          <div>
+                            <p class="txn-detail-label">{{ 'member.fundTransparency.ledger.reversalOf' | translate }}</p>
+                            <p>#{{ txn.reversalOfId }}</p>
+                          </div>
+                        }
+                      </div>
+                      @if (txn.attachmentUrl) {
+                        <button type="button" class="btn btn-secondary btn-sm" (click)="openPreview(txn)">
+                          <app-icon name="doc" [size]="14" />
+                          {{ 'member.fundTransparency.ledger.viewAttachment' | translate }}
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-state">
+                  <span class="empty-state-icon"><app-icon name="doc" [size]="24" /></span>
+                  <p class="empty-title">{{ 'member.fundTransparency.ledger.empty' | translate }}</p>
+                  <p class="empty-hint">{{ 'member.fundTransparency.ledger.emptyHint' | translate }}</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (ledger.total > pageSize) {
+        <div class="table-pagination">
+          <span class="pagination-info">
+            {{ 'member.fundTransparency.ledger.page' | translate: { page: page, total: totalPages } }}
+          </span>
+          <div class="pagination-controls">
+            <button type="button" class="btn btn-secondary btn-sm" [disabled]="page <= 1" (click)="changePage(-1)">
+              <app-icon name="chevron-left" [size]="14" />
+            </button>
+            <select [ngModel]="pageSize" (ngModelChange)="onPageSizeSelect($event)">
+              @for (size of pageSizeOptions; track size) {
+                <option [value]="size">{{ size }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              [disabled]="page >= totalPages"
+              (click)="changePage(1)"
+            >
+              <app-icon name="chevron-right" [size]="14" />
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+
+  <!-- Attachment preview modal -->
+  @if (previewOpen) {
+    <div class="modal-backdrop" (click)="closePreview()">
+      <div class="modal-card modal-card-wide preview-modal" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'member.fundTransparency.preview.title' | translate }}</h3>
+        @if (previewLoading) {
+          <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+        } @else if (previewError) {
+          <div class="error-box"><p style="margin:0">{{ previewError }}</p></div>
+        } @else if (previewUrl) {
+          @if (previewIsImage) {
+            <img [src]="previewUrl" alt="" class="preview-image" />
+          } @else {
+            <iframe [src]="previewUrl" class="preview-frame" title="preview"></iframe>
+          }
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closePreview()">
+            {{ 'common.close' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

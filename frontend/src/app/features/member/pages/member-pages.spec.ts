@@ -79,7 +79,7 @@ describe('MemberInstallmentsComponent', () => {
       '2026-1',
       '2026-3',
     ]);
-    expect(component.year).toBe(2025);
+    expect(component.selectedYear).toBe('all');
     expect(component.loading).toBe(false);
     expect(component.error).toBe('');
   });

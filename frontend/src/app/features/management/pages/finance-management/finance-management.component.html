@@ -1,0 +1,599 @@
+<div class="finance-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.financeManagement.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.financeManagement.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      <div class="notice-actions">
+        <select [(ngModel)]="noticePeriod" [attr.aria-label]="'admin.financeManagement.notice.period' | translate">
+          <option value="month">{{ 'admin.financeManagement.notice.month' | translate }}</option>
+          <option value="year">{{ 'admin.financeManagement.notice.year' | translate }}</option>
+          <option value="all">{{ 'admin.financeManagement.notice.all' | translate }}</option>
+        </select>
+        <button type="button" class="btn btn-secondary" (click)="publishNotice()" [disabled]="noticeBusy">
+          @if (noticeBusy) {
+            <span class="spinner"></span>
+          } @else {
+            <app-icon name="doc" [size]="16" />
+          }
+          {{ 'admin.financeManagement.notice.publish' | translate }}
+        </button>
+      </div>
+      @if (noticeDone) {
+        <span class="notice-done">{{ 'admin.financeManagement.notice.done' | translate }}</span>
+      }
+      <button type="button" class="btn btn-primary" (click)="openCreateForm()">
+        <app-icon name="plus" [size]="16" /> {{ 'admin.financeManagement.create' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Committee overview: what needs attention right now -->
+  @if (overview) {
+    <div class="overview-grid">
+      <button type="button" class="stat-card overview-stat" (click)="setStatusFilter('pending')">
+        <div class="stat-card-icon stat-icon-due">
+          <app-icon name="alert" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'admin.financeManagement.overview.pending' | translate }}</p>
+          <p class="stat-card-value">{{ overview.pendingCount }}</p>
+        </div>
+      </button>
+      <div class="stat-card">
+        <div class="stat-card-icon stat-icon-count">
+          <app-icon name="coin" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'admin.financeManagement.overview.monthNet' | translate }}</p>
+          <p class="stat-card-value" [class.negative]="overview.monthNet < 0">
+            {{ taka(overview.monthNet) }}
+          </p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon stat-icon-paid">
+          <app-icon name="check-circle" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'admin.financeManagement.overview.balance' | translate }}</p>
+          <p class="stat-card-value">{{ taka(overview.balance) }}</p>
+        </div>
+      </div>
+      <div class="card recent-card">
+        <p class="recent-title">{{ 'admin.financeManagement.overview.recent' | translate }}</p>
+        <ul class="recent-list">
+          @for (txn of overview.recent; track txn.id) {
+            <li>
+              <span class="recent-desc" [title]="txn.description">{{ txn.description }}</span>
+              <span class="status-badge" [class]="statusClass(txn.status)">
+                {{ 'admin.financeManagement.status.' + txn.status | translate }}
+              </span>
+              <span
+                [class.amount-income]="txn.type === 'income'"
+                [class.amount-expense]="txn.type === 'expense'"
+                class="recent-amount"
+              >
+                {{ signedAmount(txn) }}
+              </span>
+            </li>
+          } @empty {
+            <li class="muted">{{ 'admin.financeManagement.overview.noRecent' | translate }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="card filter-card">
+    <div class="filter-bar">
+      <div class="filter-chips">
+        @for (filter of statusFilters; track filter) {
+          <button
+            type="button"
+            class="filter-chip"
+            [class.filter-chip-active]="statusFilter === filter"
+            (click)="setStatusFilter(filter)"
+          >
+            {{ 'admin.financeManagement.status.' + (filter === 'all' ? 'all' : filter) | translate }}
+          </button>
+        }
+      </div>
+      <div class="filter-fields">
+        <select
+          [(ngModel)]="typeFilter"
+          (ngModelChange)="applyFilters()"
+          [attr.aria-label]="'admin.financeManagement.filters.type' | translate"
+        >
+          <option value="">{{ 'admin.financeManagement.filters.allTypes' | translate }}</option>
+          <option value="income">{{ 'admin.financeManagement.type.income' | translate }}</option>
+          <option value="expense">{{ 'admin.financeManagement.type.expense' | translate }}</option>
+        </select>
+        <select
+          [(ngModel)]="categoryFilter"
+          (ngModelChange)="applyFilters()"
+          [attr.aria-label]="'admin.financeManagement.filters.category' | translate"
+        >
+          <option value="">{{ 'admin.financeManagement.filters.allCategories' | translate }}</option>
+          @for (category of categories; track category.id) {
+            <option [value]="category.id">{{ category.label }}</option>
+          }
+        </select>
+        <input
+          type="text"
+          [(ngModel)]="search"
+          (ngModelChange)="applyFilters()"
+          [placeholder]="'admin.financeManagement.filters.search' | translate"
+        />
+        <div class="date-range-row">
+          <app-date-picker
+            [value]="dateFrom"
+            (valueChange)="dateFrom = $event; applyFilters()"
+            [max]="dateTo"
+            [clearable]="true"
+          />
+          <app-date-picker
+            [value]="dateTo"
+            (valueChange)="dateTo = $event; applyFilters()"
+            [min]="dateFrom"
+            [clearable]="true"
+          />
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="resetFilters()">
+          {{ 'admin.financeManagement.filters.reset' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="card skeleton-card">
+      <div class="skeleton-rows">
+        @for (row of [1, 2, 3, 4, 5]; track row) {
+          <div class="skeleton-row"></div>
+        }
+      </div>
+    </div>
+  } @else if (error) {
+    <div class="card card-pad error-card">
+      <p>{{ error }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (ledger) {
+    @if (ledger.totals) {
+      <div class="ledger-totals">
+        <span>
+          {{ 'admin.financeManagement.type.income' | translate }}:
+          <strong class="amount-income">{{ taka(ledger.totals.income) }}</strong>
+        </span>
+        <span>
+          {{ 'admin.financeManagement.type.expense' | translate }}:
+          <strong class="amount-expense">{{ taka(ledger.totals.expense) }}</strong>
+        </span>
+        <span>
+          {{ 'admin.financeManagement.overview.monthNet' | translate }}:
+          <strong [class.amount-expense]="ledger.totals.net < 0">{{ taka(ledger.totals.net) }}</strong>
+        </span>
+        <span class="muted">{{ 'admin.financeManagement.ledger.count' | translate: { count: ledger.total } }}</span>
+      </div>
+    }
+
+    <div class="data-table-wrap">
+      <table class="data-table data-table-cards">
+        <thead>
+          <tr>
+            <th>{{ 'admin.financeManagement.ledger.date' | translate }}</th>
+            <th>{{ 'admin.financeManagement.ledger.description' | translate }}</th>
+            <th>{{ 'admin.financeManagement.ledger.category' | translate }}</th>
+            <th>{{ 'admin.financeManagement.ledger.type' | translate }}</th>
+            <th class="amount-col">{{ 'admin.financeManagement.ledger.amount' | translate }}</th>
+            <th>{{ 'admin.financeManagement.ledger.status' | translate }}</th>
+            <th>{{ 'admin.financeManagement.ledger.reference' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (txn of ledger.items; track txn.id) {
+            <tr class="ledger-row" (click)="toggleExpanded(txn.id)">
+              <td [attr.data-label]="'admin.financeManagement.ledger.date' | translate">
+                {{ txn.txnDate | date: 'yyyy-MM-dd' }}
+              </td>
+              <td [attr.data-label]="'admin.financeManagement.ledger.description' | translate">
+                <span class="desc-cell">{{ txn.description }}</span>
+              </td>
+              <td [attr.data-label]="'admin.financeManagement.ledger.category' | translate">
+                {{ txn.categoryLabel || '—' }}
+              </td>
+              <td [attr.data-label]="'admin.financeManagement.ledger.type' | translate">
+                <span class="type-pill" [class.type-income]="txn.type === 'income'" [class.type-expense]="txn.type === 'expense'">
+                  {{ 'admin.financeManagement.type.' + txn.type | translate }}
+                </span>
+              </td>
+              <td class="amount-col" [attr.data-label]="'admin.financeManagement.ledger.amount' | translate">
+                <span [class.amount-income]="txn.type === 'income'" [class.amount-expense]="txn.type === 'expense'">
+                  {{ signedAmount(txn) }}
+                </span>
+              </td>
+              <td [attr.data-label]="'admin.financeManagement.ledger.status' | translate">
+                <span class="status-badge" [class]="statusClass(txn.status)">
+                  {{ 'admin.financeManagement.status.' + txn.status | translate }}
+                </span>
+              </td>
+              <td [attr.data-label]="'admin.financeManagement.ledger.reference' | translate">
+                {{ txn.referenceNo || '—' }}
+              </td>
+              <td class="row-actions" (click)="$event.stopPropagation()">
+                @if (txn.status === 'draft') {
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="submitDraft(txn)">
+                    {{ 'admin.financeManagement.actions.submit' | translate }}
+                  </button>
+                }
+                @if (txn.status === 'draft' || txn.status === 'pending') {
+                  <button type="button" class="btn btn-primary btn-sm" (click)="openAction('approve', txn)">
+                    {{ 'admin.financeManagement.actions.approve' | translate }}
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="openAction('reject', txn)">
+                    {{ 'admin.financeManagement.actions.reject' | translate }}
+                  </button>
+                }
+                @if (editable(txn)) {
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="openEditForm(txn)">
+                    {{ 'common.edit' | translate }}
+                  </button>
+                }
+                @if (txn.status === 'approved') {
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="openAction('reverse', txn)">
+                    {{ 'admin.financeManagement.actions.reverse' | translate }}
+                  </button>
+                }
+                <button type="button" class="btn btn-danger btn-sm" (click)="openAction('delete', txn)">
+                  {{ 'common.delete' | translate }}
+                </button>
+              </td>
+            </tr>
+            @if (expandedId === txn.id) {
+              <tr class="detail-row">
+                <td colspan="8">
+                  <div class="txn-detail">
+                    <div class="txn-detail-grid">
+                      <div>
+                        <p class="txn-detail-label">{{ 'admin.financeManagement.ledger.createdBy' | translate }}</p>
+                        <p>{{ txn.createdByName || '—' }}</p>
+                      </div>
+                      <div>
+                        <p class="txn-detail-label">{{ 'admin.financeManagement.ledger.approvedBy' | translate }}</p>
+                        <p>{{ txn.approvedByName || '—' }}</p>
+                      </div>
+                      @if (txn.linkedPaymentType) {
+                        <div>
+                          <p class="txn-detail-label">{{ 'admin.financeManagement.ledger.linkedPayment' | translate }}</p>
+                          <p>{{ paymentSourceLabel(txn.linkedPaymentType) }} #{{ txn.linkedPaymentId }}</p>
+                        </div>
+                      }
+                      @if (txn.reversalOfId) {
+                        <div>
+                          <p class="txn-detail-label">{{ 'admin.financeManagement.ledger.reversalOf' | translate }}</p>
+                          <p>#{{ txn.reversalOfId }}</p>
+                        </div>
+                      }
+                    </div>
+                    @if (txn.internalNotes) {
+                      <div>
+                        <p class="txn-detail-label">{{ 'admin.financeManagement.ledger.internalNotes' | translate }}</p>
+                        <p class="internal-notes">{{ txn.internalNotes }}</p>
+                      </div>
+                    }
+                    @if (txn.rejectionReason) {
+                      <div>
+                        <p class="txn-detail-label">{{ 'admin.financeManagement.ledger.rejectionReason' | translate }}</p>
+                        <p class="rejection-reason">{{ txn.rejectionReason }}</p>
+                      </div>
+                    }
+                    @if (!editable(txn)) {
+                      <p class="edit-window-hint">
+                        {{ 'admin.financeManagement.ledger.editWindowClosed' | translate }}
+                      </p>
+                    }
+                    @if (txn.attachmentUrl) {
+                      <a [href]="txn.attachmentUrl" target="_blank" rel="noopener" class="receipt-link">
+                        <app-icon name="doc" [size]="16" />
+                        {{ 'admin.financeManagement.ledger.viewAttachment' | translate }}
+                      </a>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          } @empty {
+            <tr>
+              <td colspan="8" class="empty-state">
+                <span class="empty-state-icon"><app-icon name="coin" [size]="24" /></span>
+                <p class="empty-title">{{ 'admin.financeManagement.ledger.empty' | translate }}</p>
+                <p class="empty-hint">{{ 'admin.financeManagement.ledger.emptyHint' | translate }}</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (ledger.total > pageSize) {
+      <div class="table-pagination">
+        <span class="pagination-info">
+          {{ 'admin.financeManagement.ledger.page' | translate: { page: page, total: totalPages } }}
+        </span>
+        <div class="pagination-controls">
+          <button type="button" class="btn btn-secondary btn-sm" [disabled]="page <= 1" (click)="changePage(-1)">
+            <app-icon name="chevron-left" [size]="14" />
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" [disabled]="page >= totalPages" (click)="changePage(1)">
+            <app-icon name="chevron-right" [size]="14" />
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Create / edit modal -->
+@if (showFormModal) {
+  <div class="modal-backdrop" (click)="closeFormModal()">
+    <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">
+        {{ (editing ? 'admin.financeManagement.editTitle' : 'admin.financeManagement.createTitle') | translate }}
+      </h3>
+      @if (formError) {
+        <div class="error-box"><p style="margin:0">{{ formError }}</p></div>
+      }
+
+      <!-- Type first: it is the most important field -->
+      <div class="field">
+        <label>{{ 'admin.financeManagement.form.type' | translate }} *</label>
+        <div class="type-toggle">
+          <button
+            type="button"
+            class="type-toggle-btn type-toggle-income"
+            [class.active]="formType === 'income'"
+            (click)="formType = 'income'; onTypeChange()"
+          >
+            {{ 'admin.financeManagement.type.income' | translate }}
+          </button>
+          <button
+            type="button"
+            class="type-toggle-btn type-toggle-expense"
+            [class.active]="formType === 'expense'"
+            (click)="formType = 'expense'; onTypeChange()"
+          >
+            {{ 'admin.financeManagement.type.expense' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>{{ 'admin.financeManagement.form.date' | translate }} *</label>
+          <app-date-picker [value]="formDate" (valueChange)="formDate = $event" />
+          @if (formFieldErrors['txnDate']) {
+            <p class="field-error">{{ formFieldErrors['txnDate'] }}</p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="finAmount">{{ 'admin.financeManagement.form.amount' | translate }} *</label>
+          <div class="amount-input-row">
+            <input id="finAmount" type="number" min="0.01" step="0.01" [(ngModel)]="formAmount" />
+            @if (amountPreview) {
+              <span class="amount-live-preview">{{ amountPreview }}</span>
+            }
+          </div>
+          @if (formFieldErrors['amount']) {
+            <p class="field-error">{{ formFieldErrors['amount'] }}</p>
+          }
+        </div>
+
+        <div class="field form-grid-full">
+          <label>{{ 'admin.financeManagement.form.category' | translate }} *</label>
+          <div class="cat-picker">
+            <input
+              type="text"
+              [(ngModel)]="categoryQuery"
+              (focus)="categoryDropdownOpen = true"
+              (click)="categoryDropdownOpen = true"
+              [placeholder]="'admin.financeManagement.form.categorySearch' | translate"
+            />
+            @if (categoryDropdownOpen) {
+              <ul class="cat-list">
+                @for (option of filteredCategoryOptions; track option.id) {
+                  <li (click)="selectCategory(option)">
+                    {{ option.label }}
+                    @if (formCategoryId === option.id) {
+                      <app-icon name="check" [size]="14" />
+                    }
+                  </li>
+                } @empty {
+                  <li class="cat-empty">{{ 'admin.financeManagement.form.categoryNoMatch' | translate }}</li>
+                }
+              </ul>
+            }
+          </div>
+          @if (canManageConfig) {
+            <div class="cat-add-row">
+              <input
+                type="text"
+                [placeholder]="'admin.financeManagement.form.addCategory' | translate"
+                #newCategoryInput
+                (keyup.enter)="addCategory(newCategoryInput.value); newCategoryInput.value = ''"
+              />
+            </div>
+          }
+          @if (formFieldErrors['categoryId']) {
+            <p class="field-error">{{ formFieldErrors['categoryId'] }}</p>
+          }
+        </div>
+
+        <div class="field form-grid-full">
+          <label for="finDescription">{{ 'admin.financeManagement.form.description' | translate }} *</label>
+          <textarea id="finDescription" rows="2" [(ngModel)]="formDescription"></textarea>
+          @if (formFieldErrors['description']) {
+            <p class="field-error">{{ formFieldErrors['description'] }}</p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="finReference">{{ 'admin.financeManagement.form.reference' | translate }}</label>
+          <input
+            id="finReference"
+            type="text"
+            [(ngModel)]="formReference"
+            [placeholder]="'admin.financeManagement.form.referenceHint' | translate"
+          />
+          <p class="field-hint">{{ 'admin.financeManagement.form.referenceAuto' | translate }}</p>
+        </div>
+
+        <div class="field">
+          <label for="finAttachment">{{ 'admin.financeManagement.form.attachment' | translate }}</label>
+          <input id="finAttachment" type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onAttachmentSelected($event)" />
+          @if (attachmentPreviewUrl) {
+            <img [src]="attachmentPreviewUrl" alt="" class="attachment-preview" />
+          }
+        </div>
+
+        <div class="field form-grid-full">
+          <label for="finNotes">{{ 'admin.financeManagement.form.internalNotes' | translate }}</label>
+          <textarea id="finNotes" rows="2" [(ngModel)]="formInternalNotes"></textarea>
+          <p class="field-hint">{{ 'admin.financeManagement.form.internalNotesHint' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Payment linking: avoid double-counting collections already recorded -->
+      @if (formType === 'income') {
+        <div class="payment-link-box">
+          <label class="checkbox-label">
+            <input type="checkbox" [ngModel]="paymentLinkEnabled" (ngModelChange)="togglePaymentLink()" />
+            {{ 'admin.financeManagement.paymentLink.title' | translate }}
+          </label>
+          @if (editing?.linkedPaymentType) {
+            <p class="field-hint">
+              {{
+                'admin.financeManagement.paymentLink.alreadyLinked'
+                  | translate
+                    : { source: paymentSourceLabel(editing.linkedPaymentType), id: editing.linkedPaymentId }
+              }}
+            </p>
+          }
+          @if (paymentLinkEnabled) {
+            <div class="payment-link-controls">
+              <select [(ngModel)]="paymentSourceFilter" (ngModelChange)="loadPaymentOptions()">
+                <option value="">{{ 'admin.financeManagement.paymentLink.allSources' | translate }}</option>
+                <option value="installment">{{ 'admin.financeManagement.source.installment' | translate }}</option>
+                <option value="picnic_payment">{{ 'admin.financeManagement.source.picnic_payment' | translate }}</option>
+                <option value="cost_share">{{ 'admin.financeManagement.source.cost_share' | translate }}</option>
+              </select>
+              <input
+                type="text"
+                [(ngModel)]="paymentSearch"
+                (ngModelChange)="loadPaymentOptions()"
+                [placeholder]="'admin.financeManagement.paymentLink.searchPlaceholder' | translate"
+              />
+            </div>
+            @if (paymentLoading) {
+              <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+            } @else {
+              <ul class="payment-list">
+                @for (payment of paymentOptions; track payment.sourceType + '-' + payment.sourceId) {
+                  <li
+                    class="payment-row"
+                    [class.selected]="selectedPayment === payment"
+                    (click)="pickPayment(payment)"
+                  >
+                    <span class="payment-main">
+                      <strong>{{ payment.memberName }}</strong>
+                      <span class="muted"> · {{ payment.detail }}</span>
+                    </span>
+                    <span class="payment-meta">
+                      {{ formatDate(payment.paidOn) }} · {{ taka(payment.amount) }}
+                    </span>
+                  </li>
+                } @empty {
+                  <li class="cat-empty">{{ 'admin.financeManagement.paymentLink.empty' | translate }}</li>
+                }
+              </ul>
+            }
+          }
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeFormModal()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        @if (!editing) {
+          <button type="button" class="btn btn-secondary" [disabled]="saving" (click)="save('draft')">
+            {{ 'admin.financeManagement.actions.saveDraft' | translate }}
+          </button>
+        }
+        <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save('pending')">
+          @if (saving) {
+            <span class="spinner"></span>
+          }
+          {{ 'admin.financeManagement.actions.savePending' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Approve / reject / reverse / delete modals -->
+@if (modal && actionTarget) {
+  <div class="modal-backdrop" (click)="closeAction()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">
+        {{ 'admin.financeManagement.modals.' + modal + '.title' | translate }}
+      </h3>
+      <p class="modal-message">
+        {{ actionTarget.description }} — {{ signedAmount(actionTarget) }}
+        @if (actionTarget.referenceNo) {
+          ({{ actionTarget.referenceNo }})
+        }
+      </p>
+      @if (modal === 'approve') {
+        <p class="modal-message hint-text">
+          {{ 'admin.financeManagement.modals.approve.twoPerson' | translate }}
+        </p>
+      }
+      @if (actionNeedsReason) {
+        <div class="field">
+          <label for="actionReason">
+            {{ 'admin.financeManagement.modals.' + modal + '.reason' | translate }} *
+          </label>
+          <textarea id="actionReason" rows="2" [(ngModel)]="actionReason"></textarea>
+        </div>
+      }
+      @if (actionError) {
+        <div class="error-box"><p style="margin:0">{{ actionError }}</p></div>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeAction()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [class.btn-primary]="modal === 'approve'"
+          [class.btn-danger]="modal !== 'approve'"
+          [disabled]="actionBusy"
+          (click)="confirmAction()"
+        >
+          @if (actionBusy) {
+            <span class="spinner"></span>
+          }
+          {{ 'admin.financeManagement.modals.' + modal + '.confirm' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

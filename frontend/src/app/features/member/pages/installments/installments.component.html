@@ -78,10 +78,7 @@
           @for (i of filtered; track i.id) {
             <tr>
               <td [attr.data-label]="'member.installments.monthColumn' | translate">
-                <span class="month-cell">
-                  <span class="month-name">{{ monthLabel(i.month) | translate }}</span>
-                  <span class="month-year">{{ i.year }}</span>
-                </span>
+                <span class="month-cell">{{ monthLabel(i.month) | translate }} - {{ i.year }}</span>
               </td>
               <td [attr.data-label]="'member.installments.amountColumn' | translate">
                 <span class="amount-cell">৳ {{ formatAmount(i.amount) }}</span>

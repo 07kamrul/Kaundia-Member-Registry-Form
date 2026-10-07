@@ -77,6 +77,12 @@ PERMISSION_CATALOG: tuple[PermissionDef, ...] = (
     # Notices & events
     PermissionDef("manage_notices", "notice", "manage", "Manage notices and events"),
     PermissionDef("manage_costs", "cost", "manage", "Record society costs, split them among members and collect payments"),
+    PermissionDef(
+        "manage_finance", "finance", "manage", "Record, edit and approve fund transactions in the transparency ledger"
+    ),
+    PermissionDef(
+        "manage_roadmap", "roadmap", "manage", "Add, edit, reorder and update the status of society roadmap items"
+    ),
     PermissionDef("notice.view", "notice", "view", "View notices"),
     PermissionDef("event.view", "event", "view", "View events"),
     # Reports
@@ -105,6 +111,8 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "manage_fee_settings",
         "manage_system_config",
         "manage_costs",
+        "manage_finance",
+        "manage_roadmap",
     ),
     AdminRole.ADMINISTRATOR.value: (
         "member.register",
@@ -117,6 +125,8 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "report.view_operational",
         "manage_system_config",
         "manage_fee_settings",
+        "manage_finance",
+        "manage_roadmap",
     ),
     "member": (
         "profile.view_own",

@@ -59,7 +59,9 @@
     "moreOptions": "আরও বিকল্প",
     "propertyRequests": "সম্পত্তি সংক্রান্ত অনুরোধ",
     "societyCosts": "সোসাইটি খরচ",
-    "costShares": "খরচের ভাগ"
+    "costShares": "খরচের ভাগ",
+    "fundTransparency": "ফান্ড স্বচ্ছতা",
+    "financeManagement": "আর্থিক ব্যবস্থাপনা"
   },
   "forbidden": {
     "title": "প্রবেশাধিকার নেই",
@@ -358,6 +360,88 @@
         "unpaid": "অনাদায়ী",
         "partial": "আংশিক",
         "paid": "পরিশোধিত"
+      }
+    },
+    "fundTransparency": {
+      "title": "ফান্ড স্বচ্ছতা",
+      "subtitle": "সোসাইটির প্রতিটি আর্থিক লেনদেন সবার জন্য উন্মুক্ত — আয়, ব্যয় ও ব্যালেন্স এক নজরে",
+      "downloadPdf": "রিপোর্ট ডাউনলোড (PDF)",
+      "currentBalance": "বর্তমান ব্যালেন্স",
+      "totalIncome": "সর্বমোট আয়",
+      "totalExpense": "সর্বমোট ব্যয়",
+      "netSaved": "নিট জমা",
+      "lastUpdated": "সর্বশেষ আপডেট",
+      "topTag": "সর্বোচ্চ",
+      "summaryLine": "এই সময়ে আয় হয়েছে {{income}} টাকা, ব্যয় হয়েছে {{expense}} টাকা, নিট জমা {{net}} টাকা।",
+      "incomeBreakdown": "কোন কোন খাত থেকে কত টাকা কালেকশন হয়েছে",
+      "expenseBreakdown": "কোন কোন খাতে কত টাকা খরচ হয়েছে",
+      "incomeBreakdownEmpty": "এই সময়কালে কোনো আয় নেই।",
+      "expenseBreakdownEmpty": "এই সময়কালে কোনো ব্যয় নেই।",
+      "period": {
+        "month": "এই মাস",
+        "year": "এই বছর",
+        "custom": "কাস্টম রেঞ্জ",
+        "all": "সর্বমোট",
+        "apply": "দেখান"
+      },
+      "errors": {
+        "loadFailed": "তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।",
+        "customRange": "কাস্টম রেঞ্জের জন্য শুরু ও শেষ তারিখ দুটোই দিন (শুরু তারিখ আগে হতে হবে)।",
+        "pdfFailed": "রিপোর্ট তৈরি করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।"
+      },
+      "filters": {
+        "search": "অনুসন্ধান",
+        "searchPlaceholder": "বিবরণ বা রেফারেন্স খুঁজুন…",
+        "type": "ধরন",
+        "allTypes": "সব ধরন",
+        "category": "খাত",
+        "allCategories": "সব খাত",
+        "dateRange": "তারিখ রেঞ্জ",
+        "amountRange": "পরিমাণ রেঞ্জ (৳)",
+        "min": "সর্বনিম্ন",
+        "max": "সর্বোচ্চ",
+        "reference": "রেফারেন্স নম্বর",
+        "approvedBy": "অনুমোদনকারী",
+        "reset": "রিসেট",
+        "clearAll": "✕ সব মুছুন"
+      },
+      "type": {
+        "income": "আয়",
+        "expense": "ব্যয়"
+      },
+      "ledger": {
+        "date": "তারিখ",
+        "description": "বিবরণ",
+        "category": "খাত",
+        "type": "ধরন",
+        "amount": "পরিমাণ",
+        "reference": "রেফারেন্স",
+        "approvedBy": "অনুমোদনকারী",
+        "reversalOf": "রিভার্সাল হয়েছে লেনদেন",
+        "viewAttachment": "সংযুক্তি দেখুন",
+        "count": "মোট {{count}}টি লেনদেন",
+        "page": "পৃষ্ঠা {{page}} / {{total}}",
+        "empty": "কোনো লেনদেন পাওয়া যায়নি",
+        "emptyHint": "ফিল্টার পরিবর্তন করে আবার দেখুন।"
+      },
+      "charts": {
+        "expenseDonut": "ব্যয়ের খাতভিত্তিক চিত্র",
+        "trend": "আয়-ব্যয়ের প্রবণতা",
+        "monthly": "মাসিক",
+        "yearly": "বার্ষিক",
+        "empty": "গ্রাফ দেখানোর মতো পর্যাপ্ত তথ্য এখনো নেই।"
+      },
+      "flags": {
+        "spike": "এই সময়ে {{category}} খরচ গত সময়ের চেয়ে {{pct}} বেশি",
+        "topCategories": "সবচেয়ে বেশি খরচ: {{categories}}"
+      },
+      "preview": {
+        "title": "সংযুক্তি প্রিভিউ",
+        "missing": "সংযুক্তিটি পাওয়া যাচ্ছে না। কমিটিকে জানান।"
+      },
+      "empty": {
+        "title": "এখনো কোনো লেনদেন প্রকাশিত হয়নি",
+        "hint": "কমিটি লেনদেন যোগ করে অনুমোদন করলে এখানে সোসাইটির সব আয়-ব্যয় দেখা যাবে।"
       }
     }
   },
@@ -744,7 +828,9 @@
         "property_type": "সম্পত্তির ধরন",
         "document_type": "দলিলের ধরন",
         "notice_category": "নোটিশ বিভাগ",
-        "event_category": "ইভেন্ট বিভাগ"
+        "event_category": "ইভেন্ট বিভাগ",
+        "finance_income_category": "আয়ের খাত (ফান্ড)",
+        "finance_expense_category": "ব্যয়ের খাত (ফান্ড)"
       },
       "addItem": "নতুন আইটেম যোগ করুন",
       "form": {
@@ -814,6 +900,13 @@
         "viewAll": "সব খরচ দেখুন",
         "quarterTotal": "এই ত্রৈমাসিকের মোট",
         "outstanding": "সদস্যদের বকেয়া"
+      },
+      "finance": {
+        "title": "ফান্ড স্বচ্ছতা",
+        "viewAll": "সব দেখুন",
+        "pending": "অনুমোদনের অপেক্ষায়",
+        "monthNet": "এই মাসের নিট",
+        "balance": "বর্তমান ব্যালেন্স"
       }
     },
     "notices": {
@@ -1164,6 +1257,138 @@
         "titleRequired": "শিরোনাম দিতে হবে।",
         "amountRequired": "শূন্যের বেশি পরিমাণ লিখুন।",
         "dateRequired": "খরচের তারিখ দিতে হবে।"
+      }
+    },
+    "financeManagement": {
+      "title": "আর্থিক ব্যবস্থাপনা",
+      "subtitle": "ফান্ডের আয়-ব্যয়ের লেনদেন যোগ, সম্পাদনা ও অনুমোদন করুন",
+      "create": "নতুন লেনদেন",
+      "createTitle": "নতুন লেনদেন যোগ করুন",
+      "editTitle": "লেনদেন সম্পাদনা",
+      "notice": {
+        "period": "রিপোর্টের সময়কাল",
+        "month": "এই মাস",
+        "year": "এই বছর",
+        "all": "সর্বমোট",
+        "publish": "রিপোর্ট নোটিশ প্রকাশ",
+        "done": "নোটিশ প্রকাশিত হয়েছে ✓"
+      },
+      "overview": {
+        "pending": "অনুমোদনের অপেক্ষায়",
+        "monthNet": "এই মাসের নিট",
+        "balance": "বর্তমান ব্যালেন্স",
+        "recent": "সর্বশেষ ৫টি লেনদেন",
+        "noRecent": "এখনো কোনো লেনদেন নেই।"
+      },
+      "status": {
+        "all": "সব",
+        "pending": "অপেক্ষমাণ",
+        "draft": "ড্রাফট",
+        "approved": "অনুমোদিত",
+        "rejected": "বাতিল"
+      },
+      "type": {
+        "income": "আয়",
+        "expense": "ব্যয়"
+      },
+      "source": {
+        "installment": "মাসিক চাঁদা",
+        "picnic_payment": "পিকনিক ফি",
+        "cost_share": "খরচের কিস্তি"
+      },
+      "filters": {
+        "type": "ধরন",
+        "allTypes": "সব ধরন",
+        "category": "খাত",
+        "allCategories": "সব খাত",
+        "search": "বিবরণ/রেফারেন্স খুঁজুন…",
+        "reset": "রিসেট"
+      },
+      "ledger": {
+        "date": "তারিখ",
+        "description": "বিবরণ",
+        "category": "খাত",
+        "type": "ধরন",
+        "amount": "পরিমাণ",
+        "status": "অবস্থা",
+        "reference": "রেফারেন্স",
+        "createdBy": "তৈরি করেছেন",
+        "approvedBy": "অনুমোদনকারী",
+        "linkedPayment": "সংযুক্ত পেমেন্ট",
+        "reversalOf": "রিভার্সাল হয়েছে লেনদেন",
+        "internalNotes": "অভ্যন্তরীণ নোট (শুধু কমিটি দেখে)",
+        "rejectionReason": "বাতিলের কারণ",
+        "viewAttachment": "সংযুক্তি দেখুন",
+        "editWindowClosed": "অনুমোদনের ৭ দিন পর সরাসরি সম্পাদনা বন্ধ — সংশোধনের জন্য রিভার্সাল তৈরি করুন।",
+        "count": "মোট {{count}}টি লেনদেন",
+        "page": "পৃষ্ঠা {{page}} / {{total}}",
+        "empty": "কোনো লেনদেন নেই",
+        "emptyHint": "'নতুন লেনদেন' বাটন থেকে প্রথম এন্ট্রি যোগ করুন।"
+      },
+      "form": {
+        "type": "ধরন",
+        "date": "তারিখ",
+        "amount": "পরিমাণ",
+        "category": "খাত",
+        "categorySearch": "খাত খুঁজুন বা লিখুন…",
+        "categoryNoMatch": "মিলে যাওয়া কোনো খাত নেই",
+        "addCategory": "নতুন খাত যোগ করুন (Enter)",
+        "description": "বিবরণ",
+        "reference": "রেফারেন্স নম্বর",
+        "referenceHint": "FT-…",
+        "referenceAuto": "খালি রাখলে স্বয়ংক্রিয়ভাবে তৈরি হবে",
+        "attachment": "সংযুক্তি (ছবি/PDF)",
+        "internalNotes": "অভ্যন্তরীণ নোট",
+        "internalNotesHint": "মেম্বাররা এই নোট দেখতে পাবে না।"
+      },
+      "paymentLink": {
+        "title": "পেমেন্ট রেকর্ডের সাথে লিংক করুন (ডাবল এন্ট্রি এড়াতে)",
+        "alreadyLinked": "বর্তমানে সংযুক্ত: {{source}} #{{id}}",
+        "allSources": "সব সোর্স",
+        "searchPlaceholder": "মেম্বারের নাম খুঁজুন…",
+        "empty": "এই ফিল্টারে লিংক করার মতো কোনো পেমেন্ট নেই।"
+      },
+      "actions": {
+        "submit": "অনুমোদনে পাঠান",
+        "approve": "অনুমোদন",
+        "reject": "বাতিল",
+        "reverse": "রিভার্সাল",
+        "saveDraft": "ড্রাফট সেভ",
+        "savePending": "সেভ ও অনুমোদনে পাঠান"
+      },
+      "modals": {
+        "approve": {
+          "title": "লেনদেন অনুমোদন",
+          "twoPerson": "যিনি এন্ট্রি তৈরি করেছেন তিনি নিজে অনুমোদন করতে পারবেন না — অন্য কমিটি সদস্য অনুমোদন করবেন।",
+          "confirm": "অনুমোদন করুন"
+        },
+        "reject": {
+          "title": "লেনদেন বাতিল",
+          "reason": "বাতিলের কারণ",
+          "confirm": "বাতিল করুন"
+        },
+        "reverse": {
+          "title": "রিভার্সাল (সংশোধন এন্ট্রি)",
+          "reason": "সংশোধনের কারণ",
+          "confirm": "রিভার্সাল তৈরি করুন"
+        },
+        "delete": {
+          "title": "লেনদেন মুছুন",
+          "reason": "মুছে ফেলার কারণ (অডিটে থাকবে)",
+          "confirm": "মুছুন"
+        }
+      },
+      "errors": {
+        "loadFailed": "তালিকা লোড করা যায়নি। আবার চেষ্টা করুন।",
+        "saveFailed": "সেভ করা যায়নি। আবার চেষ্টা করুন।",
+        "dateRequired": "তারিখ দিন।",
+        "amountRequired": "শূন্যের বেশি পরিমাণ দিন।",
+        "categoryRequired": "খাত নির্বাচন করুন।",
+        "descriptionRequired": "বিবরণ দিন।",
+        "reasonRequired": "কারণ লেখা আবশ্যক।",
+        "categoryAddFailed": "নতুন খাত যোগ করা যায়নি।",
+        "attachmentFailed": "সংযুক্তি আপলোড করা যায়নি।",
+        "actionFailed": "কাজটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।"
       }
     }
   },
