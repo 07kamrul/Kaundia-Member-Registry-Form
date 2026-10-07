@@ -16,6 +16,19 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    identifier: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+class ResetPasswordOK(BaseModel):
+    status: str = "ok"
+
+
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str

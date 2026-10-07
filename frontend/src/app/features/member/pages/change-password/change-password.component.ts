@@ -11,6 +11,7 @@ import {
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MemberService } from '../../../../core/services/member.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { PasswordFieldComponent } from '../../../../shared/password-field/password-field.component';
 
 export const MIN_PASSWORD_LENGTH = 8;
@@ -73,6 +74,7 @@ export class ChangePasswordComponent {
     private memberService: MemberService,
     private router: Router,
     private translate: TranslateService,
+    private auth: AuthService,
   ) {
     this.form = this.fb.group(
       {
@@ -120,6 +122,7 @@ export class ChangePasswordComponent {
       next: () => {
         this.submitting = false;
         this.success = true;
+        this.auth.markPasswordChanged();
         this.form.reset({ currentPassword: '', newPassword: '', confirmPassword: '' });
         setTimeout(() => this.router.navigate(['/dashboard']), REDIRECT_DELAY_MS);
         this.cdr.markForCheck();

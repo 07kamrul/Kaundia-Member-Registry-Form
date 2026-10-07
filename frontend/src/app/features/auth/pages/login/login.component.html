@@ -29,6 +29,11 @@
           <p class="field-error">{{ errorMessage('password') }}</p>
         }
       </div>
+      <div class="field" style="text-align:right;margin-top:-0.5rem">
+        <a routerLink="/forgot-password" style="font-size:0.85rem">
+          {{ 'auth.login.forgotPasswordLink' | translate }}
+        </a>
+      </div>
       <button type="submit" class="btn btn-primary" style="width:100%" [disabled]="submitting || form.invalid">
         {{ (submitting ? 'auth.login.loggingInButton' : 'auth.login.submitButton') | translate }}
       </button>

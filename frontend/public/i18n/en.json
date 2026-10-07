@@ -292,7 +292,39 @@
       "passwordRequiredError": "Password is required",
       "loginFailedError": "Login failed. Information is incorrect.",
       "showPassword": "Show password",
-      "hidePassword": "Hide password"
+      "hidePassword": "Hide password",
+      "forgotPasswordLink": "Forgot password?"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your member ID, username or registered email address and we will email you a password reset link.",
+      "identifierLabel": "Member ID / Username / Email",
+      "identifierRequiredError": "Member ID / username / email is required",
+      "submitButton": "Send Reset Link",
+      "sendingButton": "Sending...",
+      "sentMessage": "If an account exists for that identifier, a password reset link has been sent to its registered email address. Please check your inbox (and spam folder). The link expires in 30 minutes.",
+      "backToLogin": "Back to Login",
+      "errors": {
+        "requestFailed": "Could not send the reset request. Please try again."
+      }
+    },
+    "resetPassword": {
+      "title": "Set a New Password",
+      "subtitle": "Choose a strong new password for your account.",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "passwordHint": "Password must be at least 8 characters and include a number.",
+      "passwordRequiredError": "Password is required",
+      "mismatchError": "Passwords do not match",
+      "submitButton": "Reset Password",
+      "resettingButton": "Resetting...",
+      "successMessage": "Your password has been reset successfully. You can now log in with your new password.",
+      "missingTokenError": "This reset link is invalid. Please request a new password reset email.",
+      "invalidTokenError": "This reset link is invalid or has expired. Please request a new one.",
+      "weakPasswordError": "Password must be at least 8 characters and include a number.",
+      "errors": {
+        "resetFailed": "Could not reset the password. Please try again."
+      }
     }
   },
   "passwordField": {
@@ -484,7 +516,7 @@
         "messageSuffix": "'s member record will be permanently deleted. This action cannot be undone.",
         "confirmLabel": "Delete"
       },
-            "resetPasswordTitle": "Reset password and email new credentials",
+      "resetPasswordTitle": "Reset password and email new credentials",
       "resetModal": {
         "title": "Reset Password?",
         "messageSuffix": "'s login password will be reset, and the new password will be emailed to the member's registered email address.",

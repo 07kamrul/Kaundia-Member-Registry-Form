@@ -61,6 +61,7 @@ const ACCESS_TOKEN_KEY = 'krmf_access_token';
 const REFRESH_TOKEN_KEY = 'krmf_refresh_token';
 const ROLE_KEY = 'krmf_role';
 const PERMISSIONS_KEY = 'krmf_permissions';
+const MUST_CHANGE_PASSWORD_KEY = 'krmf_must_change_password';
 
 function readStoredPermissions(): string[] {
   try {
@@ -79,6 +80,9 @@ export class AuthService {
     (localStorage.getItem(ROLE_KEY) as UserRole | null) ?? null,
   );
   private permissionsValue = signal<string[]>(readStoredPermissions());
+  private mustChangePasswordValue = signal<boolean>(
+    localStorage.getItem(MUST_CHANGE_PASSWORD_KEY) === '1',
+  );
 
   readonly isAuthenticated = signal<boolean>(!!this.accessToken());
 
@@ -98,6 +102,10 @@ export class AuthService {
 
   get permissions(): string[] {
     return this.permissionsValue();
+  }
+
+  get mustChangePassword(): boolean {
+    return this.mustChangePasswordValue();
   }
 
   landingTier(): LandingTier {
@@ -125,6 +133,17 @@ export class AuthService {
       .pipe(tap((res) => this.storeSession(res, res.role)));
   }
 
+  requestPasswordReset(identifier: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiBaseUrl}/forgot-password`, { identifier });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiBaseUrl}/reset-password`, {
+      token,
+      new_password: newPassword,
+    });
+  }
+
   private storeSession(res: TokenResponse, role: UserRole): void {
     const permissions = res.permissions ?? [];
     this.memberService.clearProfileCache();
@@ -137,6 +156,13 @@ export class AuthService {
     localStorage.setItem(REFRESH_TOKEN_KEY, res.refresh_token);
     localStorage.setItem(ROLE_KEY, role);
     localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(permissions));
+    const mustChange = res.must_change_password === true;
+    this.mustChangePasswordValue.set(mustChange);
+    if (mustChange) {
+      localStorage.setItem(MUST_CHANGE_PASSWORD_KEY, '1');
+    } else {
+      localStorage.removeItem(MUST_CHANGE_PASSWORD_KEY);
+    }
   }
 
   logout(): void {
@@ -150,6 +176,14 @@ export class AuthService {
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(ROLE_KEY);
     localStorage.removeItem(PERMISSIONS_KEY);
+    localStorage.removeItem(MUST_CHANGE_PASSWORD_KEY);
+    this.mustChangePasswordValue.set(false);
+  }
+
+  /** Called after the user successfully sets a new password, unlocking the app. */
+  markPasswordChanged(): void {
+    this.mustChangePasswordValue.set(false);
+    localStorage.removeItem(MUST_CHANGE_PASSWORD_KEY);
   }
 
   handleUnauthorized(): void {

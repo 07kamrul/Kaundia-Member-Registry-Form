@@ -12,9 +12,11 @@ from app.models.event import Event
 from app.models.notice import Notice
 from app.models.picnic_payment import PicnicPayment
 from app.models.member_id_sequence import MemberIdSequence
+from app.models.password_reset import PasswordResetToken
 
 __all__ = [
     "Member",
+    "PasswordResetToken",
     "MemberStatus",
     "Property",
     "CoOwner",

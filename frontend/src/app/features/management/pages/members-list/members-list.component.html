@@ -67,7 +67,7 @@
                   >
                     <app-icon name="eye" [size]="16" />
                   </button>
-                  @if (auth.hasPermission('member.manage')) {
+                  @if (auth.hasPermission('member.manage') && m.status === 'approved') {
                     <button
                       type="button"
                       class="btn btn-secondary btn-sm btn-icon"

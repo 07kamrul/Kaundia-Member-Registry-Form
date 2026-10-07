@@ -533,7 +533,9 @@ async def reset_member_password(
             detail="This member has no login yet. Reset is available after approval.",
         )
 
-    temp_password = generate_temp_password()
+    # Fixed shared temporary password for admin-initiated resets; the member
+    # is forced to change it on first sign-in via must_change_password below.
+    temp_password = "UKAMKS123"
     credential.password_hash = await hash_password_async(temp_password)
     credential.must_change_password = True
     record_audit(
