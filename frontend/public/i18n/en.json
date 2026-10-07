@@ -207,7 +207,13 @@
       "statusDue": "Due",
       "emptyState": "No installments found",
       "paymentNotice": "Subscription payments are made directly at the office (cash/bKash/bank); the administration updates it here.",
-      "loadError": "Failed to load installment list."
+      "loadError": "Failed to load installment list.",
+      "subtitle": "Your monthly subscription payments at a glance.",
+      "summaryPaid": "Total Paid",
+      "summaryDue": "Outstanding",
+      "summaryPayments": "Payments Made",
+      "filterAll": "All Years",
+      "emptyFiltered": "No payments found for this year."
     },
     "dashboard": {
       "memberIdLabel": "Member ID",
@@ -328,7 +334,9 @@
         "submitFailed": "Could not send the request. Please try again.",
         "withdrawFailed": "Could not withdraw the request.",
         "propertyNotFound": "The requested property was not found."
-      }
+      },
+      "propertySectionTitle": "Property details",
+      "documentsSectionTitle": "Documents"
     }
   },
   "auth": {
@@ -1135,7 +1143,9 @@
       "maxFileSizeNote": "Max {{maxMb}} MB (JPG/PNG/PDF)",
       "docFileMissing": "A file must be attached for this document",
       "docFileTypeError": "Only JPG, PNG, or PDF files are accepted",
-      "docFileSizeError": "File size must not exceed {{maxMb}} MB"
+      "docFileSizeError": "File size must not exceed {{maxMb}} MB",
+      "dagCsLabel": "CS Dag No.",
+      "dagRsLabel": "RS Dag No."
     },
     "urgentContact": {
       "nameLabel": "Name",

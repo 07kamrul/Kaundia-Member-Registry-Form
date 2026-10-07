@@ -1,7 +1,8 @@
-<div style="max-width:52rem;margin:0 auto">
+<div class="installments-page">
   <div class="page-header">
     <div>
-      <h1 class="page-title">{{ 'member.installments.title' | translate }} @if (year) { — {{ year }} }</h1>
+      <h1 class="page-title">{{ 'member.installments.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'member.installments.subtitle' | translate }}</p>
     </div>
   </div>
 
@@ -10,8 +11,61 @@
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-icon stat-icon-paid">
+          <app-icon name="check-circle" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'member.installments.summaryPaid' | translate }}</p>
+          <p class="stat-card-value">৳ {{ formatAmount(paidTotal) }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon stat-icon-due">
+          <app-icon name="alert" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'member.installments.summaryDue' | translate }}</p>
+          <p class="stat-card-value">৳ {{ formatAmount(dueTotal) }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon stat-icon-count">
+          <app-icon name="coin" [size]="22" />
+        </div>
+        <div>
+          <p class="stat-card-label">{{ 'member.installments.summaryPayments' | translate }}</p>
+          <p class="stat-card-value">{{ paidCount }} / {{ filtered.length }}</p>
+        </div>
+      </div>
+    </div>
+
+    @if (years.length > 1) {
+      <div class="year-filter" role="group" aria-label="{{ 'member.installments.title' | translate }}">
+        <button
+          type="button"
+          class="year-chip"
+          [class.active]="selectedYear === 'all'"
+          (click)="selectYear('all')"
+        >
+          {{ 'member.installments.filterAll' | translate }}
+        </button>
+        @for (y of years; track y) {
+          <button
+            type="button"
+            class="year-chip"
+            [class.active]="selectedYear === y"
+            (click)="selectYear(y)"
+          >
+            {{ y }}
+          </button>
+        }
+      </div>
+    }
+
     <div class="data-table-wrap">
-      <table class="data-table">
+      <table class="data-table data-table-cards">
         <thead>
           <tr>
             <th>{{ 'member.installments.monthColumn' | translate }}</th>
@@ -21,25 +75,51 @@
           </tr>
         </thead>
         <tbody>
-          @for (i of installments; track i.id) {
+          @for (i of filtered; track i.id) {
             <tr>
-              <td>{{ monthLabel(i.month) | translate }}</td>
-              <td>৳ {{ i.amount }}</td>
-              <td>
-                <span class="status-badge" [class.status-paid]="i.status === 'paid'" [class.status-due]="i.status !== 'paid'">
+              <td [attr.data-label]="'member.installments.monthColumn' | translate">
+                <span class="month-cell">
+                  <span class="month-name">{{ monthLabel(i.month) | translate }}</span>
+                  <span class="month-year">{{ i.year }}</span>
+                </span>
+              </td>
+              <td [attr.data-label]="'member.installments.amountColumn' | translate">
+                <span class="amount-cell">৳ {{ formatAmount(i.amount) }}</span>
+              </td>
+              <td [attr.data-label]="'member.installments.statusColumn' | translate">
+                <span
+                  class="status-badge"
+                  [class.status-paid]="i.status === 'paid'"
+                  [class.status-due]="i.status !== 'paid'"
+                >
                   {{ (i.status === 'paid' ? 'member.installments.statusPaid' : 'member.installments.statusDue') | translate }}
                 </span>
               </td>
-              <td>{{ i.paidAt || '—' }}</td>
+              <td [attr.data-label]="'member.installments.paidAtColumn' | translate">
+                @if (i.paidAt) {
+                  <span>{{ formatDate(i.paidAt) }}</span>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
             </tr>
           } @empty {
-            <tr><td colspan="4" class="empty-state">{{ 'member.installments.emptyState' | translate }}</td></tr>
+            <tr>
+              <td colspan="4" class="empty-state">
+                <app-icon class="empty-icon" name="wallet" [size]="34" />
+                <p class="empty-title">
+                  {{ (installments.length ? 'member.installments.emptyFiltered' : 'member.installments.emptyState') | translate }}
+                </p>
+                <p class="empty-hint">{{ 'member.installments.paymentNotice' | translate }}</p>
+              </td>
+            </tr>
           }
         </tbody>
       </table>
     </div>
-    <p class="page-subtitle" style="margin-top:0.75rem">
-      {{ 'member.installments.paymentNotice' | translate }}
-    </p>
+
+    @if (filtered.length) {
+      <p class="payment-note">{{ 'member.installments.paymentNotice' | translate }}</p>
+    }
   }
 </div>

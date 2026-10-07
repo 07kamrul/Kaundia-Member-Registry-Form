@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://kaundiaapi.anshintech.dpdns.org/api',
+  apiBaseUrl: 'http://localhost:8000/api',
 };

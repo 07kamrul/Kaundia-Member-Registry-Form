@@ -31,6 +31,8 @@ export class ConfigListService {
     if (!cached) {
       cached = this.http.get<ConfigListItemApiModel[]>(`${this.base}/${category}`).pipe(
         map((rows) => rows.map((r) => r.value)),
+        // An unconfigured category returns [] — keep showing the defaults.
+        map((values) => (values.length ? values : defaultValues)),
         catchError(() => of(defaultValues)),
         shareReplay({ bufferSize: 1, refCount: false }),
       );

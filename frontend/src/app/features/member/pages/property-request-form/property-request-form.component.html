@@ -25,7 +25,12 @@
       <div class="error-box" role="alert"><p style="margin:0">{{ submitError }}</p></div>
     }
 
-    <div class="card profile-section">
+    <section class="card pr-card">
+      <div class="pr-card-head">
+        <span class="pr-card-icon"><app-icon name="pin" [size]="17" /></span>
+        <h2 class="pr-card-title">{{ 'member.propertyRequests.propertySectionTitle' | translate }}</h2>
+      </div>
+
       <div class="field">
         <label>{{ 'registration.property.typeLabel' | translate }} <span class="required">*</span></label>
         <div class="checkbox-row">
@@ -39,9 +44,9 @@
         @if (isTypeChecked('অন্যান্য')) {
           <input
             type="text"
+            class="pr-other-input"
             [(ngModel)]="propertyTypeOther"
             [placeholder]="'registration.property.typeOtherPlaceholder' | translate"
-            style="max-width:14rem;width:100%;margin-top:0.5rem"
           />
         }
         @if (showPropertyTypeError()) {
@@ -49,7 +54,7 @@
         }
       </div>
 
-      <div class="grid-2">
+      <div class="pr-grid pr-grid-2">
         <div class="field">
           <label for="pr-khatianNo">{{ 'registration.property.khatianNoLabel' | translate }} <span class="required">*</span></label>
           <input id="pr-khatianNo" type="text" [(ngModel)]="khatianNo" />
@@ -63,22 +68,17 @@
         </div>
       </div>
 
-      <div class="grid-3">
+      <div class="pr-grid pr-grid-4">
         <div class="field">
-          <label>{{ 'registration.property.dagNoLabel' | translate }} <span class="required">*</span></label>
-          <div class="flex-row-wrap">
-            <div style="display:flex;align-items:center;gap:0.5rem;flex:1 1 8rem">
-              <label for="pr-dagNoCs" style="font-size:0.875rem;color:#4b5563">CS:</label>
-              <input id="pr-dagNoCs" type="text" [(ngModel)]="dagNoCs" />
-            </div>
-            <div style="display:flex;align-items:center;gap:0.5rem;flex:1 1 8rem">
-              <label for="pr-dagNoRs" style="font-size:0.875rem;color:#4b5563">RS:</label>
-              <input id="pr-dagNoRs" type="text" [(ngModel)]="dagNoRs" />
-            </div>
-          </div>
+          <label for="pr-dagNoCs">{{ 'registration.property.dagCsLabel' | translate }} <span class="required">*</span></label>
+          <input id="pr-dagNoCs" type="text" [(ngModel)]="dagNoCs" />
           @if (showDagNoError('cs')) {
             <p class="field-error">{{ 'registration.property.dagNoCsRequired' | translate }}</p>
           }
+        </div>
+        <div class="field">
+          <label for="pr-dagNoRs">{{ 'registration.property.dagRsLabel' | translate }} <span class="required">*</span></label>
+          <input id="pr-dagNoRs" type="text" [(ngModel)]="dagNoRs" />
           @if (showDagNoError('rs')) {
             <p class="field-error">{{ 'registration.property.dagNoRsRequired' | translate }}</p>
           }
@@ -117,7 +117,7 @@
         </div>
       </div>
 
-      <div class="field" style="margin-bottom:0">
+      <div class="field pr-ownership-field">
         <label>{{ 'registration.property.ownershipLabel' | translate }} <span class="required">*</span></label>
         <div class="radio-group">
           @for (t of ownershipTypes; track t) {
@@ -132,21 +132,29 @@
         }
 
         @if (ownership === 'যৌথ') {
-          <div class="field" style="margin-top:0.75rem;margin-bottom:0">
+          <div class="pr-co-owners">
             <label>{{ 'member.propertyRequests.coOwnersLabel' | translate }}</label>
             @for (owner of coOwners; track $index; let i = $index) {
               <div class="pr-co-owner-row">
                 <input
+                  class="pr-co-owner-name"
                   type="text"
                   [(ngModel)]="owner.ownerName"
                   [placeholder]="'member.propertyRequests.coOwnerNamePlaceholder' | translate"
                 />
                 <input
+                  class="pr-co-owner-phone"
                   type="text"
+                  inputmode="tel"
                   [(ngModel)]="owner.ownerPhone"
                   [placeholder]="'member.profile.mobileLabel' | translate"
                 />
-                <button type="button" class="btn btn-danger btn-sm" (click)="removeCoOwner(i)">
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm pr-remove-btn"
+                  (click)="removeCoOwner(i)"
+                  [attr.aria-label]="'common.delete' | translate"
+                >
                   <app-icon name="trash" [size]="14" />
                 </button>
               </div>
@@ -154,45 +162,51 @@
             @if (showCoOwnersError()) {
               <p class="field-error">{{ 'member.propertyRequests.coOwnerNameRequired' | translate }}</p>
             }
-            <button type="button" class="btn btn-secondary btn-sm" (click)="addCoOwner()">
+            <button type="button" class="btn btn-secondary btn-sm pr-add-btn" (click)="addCoOwner()">
               <app-icon name="plus" [size]="14" />
               {{ 'member.propertyRequests.addCoOwnerButton' | translate }}
             </button>
           </div>
         }
       </div>
-    </div>
+    </section>
 
-    <div class="card profile-section">
-      <div class="field" style="margin-bottom:0">
-        <label>{{ 'member.propertyRequests.docsLabel' | translate }}</label>
-        <p class="field-hint">{{ 'registration.property.maxFileSizeNote' | translate: { maxMb: maxDocFileMb } }}</p>
+    <section class="card pr-card">
+      <div class="pr-card-head">
+        <span class="pr-card-icon"><app-icon name="doc" [size]="17" /></span>
+        <h2 class="pr-card-title">{{ 'member.propertyRequests.documentsSectionTitle' | translate }}</h2>
+      </div>
+      <p class="field-hint pr-docs-hint">{{ 'registration.property.maxFileSizeNote' | translate: { maxMb: maxDocFileMb } }}</p>
 
-        @if (mode === 'edit') {
-          <h4 class="pr-docs-subhead">{{ 'member.propertyRequests.existingDocsLabel' | translate }}</h4>
-          @if (existingDocs.length === 0) {
-            <p class="field-hint">{{ 'member.propertyRequests.noExistingDocs' | translate }}</p>
-          }
-          @for (doc of existingDocs; track doc.docType) {
-            <div class="pr-doc-row">
-              <label class="checkbox-item">
-                <input type="checkbox" [(ngModel)]="doc.keep" />
-                {{ doc.docType }}
-              </label>
-              @if (doc.filePath) {
-                <span class="pr-doc-kept" [class.pr-doc-dropped]="!doc.keep">
-                  {{ doc.keep ? ('member.propertyRequests.docKept' | translate) : ('member.propertyRequests.docDropped' | translate) }}
-                </span>
-              }
-            </div>
-          }
+      @if (mode === 'edit') {
+        <h3 class="pr-subhead">{{ 'member.propertyRequests.existingDocsLabel' | translate }}</h3>
+        @if (existingDocs.length === 0) {
+          <p class="field-hint">{{ 'member.propertyRequests.noExistingDocs' | translate }}</p>
+        } @else {
+          <div class="pr-existing-list">
+            @for (doc of existingDocs; track doc.docType) {
+              <div class="pr-existing-doc">
+                <label class="checkbox-item">
+                  <input type="checkbox" [(ngModel)]="doc.keep" />
+                  {{ doc.docType }}
+                </label>
+                @if (doc.filePath) {
+                  <span class="pr-doc-pill" [class.pr-doc-dropped]="!doc.keep">
+                    {{ doc.keep ? ('member.propertyRequests.docKept' | translate) : ('member.propertyRequests.docDropped' | translate) }}
+                  </span>
+                }
+              </div>
+            }
+          </div>
         }
+      }
 
-        <h4 class="pr-docs-subhead">{{ 'member.propertyRequests.newDocsLabel' | translate }}</h4>
-        @for (doc of newDocs; track $index; let i = $index) {
+      <h3 class="pr-subhead">{{ 'member.propertyRequests.newDocsLabel' | translate }}</h3>
+      @for (doc of newDocs; track $index; let i = $index) {
+        <div class="pr-new-doc-item">
           <div class="pr-new-doc-row">
-            <div class="field" style="margin-bottom:0">
-              <select [(ngModel)]="doc.docType">
+            <div class="field pr-doc-type-field">
+              <select [(ngModel)]="doc.docType" [class.is-invalid]="submitAttempted && (!doc.docType || !!doc.error)">
                 <option [ngValue]="''" disabled>{{ 'common.select' | translate }}</option>
                 @for (option of documentOptions; track option) {
                   <option [ngValue]="option">{{ option }}</option>
@@ -200,26 +214,34 @@
               </select>
             </div>
             <label class="pr-file-button">
-              📎 {{ (doc.file ? doc.file.name : ('registration.property.attachFileButton' | translate)) }}
+              📎
+              <span class="pr-file-name">
+                {{ doc.file ? doc.file.name : ('registration.property.attachFileButton' | translate) }}
+              </span>
               <input type="file" accept="image/jpeg,image/png,application/pdf" (change)="onNewDocFileChange(i, $event)" style="display:none" />
             </label>
-            <button type="button" class="btn btn-danger btn-sm" (click)="removeNewDoc(i)">
+            <button
+              type="button"
+              class="btn btn-danger btn-sm pr-remove-btn"
+              (click)="removeNewDoc(i)"
+              [attr.aria-label]="'common.delete' | translate"
+            >
               <app-icon name="trash" [size]="14" />
             </button>
           </div>
           @if (doc.error) {
-            <p class="field-error">{{ doc.error }}</p>
+            <p class="field-error pr-row-error">{{ doc.error }}</p>
           }
           @if (!doc.error && submitAttempted && (!doc.docType || !doc.file)) {
-            <p class="field-error">{{ 'member.propertyRequests.docIncomplete' | translate }}</p>
+            <p class="field-error pr-row-error">{{ 'member.propertyRequests.docIncomplete' | translate }}</p>
           }
-        }
-        <button type="button" class="btn btn-secondary btn-sm" (click)="addNewDoc()">
-          <app-icon name="plus" [size]="14" />
-          {{ 'member.propertyRequests.addDocButton' | translate }}
-        </button>
-      </div>
-    </div>
+        </div>
+      }
+      <button type="button" class="btn btn-secondary btn-sm pr-add-btn" (click)="addNewDoc()">
+        <app-icon name="plus" [size]="14" />
+        {{ 'member.propertyRequests.addDocButton' | translate }}
+      </button>
+    </section>
 
     <div class="pr-form-actions">
       <button type="button" class="btn btn-secondary" (click)="backToProfile()">

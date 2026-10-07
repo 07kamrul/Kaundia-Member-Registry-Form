@@ -207,7 +207,13 @@
       "statusDue": "বকেয়া",
       "emptyState": "কোনো কিস্তি নেই",
       "paymentNotice": "চাঁদা পরিশোধ অফিসে সরাসরি (নগদ/বিকাশ/ব্যাংক) করা হয়; প্রশাসন তা এখানে হালনাগাদ করেন।",
-      "loadError": "কিস্তির তালিকা লোড করা যায়নি।"
+      "loadError": "কিস্তির তালিকা লোড করা যায়নি।",
+      "subtitle": "আপনার মাসিক চাঁদা পরিশোধের হিসাব এক নজরে।",
+      "summaryPaid": "মোট পরিশোধিত",
+      "summaryDue": "মোট বকেয়া",
+      "summaryPayments": "পরিশোধিত কিস্তি",
+      "filterAll": "সব বছর",
+      "emptyFiltered": "এই বছরের কোনো পেমেন্ট পাওয়া যায়নি।"
     },
     "dashboard": {
       "memberIdLabel": "সদস্য আইডি",
@@ -328,7 +334,9 @@
         "submitFailed": "অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন।",
         "withdrawFailed": "অনুরোধ প্রত্যাহার করা যায়নি।",
         "propertyNotFound": "অনুরোধকৃত সম্পত্তিটি পাওয়া যায়নি।"
-      }
+      },
+      "propertySectionTitle": "সম্পত্তির তথ্য",
+      "documentsSectionTitle": "নথিপত্র"
     }
   },
   "auth": {
@@ -1135,7 +1143,9 @@
       "maxFileSizeNote": "সর্বোচ্চ {{maxMb}} এমবি (JPG/PNG/PDF)",
       "docFileMissing": "এই কাগজের ফাইল সংযুক্ত করা আবশ্যক",
       "docFileTypeError": "শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য",
-      "docFileSizeError": "ফাইলের সাইজ সর্বোচ্চ {{maxMb}} এমবি হতে হবে"
+      "docFileSizeError": "ফাইলের সাইজ সর্বোচ্চ {{maxMb}} এমবি হতে হবে",
+      "dagCsLabel": "সিএস দাগ নং",
+      "dagRsLabel": "আরএস দাগ নং"
     },
     "urgentContact": {
       "nameLabel": "নাম",

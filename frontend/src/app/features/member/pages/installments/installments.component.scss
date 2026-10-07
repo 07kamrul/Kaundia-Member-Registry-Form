@@ -1,0 +1,107 @@
+.installments-page {
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.stat-icon-paid {
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+}
+
+.stat-icon-due {
+  background: var(--red-50);
+  color: var(--red-700);
+}
+
+.stat-icon-count {
+  background: var(--amber-50);
+  color: var(--gold-strong);
+}
+
+.year-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.year-chip {
+  padding: 0.35rem 0.95rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--gray-700);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.year-chip:hover {
+  border-color: var(--emerald-600);
+}
+
+.year-chip.active {
+  background: var(--emerald-600);
+  border-color: var(--emerald-600);
+  color: var(--surface);
+}
+
+.month-cell {
+  display: block;
+  text-align: right;
+}
+
+.month-name {
+  display: block;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.month-year {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.amount-cell {
+  font-weight: 700;
+  color: var(--gray-800);
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--gray-400);
+}
+
+.empty-icon {
+  color: var(--gray-400);
+  margin-bottom: 0.4rem;
+}
+
+.empty-title {
+  margin: 0 0 0.3rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.empty-hint {
+  margin: 0;
+  color: var(--gray-600);
+  font-size: 0.85rem;
+}
+
+.payment-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--gray-600);
+  font-size: 0.85rem;
+}
