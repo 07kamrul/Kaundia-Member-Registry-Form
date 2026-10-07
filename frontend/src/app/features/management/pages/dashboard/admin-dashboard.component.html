@@ -17,7 +17,7 @@
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
     <div class="data-table-wrap">
-      <table class="data-table">
+      <table class="data-table data-table-cards">
         <thead>
           <tr>
             <th>{{ 'admin.dashboard.tableHeaders.reference' | translate }}</th>
@@ -31,12 +31,12 @@
         <tbody>
           @for (s of pending; track s.id) {
             <tr>
-              <td>{{ referenceFor(s) }}</td>
-              <td>{{ s.fullName }}</td>
-              <td>{{ s.mobile }}</td>
-              <td>{{ s.propertiesCount ?? '—' }}{{ 'admin.dashboard.propertiesUnit' | translate }}</td>
-              <td>{{ s.createdAt | date: 'yyyy-MM-dd' }}</td>
-              <td>
+              <td [attr.data-label]="'admin.dashboard.tableHeaders.reference' | translate">{{ referenceFor(s) }}</td>
+              <td [attr.data-label]="'admin.dashboard.tableHeaders.applicant' | translate">{{ s.fullName }}</td>
+              <td [attr.data-label]="'admin.dashboard.tableHeaders.mobile' | translate">{{ s.mobile }}</td>
+              <td [attr.data-label]="'admin.dashboard.tableHeaders.properties' | translate">{{ s.propertiesCount ?? '—' }}{{ 'admin.dashboard.propertiesUnit' | translate }}</td>
+              <td [attr.data-label]="'admin.dashboard.tableHeaders.submittedDate' | translate">{{ s.createdAt | date: 'yyyy-MM-dd' }}</td>
+              <td [attr.data-label]="'admin.dashboard.detailsLink' | translate">
                 <a
                   [routerLink]="['/submissions', s.id]"
                   class="btn btn-primary btn-sm"
