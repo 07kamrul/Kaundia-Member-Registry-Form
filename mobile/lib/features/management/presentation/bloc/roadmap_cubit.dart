@@ -49,7 +49,8 @@ class RoadmapState extends Equatable {
         busyItemId: busyItemId == _same ? this.busyItemId : busyItemId(),
         actionError: actionError == _same ? this.actionError : actionError(),
         history: history ?? this.history,
-        archiveCount: archiveCount == _same ? this.archiveCount : archiveCount(),
+        archiveCount:
+            archiveCount == _same ? this.archiveCount : archiveCount(),
       );
 
   static T _same<T>() => throw UnsupportedError('sentinel');
@@ -95,8 +96,10 @@ class RoadmapCubit extends Cubit<RoadmapState> {
     }
   }
 
-  Future<bool> setStatus(RoadmapItem item, RoadmapStatus status, {bool notify = true}) =>
-      _mutate(item.id, () => _repository.setStatus(item.id, status, notify: notify));
+  Future<bool> setStatus(RoadmapItem item, RoadmapStatus status,
+          {bool notify = true}) =>
+      _mutate(item.id,
+          () => _repository.setStatus(item.id, status, notify: notify));
 
   Future<bool> deleteItem(RoadmapItem item) =>
       _mutate(item.id, () => _repository.deleteItem(item.id));
@@ -169,7 +172,8 @@ class RoadmapCubit extends Cubit<RoadmapState> {
     emit(state.copyWith(actionError: () => null, busyItemId: () => -1));
     try {
       final archived = await _repository.archive(onlyDone: onlyDone);
-      emit(state.copyWith(busyItemId: () => null, archiveCount: () => archived, history: null));
+      emit(state.copyWith(
+          busyItemId: () => null, archiveCount: () => archived, history: null));
       await load();
       return true;
     } catch (e) {

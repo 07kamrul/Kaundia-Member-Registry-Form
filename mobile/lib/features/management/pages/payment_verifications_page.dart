@@ -18,10 +18,12 @@ class PaymentVerificationsPage extends StatefulWidget {
   final String? propertyId;
   final String? returnUrl;
 
-  const PaymentVerificationsPage({super.key, this.id, this.propertyId, this.returnUrl});
+  const PaymentVerificationsPage(
+      {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
-  State<PaymentVerificationsPage> createState() => _PaymentVerificationsPageState();
+  State<PaymentVerificationsPage> createState() =>
+      _PaymentVerificationsPageState();
 }
 
 class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
@@ -35,7 +37,8 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
       child: BlocConsumer<PaymentVerificationsCubit, PaymentVerificationsState>(
         listener: (context, state) {
           if (state.error != null) {
-            showAppToast(context, describeApiError(context, state.error), error: true);
+            showAppToast(context, describeApiError(context, state.error),
+                error: true);
           }
         },
         builder: (context, state) {
@@ -88,7 +91,7 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
     final months = p.installments
         .map((i) => '${monthLabelOf(loc, i.month)} ${i.year}')
         .join(', ');
-    final busy = state_busy(cubit, p.id);
+    final busy = _isBusy(cubit, p.id);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Padding(
@@ -109,7 +112,8 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
                             .titleSmall
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
-                      Text(months, style: Theme.of(context).textTheme.bodySmall),
+                      Text(months,
+                          style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 ),
@@ -120,11 +124,17 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
               ],
             ),
             const SizedBox(height: 8),
-            InfoRow(label: loc.adminPaymentVerificationsMethod, value: p.method),
-            InfoRow(label: loc.adminPaymentVerificationsReference, value: p.transactionRef),
-            InfoRow(label: loc.adminPaymentVerificationsPaidOn, value: p.paidOn),
+            InfoRow(
+                label: loc.adminPaymentVerificationsMethod, value: p.method),
+            InfoRow(
+                label: loc.adminPaymentVerificationsReference,
+                value: p.transactionRef),
+            InfoRow(
+                label: loc.adminPaymentVerificationsPaidOn, value: p.paidOn),
             if (p.senderAccount != null && p.senderAccount!.isNotEmpty)
-              InfoRow(label: loc.adminPaymentVerificationsSender, value: p.senderAccount!),
+              InfoRow(
+                  label: loc.adminPaymentVerificationsSender,
+                  value: p.senderAccount!),
             if (p.note != null && p.note!.isNotEmpty) Text('"${p.note}"'),
             if (p.rejectionReason != null && p.rejectionReason!.isNotEmpty)
               Text(
@@ -141,13 +151,16 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
                     label: loc.adminPaymentVerificationsViewProof,
                     variant: AppButtonVariant.ghost,
                     icon: Icons.visibility_outlined,
-                    onPressed: () => showImagePreview(context, p.proofUrl!, p.transactionRef),
+                    onPressed: () => showImagePreview(
+                        context, p.proofUrl!, p.transactionRef),
                   ),
                 if (p.status == 'pending') ...[
                   AppButton(
                     label: loc.adminPaymentVerificationsReject,
                     variant: AppButtonVariant.danger,
-                    onPressed: busy ? null : () => _rejectDialog(context, loc, cubit, p),
+                    onPressed: busy
+                        ? null
+                        : () => _rejectDialog(context, loc, cubit, p),
                   ),
                   AppButton(
                     label: loc.adminPaymentVerificationsApprove,
@@ -163,7 +176,8 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
     );
   }
 
-  bool state_busy(PaymentVerificationsCubit cubit, int id) => cubit.state.busyId == id;
+  bool _isBusy(PaymentVerificationsCubit cubit, int id) =>
+      cubit.state.busyId == id;
 
   Future<void> _rejectDialog(BuildContext context, AppLocalizations loc,
       PaymentVerificationsCubit cubit, AdminInstallmentPayment p) async {
@@ -175,7 +189,8 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('${p.memberName ?? '—'} · ${formatTaka(p.amount, decimals: 0)} · ${p.transactionRef}'),
+            Text(
+                '${p.memberName ?? '—'} · ${formatTaka(p.amount, decimals: 0)} · ${p.transactionRef}'),
             const SizedBox(height: 12),
             TextField(
               controller: controller,

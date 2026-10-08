@@ -20,25 +20,32 @@ class PropertyRequestsPage extends StatelessWidget {
   final String? propertyId;
   final String? returnUrl;
 
-  const PropertyRequestsPage({super.key, this.id, this.propertyId, this.returnUrl});
+  const PropertyRequestsPage(
+      {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) =>
-          PropertyRequestsCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))..load(),
+      create: (_) => PropertyRequestsCubit(
+          repository: AdminRepository(apiClient: sl<ApiClient>()))
+        ..load(),
       child: BlocConsumer<PropertyRequestsCubit, PropertyRequestsState>(
         listener: (context, state) {
           if (state.actionError != null) {
             if (state.actionError == 'reasonRequired') {
-              showAppToast(context, loc.adminPropertyRequestsErrorsReasonRequired, error: true);
+              showAppToast(
+                  context, loc.adminPropertyRequestsErrorsReasonRequired,
+                  error: true);
             } else {
-              showAppToast(context, describeApiError(context, state.actionError), error: true);
+              showAppToast(
+                  context, describeApiError(context, state.actionError),
+                  error: true);
             }
           }
           if (state.error != null) {
-            showAppToast(context, loc.adminPropertyRequestsErrorsLoadFailed, error: true);
+            showAppToast(context, loc.adminPropertyRequestsErrorsLoadFailed,
+                error: true);
           }
         },
         builder: (context, state) {
@@ -58,7 +65,7 @@ class PropertyRequestsPage extends StatelessWidget {
                   ),
                   items: [
                     DropdownMenuItem<PropertyRequestStatus?>(
-                      value: null,
+                      value: PropertyRequestStatus.unknown,
                       child: Text(loc.adminPropertyRequestsStatusLabelsAll),
                     ),
                     DropdownMenuItem<PropertyRequestStatus?>(
@@ -67,14 +74,18 @@ class PropertyRequestsPage extends StatelessWidget {
                     ),
                     DropdownMenuItem<PropertyRequestStatus?>(
                       value: PropertyRequestStatus.approved,
-                      child: Text(loc.adminPropertyRequestsStatusLabelsApproved),
+                      child:
+                          Text(loc.adminPropertyRequestsStatusLabelsApproved),
                     ),
                     DropdownMenuItem<PropertyRequestStatus?>(
                       value: PropertyRequestStatus.cancelled,
-                      child: Text(loc.adminPropertyRequestsStatusLabelsCancelled),
+                      child:
+                          Text(loc.adminPropertyRequestsStatusLabelsCancelled),
                     ),
                   ],
-                  onChanged: cubit.setStatusFilter,
+                  onChanged: (v) {
+                    if (v != null) cubit.setStatusFilter(v);
+                  },
                 ),
               ),
               if (state.loading)
@@ -94,20 +105,24 @@ class PropertyRequestsPage extends StatelessWidget {
     );
   }
 
-  String _actionLabel(AppLocalizations loc, PropertyRequestAction action) => switch (action) {
+  String _actionLabel(AppLocalizations loc, PropertyRequestAction action) =>
+      switch (action) {
         PropertyRequestAction.add => loc.adminPropertyRequestsActionsAdd,
         PropertyRequestAction.edit => loc.adminPropertyRequestsActionsEdit,
         PropertyRequestAction.delete => loc.adminPropertyRequestsActionsDelete,
         _ => '—',
       };
 
-  Widget _row(BuildContext context, AppLocalizations loc, PropertyRequestsCubit cubit,
-      MemberPropertyRequest r) {
+  Widget _row(BuildContext context, AppLocalizations loc,
+      PropertyRequestsCubit cubit, MemberPropertyRequest r) {
     final year = DateTime.tryParse(r.createdAt)?.year ?? DateTime.now().year;
     final reference = 'PR-$year-${'${r.id}'.padLeft(4, '0')}';
     final date = DateTime.tryParse(r.createdAt);
     final p = r.payload;
-    final types = [...p.propertyType, if (p.propertyTypeOther?.isNotEmpty == true) p.propertyTypeOther!];
+    final types = [
+      ...p.propertyType,
+      if (p.propertyTypeOther?.isNotEmpty == true) p.propertyTypeOther!
+    ];
     final summary = [
       if (types.isNotEmpty) types.join(' / '),
       if (p.khatianNo != null) 'Khatian ${p.khatianNo}',
@@ -135,7 +150,8 @@ class PropertyRequestsPage extends StatelessWidget {
                             .titleSmall
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
-                      Text(summary, style: Theme.of(context).textTheme.bodySmall),
+                      Text(summary,
+                          style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 ),
@@ -147,8 +163,10 @@ class PropertyRequestsPage extends StatelessWidget {
                     _ => StatusKind.neutral,
                   },
                   label: switch (r.status) {
-                    PropertyRequestStatus.pending => loc.adminPropertyRequestsStatusLabelsPending,
-                    PropertyRequestStatus.approved => loc.adminPropertyRequestsStatusLabelsApproved,
+                    PropertyRequestStatus.pending =>
+                      loc.adminPropertyRequestsStatusLabelsPending,
+                    PropertyRequestStatus.approved =>
+                      loc.adminPropertyRequestsStatusLabelsApproved,
                     PropertyRequestStatus.cancelled =>
                       loc.adminPropertyRequestsStatusLabelsCancelled,
                     _ => statusLabel(loc, SubmissionStatus.unknown),
@@ -157,11 +175,17 @@ class PropertyRequestsPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            InfoRow(label: loc.adminPropertyRequestsTableHeadersReference, value: reference),
-            InfoRow(label: loc.adminPropertyRequestsTableHeadersAction, value: _actionLabel(loc, r.action)),
+            InfoRow(
+                label: loc.adminPropertyRequestsTableHeadersReference,
+                value: reference),
+            InfoRow(
+                label: loc.adminPropertyRequestsTableHeadersAction,
+                value: _actionLabel(loc, r.action)),
             InfoRow(
               label: loc.adminPropertyRequestsTableHeadersDate,
-              value: date == null ? r.createdAt : DateFormat('yyyy-MM-dd').format(date),
+              value: date == null
+                  ? r.createdAt
+                  : DateFormat('yyyy-MM-dd').format(date),
             ),
             // Payload detail.
             ExpansionTile(
@@ -180,7 +204,8 @@ class PropertyRequestsPage extends StatelessWidget {
                             value: types.join(' / ')),
                       if (p.khatianNo != null)
                         InfoRow(
-                            label: loc.adminSubmissionDetailFieldLabelsKhatianNo,
+                            label:
+                                loc.adminSubmissionDetailFieldLabelsKhatianNo,
                             value: p.khatianNo!),
                       if (p.dagNoCs != null)
                         InfoRow(
@@ -192,19 +217,23 @@ class PropertyRequestsPage extends StatelessWidget {
                             value: p.dagNoRs!),
                       if (p.holdingNumber != null)
                         InfoRow(
-                            label: loc.adminSubmissionDetailFieldLabelsHoldingNumber,
+                            label: loc
+                                .adminSubmissionDetailFieldLabelsHoldingNumber,
                             value: p.holdingNumber!),
                       if (p.landQuantity != null)
                         InfoRow(
-                            label: loc.adminSubmissionDetailFieldLabelsLandQuantity,
+                            label: loc
+                                .adminSubmissionDetailFieldLabelsLandQuantity,
                             value: p.landQuantity!),
                       if (p.myShareQuantity != null)
                         InfoRow(
-                            label: loc.adminSubmissionDetailFieldLabelsMyShareQuantity,
+                            label: loc
+                                .adminSubmissionDetailFieldLabelsMyShareQuantity,
                             value: p.myShareQuantity!),
                       if (p.ownership != null)
                         InfoRow(
-                            label: loc.adminSubmissionDetailFieldLabelsOwnership,
+                            label:
+                                loc.adminSubmissionDetailFieldLabelsOwnership,
                             value: p.ownership!),
                       if (p.coOwners.isNotEmpty)
                         InfoRow(
@@ -226,7 +255,8 @@ class PropertyRequestsPage extends StatelessWidget {
             ),
             if (r.cancelReason != null && r.cancelReason!.isNotEmpty)
               InfoRow(
-                  label: loc.adminPropertyRequestsCancelReasonLabel, value: r.cancelReason!),
+                  label: loc.adminPropertyRequestsCancelReasonLabel,
+                  value: r.cancelReason!),
             if (r.status == PropertyRequestStatus.pending)
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -234,7 +264,9 @@ class PropertyRequestsPage extends StatelessWidget {
                   AppButton(
                     label: loc.adminPropertyRequestsCancelButton,
                     variant: AppButtonVariant.danger,
-                    onPressed: busy ? null : () => _cancelDialog(context, loc, cubit, r),
+                    onPressed: busy
+                        ? null
+                        : () => _cancelDialog(context, loc, cubit, r),
                   ),
                   const SizedBox(width: 8),
                   AppButton(
@@ -243,13 +275,16 @@ class PropertyRequestsPage extends StatelessWidget {
                     onPressed: busy
                         ? null
                         : () async {
-                            final confirmed = await AppDialog.confirm(
+                            final confirmed = await confirmDialog(
                               context,
                               title: loc.adminPropertyRequestsApproveModalTitle,
-                              message: loc.adminPropertyRequestsApproveModalMessageSuffix,
-                              confirmLabel: loc.adminPropertyRequestsApproveModalConfirmLabel,
+                              message: loc
+                                  .adminPropertyRequestsApproveModalMessageSuffix,
+                              confirmLabel: loc
+                                  .adminPropertyRequestsApproveModalConfirmLabel,
                             );
-                            if (confirmed && context.mounted) await cubit.approve(r);
+                            if (confirmed && context.mounted)
+                              await cubit.approve(r);
                           },
                   ),
                 ],

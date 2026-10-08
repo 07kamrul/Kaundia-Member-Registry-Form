@@ -52,6 +52,7 @@ RegistrationForm validForm({int properties = 1}) => RegistrationForm(
       gender: Gender.male,
       email: 'a@b.com',
       memberPhoto: const FileRef(fileName: 'p.jpg', path: '/tmp/p.jpg'),
+      paymentMethod: PaymentMethod.bank,
       currentAddress: const AddressDetail(house: '1', road: '2', postOffice: 'p', upazila: 'u', district: 'd', division: 'v'),
       permanentAddress: const AddressDetail(house: '1', road: '2', postOffice: 'p', upazila: 'u', district: 'd', division: 'v'),
       urgentContactName: 'Urgent',
@@ -187,7 +188,8 @@ void main() {
       predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.success && s.successId == '42'),
     ],
     verify: (_) {
-      verify(() => prefs.clearRegistrationDraft()).called(0); // cleared on acknowledge
+      // The draft is cleared only when the success dialog is acknowledged.
+      verifyNever(() => prefs.clearRegistrationDraft());
     },
   );
 
@@ -220,8 +222,10 @@ void main() {
       bloc.add(SubmitRequested());
     },
     seed: submitReadyState,
+    // failure lands first (still on step 1), then the bloc jumps to step 2.
     expect: () => [
       predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.submitting),
+      predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.failure && s.submitErrors.isNotEmpty),
       predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.failure && s.currentStep == 2 && s.submitErrors.isNotEmpty),
     ],
   );

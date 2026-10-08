@@ -17,22 +17,27 @@ class PicnicPaymentsPage extends StatelessWidget {
   final String? propertyId;
   final String? returnUrl;
 
-  const PicnicPaymentsPage({super.key, this.id, this.propertyId, this.returnUrl});
+  const PicnicPaymentsPage(
+      {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) =>
-          PicnicPaymentsCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))..load(),
-      child: BlocBuilder<PicnicPaymentsCubit, PicnicPaymentsState>(builder: (context, state) {
+      create: (_) => PicnicPaymentsCubit(
+          repository: AdminRepository(apiClient: sl<ApiClient>()))
+        ..load(),
+      child: BlocBuilder<PicnicPaymentsCubit, PicnicPaymentsState>(
+          builder: (context, state) {
         final cubit = context.read<PicnicPaymentsCubit>();
         final memberController = TextEditingController(
           text: state.memberFilter?.toString() ?? '',
         );
         return ListView(
           children: [
-            PageHeader(title: loc.adminPicnicPaymentsTitle, subtitle: loc.adminPicnicPaymentsSubtitle),
+            PageHeader(
+                title: loc.adminPicnicPaymentsTitle,
+                subtitle: loc.adminPicnicPaymentsSubtitle),
             AppCard(
               child: Column(
                 children: [
@@ -51,7 +56,7 @@ class PicnicPaymentsPage extends StatelessWidget {
                       Expanded(
                         child: DateField(
                           label: loc.adminPicnicPaymentsDateFrom,
-                          initialValue: state.dateFrom,
+                          value: state.dateFrom,
                           onChanged: (v) {
                             cubit.setDateRange(from: v);
                           },
@@ -61,7 +66,7 @@ class PicnicPaymentsPage extends StatelessWidget {
                       Expanded(
                         child: DateField(
                           label: loc.adminPicnicPaymentsDateTo,
-                          initialValue: state.dateTo,
+                          value: state.dateTo,
                           onChanged: (v) {
                             cubit.setDateRange(to: v);
                           },
@@ -118,7 +123,8 @@ class PicnicPaymentsPage extends StatelessWidget {
                       children: [
                         Text(loc.adminPicnicPaymentsCount,
                             style: Theme.of(context).textTheme.bodySmall),
-                        Text('${state.count}', style: Theme.of(context).textTheme.titleLarge),
+                        Text('${state.count}',
+                            style: Theme.of(context).textTheme.titleLarge),
                       ],
                     ),
                   ),
@@ -128,12 +134,15 @@ class PicnicPaymentsPage extends StatelessWidget {
             if (state.loading)
               const SkeletonLoader(lines: 5)
             else if (state.error != null)
-              InlineError(message: loc.adminPicnicPaymentsLoadError, onRetry: cubit.load)
+              InlineError(
+                  message: loc.adminPicnicPaymentsLoadError,
+                  onRetry: cubit.load)
             else
               AppDataTableCards<AdminPicnicPayment>(
                 items: state.items,
                 rowBuilder: (context, p) => Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   child: Padding(
                     padding: const EdgeInsets.all(14),
                     child: Column(
@@ -157,13 +166,18 @@ class PicnicPaymentsPage extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        InfoRow(label: loc.adminPicnicPaymentsDateColumn, value: p.paymentDate),
+                        InfoRow(
+                            label: loc.adminPicnicPaymentsDateColumn,
+                            value: p.paymentDate),
                         InfoRow(
                             label: loc.adminPicnicPaymentsHeadsColumn,
                             value: '${p.additionalCount}'),
-                        InfoRow(label: loc.adminPicnicPaymentsReceiptColumn, value: p.receiptNo ?? '—'),
                         InfoRow(
-                            label: loc.adminPicnicPaymentsMethodColumn, value: p.paymentMethod ?? '—'),
+                            label: loc.adminPicnicPaymentsReceiptColumn,
+                            value: p.receiptNo ?? '—'),
+                        InfoRow(
+                            label: loc.adminPicnicPaymentsMethodColumn,
+                            value: p.paymentMethod ?? '—'),
                       ],
                     ),
                   ),

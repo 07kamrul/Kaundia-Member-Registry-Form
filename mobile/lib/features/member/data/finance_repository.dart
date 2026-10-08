@@ -121,4 +121,20 @@ class FinanceRepository {
         query: filters.toQuery()) as Map<dynamic, dynamic>;
     return financeLedgerPageFromApi(api);
   }
+
+  /// Server-rendered PDF bytes (member/finance/report.pdf).
+  Future<List<int>> downloadReport({
+    required FinancePeriod period,
+    FinanceLedgerFilters filters = const FinanceLedgerFilters(),
+    String? dateFrom,
+    String? dateTo,
+  }) {
+    final query = filters.toQuery();
+    query['period'] = period.apiName;
+    if (period == FinancePeriod.custom) {
+      if (dateFrom != null && dateFrom.isNotEmpty) query['date_from'] = dateFrom;
+      if (dateTo != null && dateTo.isNotEmpty) query['date_to'] = dateTo;
+    }
+    return _api.downloadBytes('/member/finance/report.pdf', query: query);
+  }
 }

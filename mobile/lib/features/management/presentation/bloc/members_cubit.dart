@@ -7,7 +7,8 @@ import '../../domain/admin_entities.dart';
 // ----- Members list -----
 
 class MembersState extends Equatable {
-  const MembersState({this.items = const [], this.loading = false, this.error, this.busyId});
+  const MembersState(
+      {this.items = const [], this.loading = false, this.error, this.busyId});
 
   final List<Member> items;
   final bool loading;
@@ -59,7 +60,8 @@ class MembersCubit extends Cubit<MembersState> {
       await _repository.deleteMember(memberId);
       emit(state.copyWith(
         busyId: () => null,
-        items: state.items.where((m) => m.id != memberId).toList(growable: false),
+        items:
+            state.items.where((m) => m.id != memberId).toList(growable: false),
       ));
       return true;
     } catch (e) {

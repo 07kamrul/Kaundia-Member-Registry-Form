@@ -108,8 +108,9 @@ extension SubmissionDetailApiX on Map<String, dynamic> {
         properties: _list(this, 'properties')
             .map((p) => p.toPropertyEntity())
             .toList(growable: false),
-        nominees:
-            _list(this, 'nominees').map((n) => n.toNomineeEntity()).toList(growable: false),
+        nominees: _list(this, 'nominees')
+            .map((n) => n.toNomineeEntity())
+            .toList(growable: false),
         admissionFee: _sOr(this, 'admission_fee'),
         subscription: _sOr(this, 'subscription'),
         receiptNo: _sOr(this, 'receipt_no'),
@@ -122,7 +123,12 @@ extension SubmissionDetailApiX on Map<String, dynamic> {
       );
 
   static List<Map<String, dynamic>> _list(Map<String, dynamic> m, String k) =>
-      m[k] is List ? (m[k] as List).whereType<Map>().map(Map<String, dynamic>.from).toList() : const [];
+      m[k] is List
+          ? (m[k] as List)
+              .whereType<Map>()
+              .map(Map<String, dynamic>.from)
+              .toList()
+          : const [];
 }
 
 extension MemberApiX on Map<String, dynamic> {
@@ -178,24 +184,21 @@ extension PicnicPaymentsPageApiX on Map<String, dynamic> {
       totalCollected: _n(this, 'total_collected'),
       count: _i(this, 'count'),
       items: items is List
-          ? items
-              .whereType<Map>()
-              .map((r) {
-                final row = Map<String, dynamic>.from(r);
-                return AdminPicnicPayment(
-                  id: _i(row, 'id'),
-                  memberId: _i(row, 'member_id'),
-                  memberName: _s(row, 'member_name'),
-                  headPrice: _n(row, 'head_price'),
-                  additionalPrice: _n(row, 'additional_price'),
-                  additionalCount: _i(row, 'additional_count'),
-                  total: _n(row, 'total'),
-                  paymentDate: _sOr(row, 'payment_date'),
-                  receiptNo: _s(row, 'receipt_no'),
-                  paymentMethod: _s(row, 'payment_method'),
-                );
-              })
-              .toList(growable: false)
+          ? items.whereType<Map>().map((r) {
+              final row = Map<String, dynamic>.from(r);
+              return AdminPicnicPayment(
+                id: _i(row, 'id'),
+                memberId: _i(row, 'member_id'),
+                memberName: _s(row, 'member_name'),
+                headPrice: _n(row, 'head_price'),
+                additionalPrice: _n(row, 'additional_price'),
+                additionalCount: _i(row, 'additional_count'),
+                total: _n(row, 'total'),
+                paymentDate: _sOr(row, 'payment_date'),
+                receiptNo: _s(row, 'receipt_no'),
+                paymentMethod: _s(row, 'payment_method'),
+              );
+            }).toList(growable: false)
           : const <AdminPicnicPayment>[],
     );
   }
@@ -205,7 +208,9 @@ extension MemberProfileApiX on Map<String, dynamic> {
   MemberProfile toProfileEntity() {
     final detail = Map<String, dynamic>.from(this).toDetailEntity();
     final feeSummary = this['fee_summary'];
-    final fee = feeSummary is Map ? Map<String, dynamic>.from(feeSummary) : const <String, dynamic>{};
+    final fee = feeSummary is Map
+        ? Map<String, dynamic>.from(feeSummary)
+        : const <String, dynamic>{};
     final installments = _list(this, 'installments')
         .map((r) => r.toInstallmentEntity())
         .toList(growable: false);
@@ -286,7 +291,12 @@ extension MemberProfileApiX on Map<String, dynamic> {
   }
 
   static List<Map<String, dynamic>> _list(Map<String, dynamic> m, String k) =>
-      m[k] is List ? (m[k] as List).whereType<Map>().map(Map<String, dynamic>.from).toList() : const [];
+      m[k] is List
+          ? (m[k] as List)
+              .whereType<Map>()
+              .map(Map<String, dynamic>.from)
+              .toList()
+          : const [];
 }
 
 // ----- Notices / events -----
@@ -296,7 +306,8 @@ extension NoticeApiX on Map<String, dynamic> {
         id: '${this['id']}',
         title: _sOr(this, 'title'),
         body: _sOr(this, 'body'),
-        categoryId: this['category_id'] == null ? null : '${this['category_id']}',
+        categoryId:
+            this['category_id'] == null ? null : '${this['category_id']}',
         isPublished: this['is_published'] == true,
         isMembersOnly: this['is_members_only'] == true,
         publishAt: _s(this, 'publish_at'),
@@ -311,7 +322,8 @@ extension EventApiX on Map<String, dynamic> {
         title: _sOr(this, 'title'),
         description: _s(this, 'description'),
         location: _s(this, 'location'),
-        categoryId: this['category_id'] == null ? null : '${this['category_id']}',
+        categoryId:
+            this['category_id'] == null ? null : '${this['category_id']}',
         startAt: _sOr(this, 'start_at'),
         endAt: _s(this, 'end_at'),
         isPublished: this['is_published'] == true,
@@ -340,7 +352,9 @@ PropertyRequestAction _propertyAction(String? raw) => switch (raw) {
 extension PropertyRequestApiX on Map<String, dynamic> {
   MemberPropertyRequest toPropertyRequestEntity() {
     final rawPayload = this['payload'];
-    final p = rawPayload is Map ? Map<String, dynamic>.from(rawPayload) : const <String, dynamic>{};
+    final p = rawPayload is Map
+        ? Map<String, dynamic>.from(rawPayload)
+        : const <String, dynamic>{};
     String? str(String k) {
       final v = p[k];
       return v is String && v.isNotEmpty ? v : null;
@@ -366,30 +380,27 @@ extension PropertyRequestApiX on Map<String, dynamic> {
         myShareQuantity: str('my_share_quantity'),
         ownership: str('ownership'),
         coOwners: coOwners is List
-            ? coOwners
-                .whereType<Map>()
-                .map((c) {
-                  final m = Map<String, dynamic>.from(c);
-                  String s(String k) => m[k] is String && (m[k] as String).isNotEmpty
-                      ? m[k] as String
-                      : '';
-                  return PropertyRequestCoOwner(ownerName: s('owner_name'), ownerPhone: s('owner_phone'));
-                })
-                .toList(growable: false)
+            ? coOwners.whereType<Map>().map((c) {
+                final m = Map<String, dynamic>.from(c);
+                String s(String k) =>
+                    m[k] is String && (m[k] as String).isNotEmpty
+                        ? m[k] as String
+                        : '';
+                return PropertyRequestCoOwner(
+                    ownerName: s('owner_name'), ownerPhone: s('owner_phone'));
+              }).toList(growable: false)
             : const <PropertyRequestCoOwner>[],
         docs: docs is List
-            ? docs
-                .whereType<Map>()
-                .map((d) {
-                  final m = Map<String, dynamic>.from(d);
-                  String? s(String k) {
-                    final v = m[k];
-                    return v is String && v.isNotEmpty ? v : null;
-                  }
+            ? docs.whereType<Map>().map((d) {
+                final m = Map<String, dynamic>.from(d);
+                String? s(String k) {
+                  final v = m[k];
+                  return v is String && v.isNotEmpty ? v : null;
+                }
 
-                  return PropertyRequestDoc(docType: s('doc_type') ?? '', keepPath: s('keep_path'));
-                })
-                .toList(growable: false)
+                return PropertyRequestDoc(
+                    docType: s('doc_type') ?? '', keepPath: s('keep_path'));
+              }).toList(growable: false)
             : const <PropertyRequestDoc>[],
       ),
       status: _propertyStatus(this['status'] as String?),

@@ -20,7 +20,8 @@ class SubmissionSummary {
 }
 
 class ApplicableDoc {
-  const ApplicableDoc({required this.id, required this.docType, required this.fileUrl});
+  const ApplicableDoc(
+      {required this.id, required this.docType, required this.fileUrl});
 
   final String id;
   final String docType;
@@ -355,7 +356,8 @@ class ConfigListItem {
   final int sortOrder;
   final bool isActive;
 
-  ConfigListItem copyWith({String? label, int? sortOrder, bool? isActive}) => ConfigListItem(
+  ConfigListItem copyWith({String? label, int? sortOrder, bool? isActive}) =>
+      ConfigListItem(
         id: id,
         category: category,
         value: value,
@@ -464,7 +466,8 @@ enum PropertyRequestStatus { pending, approved, cancelled, unknown }
 enum PropertyRequestAction { add, edit, delete, unknown }
 
 class PropertyRequestCoOwner {
-  const PropertyRequestCoOwner({required this.ownerName, required this.ownerPhone});
+  const PropertyRequestCoOwner(
+      {required this.ownerName, required this.ownerPhone});
 
   final String ownerName;
   final String ownerPhone;

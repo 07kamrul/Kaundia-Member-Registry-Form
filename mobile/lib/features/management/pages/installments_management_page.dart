@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/auth/session.dart';
 import '../../../core/di/injector.dart';
 import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
@@ -34,24 +33,30 @@ class InstallmentsManagementPage extends StatefulWidget {
   final String? propertyId;
   final String? returnUrl;
 
-  const InstallmentsManagementPage({super.key, this.id, this.propertyId, this.returnUrl});
+  const InstallmentsManagementPage(
+      {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
-  State<InstallmentsManagementPage> createState() => _InstallmentsManagementPageState();
+  State<InstallmentsManagementPage> createState() =>
+      _InstallmentsManagementPageState();
 }
 
-class _InstallmentsManagementPageState extends State<InstallmentsManagementPage> {
+class _InstallmentsManagementPageState
+    extends State<InstallmentsManagementPage> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final canManage = sl<SessionManager>().session?.can('member.manage') ?? false;
+    final canManage =
+        sl<SessionManager>().session?.can('member.manage') ?? false;
     return BlocProvider(
-      create: (_) =>
-          InstallmentsMgmtCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))..loadMembers(),
+      create: (_) => InstallmentsMgmtCubit(
+          repository: AdminRepository(apiClient: sl<ApiClient>()))
+        ..loadMembers(),
       child: BlocConsumer<InstallmentsMgmtCubit, InstallmentsMgmtState>(
         listener: (context, state) {
           if (state.error != null) {
-            showAppToast(context, describeApiError(context, state.error), error: true);
+            showAppToast(context, describeApiError(context, state.error),
+                error: true);
           }
         },
         builder: (context, state) {
@@ -59,7 +64,9 @@ class _InstallmentsManagementPageState extends State<InstallmentsManagementPage>
           final selected = cubit.selectedMember;
           return ListView(
             children: [
-              PageHeader(title: loc.adminInstallmentsTitle, subtitle: loc.adminInstallmentsSubtitle),
+              PageHeader(
+                  title: loc.adminInstallmentsTitle,
+                  subtitle: loc.adminInstallmentsSubtitle),
               if (state.loadingMembers)
                 const SkeletonLoader(lines: 4)
               else if (state.members.isEmpty)
@@ -161,7 +168,8 @@ class _MonthCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (installment.isPaid)
-                StatusBadge(kind: StatusKind.approved, label: loc.adminInstallmentsPaid)
+                StatusBadge(
+                    kind: StatusKind.approved, label: loc.adminInstallmentsPaid)
               else
                 SizedBox(
                   width: double.infinity,

@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/admin_repository.dart';
 import '../../domain/admin_entities.dart';
+import '../../domain/finance_entities.dart';
 
 /// Manual-split entry row seeded from a preview.
 class ManualAmount {
-  const ManualAmount({required this.memberId, required this.memberName, this.amount});
+  const ManualAmount(
+      {required this.memberId, required this.memberName, this.amount});
 
   final int memberId;
   final String memberName;
@@ -94,9 +96,12 @@ class SocietyCostsState extends Equatable {
         expandedId: expandedId == _same ? this.expandedId : expandedId(),
         dateFrom: dateFrom ?? this.dateFrom,
         dateTo: dateTo ?? this.dateTo,
-        categoryFilter: categoryFilter == _same ? this.categoryFilter : categoryFilter(),
-        sourceFilter: sourceFilter == _same ? this.sourceFilter : sourceFilter(),
-        billedFilter: billedFilter == _same ? this.billedFilter : billedFilter(),
+        categoryFilter:
+            categoryFilter == _same ? this.categoryFilter : categoryFilter(),
+        sourceFilter:
+            sourceFilter == _same ? this.sourceFilter : sourceFilter(),
+        billedFilter:
+            billedFilter == _same ? this.billedFilter : billedFilter(),
         search: search ?? this.search,
         splitCost: splitCost == _same ? this.splitCost : splitCost(),
         splitMethod: splitMethod ?? this.splitMethod,
@@ -136,7 +141,9 @@ class SocietyCostsState extends Equatable {
 }
 
 class SocietyCostsCubit extends Cubit<SocietyCostsState> {
-  SocietyCostsCubit({required AdminRepository adminRepository, required SocietyCostRepository costRepository})
+  SocietyCostsCubit(
+      {required AdminRepository adminRepository,
+      required SocietyCostRepository costRepository})
       : _admin = adminRepository,
         _costs = costRepository,
         super(const SocietyCostsState());
@@ -162,9 +169,10 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
     emit(state.copyWith(loading: true, error: () => null));
     try {
       final costs = await _costs.listCosts(
-        categoryId: state.categoryFilter == null || state.categoryFilter!.isEmpty
-            ? null
-            : int.tryParse(state.categoryFilter!),
+        categoryId:
+            state.categoryFilter == null || state.categoryFilter!.isEmpty
+                ? null
+                : int.tryParse(state.categoryFilter!),
         dateFrom: state.dateFrom,
         dateTo: state.dateTo,
         paymentSource: state.sourceFilter,
@@ -173,11 +181,13 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
       );
       SocietyCostSummary? summary;
       try {
-        summary = await _costs.getSummary(dateFrom: state.dateFrom, dateTo: state.dateTo);
+        summary = await _costs.getSummary(
+            dateFrom: state.dateFrom, dateTo: state.dateTo);
       } catch (_) {
         summary = null;
       }
-      emit(state.copyWith(costs: costs, summary: () => summary, loading: false));
+      emit(
+          state.copyWith(costs: costs, summary: () => summary, loading: false));
     } catch (e) {
       emit(state.copyWith(loading: false, error: () => e));
     }
@@ -214,16 +224,16 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
     refresh();
   }
 
-  void toggleExpanded(int id) =>
-      emit(state.copyWith(expandedId: () => state.expandedId == id ? null : id));
+  void toggleExpanded(int id) => emit(
+      state.copyWith(expandedId: () => state.expandedId == id ? null : id));
 
   /// Adds a cost_category config item from the form, returns its id.
   Future<String?> addCategory(String label) async {
     final trimmed = label.trim();
     if (trimmed.isEmpty) return null;
     try {
-      final item =
-          await _admin.createConfigListItem(category: 'cost_category', value: trimmed, label: trimmed);
+      final item = await _admin.createConfigListItem(
+          category: 'cost_category', value: trimmed, label: trimmed);
       emit(state.copyWith(categories: [...state.categories, item]));
       return item.id;
     } catch (e) {
@@ -232,7 +242,10 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
     }
   }
 
-  Future<bool> saveCost({required SocietyCostInput input, int? editingId, String? receiptPath}) async {
+  Future<bool> saveCost(
+      {required SocietyCostInput input,
+      int? editingId,
+      String? receiptPath}) async {
     emit(state.copyWith(busy: true, actionError: () => null));
     try {
       final cost = editingId == null
@@ -286,15 +299,21 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
   void setManualAmount(int memberId, num? amount) {
     emit(state.copyWith(manualAmounts: [
       for (final m in state.manualAmounts)
-        if (m.memberId == memberId) ManualAmount(memberId: m.memberId, memberName: m.memberName, amount: amount) else m,
+        if (m.memberId == memberId)
+          ManualAmount(
+              memberId: m.memberId, memberName: m.memberName, amount: amount)
+        else
+          m,
     ]));
   }
 
-  num get manualTotal => state.manualAmounts.fold(0, (sum, m) => sum + (m.amount ?? 0));
+  num get manualTotal =>
+      state.manualAmounts.fold(0, (sum, m) => sum + (m.amount ?? 0));
 
   bool get manualMismatch {
     final cost = state.splitCost;
-    if (state.splitMethod != CostSplitMethod.manual || cost == null) return false;
+    if (state.splitMethod != CostSplitMethod.manual || cost == null)
+      return false;
     return (manualTotal - cost.totalAmount).abs() >= 0.005;
   }
 
@@ -309,7 +328,8 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
       if (method == CostSplitMethod.manual) {
         manual = [
           for (final m in state.manualAmounts)
-            if (m.amount != null && m.amount! >= 0) (memberId: m.memberId, amountDue: m.amount!),
+            if (m.amount != null && m.amount! >= 0)
+              (memberId: m.memberId, amountDue: m.amount!),
         ];
         if (manual.isEmpty) {
           // Seed the member list via an equal-split preview.
@@ -330,7 +350,8 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
             splitPreview: const [],
             manualAmounts: [
               for (final row in result)
-                ManualAmount(memberId: row.memberId, memberName: row.memberName),
+                ManualAmount(
+                    memberId: row.memberId, memberName: row.memberName),
             ],
             splitLoading: false,
           ));
@@ -369,7 +390,8 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
 
   // ----- Share payment -----
 
-  Future<bool> recordSharePayment(CostSplitShare share, {required num additionalAmount, String? receiptNo}) async {
+  Future<bool> recordSharePayment(CostSplitShare share,
+      {required num additionalAmount, String? receiptNo}) async {
     emit(state.copyWith(busy: true, actionError: () => null));
     try {
       await _costs.recordSharePayment(

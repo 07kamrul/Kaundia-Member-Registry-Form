@@ -119,7 +119,8 @@ class FeeSettingsCubit extends Cubit<FeeSettingsState> {
 
   Future<void> toggleHistory(String key) async {
     if (state.expandedKey == key) {
-      emit(state.copyWith(expandedKey: () => null, history: const [], tieredHistory: const []));
+      emit(state.copyWith(
+          expandedKey: () => null, history: const [], tieredHistory: const []));
       return;
     }
     emit(state.copyWith(
@@ -130,7 +131,8 @@ class FeeSettingsCubit extends Cubit<FeeSettingsState> {
     ));
     try {
       if (key == monthlySubscriptionGroupKey) {
-        final base = await _repository.getFeeSettingHistory(monthlySubscriptionTierKeys.base);
+        final base = await _repository
+            .getFeeSettingHistory(monthlySubscriptionTierKeys.base);
         emit(state.copyWith(tieredHistory: base, loadingHistory: false));
       } else {
         final history = await _repository.getFeeSettingHistory(key);

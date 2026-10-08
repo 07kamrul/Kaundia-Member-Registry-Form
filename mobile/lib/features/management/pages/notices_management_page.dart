@@ -35,7 +35,8 @@ class NoticesManagementPage extends StatefulWidget {
   final String? propertyId;
   final String? returnUrl;
 
-  const NoticesManagementPage({super.key, this.id, this.propertyId, this.returnUrl});
+  const NoticesManagementPage(
+      {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
   State<NoticesManagementPage> createState() => _NoticesManagementPageState();
@@ -46,70 +47,66 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => NoticesCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))..init(),
+      create: (_) =>
+          NoticesCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))
+            ..init(),
       child: BlocConsumer<NoticesCubit, ContentListState<Notice>>(
         listener: (context, state) {
           if (state.saveError != null) {
-            showAppToast(context, loc.adminNoticesErrorsSaveFailed, error: true);
+            showAppToast(context, loc.adminNoticesErrorsSaveFailed,
+                error: true);
           }
           if (state.error != null) {
-            showAppToast(context, loc.adminNoticesErrorsLoadFailed, error: true);
+            showAppToast(context, loc.adminNoticesErrorsLoadFailed,
+                error: true);
           }
         },
         builder: (context, state) {
           final cubit = context.read<NoticesCubit>();
           return ListView(
             children: [
-              PageHeader(title: loc.adminNoticesTitle, subtitle: loc.adminNoticesSubtitle),
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: AppTabs(
-                        labels: [
-                          loc.adminNoticesFiltersAll,
-                          loc.adminNoticesFiltersPublished,
-                          loc.adminNoticesFiltersDraft,
-                        ],
-                        selectedIndex: state.publishedFilter == null
-                            ? 0
-                            : state.publishedFilter == true
-                                ? 1
-                                : 2,
-                        onChanged: cubit.setStatusFilter,
-                      ),
-                    ),
-                  ),
-                ],
+              PageHeader(
+                  title: loc.adminNoticesTitle,
+                  subtitle: loc.adminNoticesSubtitle),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: AppTabs(
+                  labels: [
+                    loc.adminNoticesFiltersAll,
+                    loc.adminNoticesFiltersPublished,
+                    loc.adminNoticesFiltersDraft,
+                  ],
+                  selectedIndex: state.publishedFilter == null
+                      ? 0
+                      : state.publishedFilter == true
+                          ? 1
+                          : 2,
+                  onChanged: cubit.setStatusFilter,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String?>(
-                        initialValue: state.categoryFilter,
-                        decoration: InputDecoration(
-                          labelText: loc.adminNoticesFiltersCategory,
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: [
-                          DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text(loc.adminNoticesFiltersAllCategories),
-                          ),
-                          for (final c in state.categories)
-                            DropdownMenuItem<String?>(value: c.id, child: Text(c.label)),
-                        ],
-                        onChanged: cubit.setCategoryFilter,
-                      ),
-                    ),
+                child: DropdownButtonFormField<String?>(
+                  initialValue: state.categoryFilter,
+                  decoration: InputDecoration(
+                    labelText: loc.adminNoticesFiltersCategory,
+                    border: const OutlineInputBorder(),
                   ),
-                ],
+                  items: [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text(loc.adminNoticesFiltersAllCategories),
+                    ),
+                    for (final c in state.categories)
+                      DropdownMenuItem<String?>(
+                          value: c.id, child: Text(c.label)),
+                  ],
+                  onChanged: cubit.setCategoryFilter,
+                ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: AppButton(
                   label: loc.adminNoticesCreate,
                   icon: Icons.add,
@@ -142,8 +139,9 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
     return loc.adminNoticesStatusPublished;
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, NoticesCubit cubit, Notice n) {
-    final category = state_categoryLabel(context, n.categoryId);
+  Widget _row(BuildContext context, AppLocalizations loc, NoticesCubit cubit,
+      Notice n) {
+    final category = _categoryLabel(context, n.categoryId);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Padding(
@@ -163,7 +161,8 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                   ),
                 ),
                 StatusBadge(
-                  kind: n.isPublished ? StatusKind.approved : StatusKind.neutral,
+                  kind:
+                      n.isPublished ? StatusKind.approved : StatusKind.neutral,
                   label: _statusLabel(loc, n),
                 ),
               ],
@@ -190,10 +189,13 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 AppButton(
-                  label: n.isPublished ? loc.adminNoticesUnpublish : loc.adminNoticesPublish,
+                  label: n.isPublished
+                      ? loc.adminNoticesUnpublish
+                      : loc.adminNoticesPublish,
                   variant: AppButtonVariant.ghost,
-                  onPressed:
-                      state_busy(context, n.id) ? null : () => cubit.togglePublished(n),
+                  onPressed: _isBusy(context, n.id)
+                      ? null
+                      : () => cubit.togglePublished(n),
                 ),
                 AppButton(
                   label: loc.commonEdit,
@@ -204,7 +206,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                   label: loc.commonDelete,
                   variant: AppButtonVariant.ghost,
                   onPressed: () async {
-                    final confirmed = await AppDialog.confirm(
+                    final confirmed = await confirmDialog(
                       context,
                       title: loc.adminNoticesDeleteModalTitle,
                       message: loc.adminNoticesDeleteModalMessageSuffix,
@@ -221,10 +223,10 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
     );
   }
 
-  bool state_busy(BuildContext context, String id) =>
+  bool _isBusy(BuildContext context, String id) =>
       context.read<NoticesCubit>().state.busyId == id;
 
-  String state_categoryLabel(BuildContext context, String? categoryId) {
+  String _categoryLabel(BuildContext context, String? categoryId) {
     if (categoryId == null) return '—';
     final categories = context.read<NoticesCubit>().state.categories;
     for (final c in categories) {
@@ -233,7 +235,8 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
     return '—';
   }
 
-  Future<void> _openForm(BuildContext context, AppLocalizations loc, NoticesCubit cubit,
+  Future<void> _openForm(
+      BuildContext context, AppLocalizations loc, NoticesCubit cubit,
       {Notice? editing}) async {
     final titleController = TextEditingController(text: editing?.title ?? '');
     final bodyController = TextEditingController(text: editing?.body ?? '');
@@ -295,7 +298,8 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       child: Text(loc.adminNoticesFormNoCategory),
                     ),
                     for (final c in cubit.state.categories)
-                      DropdownMenuItem<String>(value: c.id, child: Text(c.label)),
+                      DropdownMenuItem<String>(
+                          value: c.id, child: Text(c.label)),
                   ],
                   onChanged: (v) => setSheetState(() => categoryId = v ?? ''),
                 ),
@@ -320,13 +324,15 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                           border: const OutlineInputBorder(),
                         ),
                         onTap: () async {
-                          final initial = _parseTime(publishTime) ?? TimeOfDay.now();
+                          final initial =
+                              _parseTime(publishTime) ?? TimeOfDay.now();
                           final picked = await showTimePicker(
                             context: sheetContext,
                             initialTime: initial,
                           );
                           if (picked != null) {
-                            setSheetState(() => publishTime = picked.format(sheetContext));
+                            setSheetState(() =>
+                                publishTime = picked.format(sheetContext));
                           }
                         },
                       ),
@@ -341,7 +347,8 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                 CheckboxListTile(
                   value: membersOnly,
                   title: Text(loc.adminNoticesFormMembersOnly),
-                  onChanged: (v) => setSheetState(() => membersOnly = v ?? false),
+                  onChanged: (v) =>
+                      setSheetState(() => membersOnly = v ?? false),
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -369,7 +376,8 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                           publishAt: publishAt,
                         ),
                       );
-                      if (sheetContext.mounted) Navigator.of(sheetContext).pop(ok);
+                      if (sheetContext.mounted)
+                        Navigator.of(sheetContext).pop(ok);
                     },
                   ),
                 ),

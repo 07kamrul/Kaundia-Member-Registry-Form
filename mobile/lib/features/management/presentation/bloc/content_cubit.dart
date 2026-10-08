@@ -11,7 +11,6 @@ class ContentListState<T> extends Equatable {
     this.categories = const [],
     this.loading = true,
     this.error,
-    this.statusFilterAll = true,
     this.publishedFilter,
     this.categoryFilter,
     this.busyId,
@@ -44,8 +43,10 @@ class ContentListState<T> extends Equatable {
         categories: categories ?? this.categories,
         loading: loading ?? this.loading,
         error: error == _same ? this.error : error(),
-        publishedFilter: publishedFilter == _same ? this.publishedFilter : publishedFilter(),
-        categoryFilter: categoryFilter == _same ? this.categoryFilter : categoryFilter(),
+        publishedFilter:
+            publishedFilter == _same ? this.publishedFilter : publishedFilter(),
+        categoryFilter:
+            categoryFilter == _same ? this.categoryFilter : categoryFilter(),
         busyId: busyId == _same ? this.busyId : busyId(),
         saveError: saveError == _same ? this.saveError : saveError(),
       );
@@ -97,11 +98,12 @@ class NoticesCubit extends Cubit<ContentListState<Notice>> {
 
   void setStatusFilter(int index) {
     // 0 = all, 1 = published, 2 = draft (matches Angular StatusFilter order).
-    emit(state.copyWith(publishedFilter: () => switch (index) {
-          1 => true,
-          2 => false,
-          _ => null,
-        }));
+    emit(state.copyWith(
+        publishedFilter: () => switch (index) {
+              1 => true,
+              2 => false,
+              _ => null,
+            }));
     load();
   }
 
@@ -193,11 +195,12 @@ class EventsCubit extends Cubit<ContentListState<EventItem>> {
   }
 
   void setStatusFilter(int index) {
-    emit(state.copyWith(publishedFilter: () => switch (index) {
-          1 => true,
-          2 => false,
-          _ => null,
-        }));
+    emit(state.copyWith(
+        publishedFilter: () => switch (index) {
+              1 => true,
+              2 => false,
+              _ => null,
+            }));
     load();
   }
 

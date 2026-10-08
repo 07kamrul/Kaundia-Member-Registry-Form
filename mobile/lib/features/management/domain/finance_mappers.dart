@@ -16,8 +16,10 @@ num _nOr(Map<String, dynamic> m, String k, {num fallback = 0}) {
   return fallback;
 }
 
-List<Map<String, dynamic>> _list(Map<String, dynamic> m, String k) =>
-    m[k] is List ? (m[k] as List).whereType<Map>().map(Map<String, dynamic>.from).toList() : const [];
+List<Map<String, dynamic>> _list(Map<String, dynamic> m, String k) => m[k]
+        is List
+    ? (m[k] as List).whereType<Map>().map(Map<String, dynamic>.from).toList()
+    : const [];
 
 extension FinanceTransactionApiX on Map<String, dynamic> {
   FinanceTransaction toTransactionEntity() => FinanceTransaction(
@@ -49,7 +51,9 @@ extension FinanceTransactionApiX on Map<String, dynamic> {
 extension FinanceLedgerApiX on Map<String, dynamic> {
   FinanceLedgerPage toLedgerEntity() {
     final totals = this['totals'];
-    final t = totals is Map ? Map<String, dynamic>.from(totals) : const <String, dynamic>{};
+    final t = totals is Map
+        ? Map<String, dynamic>.from(totals)
+        : const <String, dynamic>{};
     return FinanceLedgerPage(
       total: _i(this, 'total'),
       items: _list(this, 'items')
@@ -153,7 +157,8 @@ extension RoadmapApiX on Map<String, dynamic> {
         totals: _progress(this['totals'] is Map
             ? Map<String, dynamic>.from(this['totals'] as Map)
             : const <String, dynamic>{}),
-        timeframes: _list(this, 'timeframes').map(_timeframe).toList(growable: false),
+        timeframes:
+            _list(this, 'timeframes').map(_timeframe).toList(growable: false),
       );
 
   static RoadmapProgress _progress(Map<String, dynamic> m) => RoadmapProgress(
@@ -165,7 +170,8 @@ extension RoadmapApiX on Map<String, dynamic> {
       );
 
   static RoadmapTimeframe _timeframe(Map<String, dynamic> m) {
-    final items = _list(m, 'items').map((r) => r.toItemEntity()).toList(growable: false);
+    final items =
+        _list(m, 'items').map((r) => r.toItemEntity()).toList(growable: false);
     return RoadmapTimeframe(
       total: _i(m, 'total'),
       done: _i(m, 'done'),
@@ -189,7 +195,9 @@ extension RoadmapArchivedCycleApiX on Map<String, dynamic> {
         archivedAt: _sOr(this, 'archived_at'),
         total: _i(this, 'total'),
         done: _i(this, 'done'),
-        items: _list(this, 'items').map((r) => r.toItemEntity()).toList(growable: false),
+        items: _list(this, 'items')
+            .map((r) => r.toItemEntity())
+            .toList(growable: false),
       );
 }
 
@@ -226,7 +234,9 @@ extension SocietyCostApiX on Map<String, dynamic> {
         societyCostId: _i(s, 'society_cost_id'),
         splitMethod: splitMethodFromApi(s['split_method'] as String?),
         createdAt: _sOr(s, 'created_at'),
-        shares: _list(s, 'shares').map((r) => r.toShareEntity()).toList(growable: false),
+        shares: _list(s, 'shares')
+            .map((r) => r.toShareEntity())
+            .toList(growable: false),
       );
     }
     return SocietyCost(

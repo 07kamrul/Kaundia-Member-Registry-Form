@@ -71,11 +71,13 @@ class _MemberDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    return BlocBuilder<MemberDetailCubit, MemberDetailState>(builder: (context, state) {
+    return BlocBuilder<MemberDetailCubit, MemberDetailState>(
+        builder: (context, state) {
       final cubit = context.read<MemberDetailCubit>();
       if (state.loading) return const SkeletonLoader(lines: 8);
       if (state.error != null) {
-        return InlineError(message: loc.adminMemberDetailLoadFailed, onRetry: cubit.load);
+        return InlineError(
+            message: loc.adminMemberDetailLoadFailed, onRetry: cubit.load);
       }
       final p = state.profile;
       if (p == null) return EmptyState(message: loc.commonNoData);
@@ -125,7 +127,8 @@ class _MemberDetailView extends StatelessWidget {
     });
   }
 
-  Widget _identitySection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _identitySection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     return AppCard(
       title: loc.adminMemberDetailSectionsIdentity,
       child: Row(
@@ -141,9 +144,9 @@ class _MemberDetailView extends StatelessWidget {
                   width: 72,
                   height: 72,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      Text(p.fullName.isEmpty ? '?' : p.fullName.substring(0, 1),
-                          style: Theme.of(context).textTheme.headlineMedium),
+                  errorBuilder: (_, __, ___) => Text(
+                      p.fullName.isEmpty ? '?' : p.fullName.substring(0, 1),
+                      style: Theme.of(context).textTheme.headlineMedium),
                 ),
               ),
             ),
@@ -151,14 +154,20 @@ class _MemberDetailView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InfoRow(label: loc.adminMemberDetailFMemberId, value: p.memberId ?? '—'),
+                InfoRow(
+                    label: loc.adminMemberDetailFMemberId,
+                    value: p.memberId ?? '—'),
                 InfoRow(label: loc.adminMemberDetailFName, value: p.fullName),
-                InfoRow(label: loc.adminMemberDetailFFatherOrHusband, value: p.fatherOrHusband),
+                InfoRow(
+                    label: loc.adminMemberDetailFFatherOrHusband,
+                    value: p.fatherOrHusband),
                 InfoRow(label: loc.adminMemberDetailFMother, value: p.mother),
                 InfoRow(label: loc.adminMemberDetailFNid, value: p.nid),
                 InfoRow(label: loc.adminMemberDetailFDob, value: p.dob),
                 InfoRow(label: loc.adminMemberDetailFGender, value: p.gender),
-                InfoRow(label: loc.adminMemberDetailFOccupation, value: p.occupation),
+                InfoRow(
+                    label: loc.adminMemberDetailFOccupation,
+                    value: p.occupation),
               ],
             ),
           ),
@@ -167,7 +176,8 @@ class _MemberDetailView extends StatelessWidget {
     );
   }
 
-  Widget _contactSection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _contactSection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     return AppCard(
       title: loc.adminMemberDetailSectionsContact,
       child: Column(
@@ -177,14 +187,24 @@ class _MemberDetailView extends StatelessWidget {
           InfoRow(label: loc.adminMemberDetailFEmail, value: p.email),
           InfoRow(
             label: loc.adminMemberDetailFPresentAddress,
-            value: _joinAddress(p.currentHouse, p.currentRoad, p.currentPostOffice,
-                p.currentUpazila, p.currentDistrict, p.currentDivision),
+            value: _joinAddress(
+                p.currentHouse,
+                p.currentRoad,
+                p.currentPostOffice,
+                p.currentUpazila,
+                p.currentDistrict,
+                p.currentDivision),
             expanded: true,
           ),
           InfoRow(
             label: loc.adminMemberDetailFPermanentAddress,
-            value: _joinAddress(p.permanentHouse, p.permanentRoad, p.permanentPostOffice,
-                p.permanentUpazila, p.permanentDistrict, p.permanentDivision),
+            value: _joinAddress(
+                p.permanentHouse,
+                p.permanentRoad,
+                p.permanentPostOffice,
+                p.permanentUpazila,
+                p.permanentDistrict,
+                p.permanentDivision),
             expanded: true,
           ),
           if (p.urgentContactName != null && p.urgentContactName!.isNotEmpty)
@@ -199,7 +219,8 @@ class _MemberDetailView extends StatelessWidget {
     );
   }
 
-  Widget _membershipSection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _membershipSection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     return AppCard(
       title: loc.adminMemberDetailSectionsMembership,
       child: Column(
@@ -208,7 +229,9 @@ class _MemberDetailView extends StatelessWidget {
           InfoRow(label: loc.adminMemberDetailFJoined, value: p.createdAt),
           InfoRow(label: loc.adminMemberDetailFUpdated, value: p.updatedAt),
           if (p.reviewedAt != null)
-            InfoRow(label: loc.adminMemberDetailFReviewedAt, value: p.reviewedByName ?? p.reviewedAt!),
+            InfoRow(
+                label: loc.adminMemberDetailFReviewedAt,
+                value: p.reviewedByName ?? p.reviewedAt!),
           InfoRow(
             label: loc.adminMemberDetailFAdmissionFee,
             value: '${p.admissionFee} (${p.receiptNo})',
@@ -218,7 +241,8 @@ class _MemberDetailView extends StatelessWidget {
     );
   }
 
-  Widget _feesSection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _feesSection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     final fee = p.feeSummary;
     return AppCard(
       title: loc.adminMemberDetailSectionsFees,
@@ -245,7 +269,8 @@ class _MemberDetailView extends StatelessWidget {
     );
   }
 
-  Widget _installmentsSection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _installmentsSection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     if (p.installments.isEmpty) {
       return AppCard(
         title: loc.adminMemberDetailSectionsInstallments,
@@ -260,17 +285,23 @@ class _MemberDetailView extends StatelessWidget {
             ListTile(
               contentPadding: EdgeInsets.zero,
               dense: true,
-              title: Text('${_monthLabel(loc, i.month)} ${i.year} — ${formatTaka(i.amount, decimals: 0)}'),
+              title: Text(
+                  '${_monthLabel(loc, i.month)} ${i.year} — ${formatTaka(i.amount, decimals: 0)}'),
               trailing: i.isPaid
-                  ? StatusBadge(kind: StatusKind.approved, label: loc.adminMemberDetailPaid)
-                  : StatusBadge(kind: StatusKind.pending, label: loc.adminMemberDetailDue),
+                  ? StatusBadge(
+                      kind: StatusKind.approved,
+                      label: loc.adminMemberDetailPaid)
+                  : StatusBadge(
+                      kind: StatusKind.pending,
+                      label: loc.adminMemberDetailDue),
             ),
         ],
       ),
     );
   }
 
-  Widget _picnicSection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _picnicSection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     if (p.picnicPayments.isEmpty) {
       return AppCard(
         title: loc.adminMemberDetailSectionsPicnic,
@@ -294,7 +325,8 @@ class _MemberDetailView extends StatelessWidget {
     );
   }
 
-  Widget _nomineesSection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _nomineesSection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     if (p.nominees.isEmpty) {
       return AppCard(
         title: loc.adminMemberDetailSectionsNominees,
@@ -311,8 +343,11 @@ class _MemberDetailView extends StatelessWidget {
               n.name,
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            InfoRow(label: loc.adminMemberDetailFNomineeRelation, value: n.relation),
-            InfoRow(label: loc.adminMemberDetailFNomineeMobile, value: n.mobile),
+            InfoRow(
+                label: loc.adminMemberDetailFNomineeRelation,
+                value: n.relation),
+            InfoRow(
+                label: loc.adminMemberDetailFNomineeMobile, value: n.mobile),
             const Divider(height: 12),
           ],
         ],
@@ -320,7 +355,8 @@ class _MemberDetailView extends StatelessWidget {
     );
   }
 
-  Widget _propertySection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _propertySection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     if (p.properties.isEmpty) {
       return AppCard(
         title: loc.adminMemberDetailSectionsProperty,
@@ -338,15 +374,24 @@ class _MemberDetailView extends StatelessWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             if (prop.khatianNo != null)
-              InfoRow(label: loc.adminMemberDetailFKhatian, value: prop.khatianNo!),
+              InfoRow(
+                  label: loc.adminMemberDetailFKhatian, value: prop.khatianNo!),
             if (prop.holdingNumber != null)
-              InfoRow(label: loc.adminMemberDetailFHolding, value: prop.holdingNumber!),
+              InfoRow(
+                  label: loc.adminMemberDetailFHolding,
+                  value: prop.holdingNumber!),
             if (prop.landQuantity != null)
-              InfoRow(label: loc.adminMemberDetailFLandSize, value: prop.landQuantity!),
+              InfoRow(
+                  label: loc.adminMemberDetailFLandSize,
+                  value: prop.landQuantity!),
             if (prop.myShareQuantity != null)
-              InfoRow(label: loc.adminMemberDetailFMyShare, value: prop.myShareQuantity!),
+              InfoRow(
+                  label: loc.adminMemberDetailFMyShare,
+                  value: prop.myShareQuantity!),
             if (prop.ownership != null)
-              InfoRow(label: loc.adminMemberDetailFOwnership, value: prop.ownership!),
+              InfoRow(
+                  label: loc.adminMemberDetailFOwnership,
+                  value: prop.ownership!),
             if (prop.applicableDocs.isNotEmpty)
               for (final doc in prop.applicableDocs)
                 ListTile(
@@ -356,7 +401,8 @@ class _MemberDetailView extends StatelessWidget {
                   title: Text(doc.docType),
                   onTap: doc.fileUrl == null
                       ? null
-                      : () => showImagePreview(context, doc.fileUrl!, doc.docType),
+                      : () =>
+                          showImagePreview(context, doc.fileUrl!, doc.docType),
                 ),
             const Divider(height: 12),
           ],
@@ -365,7 +411,8 @@ class _MemberDetailView extends StatelessWidget {
     );
   }
 
-  Widget _auditSection(BuildContext context, AppLocalizations loc, MemberProfile p) {
+  Widget _auditSection(
+      BuildContext context, AppLocalizations loc, MemberProfile p) {
     if (p.auditTrail.isEmpty) {
       return AppCard(
         title: loc.adminMemberDetailSectionsAudit,

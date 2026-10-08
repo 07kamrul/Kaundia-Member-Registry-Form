@@ -6,7 +6,6 @@ import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
-import '../domain/admin_entities.dart';
 import '../presentation/bloc/fee_settings_cubit.dart';
 import '../presentation/widgets/management_widgets.dart';
 
@@ -46,8 +45,10 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
   String _keyLabel(AppLocalizations loc, String key) => switch (key) {
         'admission_fee' => loc.adminFeeSettingsKeysAdmissionFee,
         'picnic_head_fee' => loc.adminFeeSettingsKeysPicnicHeadFee,
-        'picnic_additional_head_fee' => loc.adminFeeSettingsKeysPicnicAdditionalHeadFee,
-        monthlySubscriptionGroupKey => loc.adminFeeSettingsKeysMonthlySubscription,
+        'picnic_additional_head_fee' =>
+          loc.adminFeeSettingsKeysPicnicAdditionalHeadFee,
+        monthlySubscriptionGroupKey =>
+          loc.adminFeeSettingsKeysMonthlySubscription,
         _ => key,
       };
 
@@ -55,27 +56,35 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) =>
-          FeeSettingsCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))..loadActive(),
+      create: (_) => FeeSettingsCubit(
+          repository: AdminRepository(apiClient: sl<ApiClient>()))
+        ..loadActive(),
       child: BlocConsumer<FeeSettingsCubit, FeeSettingsState>(
         listener: (context, state) {
           if (state.saveError != null) {
-            showAppToast(context, loc.adminFeeSettingsErrorsSaveFailed, error: true);
+            showAppToast(context, loc.adminFeeSettingsErrorsSaveFailed,
+                error: true);
           }
         },
         builder: (context, state) {
           final cubit = context.read<FeeSettingsCubit>();
           final tierBase = state.tierRow(monthlySubscriptionTierKeys.base);
           final tierRate = state.tierRow(monthlySubscriptionTierKeys.rate);
-          final tierThreshold = state.tierRow(monthlySubscriptionTierKeys.threshold);
-          final tableRows =
-              state.active.where((s) => !monthlySubscriptionTierKeySet.contains(s.key)).toList();
+          final tierThreshold =
+              state.tierRow(monthlySubscriptionTierKeys.threshold);
+          final tableRows = state.active
+              .where((s) => !monthlySubscriptionTierKeySet.contains(s.key))
+              .toList();
 
           return ListView(
             children: [
-              PageHeader(title: loc.adminFeeSettingsTitle, subtitle: loc.adminFeeSettingsSubtitle),
+              PageHeader(
+                  title: loc.adminFeeSettingsTitle,
+                  subtitle: loc.adminFeeSettingsSubtitle),
               if (state.error != null)
-                InlineError(message: loc.adminFeeSettingsErrorsLoadFailed, onRetry: cubit.loadActive),
+                InlineError(
+                    message: loc.adminFeeSettingsErrorsLoadFailed,
+                    onRetry: cubit.loadActive),
 
               _addVersionForm(context, loc, cubit, state),
 
@@ -92,7 +101,8 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     loc.adminFeeSettingsPicnicNotConfigured,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error),
                   ),
                 ),
 
@@ -100,7 +110,9 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                 const SkeletonLoader(lines: 4)
               else ...[
                 // Tiered summary row.
-                if (tierBase != null && tierRate != null && tierThreshold != null)
+                if (tierBase != null &&
+                    tierRate != null &&
+                    tierThreshold != null)
                   AppCard(
                     title: loc.adminFeeSettingsKeysMonthlySubscription,
                     trailing: IconButton(
@@ -108,7 +120,8 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                       tooltip: state.expandedKey == monthlySubscriptionGroupKey
                           ? loc.adminFeeSettingsHideHistory
                           : loc.adminFeeSettingsViewHistory,
-                      onPressed: () => cubit.toggleHistory(monthlySubscriptionGroupKey),
+                      onPressed: () =>
+                          cubit.toggleHistory(monthlySubscriptionGroupKey),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +160,9 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                             ),
                           ],
                         ),
-                        InfoRow(label: loc.adminFeeSettingsTableStartDate, value: row.startDate),
+                        InfoRow(
+                            label: loc.adminFeeSettingsTableStartDate,
+                            value: row.startDate),
                       ],
                     ),
                   ),
@@ -177,8 +192,8 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
     );
   }
 
-  Widget _addVersionForm(
-      BuildContext context, AppLocalizations loc, FeeSettingsCubit cubit, FeeSettingsState state) {
+  Widget _addVersionForm(BuildContext context, AppLocalizations loc,
+      FeeSettingsCubit cubit, FeeSettingsState state) {
     final isTiered = _draftKey == monthlySubscriptionGroupKey;
     final canSave = _draftKey.isNotEmpty &&
         (isTiered
@@ -199,7 +214,8 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
             ),
             items: [
               for (final k in knownFeeKeys)
-                DropdownMenuItem<String>(value: k, child: Text(_keyLabel(loc, k))),
+                DropdownMenuItem<String>(
+                    value: k, child: Text(_keyLabel(loc, k))),
             ],
             onChanged: (v) => setState(() => _draftKey = v ?? ''),
           ),
@@ -275,7 +291,7 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
               label: loc.adminFeeSettingsFormSubmit,
               onPressed: canSave && !state.saving
                   ? () async {
-                      final confirmed = await AppDialog.confirm(
+                      final confirmed = await confirmDialog(
                         context,
                         title: loc.adminFeeSettingsConfirmTitle,
                         message: loc.adminFeeSettingsConfirmMessage,
@@ -285,9 +301,12 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                       final cubit = context.read<FeeSettingsCubit>();
                       final ok = isTiered
                           ? await cubit.createTieredVersion(
-                              baseAmount: num.tryParse(_baseController.text) ?? 0,
-                              additionalRate: num.tryParse(_rateController.text) ?? 0,
-                              baseThreshold: num.tryParse(_thresholdController.text) ?? 0,
+                              baseAmount:
+                                  num.tryParse(_baseController.text) ?? 0,
+                              additionalRate:
+                                  num.tryParse(_rateController.text) ?? 0,
+                              baseThreshold:
+                                  num.tryParse(_thresholdController.text) ?? 0,
                               unit: _unit.isEmpty ? null : _unit,
                               startDate: _startDate.isEmpty ? null : _startDate,
                             )
@@ -407,8 +426,7 @@ class _HistoryList extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             dense: true,
             title: Text('${h.value} ${h.unit ?? ''}'.trim()),
-            subtitle: Text(
-                '${h.startDate} → ${h.endDate ?? '—'}'),
+            subtitle: Text('${h.startDate} → ${h.endDate ?? '—'}'),
             trailing: StatusBadge(
               kind: h.isActive ? StatusKind.approved : StatusKind.neutral,
               label: h.isActive

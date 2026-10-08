@@ -41,7 +41,8 @@ class PropertyRequestsState extends Equatable {
   static T _same<T>() => throw UnsupportedError('sentinel');
 
   @override
-  List<Object?> get props => [statusFilter, items, loading, error, busyId, actionError];
+  List<Object?> get props =>
+      [statusFilter, items, loading, error, busyId, actionError];
 }
 
 class PropertyRequestsCubit extends Cubit<PropertyRequestsState> {
@@ -54,7 +55,8 @@ class PropertyRequestsCubit extends Cubit<PropertyRequestsState> {
   Future<void> load() async {
     emit(state.copyWith(loading: true, error: () => null));
     try {
-      final items = await _repository.listPropertyRequests(status: state.statusFilter);
+      final items =
+          await _repository.listPropertyRequests(status: state.statusFilter);
       emit(state.copyWith(items: items, loading: false));
     } catch (e) {
       emit(state.copyWith(loading: false, error: () => e));

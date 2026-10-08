@@ -19,18 +19,24 @@ class SubmissionsListPage extends StatelessWidget {
   final String? propertyId;
   final String? returnUrl;
 
-  const SubmissionsListPage({super.key, this.id, this.propertyId, this.returnUrl});
+  const SubmissionsListPage(
+      {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => SubmissionsCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))..load(),
-      child: BlocBuilder<SubmissionsCubit, SubmissionsState>(builder: (context, state) {
+      create: (_) => SubmissionsCubit(
+          repository: AdminRepository(apiClient: sl<ApiClient>()))
+        ..load(),
+      child: BlocBuilder<SubmissionsCubit, SubmissionsState>(
+          builder: (context, state) {
         final cubit = context.read<SubmissionsCubit>();
         return ListView(
           children: [
-            PageHeader(title: loc.adminSubmissionsListTitle, subtitle: loc.adminSubmissionsListSubtitle),
+            PageHeader(
+                title: loc.adminSubmissionsListTitle,
+                subtitle: loc.adminSubmissionsListSubtitle),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: DropdownButtonFormField<SubmissionStatus?>(
@@ -67,7 +73,8 @@ class SubmissionsListPage extends StatelessWidget {
             else ...[
               if (state.items.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   child: StatusBadge(
                     kind: switch (state.filter) {
                       SubmissionStatus.pending => StatusKind.pending,
@@ -124,11 +131,17 @@ class SubmissionsListPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            InfoRow(label: loc.adminSubmissionsListTableHeadersReference, value: reference),
-            InfoRow(label: loc.adminSubmissionsListTableHeadersMobile, value: s.mobile),
+            InfoRow(
+                label: loc.adminSubmissionsListTableHeadersReference,
+                value: reference),
+            InfoRow(
+                label: loc.adminSubmissionsListTableHeadersMobile,
+                value: s.mobile),
             InfoRow(
               label: loc.adminSubmissionsListTableHeadersDate,
-              value: date == null ? s.createdAt : DateFormat('yyyy-MM-dd').format(date),
+              value: date == null
+                  ? s.createdAt
+                  : DateFormat('yyyy-MM-dd').format(date),
             ),
             const SizedBox(height: 8),
             Align(
@@ -146,7 +159,8 @@ class SubmissionsListPage extends StatelessWidget {
   }
 }
 
-String statusLabel(AppLocalizations loc, SubmissionStatus status) => switch (status) {
+String statusLabel(AppLocalizations loc, SubmissionStatus status) =>
+    switch (status) {
       SubmissionStatus.pending => loc.adminStatusLabelsPending,
       SubmissionStatus.approved => loc.adminStatusLabelsApproved,
       SubmissionStatus.rejected => loc.adminStatusLabelsRejected,

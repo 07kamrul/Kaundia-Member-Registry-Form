@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/auth/session.dart';
 import '../../../core/di/injector.dart';
 import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
@@ -28,13 +27,16 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
   final _labelController = TextEditingController();
   final _editController = TextEditingController();
 
-  String _categoryLabel(AppLocalizations loc, String category) => switch (category) {
+  String _categoryLabel(AppLocalizations loc, String category) =>
+      switch (category) {
         'property_type' => loc.adminConfigListsCategoriesPropertyType,
         'document_type' => loc.adminConfigListsCategoriesDocumentType,
         'notice_category' => loc.adminConfigListsCategoriesNoticeCategory,
         'event_category' => loc.adminConfigListsCategoriesEventCategory,
-        'finance_income_category' => loc.adminConfigListsCategoriesFinanceIncomeCategory,
-        'finance_expense_category' => loc.adminConfigListsCategoriesFinanceExpenseCategory,
+        'finance_income_category' =>
+          loc.adminConfigListsCategoriesFinanceIncomeCategory,
+        'finance_expense_category' =>
+          loc.adminConfigListsCategoriesFinanceExpenseCategory,
         'payment_account' => loc.adminConfigListsCategoriesPaymentAccount,
         _ => category,
       };
@@ -50,22 +52,29 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final canManage = sl<SessionManager>().session?.can('manage_system_config') ?? false;
+    final canManage =
+        sl<SessionManager>().session?.can('manage_system_config') ?? false;
     return BlocProvider(
-      create: (_) => ConfigListsCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))..load(),
+      create: (_) => ConfigListsCubit(
+          repository: AdminRepository(apiClient: sl<ApiClient>()))
+        ..load(),
       child: BlocConsumer<ConfigListsCubit, ConfigListsState>(
         listener: (context, state) {
           if (state.saveError != null) {
-            showAppToast(context, loc.adminConfigListsErrorsSaveFailed, error: true);
+            showAppToast(context, loc.adminConfigListsErrorsSaveFailed,
+                error: true);
           } else if (state.error != null) {
-            showAppToast(context, loc.adminConfigListsErrorsSaveFailed, error: true);
+            showAppToast(context, loc.adminConfigListsErrorsSaveFailed,
+                error: true);
           }
         },
         builder: (context, state) {
           final cubit = context.read<ConfigListsCubit>();
           return ListView(
             children: [
-              PageHeader(title: loc.adminConfigListsTitle, subtitle: loc.adminConfigListsSubtitle),
+              PageHeader(
+                  title: loc.adminConfigListsTitle,
+                  subtitle: loc.adminConfigListsSubtitle),
               // Category tabs.
               SizedBox(
                 height: 48,
@@ -77,8 +86,10 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
                       label: Text(_categoryLabel(loc, configCategories[index])),
-                      selected: state.selectedCategory == configCategories[index],
-                      onSelected: (_) => cubit.selectCategory(configCategories[index]),
+                      selected:
+                          state.selectedCategory == configCategories[index],
+                      onSelected: (_) =>
+                          cubit.selectCategory(configCategories[index]),
                     ),
                   ),
                 ),
@@ -132,7 +143,8 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
               else
                 AppDataTableCards<ConfigListItem>(
                   items: state.items,
-                  rowBuilder: (context, item) => _row(context, loc, cubit, state, item, canManage),
+                  rowBuilder: (context, item) =>
+                      _row(context, loc, cubit, state, item, canManage),
                 ),
               const SizedBox(height: 32),
             ],
@@ -142,8 +154,13 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
     );
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, ConfigListsCubit cubit,
-      ConfigListsState state, ConfigListItem item, bool canManage) {
+  Widget _row(
+      BuildContext context,
+      AppLocalizations loc,
+      ConfigListsCubit cubit,
+      ConfigListsState state,
+      ConfigListItem item,
+      bool canManage) {
     final busy = state.busyId == item.id;
     final editing = state.editingId == item.id;
     final index = state.items.indexOf(item);
@@ -166,7 +183,8 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                   ),
                 ),
                 StatusBadge(
-                  kind: item.isActive ? StatusKind.approved : StatusKind.neutral,
+                  kind:
+                      item.isActive ? StatusKind.approved : StatusKind.neutral,
                   label: item.isActive
                       ? loc.adminConfigListsActive
                       : loc.adminConfigListsInactive,
@@ -183,13 +201,16 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                       controller: _editController,
                       autofocus: true,
                       enabled: !busy,
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
+                      decoration:
+                          const InputDecoration(border: OutlineInputBorder()),
                       onFieldSubmitted: (v) => cubit.saveLabel(item, v),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.check),
-                    onPressed: busy ? null : () => cubit.saveLabel(item, _editController.text),
+                    onPressed: busy
+                        ? null
+                        : () => cubit.saveLabel(item, _editController.text),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -210,8 +231,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                   child: Row(
                     children: [
                       Expanded(child: Text(item.label)),
-                      if (canManage)
-                        const Icon(Icons.edit_outlined, size: 16),
+                      if (canManage) const Icon(Icons.edit_outlined, size: 16),
                     ],
                   ),
                 ),
@@ -223,15 +243,17 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                 IconButton(
                   tooltip: loc.adminConfigListsActionsMoveUp,
                   icon: const Icon(Icons.arrow_upward),
-                  onPressed:
-                      canManage && !busy && index > 0 ? () => cubit.moveItem(index, -1) : null,
+                  onPressed: canManage && !busy && index > 0
+                      ? () => cubit.moveItem(index, -1)
+                      : null,
                 ),
                 IconButton(
                   tooltip: loc.adminConfigListsActionsMoveDown,
                   icon: const Icon(Icons.arrow_downward),
-                  onPressed: canManage && !busy && index < state.items.length - 1
-                      ? () => cubit.moveItem(index, 1)
-                      : null,
+                  onPressed:
+                      canManage && !busy && index < state.items.length - 1
+                          ? () => cubit.moveItem(index, 1)
+                          : null,
                 ),
                 if (canManage)
                   Switch(

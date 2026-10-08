@@ -15,16 +15,21 @@ class AdminRepository {
   final ApiClient _api;
   static const _base = '/admin';
 
-  List<Map<String, dynamic>> _rows(dynamic data) =>
-      data is List ? data.whereType<Map>().map(Map<String, dynamic>.from).toList() : const [];
+  List<Map<String, dynamic>> _rows(dynamic data) => data is List
+      ? data.whereType<Map>().map(Map<String, dynamic>.from).toList()
+      : const [];
 
   // ----- Submissions -----
 
-  Future<List<SubmissionSummary>> listSubmissions({SubmissionStatus? status}) async {
+  Future<List<SubmissionSummary>> listSubmissions(
+      {SubmissionStatus? status}) async {
     final data = await _api.getUri('$_base/submissions', query: {
-      if (status != null && status != SubmissionStatus.unknown) 'status': status.apiName,
+      if (status != null && status != SubmissionStatus.unknown)
+        'status': status.apiName,
     });
-    return _rows(data).map((r) => SubmissionSummaryApiX(r).toSummaryEntity()).toList(growable: false);
+    return _rows(data)
+        .map((r) => SubmissionSummaryApiX(r).toSummaryEntity())
+        .toList(growable: false);
   }
 
   Future<SubmissionDetail> getSubmission(String id) async {
@@ -33,15 +38,21 @@ class AdminRepository {
   }
 
   /// kind: 'member_photo' | 'receipt_photo'. Returns the refreshed submission.
-  Future<SubmissionDetail> replaceAttachment(String id, String kind, String filePath) async {
-    final form = FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
-    final data = await _api.putMultipart('$_base/submissions/$id/attachments/$kind', form);
+  Future<SubmissionDetail> replaceAttachment(
+      String id, String kind, String filePath) async {
+    final form =
+        FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
+    final data = await _api.putMultipart(
+        '$_base/submissions/$id/attachments/$kind', form);
     return Map<String, dynamic>.from(data as Map).toDetailEntity();
   }
 
-  Future<SubmissionDetail> replaceDocument(String id, String docId, String filePath) async {
-    final form = FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
-    final data = await _api.putMultipart('$_base/submissions/$id/documents/$docId', form);
+  Future<SubmissionDetail> replaceDocument(
+      String id, String docId, String filePath) async {
+    final form =
+        FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
+    final data = await _api.putMultipart(
+        '$_base/submissions/$id/documents/$docId', form);
     return Map<String, dynamic>.from(data as Map).toDetailEntity();
   }
 
@@ -53,22 +64,28 @@ class AdminRepository {
 
   /// Returns whether the rejection email was sent.
   Future<bool> rejectSubmission(String id, String reason) async {
-    final data = await _api.post('$_base/submissions/$id/reject', {'reason': reason});
+    final data =
+        await _api.post('$_base/submissions/$id/reject', {'reason': reason});
     return (data as Map)['email_sent'] == true;
   }
 
   Future<bool> resendRejectionNotification(String id) async {
-    final data = await _api.post('$_base/submissions/$id/resend-notification', {});
+    final data =
+        await _api.post('$_base/submissions/$id/resend-notification', {});
     return (data as Map)['email_sent'] == true;
   }
 
   // ----- Property requests -----
 
-  Future<List<MemberPropertyRequest>> listPropertyRequests({PropertyRequestStatus? status}) async {
+  Future<List<MemberPropertyRequest>> listPropertyRequests(
+      {PropertyRequestStatus? status}) async {
     final data = await _api.getUri('$_base/property-requests', query: {
-      if (status != null && status != PropertyRequestStatus.unknown) 'status': status.name,
+      if (status != null && status != PropertyRequestStatus.unknown)
+        'status': status.name,
     });
-    return _rows(data).map((r) => r.toPropertyRequestEntity()).toList(growable: false);
+    return _rows(data)
+        .map((r) => r.toPropertyRequestEntity())
+        .toList(growable: false);
   }
 
   Future<MemberPropertyRequest> approvePropertyRequest(int id) async {
@@ -76,8 +93,10 @@ class AdminRepository {
     return Map<String, dynamic>.from(data as Map).toPropertyRequestEntity();
   }
 
-  Future<MemberPropertyRequest> cancelPropertyRequest(int id, String reason) async {
-    final data = await _api.post('$_base/property-requests/$id/cancel', {'reason': reason});
+  Future<MemberPropertyRequest> cancelPropertyRequest(
+      int id, String reason) async {
+    final data = await _api
+        .post('$_base/property-requests/$id/cancel', {'reason': reason});
     return Map<String, dynamic>.from(data as Map).toPropertyRequestEntity();
   }
 
@@ -95,10 +114,13 @@ class AdminRepository {
 
   Future<List<Installment>> getMemberInstallments(String memberId) async {
     final data = await _api.getUri('$_base/members/$memberId/installments');
-    return _rows(data).map((r) => r.toInstallmentEntity()).toList(growable: false);
+    return _rows(data)
+        .map((r) => r.toInstallmentEntity())
+        .toList(growable: false);
   }
 
-  Future<void> deleteMember(String memberId) => _api.delete('$_base/members/$memberId');
+  Future<void> deleteMember(String memberId) =>
+      _api.delete('$_base/members/$memberId');
 
   /// Returns whether the notification email was sent.
   Future<bool> resetMemberPassword(String memberId) async {
@@ -110,7 +132,8 @@ class AdminRepository {
 
   /// status: 'paid' | 'due'.
   Future<Installment> updateInstallment(String id, String status) async {
-    final data = await _api.patch('$_base/installments/$id', {'status': status});
+    final data =
+        await _api.patch('$_base/installments/$id', {'status': status});
     return Map<String, dynamic>.from(data as Map).toInstallmentEntity();
   }
 
@@ -133,12 +156,16 @@ class AdminRepository {
 
   Future<List<FeeSetting>> getActiveFeeSettings() async {
     final data = await _api.getUri('$_base/fee-settings');
-    return _rows(data).map((r) => r.toFeeSettingEntity()).toList(growable: false);
+    return _rows(data)
+        .map((r) => r.toFeeSettingEntity())
+        .toList(growable: false);
   }
 
   Future<List<FeeSetting>> getFeeSettingHistory(String key) async {
     final data = await _api.getUri('$_base/fee-settings/$key/history');
-    return _rows(data).map((r) => r.toFeeSettingEntity()).toList(growable: false);
+    return _rows(data)
+        .map((r) => r.toFeeSettingEntity())
+        .toList(growable: false);
   }
 
   Future<FeeSetting> createFeeSettingVersion({
@@ -159,8 +186,11 @@ class AdminRepository {
   // ----- Config lists -----
 
   Future<List<ConfigListItem>> listConfigListItems(String category) async {
-    final data = await _api.getUri('$_base/config-lists', query: {'category': category});
-    return _rows(data).map((r) => r.toConfigItemEntity()).toList(growable: false);
+    final data =
+        await _api.getUri('$_base/config-lists', query: {'category': category});
+    return _rows(data)
+        .map((r) => r.toConfigItemEntity())
+        .toList(growable: false);
   }
 
   Future<ConfigListItem> createConfigListItem({
@@ -194,10 +224,12 @@ class AdminRepository {
 
   // ----- Notices / events (management CRUD, full-record bodies) -----
 
-  Future<List<Notice>> listNotices({bool? published, String? categoryId}) async {
+  Future<List<Notice>> listNotices(
+      {bool? published, String? categoryId}) async {
     final data = await _api.getUri('$_base/notices', query: {
       if (published != null) 'published': '$published',
-      if (categoryId != null && categoryId.isNotEmpty) 'category_id': categoryId,
+      if (categoryId != null && categoryId.isNotEmpty)
+        'category_id': categoryId,
     });
     return _rows(data).map((r) => r.toNoticeEntity()).toList(growable: false);
   }
@@ -225,10 +257,12 @@ class AdminRepository {
 
   Future<void> deleteNotice(String id) => _api.delete('$_base/notices/$id');
 
-  Future<List<EventItem>> listEvents({bool? published, String? categoryId}) async {
+  Future<List<EventItem>> listEvents(
+      {bool? published, String? categoryId}) async {
     final data = await _api.getUri('$_base/events', query: {
       if (published != null) 'published': '$published',
-      if (categoryId != null && categoryId.isNotEmpty) 'category_id': categoryId,
+      if (categoryId != null && categoryId.isNotEmpty)
+        'category_id': categoryId,
     });
     return _rows(data).map((r) => r.toEventEntity()).toList(growable: false);
   }
@@ -237,8 +271,9 @@ class AdminRepository {
         'title': e.title,
         'description': e.description,
         'location': e.location,
-        'category_id':
-            e.categoryId == null || e.categoryId!.isEmpty ? null : int.tryParse(e.categoryId!),
+        'category_id': e.categoryId == null || e.categoryId!.isEmpty
+            ? null
+            : int.tryParse(e.categoryId!),
         'start_at': e.startAt,
         'end_at': e.endAt,
         'is_published': e.isPublished,
@@ -352,7 +387,9 @@ class FinanceRepository {
       limit: limit,
       offset: offset,
     );
-    if (status != null && status != FinanceStatus.unknown) query['status'] = status.apiName;
+    if (status != null && status != FinanceStatus.unknown) {
+      query['status'] = status.apiName;
+    }
     if (includeInactive == true) query['include_inactive'] = 'true';
     final data = await _api.getUri('$_admin/transactions', query: query);
     return Map<String, dynamic>.from(data as Map).toLedgerEntity();
@@ -364,25 +401,31 @@ class FinanceRepository {
         'category_id': input.categoryId,
         'amount': input.amount,
         'description': input.description,
-        'reference_no': (input.referenceNo ?? '').isEmpty ? null : input.referenceNo,
-        'internal_notes': (input.internalNotes ?? '').isEmpty ? null : input.internalNotes,
+        'reference_no':
+            (input.referenceNo ?? '').isEmpty ? null : input.referenceNo,
+        'internal_notes':
+            (input.internalNotes ?? '').isEmpty ? null : input.internalNotes,
         if (input.status != null) 'status': input.status!.apiName,
         'linked_payment_type': input.linkedPaymentType?.apiName,
         'linked_payment_id': input.linkedPaymentId,
       };
 
-  Future<FinanceTransaction> createTransaction(FinanceTransactionInput input) async {
+  Future<FinanceTransaction> createTransaction(
+      FinanceTransactionInput input) async {
     final data = await _api.post('$_admin/transactions', _inputBody(input));
     return Map<String, dynamic>.from(data as Map).toTransactionEntity();
   }
 
-  Future<FinanceTransaction> updateTransaction(int id, FinanceTransactionInput changes) async {
-    final data = await _api.patch('$_admin/transactions/$id', _inputBody(changes));
+  Future<FinanceTransaction> updateTransaction(
+      int id, FinanceTransactionInput changes) async {
+    final data =
+        await _api.patch('$_admin/transactions/$id', _inputBody(changes));
     return Map<String, dynamic>.from(data as Map).toTransactionEntity();
   }
 
   Future<FinanceTransaction> uploadAttachment(int id, String filePath) async {
-    final form = FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
+    final form =
+        FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
     final data = await _api.put('$_admin/transactions/$id/attachment', form);
     return Map<String, dynamic>.from(data as Map).toTransactionEntity();
   }
@@ -398,12 +441,14 @@ class FinanceRepository {
   }
 
   Future<FinanceTransaction> rejectTransaction(int id, String reason) async {
-    final data = await _api.post('$_admin/transactions/$id/reject', {'reason': reason});
+    final data =
+        await _api.post('$_admin/transactions/$id/reject', {'reason': reason});
     return Map<String, dynamic>.from(data as Map).toTransactionEntity();
   }
 
   Future<FinanceTransaction> reverseTransaction(int id, String reason) async {
-    final data = await _api.post('$_admin/transactions/$id/reverse', {'reason': reason});
+    final data =
+        await _api.post('$_admin/transactions/$id/reverse', {'reason': reason});
     return Map<String, dynamic>.from(data as Map).toTransactionEntity();
   }
 
@@ -442,7 +487,8 @@ class FinanceRepository {
         .toList(growable: false);
   }
 
-  Future<void> publishReportNotice(FinancePeriod period, {String? dateFrom, String? dateTo}) =>
+  Future<void> publishReportNotice(FinancePeriod period,
+          {String? dateFrom, String? dateTo}) =>
       _api.post('$_admin/publish-report-notice', {
         'period': period.name,
         'date_from': dateFrom,
@@ -453,13 +499,15 @@ class FinanceRepository {
 // ----- Installment payment verification -----
 
 class InstallmentPaymentRepository {
-  InstallmentPaymentRepository({required ApiClient apiClient}) : _api = apiClient;
+  InstallmentPaymentRepository({required ApiClient apiClient})
+      : _api = apiClient;
 
   final ApiClient _api;
   static const _base = '/admin/installment-payments';
 
   Future<List<AdminInstallmentPayment>> listForAdmin({String? status}) async {
-    final data = await _api.getUri(_base, query: {if (status != null) 'status': status});
+    final data =
+        await _api.getUri(_base, query: {if (status != null) 'status': status});
     return (data as List)
         .whereType<Map>()
         .map((r) => Map<String, dynamic>.from(r).toAdminPaymentEntity())
@@ -536,8 +584,10 @@ class SocietyCostRepository {
   Future<void> deleteCost(int id) => _api.delete('$_base/society-costs/$id');
 
   Future<SocietyCost> uploadReceipt(int id, String filePath) async {
-    final form = FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
-    final data = await _api.putMultipart('$_base/society-costs/$id/receipt', form);
+    final form =
+        FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
+    final data =
+        await _api.putMultipart('$_base/society-costs/$id/receipt', form);
     return Map<String, dynamic>.from(data as Map).toCostEntity();
   }
 
@@ -554,9 +604,11 @@ class SocietyCostRepository {
       'split_method': splitMethod.apiName,
       if (manualShares.isNotEmpty)
         'manual_shares': [
-          for (final m in manualShares) {'member_id': m.memberId, 'amount_due': m.amountDue},
+          for (final m in manualShares)
+            {'member_id': m.memberId, 'amount_due': m.amountDue},
         ],
-      if (splitMethod == CostSplitMethod.manual) 'allow_mismatch': allowMismatch,
+      if (splitMethod == CostSplitMethod.manual)
+        'allow_mismatch': allowMismatch,
       if (dryRun) 'dry_run': true,
     });
     if (data is List) {
@@ -580,12 +632,14 @@ class SocietyCostRepository {
     return Map<String, dynamic>.from(data as Map).toShareEntity();
   }
 
-  Future<SocietyCostSummary> getSummary({String? dateFrom, String? dateTo}) async {
+  Future<SocietyCostSummary> getSummary(
+      {String? dateFrom, String? dateTo}) async {
     final data = await _api.getUri('$_base/society-costs/summary', query: {
       if (dateFrom != null && dateFrom.isNotEmpty) 'date_from': dateFrom,
       if (dateTo != null && dateTo.isNotEmpty) 'date_to': dateTo,
     });
-    return SocietyCostSummaryApiX(Map<String, dynamic>.from(data as Map)).toSummaryEntity();
+    return SocietyCostSummaryApiX(Map<String, dynamic>.from(data as Map))
+        .toSummaryEntity();
   }
 }
 
@@ -634,7 +688,8 @@ class RoadmapRepository {
     final body = <String, dynamic>{
       if (timeframeId != null) 'timeframe_id': timeframeId,
       if (text != null) 'text': text,
-      if (targetDate != null) 'target_date': targetDate.isEmpty ? null : targetDate,
+      if (targetDate != null)
+        'target_date': targetDate.isEmpty ? null : targetDate,
       if (owner != null) 'owner': owner.isEmpty ? null : owner,
       if (note != null) 'note': note.isEmpty ? null : note,
     };
@@ -642,7 +697,8 @@ class RoadmapRepository {
     return Map<String, dynamic>.from(data as Map).toRoadmapEntity();
   }
 
-  Future<Roadmap> setStatus(int id, RoadmapStatus status, {bool notify = true}) async {
+  Future<Roadmap> setStatus(int id, RoadmapStatus status,
+      {bool notify = true}) async {
     final data = await _api.post('$_base/items/$id/status', {
       'status': status.apiName,
       'notify': notify,
@@ -664,7 +720,8 @@ class RoadmapRepository {
   }
 
   Future<int> archive({required bool onlyDone}) async {
-    final data = await _api.post('$_base/archive', null, query: {'only_done': '$onlyDone'});
+    final data = await _api
+        .post('$_base/archive', null, query: {'only_done': '$onlyDone'});
     return ((data as Map)['archived'] as num?)?.toInt() ?? 0;
   }
 

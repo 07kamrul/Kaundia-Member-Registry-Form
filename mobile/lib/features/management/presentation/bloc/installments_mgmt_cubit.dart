@@ -39,7 +39,9 @@ class InstallmentsMgmtState extends Equatable {
       InstallmentsMgmtState(
         members: members ?? this.members,
         loadingMembers: loadingMembers ?? this.loadingMembers,
-        selectedMemberId: selectedMemberId == _same ? this.selectedMemberId : selectedMemberId(),
+        selectedMemberId: selectedMemberId == _same
+            ? this.selectedMemberId
+            : selectedMemberId(),
         installments: installments ?? this.installments,
         loadingInstallments: loadingInstallments ?? this.loadingInstallments,
         markingId: markingId == _same ? this.markingId : markingId(),
@@ -79,8 +81,9 @@ class InstallmentsMgmtCubit extends Cubit<InstallmentsMgmtState> {
   Future<void> loadMembers() async {
     emit(state.copyWith(loadingMembers: true, error: () => null));
     try {
-      final members =
-          (await _repository.listMembers()).where((m) => m.status.name == 'approved').toList();
+      final members = (await _repository.listMembers())
+          .where((m) => m.status.name == 'approved')
+          .toList();
       emit(state.copyWith(members: members, loadingMembers: false));
       if (members.isNotEmpty) {
         await selectMember(members.first.id);
@@ -99,7 +102,8 @@ class InstallmentsMgmtCubit extends Cubit<InstallmentsMgmtState> {
     ));
     try {
       final installments = await _repository.getMemberInstallments(memberId);
-      emit(state.copyWith(installments: installments, loadingInstallments: false));
+      emit(state.copyWith(
+          installments: installments, loadingInstallments: false));
     } catch (e) {
       emit(state.copyWith(loadingInstallments: false, error: () => e));
     }
@@ -108,9 +112,11 @@ class InstallmentsMgmtCubit extends Cubit<InstallmentsMgmtState> {
   Future<void> markPaid(Installment installment) async {
     emit(state.copyWith(markingId: () => installment.id, error: () => null));
     try {
-      final updated = await _repository.updateInstallment(installment.id, 'paid');
+      final updated =
+          await _repository.updateInstallment(installment.id, 'paid');
       final installments = [
-        for (final i in state.installments) if (i.id == updated.id) updated else i,
+        for (final i in state.installments)
+          if (i.id == updated.id) updated else i,
       ];
       emit(state.copyWith(markingId: () => null, installments: installments));
     } catch (e) {

@@ -19,7 +19,8 @@ class FinanceManagementPage extends StatefulWidget {
   final String? propertyId;
   final String? returnUrl;
 
-  const FinanceManagementPage({super.key, this.id, this.propertyId, this.returnUrl});
+  const FinanceManagementPage(
+      {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
   State<FinanceManagementPage> createState() => _FinanceManagementPageState();
@@ -45,7 +46,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
       child: BlocConsumer<FinanceCubit, FinanceState>(
         listener: (context, state) {
           if (state.actionError != null) {
-            showAppToast(context, describeApiError(context, state.actionError), error: true);
+            showAppToast(context, describeApiError(context, state.actionError),
+                error: true);
           }
         },
         builder: (context, state) {
@@ -70,9 +72,12 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(loc.adminFinanceManagementOverviewPending,
-                                    style: Theme.of(context).textTheme.bodySmall),
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall),
                                 Text('${state.overview!.pendingCount}',
-                                    style: Theme.of(context).textTheme.titleMedium),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
                               ],
                             ),
                           ),
@@ -81,10 +86,13 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(loc.adminFinanceManagementOverviewMonthNet,
-                                    style: Theme.of(context).textTheme.bodySmall),
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall),
                                 Text(
-                                  formatTaka(state.overview!.monthNet, decimals: 0),
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                  formatTaka(state.overview!.monthNet,
+                                      decimals: 0),
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 ),
                               ],
                             ),
@@ -94,10 +102,13 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(loc.adminFinanceManagementOverviewBalance,
-                                    style: Theme.of(context).textTheme.bodySmall),
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall),
                                 Text(
-                                  formatTaka(state.overview!.balance, decimals: 0),
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                  formatTaka(state.overview!.balance,
+                                      decimals: 0),
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 ),
                               ],
                             ),
@@ -151,7 +162,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                       items: [
                         DropdownMenuItem<FinanceType?>(
                           value: null,
-                          child: Text(loc.adminFinanceManagementFiltersAllTypes),
+                          child:
+                              Text(loc.adminFinanceManagementFiltersAllTypes),
                         ),
                         DropdownMenuItem<FinanceType?>(
                           value: FinanceType.income,
@@ -245,13 +257,17 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
               if (state.loading)
                 const SkeletonLoader(lines: 6)
               else if (state.error != null)
-                InlineError(message: loc.adminFinanceManagementErrorsLoadFailed, onRetry: cubit.refresh)
+                InlineError(
+                    message: loc.adminFinanceManagementErrorsLoadFailed,
+                    onRetry: cubit.refresh)
               else if (ledger == null || ledger.items.isEmpty)
                 EmptyState(message: loc.adminFinanceManagementLedgerEmpty)
               else ...[
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Text(loc.adminFinanceManagementLedgerCount(ledger.total),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Text(
+                      loc.adminFinanceManagementLedgerCount(ledger.total),
                       style: Theme.of(context).textTheme.bodySmall),
                 ),
                 for (final txn in ledger.items)
@@ -261,9 +277,11 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.chevron_left),
-                      onPressed: state.page > 1 ? () => cubit.changePage(-1) : null,
+                      onPressed:
+                          state.page > 1 ? () => cubit.changePage(-1) : null,
                     ),
-                    Text(loc.adminFinanceManagementLedgerPage(state.page, cubit.totalPages)),
+                    Text(loc.adminFinanceManagementLedgerPage(
+                        state.page, cubit.totalPages)),
                     IconButton(
                       icon: const Icon(Icons.chevron_right),
                       onPressed: state.page < cubit.totalPages
@@ -281,8 +299,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
     );
   }
 
-  Widget _txnCard(
-      BuildContext context, AppLocalizations loc, FinanceCubit cubit, FinanceTransaction txn) {
+  Widget _txnCard(BuildContext context, AppLocalizations loc,
+      FinanceCubit cubit, FinanceTransaction txn) {
     final expanded = cubit.state.expandedId == txn.id;
     final sign = txn.type == FinanceType.income ? '+' : '−';
     return Card(
@@ -331,16 +349,23 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                 _ => StatusKind.neutral,
               },
               label: switch (txn.status) {
-                FinanceStatus.approved => loc.adminFinanceManagementStatusApproved,
-                FinanceStatus.pending => loc.adminFinanceManagementStatusPending,
-                FinanceStatus.rejected => loc.adminFinanceManagementStatusRejected,
+                FinanceStatus.approved =>
+                  loc.adminFinanceManagementStatusApproved,
+                FinanceStatus.pending =>
+                  loc.adminFinanceManagementStatusPending,
+                FinanceStatus.rejected =>
+                  loc.adminFinanceManagementStatusRejected,
                 _ => loc.adminFinanceManagementStatusDraft,
               },
             ),
             if (expanded) ...[
-              InfoRow(label: loc.adminFinanceManagementLedgerReference, value: txn.referenceNo ?? '—'),
+              InfoRow(
+                  label: loc.adminFinanceManagementLedgerReference,
+                  value: txn.referenceNo ?? '—'),
               if (txn.internalNotes != null)
-                InfoRow(label: loc.adminFinanceManagementLedgerInternalNotes, value: txn.internalNotes!),
+                InfoRow(
+                    label: loc.adminFinanceManagementLedgerInternalNotes,
+                    value: txn.internalNotes!),
               if (txn.rejectionReason != null)
                 InfoRow(
                     label: loc.adminFinanceManagementLedgerRejectionReason,
@@ -350,7 +375,9 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                     label: loc.adminFinanceManagementLedgerApprovedBy,
                     value: '${txn.approvedByName} · ${txn.approvedAt ?? ''}'),
               if (txn.createdByName != null)
-                InfoRow(label: loc.adminFinanceManagementLedgerCreatedBy, value: txn.createdByName!),
+                InfoRow(
+                    label: loc.adminFinanceManagementLedgerCreatedBy,
+                    value: txn.createdByName!),
               if (txn.linkedPaymentType != null)
                 InfoRow(
                   label: loc.adminFinanceManagementLedgerLinkedPayment,
@@ -364,8 +391,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                     label: loc.adminFinanceManagementLedgerViewAttachment,
                     variant: AppButtonVariant.ghost,
                     icon: Icons.attach_file,
-                    onPressed: () =>
-                        showImagePreview(context, txn.attachmentUrl!, txn.description),
+                    onPressed: () => showImagePreview(
+                        context, txn.attachmentUrl!, txn.description),
                   ),
                 ),
               Wrap(
@@ -376,7 +403,9 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                     AppButton(
                       label: loc.adminFinanceManagementActionsSubmit,
                       variant: AppButtonVariant.ghost,
-                      onPressed: cubit.state.busy ? null : () => cubit.submitDraft(txn),
+                      onPressed: cubit.state.busy
+                          ? null
+                          : () => cubit.submitDraft(txn),
                     ),
                   if (txn.status == FinanceStatus.pending)
                     AppButton(
@@ -385,15 +414,20 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                       onPressed: cubit.state.busy
                           ? null
                           : () async {
-                              final confirmed = await AppDialog.confirm(
+                              final confirmed = await confirmDialog(
                                 context,
-                                title: loc.adminFinanceManagementModalsApproveTitle,
-                                message: loc.adminFinanceManagementModalsApproveConfirm,
+                                title: loc
+                                    .adminFinanceManagementModalsApproveTitle,
+                                message: loc
+                                    .adminFinanceManagementModalsApproveConfirm,
                               );
-                              if (confirmed && context.mounted) await cubit.approve(txn);
+                              if (confirmed && context.mounted) {
+                                await cubit.approve(txn);
+                              }
                             },
                     ),
-                  if (txn.status == FinanceStatus.pending || txn.status == FinanceStatus.approved)
+                  if (txn.status == FinanceStatus.pending ||
+                      txn.status == FinanceStatus.approved)
                     AppButton(
                       label: loc.adminFinanceManagementActionsReject,
                       variant: AppButtonVariant.ghost,
@@ -414,14 +448,17 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                   AppButton(
                     label: loc.commonEdit,
                     variant: AppButtonVariant.ghost,
-                    onPressed: cubit.state.busy ? null : () => _openForm(context, loc, cubit, editing: txn),
+                    onPressed: cubit.state.busy
+                        ? null
+                        : () => _openForm(context, loc, cubit, editing: txn),
                   ),
                   AppButton(
                     label: loc.commonDelete,
                     variant: AppButtonVariant.ghost,
                     onPressed: cubit.state.busy
                         ? null
-                        : () => _reasonDialog(context, loc, cubit, txn, _FinanceAction.delete),
+                        : () => _reasonDialog(
+                            context, loc, cubit, txn, _FinanceAction.delete),
                   ),
                 ],
               ),
@@ -432,34 +469,40 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
     );
   }
 
-  String _sourceLabel(AppLocalizations loc, PaymentSourceType source) => switch (source) {
-        PaymentSourceType.installment => loc.adminFinanceManagementSourceInstallment,
-        PaymentSourceType.picnicPayment => loc.adminFinanceManagementSourcePicnicPayment,
-        PaymentSourceType.costShare => loc.adminFinanceManagementSourceCostShare,
+  String _sourceLabel(AppLocalizations loc, PaymentSourceType source) =>
+      switch (source) {
+        PaymentSourceType.installment =>
+          loc.adminFinanceManagementSourceInstallment,
+        PaymentSourceType.picnicPayment =>
+          loc.adminFinanceManagementSourcePicnicPayment,
+        PaymentSourceType.costShare =>
+          loc.adminFinanceManagementSourceCostShare,
         _ => '—',
       };
 
-  Future<void> _reasonDialog(BuildContext context, AppLocalizations loc, FinanceCubit cubit,
-      FinanceTransaction txn, _FinanceAction action) async {
+  Future<void> _reasonDialog(BuildContext context, AppLocalizations loc,
+      FinanceCubit cubit, FinanceTransaction txn, _FinanceAction action) async {
     final controller = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(switch (action) {
           _FinanceAction.reject => loc.adminFinanceManagementModalsRejectTitle,
-          _FinanceAction.reverse => loc.adminFinanceManagementModalsReverseTitle,
+          _FinanceAction.reverse =>
+            loc.adminFinanceManagementModalsReverseTitle,
           _FinanceAction.delete => loc.adminFinanceManagementModalsDeleteTitle,
-          _ => '',
         }),
         content: TextField(
           controller: controller,
           maxLines: 3,
           decoration: InputDecoration(
             hintText: switch (action) {
-              _FinanceAction.reject => loc.adminFinanceManagementModalsRejectReason,
-              _FinanceAction.reverse => loc.adminFinanceManagementModalsReverseReason,
-              _FinanceAction.delete => loc.adminFinanceManagementModalsDeleteReason,
-              _ => '',
+              _FinanceAction.reject =>
+                loc.adminFinanceManagementModalsRejectReason,
+              _FinanceAction.reverse =>
+                loc.adminFinanceManagementModalsReverseReason,
+              _FinanceAction.delete =>
+                loc.adminFinanceManagementModalsDeleteReason,
             },
             border: const OutlineInputBorder(),
           ),
@@ -479,37 +522,41 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
     if (confirmed != true || !context.mounted) return;
     final reason = controller.text.trim();
     if (reason.isEmpty) {
-      showAppToast(context, loc.adminFinanceManagementErrorsReasonRequired, error: true);
+      showAppToast(context, loc.adminFinanceManagementErrorsReasonRequired,
+          error: true);
       return;
     }
     final ok = switch (action) {
       _FinanceAction.reject => await cubit.reject(txn, reason),
       _FinanceAction.reverse => await cubit.reverse(txn, reason),
       _FinanceAction.delete => await cubit.delete(txn, reason),
-      _ => false,
     };
     if (ok && context.mounted) showAppToast(context, loc.commonSave);
   }
 
   // ----- Create / edit -----
 
-  Future<void> _openForm(BuildContext context, AppLocalizations loc, FinanceCubit cubit,
+  Future<void> _openForm(
+      BuildContext context, AppLocalizations loc, FinanceCubit cubit,
       {FinanceTransaction? editing}) async {
     final type = editing?.type ?? FinanceType.income;
-    final dateController =
-        TextEditingController(text: editing?.txnDate ?? DateTime.now().toIso8601String().substring(0, 10));
+    final dateController = TextEditingController(
+        text: editing?.txnDate ??
+            DateTime.now().toIso8601String().substring(0, 10));
     final amountController =
         TextEditingController(text: editing == null ? '' : '${editing.amount}');
-    final descriptionController = TextEditingController(text: editing?.description ?? '');
-    final referenceController = TextEditingController(text: editing?.referenceNo ?? '');
-    final notesController = TextEditingController(text: editing?.internalNotes ?? '');
+    final descriptionController =
+        TextEditingController(text: editing?.description ?? '');
+    final referenceController =
+        TextEditingController(text: editing?.referenceNo ?? '');
+    final notesController =
+        TextEditingController(text: editing?.internalNotes ?? '');
     var categoryId = editing?.categoryId;
     String? pickedAttachment;
     // Payment linking (income only, create only).
     var linkPayment = false;
     UnlinkedPayment? selectedPayment;
     PaymentSourceType? sourceFilter;
-    final paymentSearchController = TextEditingController();
 
     await showModalBottomSheet<bool>(
       context: context,
@@ -566,7 +613,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: sheetContext,
-                          initialDate: DateTime.tryParse(dateController.text) ?? DateTime.now(),
+                          initialDate: DateTime.tryParse(dateController.text) ??
+                              DateTime.now(),
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         );
@@ -586,7 +634,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                       items: [
                         for (final c in cubit.state.categories)
                           if (c.type == currentType && c.isActive)
-                            DropdownMenuItem<int>(value: c.id, child: Text(c.label)),
+                            DropdownMenuItem<int>(
+                                value: c.id, child: Text(c.label)),
                       ],
                       onChanged: (v) => setSheetState(() => categoryId = v),
                     ),
@@ -639,18 +688,19 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           variant: AppButtonVariant.secondary,
                           icon: Icons.attach_file,
                           onPressed: () async {
-                            final result =
-                                await FilePicker.platform.pickFiles(type: FileType.any);
+                            final result = await FilePicker.platform
+                                .pickFiles(type: FileType.any);
                             if (result != null) {
-                              setSheetState(
-                                  () => pickedAttachment = result.files.single.path);
+                              setSheetState(() =>
+                                  pickedAttachment = result.files.single.path);
                             }
                           },
                         ),
                       ],
                     ),
                     // Payment linking for incomes (create only).
-                    if (editing == null && currentType == FinanceType.income) ...[
+                    if (editing == null &&
+                        currentType == FinanceType.income) ...[
                       const SizedBox(height: 8),
                       CheckboxListTile(
                         value: linkPayment,
@@ -666,25 +716,30 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         DropdownButtonFormField<PaymentSourceType?>(
                           initialValue: sourceFilter,
                           decoration: InputDecoration(
-                            labelText: loc.adminFinanceManagementPaymentLinkAllSources,
+                            labelText:
+                                loc.adminFinanceManagementPaymentLinkAllSources,
                             border: const OutlineInputBorder(),
                           ),
                           items: [
                             DropdownMenuItem<PaymentSourceType?>(
                               value: null,
-                              child: Text(loc.adminFinanceManagementPaymentLinkAllSources),
+                              child: Text(loc
+                                  .adminFinanceManagementPaymentLinkAllSources),
                             ),
                             DropdownMenuItem<PaymentSourceType?>(
                               value: PaymentSourceType.installment,
-                              child: Text(loc.adminFinanceManagementSourceInstallment),
+                              child: Text(
+                                  loc.adminFinanceManagementSourceInstallment),
                             ),
                             DropdownMenuItem<PaymentSourceType?>(
                               value: PaymentSourceType.picnicPayment,
-                              child: Text(loc.adminFinanceManagementSourcePicnicPayment),
+                              child: Text(loc
+                                  .adminFinanceManagementSourcePicnicPayment),
                             ),
                             DropdownMenuItem<PaymentSourceType?>(
                               value: PaymentSourceType.costShare,
-                              child: Text(loc.adminFinanceManagementSourceCostShare),
+                              child: Text(
+                                  loc.adminFinanceManagementSourceCostShare),
                             ),
                           ],
                           onChanged: (v) {
@@ -700,21 +755,25 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         else if (cubit.state.unlinkedPayments.isEmpty)
                           Padding(
                             padding: const EdgeInsets.all(8),
-                            child: Text(loc.adminFinanceManagementPaymentLinkEmpty),
+                            child: Text(
+                                loc.adminFinanceManagementPaymentLinkEmpty),
                           )
                         else
-                          for (final payment in cubit.state.unlinkedPayments)
-                            RadioListTile<UnlinkedPayment>(
-                              value: payment,
-                              groupValue: selectedPayment,
+                          for (final payment
+                              in cubit.state.unlinkedPayments)
+                            ListTile(
                               dense: true,
+                              leading: Icon(selectedPayment == payment
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked),
                               title: Text(
                                   '${payment.memberName ?? '—'} · ${formatTaka(payment.amount, decimals: 0)}'),
                               subtitle: Text(payment.detail),
-                              onChanged: (v) => setSheetState(() {
-                                selectedPayment = v;
+                              onTap: () => setSheetState(() {
+                                selectedPayment = payment;
                                 amountController.text = '${payment.amount}';
-                                dateController.text = payment.paidOn.substring(0, 10);
+                                dateController.text =
+                                    payment.paidOn.substring(0, 10);
                                 descriptionController.text = payment.detail;
                               }),
                             ),
@@ -734,7 +793,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                                     type: currentType,
                                     dateController: dateController,
                                     amountController: amountController,
-                                    descriptionController: descriptionController,
+                                    descriptionController:
+                                        descriptionController,
                                     referenceController: referenceController,
                                     notesController: notesController,
                                     categoryId: categoryId,
@@ -754,7 +814,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                                     type: currentType,
                                     dateController: dateController,
                                     amountController: amountController,
-                                    descriptionController: descriptionController,
+                                    descriptionController:
+                                        descriptionController,
                                     referenceController: referenceController,
                                     notesController: notesController,
                                     categoryId: categoryId,
@@ -793,12 +854,15 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
   }) async {
     final amount = num.tryParse(amountController.text);
     final errors = <String>[];
-    if (dateController.text.isEmpty) errors.add(loc.adminFinanceManagementErrorsDateRequired);
-    if (amount == null || amount <= 0) errors.add(loc.adminFinanceManagementErrorsAmountRequired);
+    if (dateController.text.isEmpty)
+      errors.add(loc.adminFinanceManagementErrorsDateRequired);
+    if (amount == null || amount <= 0)
+      errors.add(loc.adminFinanceManagementErrorsAmountRequired);
     if (descriptionController.text.trim().isEmpty) {
       errors.add(loc.adminFinanceManagementErrorsDescriptionRequired);
     }
-    if (categoryId == null) errors.add(loc.adminFinanceManagementErrorsCategoryRequired);
+    if (categoryId == null)
+      errors.add(loc.adminFinanceManagementErrorsCategoryRequired);
     if (errors.isNotEmpty) {
       showAppToast(sheetContext, errors.first, error: true);
       return;
@@ -821,11 +885,15 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
         status: editing == null
             ? (saveAsPending ? FinanceStatus.pending : FinanceStatus.draft)
             : null,
-        linkedPaymentType: editing == null && type == FinanceType.income && selectedPayment != null
-            ? selectedPayment!.sourceType
+        linkedPaymentType: editing == null &&
+                type == FinanceType.income &&
+                selectedPayment != null
+            ? selectedPayment.sourceType
             : null,
-        linkedPaymentId: editing == null && type == FinanceType.income && selectedPayment != null
-            ? selectedPayment!.sourceId
+        linkedPaymentId: editing == null &&
+                type == FinanceType.income &&
+                selectedPayment != null
+            ? selectedPayment.sourceId
             : null,
       ),
     );

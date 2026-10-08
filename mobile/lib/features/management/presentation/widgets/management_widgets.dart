@@ -10,7 +10,9 @@ String describeApiError(BuildContext context, Object? error) {
   if (error is ApiException) {
     if (error.isNetwork) return loc.commonNetworkError;
     if (error.isUnauthorized) return loc.commonUnauthorized;
-    if (error.isBusiness && error.businessMessage != null) return error.businessMessage!;
+    if (error.isBusiness && error.businessMessage != null) {
+      return error.businessMessage!;
+    }
     if (error.isServer && error.message != null && error.message!.isNotEmpty) {
       return error.message!;
     }
@@ -21,7 +23,11 @@ String describeApiError(BuildContext context, Object? error) {
 
 /// Small label/value row used by detail screens (dt/dd grid in Angular).
 class InfoRow extends StatelessWidget {
-  const InfoRow({super.key, required this.label, required this.value, this.expanded = false});
+  const InfoRow(
+      {super.key,
+      required this.label,
+      required this.value,
+      this.expanded = false});
 
   final String label;
   final String value;
@@ -66,10 +72,9 @@ class SectionHeading extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16, bottom: 6),
       child: Text(
         title,
-        style: Theme.of(context)
-            .textTheme
-            .titleMedium
-            ?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary),
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.primary),
       ),
     );
   }
@@ -77,7 +82,8 @@ class SectionHeading extends StatelessWidget {
 
 /// Taka amount with South-Asian (lakh) grouping: 1250000 -> "৳ 12,50,000".
 String formatTaka(num value, {int decimals = 0}) {
-  final fmt = NumberFormat.currency(locale: 'en_IN', symbol: '৳ ', decimalDigits: decimals);
+  final fmt = NumberFormat.currency(
+      locale: 'en_IN', symbol: '৳ ', decimalDigits: decimals);
   return fmt.format(value);
 }
 
@@ -97,7 +103,9 @@ Future<void> showImagePreview(BuildContext context, String url, String alt) {
         mainAxisSize: MainAxisSize.min,
         children: [
           AppBar(title: Text(alt), actions: [
-            IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(ctx).pop()),
+            IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(ctx).pop()),
           ]),
           Flexible(
             child: InteractiveViewer(
@@ -111,8 +119,9 @@ Future<void> showImagePreview(BuildContext context, String url, String alt) {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                loadingBuilder: (_, child, progress) =>
-                    progress == null ? child : const CircularProgressIndicator(),
+                loadingBuilder: (_, child, progress) => progress == null
+                    ? child
+                    : const CircularProgressIndicator(),
               ),
             ),
           ),
@@ -141,7 +150,8 @@ class SelectField<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
       initialValue: value,
-      decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
+      decoration:
+          InputDecoration(labelText: label, border: const OutlineInputBorder()),
       items: items,
       onChanged: onChanged,
     );
@@ -197,4 +207,38 @@ class UploadTarget {
 
   final String path;
   final String fileName;
+}
+
+/// Same look as AppDialog.confirm but returns the result (AppDialog.confirm
+/// is typed `Future<void>`, pages need the boolean).
+Future<bool> confirmDialog(
+  BuildContext context, {
+  required String title,
+  required String message,
+  String? confirmLabel,
+  String? cancelLabel,
+  bool destructive = false,
+}) {
+  final loc = AppLocalizations.of(context);
+  return showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(cancelLabel ?? loc.commonCancel),
+        ),
+        FilledButton(
+          style: destructive
+              ? FilledButton.styleFrom(
+                  backgroundColor: Theme.of(ctx).colorScheme.error)
+              : null,
+          onPressed: () => Navigator.of(ctx).pop(true),
+          child: Text(confirmLabel ?? loc.commonConfirmAction),
+        ),
+      ],
+    ),
+  ).then((value) => value == true);
 }

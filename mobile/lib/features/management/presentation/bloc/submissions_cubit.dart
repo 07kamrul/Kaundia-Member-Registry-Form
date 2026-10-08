@@ -42,7 +42,8 @@ class SubmissionsState extends Equatable {
 class SubmissionsCubit extends Cubit<SubmissionsState> {
   SubmissionsCubit({required AdminRepository repository})
       : _repository = repository,
-        super(const SubmissionsState(filter: SubmissionStatus.pending, loading: true));
+        super(const SubmissionsState(
+            filter: SubmissionStatus.pending, loading: true));
 
   final AdminRepository _repository;
 
@@ -97,15 +98,19 @@ class SubmissionDetailState extends Equatable {
         loading: loading ?? this.loading,
         submission: submission ?? this.submission,
         error: error == _sentinel ? this.error : error(),
-        actionError: actionError == _sentinel ? this.actionError : actionError(),
+        actionError:
+            actionError == _sentinel ? this.actionError : actionError(),
         busy: busy ?? this.busy,
-        rejectionNotice: rejectionNotice == _sentinel ? this.rejectionNotice : rejectionNotice(),
+        rejectionNotice: rejectionNotice == _sentinel
+            ? this.rejectionNotice
+            : rejectionNotice(),
       );
 
   static T _sentinel<T>() => throw UnsupportedError('sentinel');
 
   @override
-  List<Object?> get props => [loading, submission, error, actionError, busy, rejectionNotice];
+  List<Object?> get props =>
+      [loading, submission, error, actionError, busy, rejectionNotice];
 }
 
 class SubmissionDetailCubit extends Cubit<SubmissionDetailState> {
@@ -208,7 +213,8 @@ class SubmissionDetailCubit extends Cubit<SubmissionDetailState> {
     try {
       final sent = await _repository.resendRejectionNotification(id);
       if (!sent) {
-        emit(state.copyWith(busy: false, actionError: () => 'rejectEmailFailed'));
+        emit(state.copyWith(
+            busy: false, actionError: () => 'rejectEmailFailed'));
         return false;
       }
       final submission = state.submission;
@@ -223,7 +229,8 @@ class SubmissionDetailCubit extends Cubit<SubmissionDetailState> {
   Future<void> replaceAttachment(String kind, String filePath) async {
     emit(state.copyWith(busy: true, actionError: () => null));
     try {
-      final submission = await _repository.replaceAttachment(id, kind, filePath);
+      final submission =
+          await _repository.replaceAttachment(id, kind, filePath);
       emit(state.copyWith(busy: false, submission: submission));
     } catch (e) {
       emit(state.copyWith(busy: false, actionError: () => e));

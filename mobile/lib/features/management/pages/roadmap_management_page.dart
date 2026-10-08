@@ -17,7 +17,8 @@ class RoadmapManagementPage extends StatefulWidget {
   final String? propertyId;
   final String? returnUrl;
 
-  const RoadmapManagementPage({super.key, this.id, this.propertyId, this.returnUrl});
+  const RoadmapManagementPage(
+      {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
   State<RoadmapManagementPage> createState() => _RoadmapManagementPageState();
@@ -28,14 +29,18 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => RoadmapCubit(repository: RoadmapRepository(apiClient: sl<ApiClient>()))..load(),
+      create: (_) => RoadmapCubit(
+          repository: RoadmapRepository(apiClient: sl<ApiClient>()))
+        ..load(),
       child: BlocConsumer<RoadmapCubit, RoadmapState>(
         listener: (context, state) {
           if (state.actionError != null) {
-            showAppToast(context, describeApiError(context, state.actionError), error: true);
+            showAppToast(context, describeApiError(context, state.actionError),
+                error: true);
           }
           if (state.archiveCount != null) {
-            showAppToast(context, loc.adminRoadmapArchiveDone(state.archiveCount!));
+            showAppToast(
+                context, loc.adminRoadmapArchiveDone(state.archiveCount!));
           }
         },
         builder: (context, state) {
@@ -43,11 +48,14 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
           final roadmap = state.roadmap;
           return ListView(
             children: [
-              PageHeader(title: loc.adminRoadmapTitle, subtitle: loc.adminRoadmapSubtitle),
+              PageHeader(
+                  title: loc.adminRoadmapTitle,
+                  subtitle: loc.adminRoadmapSubtitle),
               if (state.loading)
                 const SkeletonLoader(lines: 6)
               else if (state.loadError != null)
-                InlineError(message: loc.adminRoadmapErrorsGeneric, onRetry: cubit.load)
+                InlineError(
+                    message: loc.adminRoadmapErrorsGeneric, onRetry: cubit.load)
               else if (roadmap == null)
                 EmptyState(message: loc.commonNoData)
               else ...[
@@ -68,19 +76,22 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Wrap(
                     spacing: 8,
                     children: [
                       AppButton(
                         label: loc.adminRoadmapAdd,
                         icon: Icons.add,
-                        onPressed: () => _openForm(context, loc, cubit, roadmap),
+                        onPressed: () =>
+                            _openForm(context, loc, cubit, roadmap),
                       ),
                       AppButton(
                         label: loc.adminRoadmapArchiveButton,
                         variant: AppButtonVariant.secondary,
-                        onPressed: () => _openArchiveDialog(context, loc, cubit),
+                        onPressed: () =>
+                            _openArchiveDialog(context, loc, cubit),
                       ),
                       AppButton(
                         label: loc.adminRoadmapArchiveHistory,
@@ -112,7 +123,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                             child: Text(loc.commonNoData),
                           ),
                         for (var i = 0; i < tf.items.length; i++)
-                          _itemTile(context, loc, cubit, roadmap, tf, tf.items[i], i),
+                          _itemTile(
+                              context, loc, cubit, roadmap, tf, tf.items[i], i),
                       ],
                     ),
                   ),
@@ -127,16 +139,24 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
 
   bool _notifyOnDone = true;
 
-  String _statusLabel(AppLocalizations loc, RoadmapStatus status) => switch (status) {
+  String _statusLabel(AppLocalizations loc, RoadmapStatus status) =>
+      switch (status) {
         RoadmapStatus.planned => loc.adminRoadmapStatusPlanned,
         RoadmapStatus.inProgress => loc.adminRoadmapStatusInProgress,
         RoadmapStatus.done => loc.adminRoadmapStatusDone,
         _ => '—',
       };
 
-  Widget _itemTile(BuildContext context, AppLocalizations loc, RoadmapCubit cubit,
-      Roadmap roadmap, RoadmapTimeframe tf, RoadmapItem item, int index) {
-    final busy = cubit.state.busyItemId == item.id || cubit.state.busyItemId == -1;
+  Widget _itemTile(
+      BuildContext context,
+      AppLocalizations loc,
+      RoadmapCubit cubit,
+      Roadmap roadmap,
+      RoadmapTimeframe tf,
+      RoadmapItem item,
+      int index) {
+    final busy =
+        cubit.state.busyItemId == item.id || cubit.state.busyItemId == -1;
     return Column(
       children: [
         Row(
@@ -147,7 +167,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                 children: [
                   Text(item.text),
                   if (item.targetDate != null && item.targetDate!.isNotEmpty)
-                    Text(item.targetDate!, style: Theme.of(context).textTheme.bodySmall),
+                    Text(item.targetDate!,
+                        style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             ),
@@ -164,7 +185,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                   selected: item.status == status,
                   onSelected: busy || item.status == status
                       ? null
-                      : (_) => cubit.setStatus(item, status, notify: _notifyOnDone),
+                      : (_) =>
+                          cubit.setStatus(item, status, notify: _notifyOnDone),
                 ),
               ),
           ],
@@ -175,7 +197,9 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
             IconButton(
               tooltip: loc.adminRoadmapMoveUp,
               icon: const Icon(Icons.arrow_upward, size: 18),
-              onPressed: busy || index == 0 ? null : () => cubit.reorder(tf, index, -1),
+              onPressed: busy || index == 0
+                  ? null
+                  : () => cubit.reorder(tf, index, -1),
             ),
             IconButton(
               tooltip: loc.adminRoadmapMoveDown,
@@ -187,7 +211,10 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
             IconButton(
               tooltip: loc.commonEdit,
               icon: const Icon(Icons.edit_outlined, size: 18),
-              onPressed: busy ? null : () => _openForm(context, loc, cubit, roadmap, editing: item),
+              onPressed: busy
+                  ? null
+                  : () =>
+                      _openForm(context, loc, cubit, roadmap, editing: item),
             ),
             IconButton(
               tooltip: loc.commonDelete,
@@ -195,13 +222,14 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
               onPressed: busy
                   ? null
                   : () async {
-                      final confirmed = await AppDialog.confirm(
+                      final confirmed = await confirmDialog(
                         context,
                         title: loc.adminRoadmapDeleteTitle,
                         message: item.text,
                         destructive: true,
                       );
-                      if (confirmed && context.mounted) await cubit.deleteItem(item);
+                      if (confirmed && context.mounted)
+                        await cubit.deleteItem(item);
                     },
             ),
           ],
@@ -211,8 +239,9 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
     );
   }
 
-  Future<void> _openForm(BuildContext context, AppLocalizations loc, RoadmapCubit cubit,
-      Roadmap roadmap, {RoadmapItem? editing}) async {
+  Future<void> _openForm(BuildContext context, AppLocalizations loc,
+      RoadmapCubit cubit, Roadmap roadmap,
+      {RoadmapItem? editing}) async {
     final textController = TextEditingController(text: editing?.text ?? '');
     final ownerController = TextEditingController(text: editing?.owner ?? '');
     final noteController = TextEditingController(text: editing?.note ?? '');
@@ -272,14 +301,14 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                       RoadmapStatus.inProgress,
                       RoadmapStatus.done,
                     ])
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text(_statusLabel(loc, statusOption)),
-                            selected: status == statusOption,
-                            onSelected: (_) => status = statusOption,
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(_statusLabel(loc, statusOption)),
+                          selected: status == statusOption,
+                          onSelected: (_) => status = statusOption,
                         ),
+                      ),
                   ],
                 ),
               ],
@@ -315,7 +344,9 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                   onPressed: () async {
                     final text = textController.text.trim();
                     if (text.isEmpty) {
-                      showAppToast(sheetContext, loc.adminRoadmapErrorsTextRequired, error: true);
+                      showAppToast(
+                          sheetContext, loc.adminRoadmapErrorsTextRequired,
+                          error: true);
                       return;
                     }
                     final ok = editing == null
@@ -336,7 +367,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                             owner: ownerController.text.trim(),
                             note: noteController.text.trim(),
                           );
-                    if (sheetContext.mounted && ok) Navigator.of(sheetContext).pop();
+                    if (sheetContext.mounted && ok)
+                      Navigator.of(sheetContext).pop();
                   },
                 ),
               ),
@@ -384,7 +416,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
     }
   }
 
-  void _openHistorySheet(BuildContext context, AppLocalizations loc, RoadmapCubit cubit) {
+  void _openHistorySheet(
+      BuildContext context, AppLocalizations loc, RoadmapCubit cubit) {
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => BlocProvider.value(
@@ -412,7 +445,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(loc.adminRoadmapArchiveCycleSummary(cycle.total, cycle.done)),
+                        Text(loc.adminRoadmapArchiveCycleSummary(
+                            cycle.total, cycle.done)),
                         for (final item in cycle.items)
                           ListTile(
                             dense: true,

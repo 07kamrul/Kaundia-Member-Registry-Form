@@ -4,18 +4,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injector.dart';
-import '../../../core/network/api_client.dart';
 import '../../../core/enums/enums.dart';
+import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
+import '../domain/admin_entities.dart';
 import '../presentation/bloc/submissions_cubit.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'submissions_list_page.dart';
 
 /// Full submission review (Angular submission-detail): every section of the
 /// application, attachment previews, and approve/reject in review mode.
-class SubmissionDetailPage extends StatefulWidget {
+class SubmissionDetailPage extends StatelessWidget {
   final String? id;
   final String? propertyId;
   final String? returnUrl;
@@ -23,14 +24,9 @@ class SubmissionDetailPage extends StatefulWidget {
   const SubmissionDetailPage({super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
-  State<SubmissionDetailPage> createState() => _SubmissionDetailPageState();
-}
-
-class _SubmissionDetailPageState extends State<SubmissionDetailPage> {
-  @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final id = widget.id ?? (ModalRoute.of(context)?.settings.arguments as String?);
+    final id = this.id ?? (ModalRoute.of(context)?.settings.arguments as String?);
     if (id == null) {
       return EmptyState(message: loc.commonNoData);
     }
@@ -43,6 +39,19 @@ class _SubmissionDetailPageState extends State<SubmissionDetailPage> {
     );
   }
 }
+
+String _joinAddress(
+  String? house,
+  String? road,
+  String? po,
+  String? up,
+  String? dist,
+  String? div,
+) =>
+    [house, road, po, up, dist, div]
+        .whereType<String>()
+        .where((e) => e.isNotEmpty)
+        .join(', ');
 
 class _SubmissionDetailView extends StatelessWidget {
   const _SubmissionDetailView();
@@ -132,31 +141,29 @@ class _SubmissionDetailView extends StatelessWidget {
     );
   }
 
-  Widget _personalSection(BuildContext context, AppLocalizations loc, dynamic s) {
+  Widget _personalSection(BuildContext context, AppLocalizations loc, SubmissionDetail s) {
     return AppCard(
       title: loc.adminSubmissionDetailPersonalInfo,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InfoRow(label: loc.adminSubmissionDetailFieldsName, value: s.fullName as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsFatherOrHusband, value: s.fatherOrHusband as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsMother, value: s.mother as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsDob, value: s.dob as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsNationality, value: s.nationality as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsOccupation, value: s.occupation as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsNid, value: s.nid as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsGender, value: s.gender as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsEmail, value: s.email as String),
-          if ((s as dynamic).memberId != null)
-            InfoRow(label: loc.adminMemberDetailFMemberId, value: s.memberId as String),
+          InfoRow(label: loc.adminSubmissionDetailFieldsName, value: s.fullName),
+          InfoRow(label: loc.adminSubmissionDetailFieldsFatherOrHusband, value: s.fatherOrHusband),
+          InfoRow(label: loc.adminSubmissionDetailFieldsMother, value: s.mother),
+          InfoRow(label: loc.adminSubmissionDetailFieldsDob, value: s.dob),
+          InfoRow(label: loc.adminSubmissionDetailFieldsNationality, value: s.nationality),
+          InfoRow(label: loc.adminSubmissionDetailFieldsOccupation, value: s.occupation),
+          InfoRow(label: loc.adminSubmissionDetailFieldLabelsNid, value: s.nid),
+          InfoRow(label: loc.adminSubmissionDetailFieldsGender, value: s.gender),
+          InfoRow(label: loc.adminSubmissionDetailFieldsEmail, value: s.email),
+          if (s.memberId != null)
+            InfoRow(label: loc.adminMemberDetailFMemberId, value: s.memberId!),
         ],
       ),
     );
   }
 
-  Widget _addressSection(BuildContext context, AppLocalizations loc, dynamic s) {
-    String join(String? house, String? road, String? po, String? up, String? dist, String? div) =>
-        [house, road, po, up, dist, div].whereType<String>().where((e) => e.isNotEmpty).join(', ');
+  Widget _addressSection(BuildContext context, AppLocalizations loc, SubmissionDetail s) {
     return AppCard(
       title: loc.adminSubmissionDetailFieldsAddress,
       child: Column(
@@ -164,21 +171,21 @@ class _SubmissionDetailView extends StatelessWidget {
         children: [
           InfoRow(
             label: loc.adminSubmissionDetailPermanentAddress,
-            value: join(s.permanentHouse, s.permanentRoad, s.permanentPostOffice,
+            value: _joinAddress(s.permanentHouse, s.permanentRoad, s.permanentPostOffice,
                 s.permanentUpazila, s.permanentDistrict, s.permanentDivision),
           ),
           InfoRow(
             label: loc.adminSubmissionDetailCurrentAddress,
-            value: join(s.currentHouse, s.currentRoad, s.currentPostOffice, s.currentUpazila,
-                s.currentDistrict, s.currentDivision),
+            value: _joinAddress(s.currentHouse, s.currentRoad, s.currentPostOffice,
+                s.currentUpazila, s.currentDistrict, s.currentDivision),
           ),
         ],
       ),
     );
   }
 
-  Widget _emergencySection(BuildContext context, AppLocalizations loc, dynamic s) {
-    final name = s.urgentContactName as String?;
+  Widget _emergencySection(BuildContext context, AppLocalizations loc, SubmissionDetail s) {
+    final name = s.urgentContactName;
     if (name == null || name.isEmpty) return const SizedBox.shrink();
     return AppCard(
       title: loc.adminSubmissionDetailUrgentContact,
@@ -194,34 +201,31 @@ class _SubmissionDetailView extends StatelessWidget {
     );
   }
 
-  Widget _attachmentsSection(BuildContext context, AppLocalizations loc, dynamic s,
-      SubmissionDetailCubit cubit, bool busy) {
+  Widget _attachmentsSection(
+      BuildContext context, AppLocalizations loc, SubmissionDetail s, SubmissionDetailCubit cubit, bool busy) {
     Widget preview(String? url, String label) {
       if (url == null || url.isEmpty) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Text(loc.adminSubmissionDetailNoAttachment,
-              style: Theme.of(context).textTheme.bodySmall),
+          child: Text(
+            loc.adminSubmissionDetailNoAttachment,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         );
       }
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () => showImagePreview(context, url, label),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  url,
-                  height: 140,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Text(loc.adminSubmissionDetailFileMissing),
-                ),
-              ),
+        child: GestureDetector(
+          onTap: () => showImagePreview(context, url, label),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              url,
+              height: 140,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Text(loc.adminSubmissionDetailFileMissing),
             ),
-          ],
+          ),
         ),
       );
     }
@@ -231,25 +235,26 @@ class _SubmissionDetailView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          preview(s.memberPhotoUrl as String?, loc.adminSubmissionDetailFieldsMemberPhoto),
+          preview(s.memberPhotoUrl, loc.adminSubmissionDetailFieldsMemberPhoto),
           _replaceButton(
             context,
-            loc,
-            label: '${loc.adminSubmissionDetailUploadAgain} — ${loc.adminSubmissionDetailFieldsMemberPhoto}',
+            '${loc.adminSubmissionDetailUploadAgain} — ${loc.adminSubmissionDetailFieldsMemberPhoto}',
             enabled: !busy,
+            imagesOnly: true,
             onPicked: (path) => cubit.replaceAttachment('member_photo', path),
           ),
-          preview(s.receiptPhotoUrl as String?, loc.adminSubmissionDetailFieldsReceiptPhoto),
+          preview(s.receiptPhotoUrl, loc.adminSubmissionDetailFieldsReceiptPhoto),
           _replaceButton(
             context,
-            loc,
-            label: '${loc.adminSubmissionDetailUploadAgain} — ${loc.adminSubmissionDetailFieldsReceiptPhoto}',
+            '${loc.adminSubmissionDetailUploadAgain} — ${loc.adminSubmissionDetailFieldsReceiptPhoto}',
             enabled: !busy,
             imagesOnly: true,
             onPicked: (path) => cubit.replaceAttachment('receipt_photo', path),
           ),
-          if (s.memberSignature != null && (s.memberSignature as String).isNotEmpty)
-            InfoRow(label: loc.adminSubmissionDetailFieldsMemberSignature, value: s.memberSignature),
+          if (s.memberSignature != null && s.memberSignature!.isNotEmpty)
+            InfoRow(
+                label: loc.adminSubmissionDetailFieldsMemberSignature,
+                value: s.memberSignature!),
         ],
       ),
     );
@@ -257,10 +262,9 @@ class _SubmissionDetailView extends StatelessWidget {
 
   Widget _replaceButton(
     BuildContext context,
-    AppLocalizations loc, {
-    required String label,
+    String label, {
     required bool enabled,
-    bool imagesOnly = false,
+    required bool imagesOnly,
     required ValueChanged<String> onPicked,
   }) {
     return Padding(
@@ -281,10 +285,9 @@ class _SubmissionDetailView extends StatelessWidget {
     );
   }
 
-  Widget _propertiesSection(BuildContext context, AppLocalizations loc, dynamic s,
-      SubmissionDetailCubit cubit, bool busy) {
-    final properties = s.properties as List;
-    if (properties.isEmpty) {
+  Widget _propertiesSection(
+      BuildContext context, AppLocalizations loc, SubmissionDetail s, SubmissionDetailCubit cubit, bool busy) {
+    if (s.properties.isEmpty) {
       return AppCard(
         title: loc.adminSubmissionDetailProperties,
         child: Text(loc.adminSubmissionDetailNoProperties),
@@ -292,19 +295,17 @@ class _SubmissionDetailView extends StatelessWidget {
     }
     return AppCard(
       title:
-          '${loc.adminSubmissionDetailProperties} (${loc.adminSubmissionDetailPropertyCount(properties.length)})',
+          '${loc.adminSubmissionDetailProperties} (${loc.adminSubmissionDetailPropertyCount(s.properties.length)})',
       child: Column(
         children: [
-          for (final p in properties)
-            _PropertyTile(property: p, loc: loc, cubit: cubit, busy: busy),
+          for (final p in s.properties) _PropertyTile(property: p, cubit: cubit, busy: busy),
         ],
       ),
     );
   }
 
-  Widget _nomineesSection(BuildContext context, AppLocalizations loc, dynamic s) {
-    final nominees = s.nominees as List;
-    if (nominees.isEmpty) {
+  Widget _nomineesSection(BuildContext context, AppLocalizations loc, SubmissionDetail s) {
+    if (s.nominees.isEmpty) {
       return AppCard(
         title: loc.adminSubmissionDetailNominees,
         child: Text(loc.adminSubmissionDetailNoNominees),
@@ -312,8 +313,8 @@ class _SubmissionDetailView extends StatelessWidget {
     }
     num shareTotal = 0;
     var shareDeclared = false;
-    for (final n in nominees) {
-      final share = n.sharePercentage as num?;
+    for (final n in s.nominees) {
+      final share = n.sharePercentage;
       if (share != null) {
         shareDeclared = true;
         shareTotal += share;
@@ -321,14 +322,14 @@ class _SubmissionDetailView extends StatelessWidget {
     }
     return AppCard(
       title:
-          '${loc.adminSubmissionDetailNominees} (${loc.adminSubmissionDetailNomineeCount(nominees.length)})',
+          '${loc.adminSubmissionDetailNominees} (${loc.adminSubmissionDetailNomineeCount(s.nominees.length)})',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final n in nominees) ...[
-            InfoRow(label: loc.adminSubmissionDetailFieldsName, value: n.name as String),
-            InfoRow(label: loc.adminSubmissionDetailFieldsRelation, value: n.relation as String),
-            InfoRow(label: loc.adminSubmissionDetailFieldsMobile, value: n.mobile as String),
+          for (final n in s.nominees) ...[
+            InfoRow(label: loc.adminSubmissionDetailFieldsName, value: n.name),
+            InfoRow(label: loc.adminSubmissionDetailFieldsRelation, value: n.relation),
+            InfoRow(label: loc.adminSubmissionDetailFieldsMobile, value: n.mobile),
             if (n.sharePercentage != null)
               InfoRow(
                 label: loc.adminSubmissionDetailFieldLabelsPercentage,
@@ -338,14 +339,14 @@ class _SubmissionDetailView extends StatelessWidget {
           ],
           if (shareDeclared)
             InfoRow(
-              label: loc.adminSubmissionDetailShareTotal,
-              value: '$shareTotal%',
+              label: loc.adminSubmissionDetailFieldLabelsPercentage,
+              value: loc.adminSubmissionDetailShareTotal(shareTotal),
             ),
           if (shareDeclared && shareTotal.round() != 100)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                loc.adminSubmissionDetailShareWarning,
+                loc.adminSubmissionDetailShareWarning(shareTotal),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
@@ -354,16 +355,16 @@ class _SubmissionDetailView extends StatelessWidget {
     );
   }
 
-  Widget _paymentSection(BuildContext context, AppLocalizations loc, dynamic s) {
+  Widget _paymentSection(BuildContext context, AppLocalizations loc, SubmissionDetail s) {
     return AppCard(
       title: loc.adminSubmissionDetailPaymentSummary,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InfoRow(label: loc.adminSubmissionDetailFieldsAdmissionFee, value: s.admissionFee as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsSubscription, value: s.subscription as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsReceiptNo, value: s.receiptNo as String),
-          InfoRow(label: loc.adminSubmissionDetailFieldsPaymentMethod, value: s.paymentMethod as String),
+          InfoRow(label: loc.adminSubmissionDetailFieldsAdmissionFee, value: s.admissionFee),
+          InfoRow(label: loc.adminSubmissionDetailFieldsSubscription, value: s.subscription),
+          InfoRow(label: loc.adminSubmissionDetailFieldsReceiptNo, value: s.receiptNo),
+          InfoRow(label: loc.adminSubmissionDetailFieldsPaymentMethod, value: s.paymentMethod),
         ],
       ),
     );
@@ -383,7 +384,7 @@ class _SubmissionDetailView extends StatelessWidget {
               onPressed: busy
                   ? null
                   : () async {
-                      final confirmed = await AppDialog.confirm(
+                      final confirmed = await confirmDialog(
                         context,
                         title: loc.adminSubmissionDetailApproveModalTitle,
                         message: loc.adminSubmissionDetailApproveModalMessageSuffix,
@@ -456,39 +457,34 @@ class _SubmissionDetailView extends StatelessWidget {
 }
 
 class _PropertyTile extends StatelessWidget {
-  const _PropertyTile({
-    required this.property,
-    required this.loc,
-    required this.cubit,
-    required this.busy,
-  });
+  const _PropertyTile({required this.property, required this.cubit, required this.busy});
 
-  final dynamic property; // SubmissionProperty
-  final AppLocalizations loc;
+  final SubmissionProperty property;
   final SubmissionDetailCubit cubit;
   final bool busy;
 
   @override
   Widget build(BuildContext context) {
-    final docs = property.applicableDocs as List;
+    final loc = AppLocalizations.of(context);
+    final docs = property.applicableDocs;
     final types = [
-      ...(property.propertyType as List).whereType<String>(),
-      if ((property.propertyTypeOther as String?)?.isNotEmpty == true) property.propertyTypeOther,
-    ].join(', ');
+      ...property.propertyType,
+      if (property.propertyTypeOther?.trim().isNotEmpty == true) property.propertyTypeOther!.trim(),
+    ];
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: const EdgeInsets.only(bottom: 8),
       title: Text(
-        types.isEmpty ? loc.adminSubmissionDetailPropertyCardTitle : types,
+        types.isEmpty ? loc.adminSubmissionDetailPropertyCardTitle : types.join(', '),
         style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
         [
-          if ((property.khatianNo as String?)?.isNotEmpty == true)
+          if (property.khatianNo?.isNotEmpty == true)
             '${loc.adminSubmissionDetailFieldLabelsKhatianNo} ${property.khatianNo}',
-          if ((property.landQuantity as String?)?.isNotEmpty == true)
+          if (property.landQuantity?.isNotEmpty == true)
             '${loc.adminSubmissionDetailFieldLabelsLandQuantity} ${property.landQuantity}',
-          if ((property.ownership as String?)?.isNotEmpty == true) property.ownership,
+          if (property.ownership?.isNotEmpty == true) property.ownership!,
         ].join(' · '),
         style: Theme.of(context).textTheme.bodySmall,
       ),
@@ -498,20 +494,26 @@ class _PropertyTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if ((property.dagNoCs as String?)?.isNotEmpty == true)
-                InfoRow(label: loc.adminSubmissionDetailFieldLabelsDagNoCs, value: property.dagNoCs),
-              if ((property.dagNoRs as String?)?.isNotEmpty == true)
-                InfoRow(label: loc.adminSubmissionDetailFieldLabelsDagNoRs, value: property.dagNoRs),
-              if ((property.holdingNumber as String?)?.isNotEmpty == true)
+              if (property.dagNoCs?.isNotEmpty == true)
+                InfoRow(
+                    label: loc.adminSubmissionDetailFieldLabelsDagNoCs,
+                    value: property.dagNoCs!),
+              if (property.dagNoRs?.isNotEmpty == true)
+                InfoRow(
+                    label: loc.adminSubmissionDetailFieldLabelsDagNoRs,
+                    value: property.dagNoRs!),
+              if (property.holdingNumber?.isNotEmpty == true)
                 InfoRow(
                     label: loc.adminSubmissionDetailFieldLabelsHoldingNumber,
-                    value: property.holdingNumber),
-              if ((property.myShareQuantity as String?)?.isNotEmpty == true)
+                    value: property.holdingNumber!),
+              if (property.myShareQuantity?.isNotEmpty == true)
                 InfoRow(
                     label: loc.adminSubmissionDetailFieldLabelsMyShareQuantity,
-                    value: property.myShareQuantity),
+                    value: property.myShareQuantity!),
               if (property.jointOwnerCount != null)
-                InfoRow(label: loc.adminSubmissionDetailJointOwnerCountLabel, value: '${property.jointOwnerCount}'),
+                InfoRow(
+                    label: loc.adminSubmissionDetailJointOwnerCountLabel,
+                    value: '${property.jointOwnerCount}'),
               const SizedBox(height: 8),
               Text(
                 docs.isEmpty
@@ -524,48 +526,31 @@ class _PropertyTile extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   dense: true,
                   leading: const Icon(Icons.description_outlined),
-                  title: Text(doc.docType as String),
-                  subtitle: (doc.fileUrl as String?) != null
-                      ? null
-                      : Text(loc.adminSubmissionDetailFileMissing),
-                  trailing: (doc.fileUrl as String?) != null
-                      ? Row(mainAxisSize: MainAxisSize.min, children: [
-                          IconButton(
-                            icon: const Icon(Icons.visibility_outlined),
-                            tooltip: loc.adminSubmissionDetailView,
-                            onPressed: doc.fileUrl == null
-                                ? null
-                                : () => showImagePreview(context, doc.fileUrl!, doc.docType),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.upload_file_outlined),
-                            tooltip: loc.adminSubmissionDetailReplaceFile,
-                            onPressed: busy
-                                ? null
-                                : () async {
-                                    final result =
-                                        await FilePicker.platform.pickFiles(type: FileType.any);
-                                    final path = result?.files.single.path;
-                                    if (path != null) {
-                                      await cubit.replaceDocument(doc.id as String, path);
-                                    }
-                                  },
-                          ),
-                        ])
-                      : IconButton(
-                          icon: const Icon(Icons.upload_file_outlined),
-                          tooltip: loc.adminSubmissionDetailReplaceFile,
-                          onPressed: busy
-                              ? null
-                              : () async {
-                                  final result =
-                                      await FilePicker.platform.pickFiles(type: FileType.any);
-                                  final path = result?.files.single.path;
-                                  if (path != null) {
-                                    await cubit.replaceDocument(doc.id as String, path);
-                                  }
-                                },
-                        ),
+                  title: Text(doc.docType),
+                  subtitle:
+                      doc.fileUrl == null ? Text(loc.adminSubmissionDetailFileMissing) : null,
+                  trailing: IconButton(
+                    icon: Icon(doc.fileUrl == null
+                        ? Icons.upload_file_outlined
+                        : Icons.visibility_outlined),
+                    tooltip: doc.fileUrl == null
+                        ? loc.adminSubmissionDetailReplaceFile
+                        : loc.adminSubmissionDetailView,
+                    onPressed: busy
+                        ? null
+                        : () async {
+                            if (doc.fileUrl != null) {
+                              showImagePreview(context, doc.fileUrl!, doc.docType);
+                              return;
+                            }
+                            final result =
+                                await FilePicker.platform.pickFiles(type: FileType.any);
+                            final path = result?.files.single.path;
+                            if (path != null) {
+                              await cubit.replaceDocument(doc.id, path);
+                            }
+                          },
+                  ),
                 ),
             ],
           ),

@@ -1,4 +1,3 @@
-
 // ----- Finance management (FinanceService.ts) -----
 
 enum FinanceType { income, expense, unknown }
@@ -58,7 +57,8 @@ extension PaymentSourceApiNameX on PaymentSourceType {
 }
 
 class FinanceTotals {
-  const FinanceTotals({required this.income, required this.expense, required this.net});
+  const FinanceTotals(
+      {required this.income, required this.expense, required this.net});
 
   final num income;
   final num expense;
@@ -114,7 +114,8 @@ class FinanceTransaction {
 }
 
 class FinanceLedgerPage {
-  const FinanceLedgerPage({required this.items, required this.total, required this.totals});
+  const FinanceLedgerPage(
+      {required this.items, required this.total, required this.totals});
 
   final List<FinanceTransaction> items;
   final int total;
@@ -246,7 +247,11 @@ class AdminInstallmentPayment {
 }
 
 class PayableInstallment {
-  const PayableInstallment({required this.id, required this.year, required this.month, required this.amount});
+  const PayableInstallment(
+      {required this.id,
+      required this.year,
+      required this.month,
+      required this.amount});
 
   final int id;
   final int year;
@@ -344,7 +349,8 @@ class RoadmapTimeframe extends RoadmapProgress {
 }
 
 class Roadmap {
-  const Roadmap({required this.totals, required this.timeframes, this.lastUpdated});
+  const Roadmap(
+      {required this.totals, required this.timeframes, this.lastUpdated});
 
   final String? lastUpdated;
   final RoadmapProgress totals;
@@ -517,7 +523,10 @@ class SocietyCostInput {
 }
 
 class SplitPreviewRow {
-  const SplitPreviewRow({required this.memberId, required this.memberName, required this.amountDue});
+  const SplitPreviewRow(
+      {required this.memberId,
+      required this.memberName,
+      required this.amountDue});
 
   final int memberId;
   final String memberName;

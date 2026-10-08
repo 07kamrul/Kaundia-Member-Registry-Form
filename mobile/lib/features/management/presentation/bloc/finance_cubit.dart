@@ -74,7 +74,8 @@ class FinanceState extends Equatable {
         ledger: ledger == _same ? this.ledger : ledger(),
         loading: loading ?? this.loading,
         error: error == _same ? this.error : error(),
-        statusFilter: statusFilter == _same ? this.statusFilter : statusFilter(),
+        statusFilter:
+            statusFilter == _same ? this.statusFilter : statusFilter(),
         typeFilter: typeFilter == _same ? this.typeFilter : typeFilter(),
         dateFrom: dateFrom ?? this.dateFrom,
         dateTo: dateTo ?? this.dateTo,
@@ -165,7 +166,8 @@ class FinanceCubit extends Cubit<FinanceState> {
     }
   }
 
-  void setFilters({FinanceStatus? statusFilter, FinanceType? typeFilter, String? search}) {
+  void setFilters(
+      {FinanceStatus? statusFilter, FinanceType? typeFilter, String? search}) {
     emit(state.copyWith(
       statusFilter: () => statusFilter,
       typeFilter: () => typeFilter,
@@ -176,7 +178,8 @@ class FinanceCubit extends Cubit<FinanceState> {
   }
 
   void setDateRange({String? from, String? to}) {
-    emit(state.copyWith(dateFrom: from ?? state.dateFrom, dateTo: to ?? state.dateTo, page: 1));
+    emit(state.copyWith(
+        dateFrom: from ?? state.dateFrom, dateTo: to ?? state.dateTo, page: 1));
   }
 
   void resetFilters() {
@@ -203,8 +206,8 @@ class FinanceCubit extends Cubit<FinanceState> {
     refresh();
   }
 
-  void toggleExpanded(int id) =>
-      emit(state.copyWith(expandedId: () => state.expandedId == id ? null : id));
+  void toggleExpanded(int id) => emit(
+      state.copyWith(expandedId: () => state.expandedId == id ? null : id));
 
   /// Creates (editingId == null) or updates a transaction, then uploads an
   /// optional attachment. Returns success.
@@ -231,9 +234,11 @@ class FinanceCubit extends Cubit<FinanceState> {
     }
   }
 
-  Future<bool> submitDraft(FinanceTransaction txn) => _action(() => _finance.submitTransaction(txn.id));
+  Future<bool> submitDraft(FinanceTransaction txn) =>
+      _action(() => _finance.submitTransaction(txn.id));
 
-  Future<bool> approve(FinanceTransaction txn) => _action(() => _finance.approveTransaction(txn.id));
+  Future<bool> approve(FinanceTransaction txn) =>
+      _action(() => _finance.approveTransaction(txn.id));
 
   Future<bool> reject(FinanceTransaction txn, String reason) =>
       _action(() => _finance.rejectTransaction(txn.id, reason));
@@ -258,10 +263,12 @@ class FinanceCubit extends Cubit<FinanceState> {
     }
   }
 
-  Future<void> loadUnlinkedPayments({PaymentSourceType? sourceType, String? search}) async {
+  Future<void> loadUnlinkedPayments(
+      {PaymentSourceType? sourceType, String? search}) async {
     emit(state.copyWith(unlinkedLoading: true));
     try {
-      final payments = await _finance.unlinkedPayments(sourceType: sourceType, search: search);
+      final payments = await _finance.unlinkedPayments(
+          sourceType: sourceType, search: search);
       emit(state.copyWith(unlinkedPayments: payments, unlinkedLoading: false));
     } catch (_) {
       emit(state.copyWith(unlinkedPayments: const [], unlinkedLoading: false));
@@ -276,10 +283,13 @@ class FinanceCubit extends Cubit<FinanceState> {
         ? 'finance_expense_category'
         : 'finance_income_category';
     try {
-      final item = await _admin.createConfigListItem(category: listKey, value: trimmed, label: trimmed);
+      final item = await _admin.createConfigListItem(
+          category: listKey, value: trimmed, label: trimmed);
       final category = FinanceCategory(
         id: int.tryParse(item.id) ?? 0,
-        type: listKey == 'finance_expense_category' ? FinanceType.expense : FinanceType.income,
+        type: listKey == 'finance_expense_category'
+            ? FinanceType.expense
+            : FinanceType.income,
         label: item.label,
         isActive: true,
       );
@@ -291,8 +301,10 @@ class FinanceCubit extends Cubit<FinanceState> {
     }
   }
 
-  Future<bool> publishReportNotice({FinancePeriod period = FinancePeriod.month}) async {
-    emit(state.copyWith(busy: true, actionError: () => null, noticeDone: false));
+  Future<bool> publishReportNotice(
+      {FinancePeriod period = FinancePeriod.month}) async {
+    emit(
+        state.copyWith(busy: true, actionError: () => null, noticeDone: false));
     try {
       await _finance.publishReportNotice(period);
       emit(state.copyWith(busy: false, noticeDone: true));
@@ -352,7 +364,8 @@ class PaymentVerificationsCubit extends Cubit<PaymentVerificationsState> {
   Future<void> load() async {
     emit(state.copyWith(loading: true, error: () => null));
     try {
-      final payments = await _repository.listForAdmin(status: state.statusFilter);
+      final payments =
+          await _repository.listForAdmin(status: state.statusFilter);
       emit(state.copyWith(payments: payments, loading: false));
     } catch (e) {
       emit(state.copyWith(loading: false, error: () => e));

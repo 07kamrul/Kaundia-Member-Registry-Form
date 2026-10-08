@@ -1,6 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kaundia_app/core/network/api_client.dart';
 import 'package:kaundia_app/core/network/api_exception.dart';
 import 'package:kaundia_app/features/member/data/member_repository.dart';
 import 'package:kaundia_app/features/member/domain/member_entities.dart';
@@ -9,10 +8,10 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockRepo extends Mock implements MemberRepository {}
 
-MemberProfile _profile({String status = 'approved'}) => MemberProfile(
+MemberProfile _profile({String status = 'approved', String fullName = 'রহিম'}) => MemberProfile(
       memberId: 'MBR-1',
       status: status,
-      fullName: 'রহিম',
+      fullName: fullName,
       fatherOrHusband: 'করিম',
       mother: 'রহিমা',
       dob: '1990-01-01',
@@ -46,9 +45,10 @@ void main() {
       expect: () => [
         predicate<ProfileState>((s) => s.status == ProfileStatus.loading),
         predicate<ProfileState>((s) =>
-            s.status == ProfileStatus.loaded &&
-            s.profile?.fullName == 'রহিম' &&
-            !s.requestsLoading),
+            s.status == ProfileStatus.loaded && s.profile?.fullName == 'রহিম'),
+        predicate<ProfileState>((s) => s.requestsLoading),
+        predicate<ProfileState>((s) =>
+            s.status == ProfileStatus.loaded && !s.requestsLoading),
       ],
       verify: (_) => verify(() => repo.getPropertyRequests()).called(1),
     );
@@ -115,7 +115,7 @@ void main() {
               fieldErrors: {'full_name': 'too short'},
             );
           }
-          return _profile();
+          return _profile(fullName: 'রহিম সাহেব');
         });
         return ProfileBloc(repository: repo);
       },
@@ -125,14 +125,15 @@ void main() {
         bloc.add(const ProfileEditStarted());
         bloc.add(const ProfileDraftChanged(MemberProfileUpdate(fullName: 'নতুন')));
         bloc.add(const ProfileSaved(update: MemberProfileUpdate(fullName: 'নতুন')));
+        await bloc.stream.first; // failure state
+        bloc.add(const ProfileSaved(update: MemberProfileUpdate(fullName: 'নতুন')));
       },
-      skip: 3, // loading, loaded, editing (+draft emits are merged by bloc_test counting)
+      skip: 7, // loading, loaded, requestsLoading, requestsLoaded, editing, draftChanged, saving
       expect: () => [
-        predicate<ProfileState>((s) => s.saving),
         predicate<ProfileState>((s) => !s.saving && s.saveError == 'too short'),
-        predicate<ProfileState>((s) => s.saving),
+        predicate<ProfileState>((s) => s.saving && s.saveError == null),
         predicate<ProfileState>((s) =>
-            !s.saving && !s.editing && s.saveError == null && s.profile?.fullName == 'রহিম'),
+            !s.saving && !s.editing && s.saveError == null && s.profile?.fullName == 'রহিম সাহেব'),
       ],
     );
   });

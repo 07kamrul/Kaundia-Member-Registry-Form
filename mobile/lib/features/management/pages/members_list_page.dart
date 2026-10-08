@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/auth/session.dart';
 import '../../../core/di/injector.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/enums/enums.dart';
@@ -26,20 +25,26 @@ class MembersListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final canManage = sl<SessionManager>().session?.can('member.manage') ?? false;
+    final canManage =
+        sl<SessionManager>().session?.can('member.manage') ?? false;
     return BlocProvider(
-      create: (_) => MembersCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))..load(),
+      create: (_) =>
+          MembersCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))
+            ..load(),
       child: BlocConsumer<MembersCubit, MembersState>(
         listener: (context, state) {
           if (state.error != null) {
-            showAppToast(context, describeApiError(context, state.error), error: true);
+            showAppToast(context, describeApiError(context, state.error),
+                error: true);
           }
         },
         builder: (context, state) {
           final cubit = context.read<MembersCubit>();
           return ListView(
             children: [
-              PageHeader(title: loc.adminMembersListTitle, subtitle: loc.adminMembersListSubtitle),
+              PageHeader(
+                  title: loc.adminMembersListTitle,
+                  subtitle: loc.adminMembersListSubtitle),
               if (state.loading)
                 const SkeletonLoader(lines: 6)
               else if (state.items.isEmpty && state.error == null)
@@ -47,7 +52,8 @@ class MembersListPage extends StatelessWidget {
               else
                 AppDataTableCards<Member>(
                   items: state.items,
-                  rowBuilder: (context, m) => _row(context, loc, cubit, m, canManage, state),
+                  rowBuilder: (context, m) =>
+                      _row(context, loc, cubit, m, canManage, state),
                   onRowTap: (m) => context.go('/members/${m.id}'),
                 ),
             ],
@@ -57,8 +63,8 @@ class MembersListPage extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, MembersCubit cubit, Member m,
-      bool canManage, MembersState state) {
+  Widget _row(BuildContext context, AppLocalizations loc, MembersCubit cubit,
+      Member m, bool canManage, MembersState state) {
     final contribution = m.status != SubmissionStatus.approved
         ? '—'
         : m.dueInstallments > 0
@@ -94,9 +100,14 @@ class MembersListPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            InfoRow(label: loc.adminMembersListTableHeadersMemberId, value: m.memberId ?? '—'),
-            InfoRow(label: loc.adminMembersListTableHeadersMobile, value: m.mobile),
-            InfoRow(label: loc.adminMembersListTableHeadersContributionStatus, value: contribution),
+            InfoRow(
+                label: loc.adminMembersListTableHeadersMemberId,
+                value: m.memberId ?? '—'),
+            InfoRow(
+                label: loc.adminMembersListTableHeadersMobile, value: m.mobile),
+            InfoRow(
+                label: loc.adminMembersListTableHeadersContributionStatus,
+                value: contribution),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -113,11 +124,13 @@ class MembersListPage extends StatelessWidget {
                     onPressed: state.busyId == m.id
                         ? null
                         : () async {
-                            final confirmed = await AppDialog.confirm(
+                            final confirmed = await confirmDialog(
                               context,
                               title: loc.adminMembersListResetModalTitle,
-                              message: '${m.fullName} ${loc.adminMembersListResetModalMessageSuffix}',
-                              confirmLabel: loc.adminMembersListResetModalConfirmLabel,
+                              message:
+                                  '${m.fullName} ${loc.adminMembersListResetModalMessageSuffix}',
+                              confirmLabel:
+                                  loc.adminMembersListResetModalConfirmLabel,
                             );
                             if (confirmed && context.mounted) {
                               final sent = await cubit.resetPassword(m.id);
@@ -125,8 +138,11 @@ class MembersListPage extends StatelessWidget {
                                 showAppToast(
                                   context,
                                   sent
-                                      ? loc.adminMembersListResetModalSuccessMessage(m.fullName)
-                                      : loc.adminMembersListResetModalSuccessNoEmail,
+                                      ? loc
+                                          .adminMembersListResetModalSuccessMessage(
+                                              m.fullName)
+                                      : loc
+                                          .adminMembersListResetModalSuccessNoEmail,
                                 );
                               }
                             }
@@ -139,14 +155,17 @@ class MembersListPage extends StatelessWidget {
                     onPressed: state.busyId == m.id
                         ? null
                         : () async {
-                            final confirmed = await AppDialog.confirm(
+                            final confirmed = await confirmDialog(
                               context,
                               title: loc.adminMembersListDeleteModalTitle,
-                              message: '${m.fullName} ${loc.adminMembersListDeleteModalMessageSuffix}',
-                              confirmLabel: loc.adminMembersListDeleteModalConfirmLabel,
+                              message:
+                                  '${m.fullName} ${loc.adminMembersListDeleteModalMessageSuffix}',
+                              confirmLabel:
+                                  loc.adminMembersListDeleteModalConfirmLabel,
                               destructive: true,
                             );
-                            if (confirmed && context.mounted) await cubit.delete(m.id);
+                            if (confirmed && context.mounted)
+                              await cubit.delete(m.id);
                           },
                   ),
                 ],

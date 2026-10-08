@@ -16,7 +16,7 @@ const configCategories = [
 
 class ConfigListsState extends Equatable {
   const ConfigListsState({
-    this.selectedCategory = configCategories.first,
+    this.selectedCategory = 'property_type',
     this.items = const [],
     this.loading = false,
     this.error,
@@ -57,7 +57,8 @@ class ConfigListsState extends Equatable {
   static T _same<T>() => throw UnsupportedError('sentinel');
 
   @override
-  List<Object?> get props => [selectedCategory, items, loading, error, busyId, editingId, saveError];
+  List<Object?> get props =>
+      [selectedCategory, items, loading, error, busyId, editingId, saveError];
 }
 
 class ConfigListsCubit extends Cubit<ConfigListsState> {
@@ -70,7 +71,8 @@ class ConfigListsCubit extends Cubit<ConfigListsState> {
   Future<void> load() async {
     emit(state.copyWith(loading: true, error: () => null));
     try {
-      final items = await _repository.listConfigListItems(state.selectedCategory);
+      final items =
+          await _repository.listConfigListItems(state.selectedCategory);
       emit(state.copyWith(items: items, loading: false));
     } catch (e) {
       emit(state.copyWith(loading: false, error: () => e));
@@ -103,8 +105,8 @@ class ConfigListsCubit extends Cubit<ConfigListsState> {
   Future<void> toggleActive(ConfigListItem item) async {
     emit(state.copyWith(busyId: () => item.id, error: () => null));
     try {
-      final updated =
-          await _repository.updateConfigListItem(item.id, isActive: !item.isActive);
+      final updated = await _repository.updateConfigListItem(item.id,
+          isActive: !item.isActive);
       emit(state.copyWith(
         busyId: () => null,
         items: _replace(updated),
@@ -130,8 +132,10 @@ class ConfigListsCubit extends Cubit<ConfigListsState> {
     }
     emit(state.copyWith(busyId: () => item.id, error: () => null));
     try {
-      final updated = await _repository.updateConfigListItem(item.id, label: trimmed);
-      emit(state.copyWith(busyId: () => null, editingId: () => null, items: _replace(updated)));
+      final updated =
+          await _repository.updateConfigListItem(item.id, label: trimmed);
+      emit(state.copyWith(
+          busyId: () => null, editingId: () => null, items: _replace(updated)));
     } catch (e) {
       emit(state.copyWith(busyId: () => null, error: () => e));
     }
@@ -145,8 +149,10 @@ class ConfigListsCubit extends Cubit<ConfigListsState> {
     final neighbor = state.items[target];
     emit(state.copyWith(busyId: () => current.id, error: () => null));
     try {
-      await _repository.updateConfigListItem(current.id, sortOrder: neighbor.sortOrder);
-      await _repository.updateConfigListItem(neighbor.id, sortOrder: current.sortOrder);
+      await _repository.updateConfigListItem(current.id,
+          sortOrder: neighbor.sortOrder);
+      await _repository.updateConfigListItem(neighbor.id,
+          sortOrder: current.sortOrder);
       emit(state.copyWith(
         busyId: () => null,
         items: List<ConfigListItem>.from(state.items)
@@ -160,6 +166,7 @@ class ConfigListsCubit extends Cubit<ConfigListsState> {
   }
 
   List<ConfigListItem> _replace(ConfigListItem updated) => [
-        for (final i in state.items) if (i.id == updated.id) updated else i,
+        for (final i in state.items)
+          if (i.id == updated.id) updated else i,
       ];
 }
