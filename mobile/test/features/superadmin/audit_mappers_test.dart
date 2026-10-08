@@ -47,7 +47,7 @@ void main() {
     expect(entity.detail, isNull);
   });
 
-  test('actionVerb extracts the verb like the Angular actionClass()', () {
+  test('actionVerb extracts the first segment like the Angular actionClass()', () {
     AuditLogEntry entry(String action) => AuditLogEntry(
           id: '1',
           actorAdminId: null,
@@ -57,11 +57,13 @@ void main() {
           detail: null,
           createdAt: '2026-01-15T10:30:00Z',
         );
-    expect(entry('submission.approve').actionVerb, 'approve');
-    expect(entry('submission_reject').actionVerb, 'reject');
-    expect(entry('role.update').actionVerb, 'update');
-    expect(entry('user.delete').actionVerb, 'delete');
-    expect(entry('fee.create').actionVerb, 'create');
+    // Angular: verb = action.split(/[._]/)[0], badge only for known verbs.
+    expect(entry('approve.submission').actionVerb, 'approve');
+    expect(entry('reject_submission').actionVerb, 'reject');
+    expect(entry('update_role').actionVerb, 'update');
+    expect(entry('delete_user').actionVerb, 'delete');
+    expect(entry('create_fee').actionVerb, 'create');
+    expect(entry('submission.approve').actionVerb, '');
     expect(entry('weird.verb').actionVerb, '');
   });
 
@@ -79,7 +81,7 @@ void main() {
       AuditDetailPair(key: 'detail', value: 'plain text'),
     ]);
     expect(parseAuditDetail('[1,2]'), const [
-      AuditDetailPair(key: 'detail', value: '[1, 2]'),
+      AuditDetailPair(key: 'detail', value: '[1,2]'),
     ]);
     expect(parseAuditDetail(null), isEmpty);
     expect(parseAuditDetail(''), isEmpty);

@@ -181,7 +181,9 @@ class FundTransparencyCubit extends Cubit<FundTransparencyState> {
     String? dateTo,
   }) async {
     if (period == FinancePeriod.custom &&
-        ((dateFrom ?? '').isEmpty || (dateTo ?? '').isEmpty || dateFrom! > dateTo!)) {
+        ((dateFrom ?? '').isEmpty ||
+        (dateTo ?? '').isEmpty ||
+        dateFrom!.compareTo(dateTo!) > 0)) {
       // Caller surfaces the inline period error.
       return;
     }
@@ -200,7 +202,7 @@ class FundTransparencyCubit extends Cubit<FundTransparencyState> {
         ledgerDateTo: summary.periodDateTo,
         page: 1,
       ));
-      await _loadLedger(emit);
+      await _loadLedger();
     } on ApiException {
       emit(state.copyWith(status: FundStatus.failure, error: true));
     }
@@ -213,20 +215,18 @@ class FundTransparencyCubit extends Cubit<FundTransparencyState> {
       search: search,
       clearSearch: search == null,
       page: 1,
-      ledgerLoading: true,
-      clearLedgerError: true,
     ));
-    await _loadLedger(emit);
+    await _loadLedger();
   }
 
   Future<void> changePage(int delta) async {
     final next = state.page + delta;
     if (next < 1 || next > state.totalPages) return;
-    emit(state.copyWith(page: next, ledgerLoading: true, clearLedgerError: true));
-    await _loadLedger(emit);
+    emit(state.copyWith(page: next));
+    await _loadLedger();
   }
 
-  Future<void> _loadLedger(Emitter<FundTransparencyState> emit) async {
+  Future<void> _loadLedger() async {
     emit(state.copyWith(ledgerLoading: true, clearLedgerError: true));
     try {
       final ledger = await _repository.getTransactions(state.ledgerFilters);

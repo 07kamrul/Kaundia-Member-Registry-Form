@@ -7,10 +7,12 @@ class PublicStatsDto {
     required this.monthlySubscriptionTotal,
   });
 
+  /// Missing/blank keys degrade to 0 — the Angular home card silently shows
+  /// placeholders when stats are incomplete.
   factory PublicStatsDto.fromJson(Map<String, dynamic> json) => PublicStatsDto(
-        pendingCount: (json['pending_count'] as num).toInt(),
-        approvedCount: (json['approved_count'] as num).toInt(),
-        monthlySubscriptionTotal: (json['monthly_subscription_total'] as num).toInt(),
+        pendingCount: (json['pending_count'] as num?)?.toInt() ?? 0,
+        approvedCount: (json['approved_count'] as num?)?.toInt() ?? 0,
+        monthlySubscriptionTotal: (json['monthly_subscription_total'] as num?)?.toInt() ?? 0,
       );
 
   final int pendingCount;

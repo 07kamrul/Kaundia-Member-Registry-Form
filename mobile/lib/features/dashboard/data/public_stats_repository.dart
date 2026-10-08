@@ -14,7 +14,7 @@ class PublicStatsRepositoryImpl implements PublicStatsRepository {
 
   @override
   Future<PublicStats> getStats() async {
-    final data = await _api.getUri('/public/stats') as Map<String, dynamic>;
+    final data = Map<String, dynamic>.from(await _api.getUri('/public/stats') as Map);
     return PublicStatsDto.fromJson(data).toEntity();
   }
 }

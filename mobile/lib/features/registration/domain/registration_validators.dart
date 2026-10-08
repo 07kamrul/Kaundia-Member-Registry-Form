@@ -54,9 +54,11 @@ enum RegErrorKind {
   nidInvalid,
   photoRequired,
   addressFieldRequired,
-  permanentAddressRequired,
   propertyCountRequired,
   propertyTypeRequired,
+  khatianRequired,
+  dagCsRequired,
+  dagRsRequired,
   ownershipRequired,
   jointOwnerCountRequired,
   landQuantityRequired,
@@ -80,17 +82,28 @@ enum RegErrorKind {
 
 const wizardStepCount = 6;
 
-List<RegError> validateStep(int step, RegistrationForm form) => switch (step) {
-        1 => validateMemberStep(form),
-        2 => validatePropertyStep(form),
-        3 => validateContactStep(form),
-        4 => validatePaymentStep(form),
-        5 => validateDeclarationStep(form),
-        _ => const [],
-      };
+List<RegError> validateStep(
+  int step,
+  RegistrationForm form, {
+  bool hasAdmissionFee = false,
+  bool hasSubscription = false,
+}) =>
+    switch (step) {
+      1 => validateMemberStep(form),
+      2 => validatePropertyStep(form),
+      3 => validateContactStep(form),
+      4 => validatePaymentStep(form, hasAdmissionFee: hasAdmissionFee, hasSubscription: hasSubscription),
+      5 => validateDeclarationStep(form),
+      _ => const [],
+    };
 
-List<RegError> validateAllSteps(RegistrationForm form) => [
-      for (var s = 1; s <= 5; s++) ...validateStep(s, form),
+/// Payment validation needs the live fee values, so it is passed in here.
+List<RegError> validateAllSteps(RegistrationForm form, {required bool hasAdmissionFee, required bool hasSubscription}) => [
+      ...validateStep(1, form),
+      ...validateStep(2, form),
+      ...validateStep(3, form),
+      ...validatePaymentStep(form, hasAdmissionFee: hasAdmissionFee, hasSubscription: hasSubscription),
+      ...validateStep(5, form),
     ];
 
 /// First step (1-based) failing its own validation; review (6) never fails.
@@ -161,6 +174,15 @@ List<RegError> validatePropertyStep(RegistrationForm form) {
     final p = form.properties[i];
     if (p.propertyType.isEmpty) {
       errs.add(RegError(RegErrorKind.propertyTypeRequired, propertyIndex: i));
+    }
+    if (p.khatianNo.trim().isEmpty) {
+      errs.add(RegError(RegErrorKind.khatianRequired, propertyIndex: i));
+    }
+    if (p.dagNoCs.trim().isEmpty) {
+      errs.add(RegError(RegErrorKind.dagCsRequired, propertyIndex: i));
+    }
+    if (p.dagNoRs.trim().isEmpty) {
+      errs.add(RegError(RegErrorKind.dagRsRequired, propertyIndex: i));
     }
     if (p.ownership == OwnershipType.unknown) {
       errs.add(RegError(RegErrorKind.ownershipRequired, propertyIndex: i));

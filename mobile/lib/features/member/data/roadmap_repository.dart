@@ -2,7 +2,7 @@ import '../../../core/network/api_client.dart';
 import '../domain/roadmap_entities.dart';
 
 String _str(dynamic v) => v?.toString() ?? '';
-String? _s(dynamic v) => v == null ? null : v.toString();
+String? _s(dynamic v) => v?.toString();
 int _int(dynamic v) => (v is num) ? v.toInt() : 0;
 num _num(dynamic v) => (v is num) ? v : 0;
 

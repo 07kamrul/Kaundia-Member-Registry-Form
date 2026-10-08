@@ -206,10 +206,10 @@ extension MemberProfileApiX on Map<String, dynamic> {
     final detail = Map<String, dynamic>.from(this).toDetailEntity();
     final feeSummary = this['fee_summary'];
     final fee = feeSummary is Map ? Map<String, dynamic>.from(feeSummary) : const <String, dynamic>{};
-    final installments = _list('installments')
+    final installments = _list(this, 'installments')
         .map((r) => r.toInstallmentEntity())
         .toList(growable: false);
-    final picnic = _list('picnic_payments')
+    final picnic = _list(this, 'picnic_payments')
         .map((r) => MemberPicnicPayment(
               id: r['id'] as int,
               total: (r['total'] as num?) ?? 0,
@@ -219,7 +219,7 @@ extension MemberProfileApiX on Map<String, dynamic> {
               paymentMethod: r['payment_method'] as String?,
             ))
         .toList(growable: false);
-    final audit = _list('audit_trail')
+    final audit = _list(this, 'audit_trail')
         .map((r) => MemberAuditEntry(
               id: r['id'] as int,
               action: (r['action'] as String?) ?? '',

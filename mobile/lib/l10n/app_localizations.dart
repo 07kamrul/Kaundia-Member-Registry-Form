@@ -9326,6 +9326,36 @@ abstract class AppLocalizations {
   /// **'জরুরি যোগাযোগ'**
   String get registrationReviewUrgentContactLabel;
 
+  /// No description provided for @registrationSignatureSectionTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'স্বাক্ষর'**
+  String get registrationSignatureSectionTitle;
+
+  /// No description provided for @registrationSignatureHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'নিচের বাক্সে স্বাক্ষর আঁকুন'**
+  String get registrationSignatureHint;
+
+  /// No description provided for @registrationSignatureClearButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'মুছে ফেলুন'**
+  String get registrationSignatureClearButton;
+
+  /// No description provided for @registrationSignatureSaveButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'স্বাক্ষর সংরক্ষণ'**
+  String get registrationSignatureSaveButton;
+
+  /// No description provided for @registrationSignatureSavedButton.
+  ///
+  /// In bn, this message translates to:
+  /// **'স্বাক্ষর সংরক্ষিত'**
+  String get registrationSignatureSavedButton;
+
   /// No description provided for @registrationStepShortLabelsMemberInfo.
   ///
   /// In bn, this message translates to:
@@ -9967,6 +9997,198 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'ফিল্টার সরিয়ে ফেলুন'**
   String get superadminAuditClearFilters;
+
+  /// No description provided for @memberProfileCurrentHouseLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'বর্তমান বাড়ি'**
+  String get memberProfileCurrentHouseLabel;
+
+  /// No description provided for @memberProfileCurrentRoadLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'বর্তমান রাস্তা'**
+  String get memberProfileCurrentRoadLabel;
+
+  /// No description provided for @memberProfileCurrentPostOfficeLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'বর্তমান ডাকঘর'**
+  String get memberProfileCurrentPostOfficeLabel;
+
+  /// No description provided for @memberProfileCurrentUpazilaLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'বর্তমান উপজেলা'**
+  String get memberProfileCurrentUpazilaLabel;
+
+  /// No description provided for @memberProfileCurrentDistrictLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'বর্তমান জেলা'**
+  String get memberProfileCurrentDistrictLabel;
+
+  /// No description provided for @memberProfileCurrentDivisionLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'বর্তমান বিভাগ'**
+  String get memberProfileCurrentDivisionLabel;
+
+  /// No description provided for @memberProfileUrgentNameLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'যোগাযোগের নাম'**
+  String get memberProfileUrgentNameLabel;
+
+  /// No description provided for @memberProfileUrgentMobileLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'যোগাযোগের মোবাইল'**
+  String get memberProfileUrgentMobileLabel;
+
+  /// No description provided for @memberProfileMobileInvalid.
+  ///
+  /// In bn, this message translates to:
+  /// **'সঠিক মোবাইল নম্বর দিন (যেমন +8801XXXXXXXXX)'**
+  String get memberProfileMobileInvalid;
+
+  /// No description provided for @memberProfilePropertyTypesLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'সম্পত্তির ধরন'**
+  String get memberProfilePropertyTypesLabel;
+
+  /// No description provided for @attachmentViewerMissing.
+  ///
+  /// In bn, this message translates to:
+  /// **'ফাইলটি সার্ভারে নেই।'**
+  String get attachmentViewerMissing;
+
+  /// No description provided for @attachmentViewerDownloadFailed.
+  ///
+  /// In bn, this message translates to:
+  /// **'ডাউনলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।'**
+  String get attachmentViewerDownloadFailed;
+
+  /// No description provided for @attachmentViewerDownloadStarted.
+  ///
+  /// In bn, this message translates to:
+  /// **'ডাউনলোড শুরু হয়েছে।'**
+  String get attachmentViewerDownloadStarted;
+
+  /// No description provided for @attachmentViewerPreviewUnavailable.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই ফাইল ধরনটি অ্যাপে প্রিভিউ করা যায় না।'**
+  String get attachmentViewerPreviewUnavailable;
+
+  /// No description provided for @attachmentViewerDownloadOpen.
+  ///
+  /// In bn, this message translates to:
+  /// **'ডাউনলোড করে খুলুন'**
+  String get attachmentViewerDownloadOpen;
+
+  /// No description provided for @memberFundTransparencyFiltersDateFrom.
+  ///
+  /// In bn, this message translates to:
+  /// **'শুরুর তারিখ'**
+  String get memberFundTransparencyFiltersDateFrom;
+
+  /// No description provided for @memberFundTransparencyFiltersDateTo.
+  ///
+  /// In bn, this message translates to:
+  /// **'শেষ তারিখ'**
+  String get memberFundTransparencyFiltersDateTo;
+
+  /// No description provided for @adminRoadmapStatusPlanned.
+  ///
+  /// In bn, this message translates to:
+  /// **'পরিকল্পিত'**
+  String get adminRoadmapStatusPlanned;
+
+  /// No description provided for @adminRoadmapStatusInProgress.
+  ///
+  /// In bn, this message translates to:
+  /// **'চলমান'**
+  String get adminRoadmapStatusInProgress;
+
+  /// No description provided for @adminRoadmapStatusDone.
+  ///
+  /// In bn, this message translates to:
+  /// **'সম্পন্ন'**
+  String get adminRoadmapStatusDone;
+
+  /// No description provided for @adminPropertyRequestsPayloadType.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমির ধরন'**
+  String get adminPropertyRequestsPayloadType;
+
+  /// No description provided for @adminPropertyRequestsPayloadKhatianNo.
+  ///
+  /// In bn, this message translates to:
+  /// **'খতিয়ান নং'**
+  String get adminPropertyRequestsPayloadKhatianNo;
+
+  /// No description provided for @adminPropertyRequestsPayloadDagNoCs.
+  ///
+  /// In bn, this message translates to:
+  /// **'সিএস দাগ নং'**
+  String get adminPropertyRequestsPayloadDagNoCs;
+
+  /// No description provided for @adminPropertyRequestsPayloadDagNoRs.
+  ///
+  /// In bn, this message translates to:
+  /// **'আরএস দাগ নং'**
+  String get adminPropertyRequestsPayloadDagNoRs;
+
+  /// No description provided for @adminPropertyRequestsPayloadHoldingNumber.
+  ///
+  /// In bn, this message translates to:
+  /// **'হোল্ডিং নং'**
+  String get adminPropertyRequestsPayloadHoldingNumber;
+
+  /// No description provided for @adminPropertyRequestsPayloadLandQuantity.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমির পরিমাণ'**
+  String get adminPropertyRequestsPayloadLandQuantity;
+
+  /// No description provided for @adminPropertyRequestsPayloadMyShareQuantity.
+  ///
+  /// In bn, this message translates to:
+  /// **'আমার অংশ'**
+  String get adminPropertyRequestsPayloadMyShareQuantity;
+
+  /// No description provided for @adminPropertyRequestsPayloadOwnership.
+  ///
+  /// In bn, this message translates to:
+  /// **'মালিকানা'**
+  String get adminPropertyRequestsPayloadOwnership;
+
+  /// No description provided for @adminPropertyRequestsPayloadCoOwners.
+  ///
+  /// In bn, this message translates to:
+  /// **'যৌথ মালিক'**
+  String get adminPropertyRequestsPayloadCoOwners;
+
+  /// No description provided for @adminPropertyRequestsPayloadDocs.
+  ///
+  /// In bn, this message translates to:
+  /// **'দলিলপত্র'**
+  String get adminPropertyRequestsPayloadDocs;
+
+  /// No description provided for @adminSocietyCostsSummaryMemberBilled.
+  ///
+  /// In bn, this message translates to:
+  /// **'সদস্যদের বকেয়া'**
+  String get adminSocietyCostsSummaryMemberBilled;
+
+  /// No description provided for @adminFinanceManagementFiltersApply.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্রয়োগ করুন'**
+  String get adminFinanceManagementFiltersApply;
 }
 
 class _AppLocalizationsDelegate

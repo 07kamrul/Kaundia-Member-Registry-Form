@@ -5010,6 +5010,21 @@ class AppLocalizationsBn extends AppLocalizations {
   String get registrationReviewUrgentContactLabel => 'জরুরি যোগাযোগ';
 
   @override
+  String get registrationSignatureSectionTitle => 'স্বাক্ষর';
+
+  @override
+  String get registrationSignatureHint => 'নিচের বাক্সে স্বাক্ষর আঁকুন';
+
+  @override
+  String get registrationSignatureClearButton => 'মুছে ফেলুন';
+
+  @override
+  String get registrationSignatureSaveButton => 'স্বাক্ষর সংরক্ষণ';
+
+  @override
+  String get registrationSignatureSavedButton => 'স্বাক্ষর সংরক্ষিত';
+
+  @override
   String get registrationStepShortLabelsMemberInfo => 'সদস্য';
 
   @override
@@ -5367,4 +5382,103 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get superadminAuditClearFilters => 'ফিল্টার সরিয়ে ফেলুন';
+
+  @override
+  String get memberProfileCurrentHouseLabel => 'বর্তমান বাড়ি';
+
+  @override
+  String get memberProfileCurrentRoadLabel => 'বর্তমান রাস্তা';
+
+  @override
+  String get memberProfileCurrentPostOfficeLabel => 'বর্তমান ডাকঘর';
+
+  @override
+  String get memberProfileCurrentUpazilaLabel => 'বর্তমান উপজেলা';
+
+  @override
+  String get memberProfileCurrentDistrictLabel => 'বর্তমান জেলা';
+
+  @override
+  String get memberProfileCurrentDivisionLabel => 'বর্তমান বিভাগ';
+
+  @override
+  String get memberProfileUrgentNameLabel => 'যোগাযোগের নাম';
+
+  @override
+  String get memberProfileUrgentMobileLabel => 'যোগাযোগের মোবাইল';
+
+  @override
+  String get memberProfileMobileInvalid =>
+      'সঠিক মোবাইল নম্বর দিন (যেমন +8801XXXXXXXXX)';
+
+  @override
+  String get memberProfilePropertyTypesLabel => 'সম্পত্তির ধরন';
+
+  @override
+  String get attachmentViewerMissing => 'ফাইলটি সার্ভারে নেই।';
+
+  @override
+  String get attachmentViewerDownloadFailed =>
+      'ডাউনলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get attachmentViewerDownloadStarted => 'ডাউনলোড শুরু হয়েছে।';
+
+  @override
+  String get attachmentViewerPreviewUnavailable =>
+      'এই ফাইল ধরনটি অ্যাপে প্রিভিউ করা যায় না।';
+
+  @override
+  String get attachmentViewerDownloadOpen => 'ডাউনলোড করে খুলুন';
+
+  @override
+  String get memberFundTransparencyFiltersDateFrom => 'শুরুর তারিখ';
+
+  @override
+  String get memberFundTransparencyFiltersDateTo => 'শেষ তারিখ';
+
+  @override
+  String get adminRoadmapStatusPlanned => 'পরিকল্পিত';
+
+  @override
+  String get adminRoadmapStatusInProgress => 'চলমান';
+
+  @override
+  String get adminRoadmapStatusDone => 'সম্পন্ন';
+
+  @override
+  String get adminPropertyRequestsPayloadType => 'জমির ধরন';
+
+  @override
+  String get adminPropertyRequestsPayloadKhatianNo => 'খতিয়ান নং';
+
+  @override
+  String get adminPropertyRequestsPayloadDagNoCs => 'সিএস দাগ নং';
+
+  @override
+  String get adminPropertyRequestsPayloadDagNoRs => 'আরএস দাগ নং';
+
+  @override
+  String get adminPropertyRequestsPayloadHoldingNumber => 'হোল্ডিং নং';
+
+  @override
+  String get adminPropertyRequestsPayloadLandQuantity => 'জমির পরিমাণ';
+
+  @override
+  String get adminPropertyRequestsPayloadMyShareQuantity => 'আমার অংশ';
+
+  @override
+  String get adminPropertyRequestsPayloadOwnership => 'মালিকানা';
+
+  @override
+  String get adminPropertyRequestsPayloadCoOwners => 'যৌথ মালিক';
+
+  @override
+  String get adminPropertyRequestsPayloadDocs => 'দলিলপত্র';
+
+  @override
+  String get adminSocietyCostsSummaryMemberBilled => 'সদস্যদের বকেয়া';
+
+  @override
+  String get adminFinanceManagementFiltersApply => 'প্রয়োগ করুন';
 }

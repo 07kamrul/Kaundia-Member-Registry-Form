@@ -1,5 +1,4 @@
 import '../../../core/network/api_client.dart';
-import '../domain/registration_form.dart';
 
 /// Backend-quoted চাঁদা breakdown (registration.model.ts SubscriptionQuote).
 class SubscriptionQuote {

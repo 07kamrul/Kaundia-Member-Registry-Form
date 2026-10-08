@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaundia_app/features/superadmin/data/rbac_dtos.dart';
+import 'package:kaundia_app/features/superadmin/domain/rbac_entities.dart';
 
 void main() {
   test('PermissionDefDto maps every field from snake_case API JSON', () {

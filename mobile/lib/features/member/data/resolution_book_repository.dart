@@ -2,7 +2,7 @@ import '../../../core/network/api_client.dart';
 import '../domain/resolution_book_entities.dart';
 
 String _str(dynamic v) => v?.toString() ?? '';
-String? _s(dynamic v) => v == null ? null : v.toString();
+String? _s(dynamic v) => v?.toString();
 int _int(dynamic v) => (v is num) ? v.toInt() : 0;
 num _num(dynamic v) => (v is num) ? v : 0;
 
@@ -10,7 +10,7 @@ MemberRef? _memberRef(Map<dynamic, dynamic>? api) => api == null
     ? null
     : MemberRef(id: _str(api['id']), fullName: _str(api['full_name']), memberId: _s(api['member_id']));
 
-Resolution _resolution(Map<dynamic, dynamic> api) => Resolution(
+Resolution resolutionFromApi(Map<dynamic, dynamic> api) => Resolution(
       id: _str(api['id']),
       meetingId: _str(api['meeting_id']),
       resolutionNo: _int(api['resolution_no']),
@@ -35,7 +35,7 @@ Recording _recording(Map<dynamic, dynamic> api) => Recording(
       uploadedAt: _s(api['uploaded_at']),
     );
 
-MeetingListItem _meetingListItem(Map<dynamic, dynamic> api) => MeetingListItem(
+MeetingListItem meetingListItemFromApi(Map<dynamic, dynamic> api) => MeetingListItem(
       id: _str(api['id']),
       meetingNo: _str(api['meeting_no']),
       date: _str(api['date']),
@@ -50,8 +50,8 @@ MeetingListItem _meetingListItem(Map<dynamic, dynamic> api) => MeetingListItem(
       attendancePercent: _num(api['attendance_percent']),
     );
 
-MeetingDetail _meetingDetail(Map<dynamic, dynamic> api) {
-  final base = _meetingListItem(api);
+MeetingDetail meetingDetailFromApi(Map<dynamic, dynamic> api) {
+  final base = meetingListItemFromApi(api);
   return MeetingDetail(
     id: base.id,
     meetingNo: base.meetingNo,
@@ -71,7 +71,7 @@ MeetingDetail _meetingDetail(Map<dynamic, dynamic> api) {
     updatedAt: _s(api['updated_at']),
     resolutions: [
       for (final r in (api['resolutions'] as List<dynamic>? ?? const []))
-        _resolution(r as Map<dynamic, dynamic>),
+        resolutionFromApi(r as Map<dynamic, dynamic>),
     ],
     attendance: [
       for (final a in (api['attendance'] as List<dynamic>? ?? const []))
@@ -118,24 +118,14 @@ class ResolutionBookRepository {
       total: _int(api['total']),
       items: [
         for (final row in (api['items'] as List<dynamic>? ?? const []))
-          _meetingListItem(row as Map<dynamic, dynamic>),
+          meetingListItemFromApi(row as Map<dynamic, dynamic>),
       ],
     );
   }
 
   Future<MeetingSummary> summary() async {
     final api = await _api.getUri('/resolution-book/summary') as Map<dynamic, dynamic>;
-    return MeetingSummary(
-      totalMeetings: _int(api['total_meetings']),
-      meetingsThisYear: _int(api['meetings_this_year']),
-      averageAttendancePercent: _num(api['average_attendance_percent']),
-      openActionItems: _int(api['open_action_items']),
-      upcomingMeetingDate: _s(api['upcoming_meeting_date']),
-      recentMeetings: [
-        for (final row in (api['recent_meetings'] as List<dynamic>? ?? const []))
-          _meetingListItem(row as Map<dynamic, dynamic>),
-      ],
-    );
+    return meetingSummaryFromApi(api);
   }
 
   Future<SuggestedMeetingNo> suggestMeetingNo(String forDate) async {
@@ -149,25 +139,25 @@ class ResolutionBookRepository {
 
   Future<MeetingDetail> getMeeting(String id) async {
     final api = await _api.getUri('/resolution-book/meetings/$id') as Map<dynamic, dynamic>;
-    return _meetingDetail(api);
+    return meetingDetailFromApi(api);
   }
 
   Future<MeetingDetail> createMeeting(MeetingCreateInput input) async {
     final data = await _api.post('/resolution-book/meetings', _meetingBody(input))
         as Map<dynamic, dynamic>;
-    return _meetingDetail(data);
+    return meetingDetailFromApi(data);
   }
 
   Future<MeetingDetail> updateMeeting(String id, MeetingCreateInput input) async {
     final data = await _api.put('/resolution-book/meetings/$id', _meetingBody(input))
         as Map<dynamic, dynamic>;
-    return _meetingDetail(data);
+    return meetingDetailFromApi(data);
   }
 
   Future<Resolution> updateResolutionStatus(String id, ResolutionStatus status) async {
     final data = await _api.put('/resolution-book/resolutions/$id',
         {'status': status.apiName}) as Map<dynamic, dynamic>;
-    return _resolution((data['resolution'] as Map<dynamic, dynamic>? ?? data));
+    return resolutionFromApi((data['resolution'] as Map<dynamic, dynamic>? ?? data));
   }
 
   /// Server-rendered official minutes (GET .../export.pdf).
@@ -205,6 +195,18 @@ class ResolutionBookRepository {
         'notify': input.notify,
       };
 }
+
+MeetingSummary meetingSummaryFromApi(Map<dynamic, dynamic> api) => MeetingSummary(
+      totalMeetings: _int(api['total_meetings']),
+      meetingsThisYear: _int(api['meetings_this_year']),
+      averageAttendancePercent: _num(api['average_attendance_percent']),
+      openActionItems: _int(api['open_action_items']),
+      upcomingMeetingDate: _s(api['upcoming_meeting_date']),
+      recentMeetings: [
+        for (final row in (api['recent_meetings'] as List<dynamic>? ?? const []))
+          meetingListItemFromApi(row as Map<dynamic, dynamic>),
+      ],
+    );
 
 class SuggestedMeetingNo {
   const SuggestedMeetingNo({required this.meetingNo, required this.available});

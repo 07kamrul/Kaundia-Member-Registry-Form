@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/config/app_config.dart';
+import '../../../core/enums/enums.dart';
 import '../../../core/network/api_client.dart';
 import '../domain/payment_entities.dart';
 
@@ -8,7 +9,7 @@ num _num(dynamic v) =>
     v is num ? v : (v is String ? num.tryParse(v) ?? 0 : 0);
 
 String _str(dynamic v) => v?.toString() ?? '';
-String? _s(dynamic v) => v == null ? null : v.toString();
+String? _s(dynamic v) => v?.toString();
 
 String? _toFileUrl(dynamic path) {
   final raw = _s(path);

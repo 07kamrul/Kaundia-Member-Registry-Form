@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/rbac_repository.dart';
-import '../../../domain/rbac_entities.dart';
+import '../../data/rbac_repository.dart';
+import '../../domain/rbac_entities.dart';
 import '../../../../core/network/api_exception.dart';
 
 /// Which load/save failed — the page maps each to its localized message,
@@ -303,6 +303,7 @@ class RbacBloc extends Bloc<RbacEvent, RbacState> {
           selectedRoleId: firstRole?.id,
           draftKeys: firstRole == null ? const {} : firstRole.permissionKeys.toSet(),
           overrideDraftKey: permissions.isEmpty ? '' : permissions.first.key,
+          selectedUserId: users._first?.id,
           roleAssignDraft: users._first?.role ?? '',
         ));
         final firstUser = users._first;
@@ -343,7 +344,9 @@ class RbacBloc extends Bloc<RbacEvent, RbacState> {
 
   Future<void> _onMatrixSave(RbacMatrixSaveRequested event, Emitter<RbacState> emit) async {
     final roleId = state.selectedRoleId;
-    if (roleId == null) return;
+    // super_admin always has every permission — the Angular UI disables the
+    // toggles; mirror that guard here so a stray event cannot PUT.
+    if (roleId == null || state.selectedRole?.isSuperAdmin == true) return;
     emit(state.copyWith(savingMatrix: true, matrixSaveError: false));
     try {
       final updated = await _repo.updateRolePermissions(roleId, state.draftKeys.toList());

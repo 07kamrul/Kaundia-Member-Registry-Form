@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/enums/enums.dart';
-import '../../../shared/utils/file_utils.dart' show AttachedFile;
-import '../../domain/registration_form.dart' show AddressField, Gender, PaymentMethod;
+import '../../domain/registration_form.dart' show Gender, PaymentMethod;
+import '../../domain/registration_validators.dart' show AddressField;
 
 sealed class RegistrationEvent extends Equatable {
   const RegistrationEvent();
@@ -239,6 +239,12 @@ final class SubscriptionRetryRequested extends RegistrationEvent {
   const SubscriptionRetryRequested();
 }
 
+/// Internal: debounced quote refresh tick (scheduled by the bloc when property
+/// share amounts change).
+final class QuoteRefreshRequested extends RegistrationEvent {
+  const QuoteRefreshRequested();
+}
+
 // ---- Step 5: declaration + signature -------------------------------------
 
 final class SubmissionDateChanged extends RegistrationEvent {
@@ -293,15 +299,4 @@ final class SubmitRequested extends RegistrationEvent {
 
 final class SubmitSuccessAcknowledged extends RegistrationEvent {
   const SubmitSuccessAcknowledged();
-}
-
-/// Internal: attached files are pre-validated/compressed before entering the
-/// form; this event carries the prepared result.
-final class _FilePrepared extends RegistrationEvent {
-  const _FilePrepared(this.file, this.attach);
-  final AttachedFile file;
-  final RegistrationEvent attach; // dispatch target once prepared
-
-  @override
-  List<Object?> get props => [file, attach];
 }

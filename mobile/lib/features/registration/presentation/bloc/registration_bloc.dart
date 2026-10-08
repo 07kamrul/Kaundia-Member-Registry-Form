@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
 
+import '../../../../core/network/api_exception.dart';
+import '../../../../core/enums/enums.dart';
 import '../../../../shared/utils/file_utils.dart';
 import '../../data/config_list_repository.dart';
 import '../../data/fee_repository.dart';
@@ -74,7 +76,7 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     on<StepPrevRequested>(_onStepPrev);
     on<SubmitRequested>(_onSubmit);
     on<SubmitSuccessAcknowledged>(_onSubmitAcknowledged);
-    on<_QuoteRefreshTick>(_onQuoteRefreshTick);
+    on<QuoteRefreshRequested>(_onQuoteRefreshTick);
   }
 
   final RegistrationRepository _registrationRepository;
@@ -113,11 +115,11 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
       draftLastSaved: draftLastSaved,
     ));
 
-    unawaited(_loadFee(emit));
-    unawaited(_loadConfigLists(emit));
-    unawaited(_loadGeo(emit));
+    await _loadFee(emit);
+    await _loadConfigLists(emit);
+    await _loadGeo(emit);
     if (form.totalShareQuantity > 0) {
-      unawaited(_refreshQuote(emit, form.totalShareQuantity));
+      await _refreshQuote(emit, form.totalShareQuantity);
     }
   }
 
@@ -191,13 +193,11 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     _scheduleAutosave(next);
     if (affectsQuote) {
       _quoteTimer?.cancel();
-      _quoteTimer = Timer(_quoteDebounce, () {
-        unawaited(_refreshQuote(this as Emitter<RegistrationState>, form.totalShareQuantity));
-      });
+      _quoteTimer = Timer(_quoteDebounce, () => add(const QuoteRefreshRequested()));
     }
   }
 
-  Future<void> _onQuoteRefreshTick(_QuoteRefreshTick e, Emitter<RegistrationState> emit) async {
+  Future<void> _onQuoteRefreshTick(QuoteRefreshRequested e, Emitter<RegistrationState> emit) async {
     await _refreshQuote(emit, state.form.totalShareQuantity);
   }
 
@@ -243,6 +243,10 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
   Future<void> _onPhotoAttached(MemberPhotoAttached e, Emitter<RegistrationState> emit) async {
     try {
       final prepared = await prepareImage(e.path);
+      if (prepared == null) {
+        emit(state.copyWith(fileError: const FilePickError(kind: FileErrorKind.size)));
+        return;
+      }
       _emitFormChange(
         emit,
         state.form.copyWith(memberPhoto: FileRef(fileName: prepared.fileName, path: prepared.path)),
@@ -492,6 +496,8 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
       for (var s = state.currentStep; s < target; s++) {
         final errors = validateStep(s, state.form);
         if (errors.isNotEmpty) {
+          // Stay on the offending step and surface the messages (mirrors the
+          // Angular goToStep early return).
           emit(state.copyWith(
             stepErrors: errors,
             submitAttempted: true,
@@ -517,8 +523,7 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
   Future<void> _onSubmit(SubmitRequested e, Emitter<RegistrationState> emit) async {
     final f = state.form;
     final clientErrors = [
-      ...validateAllSteps(f),
-      ...validatePaymentStep(f, hasAdmissionFee: state.hasAdmissionFee, hasSubscription: state.hasSubscription),
+      ...validateAllSteps(f, hasAdmissionFee: state.hasAdmissionFee, hasSubscription: state.hasSubscription),
     ];
     if (clientErrors.isNotEmpty) {
       final invalid = firstInvalidStep(f) ?? 1;
@@ -564,7 +569,7 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     } catch (_) {
       emit(state.copyWith(
         submitStatus: SubmitStatus.failure,
-        submitErrors: const [SubmitErrorItem.plain(SubmitErrorKind.generic, status: 0)],
+        submitErrors: [SubmitErrorItem.plain(SubmitErrorKind.generic, status: 0)],
       ));
     }
   }
@@ -595,12 +600,4 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     _quoteTimer?.cancel();
     return super.close();
   }
-}
-
-/// Internal event used by retry paths.
-class _QuoteRefreshTick extends RegistrationEvent {
-  const _QuoteRefreshTick();
-
-  @override
-  List<Object?> get props => const [];
 }

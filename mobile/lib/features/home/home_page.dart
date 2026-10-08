@@ -8,9 +8,8 @@ import 'package:intl/intl.dart';
 import '../../../core/di/injector.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
+import '../dashboard/data/public_stats_repository.dart';
 import 'bloc/stats_cubit.dart';
-import '../../../core/network/api_client.dart';
-import 'data/stats_repository.dart';
 
 /// Public landing page, port of Angular `home.component.*` (hero, apply/login
 /// actions, live public stats card, how-it-works steps) plus the registration
@@ -163,7 +162,7 @@ class _StatsCardState extends State<_StatsCard> {
   @override
   void initState() {
     super.initState();
-    _cubit = StatsCubit(repository: StatsRepository(apiClient: sl<ApiClient>()));
+    _cubit = StatsCubit(repository: sl<PublicStatsRepository>());
     _cubit.loadStats();
   }
 

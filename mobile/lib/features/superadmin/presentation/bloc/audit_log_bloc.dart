@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/audit_repository.dart';
-import '../../../data/rbac_repository.dart';
-import '../../../domain/audit_entities.dart';
+import '../../data/audit_repository.dart';
+import '../../data/rbac_repository.dart';
+import '../../domain/audit_entities.dart';
 import '../../../../core/network/api_exception.dart';
 
 const List<int> kAuditPageSizes = [10, 25, 50];

@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/widgets.dart';
 
 /// Localized text for an [ApiException] (mirrors the Angular error boxes).
 String describeApiError(BuildContext context, Object? error) {
@@ -82,10 +81,12 @@ String formatTaka(num value, {int decimals = 0}) {
   return fmt.format(value);
 }
 
-String formatAmount(num value, {int decimals = 2}) =>
-    NumberFormat.decimalPattern('en_IN')
-      ..minimumFractionDigits = decimals
-      ..maximumFractionDigits = decimals;
+String formatAmount(num value, {int decimals = 2}) {
+  final fmt = NumberFormat.decimalPattern('en_IN')
+    ..minimumFractionDigits = decimals
+    ..maximumFractionDigits = decimals;
+  return fmt.format(value);
+}
 
 /// Full-screen image preview dialog with error fallback.
 Future<void> showImagePreview(BuildContext context, String url, String alt) {
@@ -139,7 +140,7 @@ class SelectField<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
       items: items,
       onChanged: onChanged,

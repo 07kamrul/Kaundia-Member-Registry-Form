@@ -5018,6 +5018,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registrationReviewUrgentContactLabel => 'Urgent Contact';
 
   @override
+  String get registrationSignatureSectionTitle => 'Signature';
+
+  @override
+  String get registrationSignatureHint =>
+      'Draw your signature in the box below';
+
+  @override
+  String get registrationSignatureClearButton => 'Clear';
+
+  @override
+  String get registrationSignatureSaveButton => 'Save signature';
+
+  @override
+  String get registrationSignatureSavedButton => 'Signature saved';
+
+  @override
   String get registrationStepShortLabelsMemberInfo => 'Member';
 
   @override
@@ -5377,4 +5393,103 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get superadminAuditClearFilters => 'Clear filters';
+
+  @override
+  String get memberProfileCurrentHouseLabel => 'Current house';
+
+  @override
+  String get memberProfileCurrentRoadLabel => 'Current road';
+
+  @override
+  String get memberProfileCurrentPostOfficeLabel => 'Current post office';
+
+  @override
+  String get memberProfileCurrentUpazilaLabel => 'Current upazila';
+
+  @override
+  String get memberProfileCurrentDistrictLabel => 'Current district';
+
+  @override
+  String get memberProfileCurrentDivisionLabel => 'Current division';
+
+  @override
+  String get memberProfileUrgentNameLabel => 'Contact name';
+
+  @override
+  String get memberProfileUrgentMobileLabel => 'Contact mobile';
+
+  @override
+  String get memberProfileMobileInvalid =>
+      'Enter a valid mobile number (e.g. +8801XXXXXXXXX)';
+
+  @override
+  String get memberProfilePropertyTypesLabel => 'Property type';
+
+  @override
+  String get attachmentViewerMissing => 'The file is missing on the server.';
+
+  @override
+  String get attachmentViewerDownloadFailed =>
+      'Download failed. Please try again.';
+
+  @override
+  String get attachmentViewerDownloadStarted => 'Download started.';
+
+  @override
+  String get attachmentViewerPreviewUnavailable =>
+      'This file type cannot be previewed in the app.';
+
+  @override
+  String get attachmentViewerDownloadOpen => 'Download & open';
+
+  @override
+  String get memberFundTransparencyFiltersDateFrom => 'From date';
+
+  @override
+  String get memberFundTransparencyFiltersDateTo => 'To date';
+
+  @override
+  String get adminRoadmapStatusPlanned => 'Planned';
+
+  @override
+  String get adminRoadmapStatusInProgress => 'In progress';
+
+  @override
+  String get adminRoadmapStatusDone => 'Done';
+
+  @override
+  String get adminPropertyRequestsPayloadType => 'Property type';
+
+  @override
+  String get adminPropertyRequestsPayloadKhatianNo => 'Khatian no';
+
+  @override
+  String get adminPropertyRequestsPayloadDagNoCs => 'CS dag no';
+
+  @override
+  String get adminPropertyRequestsPayloadDagNoRs => 'RS dag no';
+
+  @override
+  String get adminPropertyRequestsPayloadHoldingNumber => 'Holding no';
+
+  @override
+  String get adminPropertyRequestsPayloadLandQuantity => 'Land quantity';
+
+  @override
+  String get adminPropertyRequestsPayloadMyShareQuantity => 'My share';
+
+  @override
+  String get adminPropertyRequestsPayloadOwnership => 'Ownership';
+
+  @override
+  String get adminPropertyRequestsPayloadCoOwners => 'Co-owners';
+
+  @override
+  String get adminPropertyRequestsPayloadDocs => 'Documents';
+
+  @override
+  String get adminSocietyCostsSummaryMemberBilled => 'Member billed';
+
+  @override
+  String get adminFinanceManagementFiltersApply => 'Apply';
 }

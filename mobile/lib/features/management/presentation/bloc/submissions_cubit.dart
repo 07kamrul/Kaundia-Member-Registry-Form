@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/enums/enums.dart';
-import '../../../data/admin_repository.dart';
-import '../../../domain/admin_entities.dart';
+import '../../data/admin_repository.dart';
+import '../../domain/admin_entities.dart';
 
 // ----- Submissions queue -----
 

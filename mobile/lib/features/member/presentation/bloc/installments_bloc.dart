@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injector.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../data/member_repository.dart';
 import '../../../../shared/utils/file_utils.dart';
 import '../../data/payment_repository.dart';
 import '../../domain/member_entities.dart';
@@ -99,7 +100,7 @@ class InstallmentsState extends Equatable {
   /// Newest first (mirrors the Angular sort).
   List<MemberInstallment> get sorted {
     final list = [...filtered]
-      ..sort((a, b) => b.year - a.year || b.month - a.month);
+      ..sort((a, b) => b.year != a.year ? b.year - a.year : b.month - a.month);
     return list;
   }
 

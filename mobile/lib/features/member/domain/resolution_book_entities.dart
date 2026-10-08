@@ -18,6 +18,13 @@ extension MeetingStatusX on MeetingStatus {
         'cancelled' => MeetingStatus.cancelled,
         _ => MeetingStatus.unknown,
       };
+
+  String get apiName => switch (this) {
+        MeetingStatus.scheduled => 'scheduled',
+        MeetingStatus.completed => 'completed',
+        MeetingStatus.cancelled => 'cancelled',
+        MeetingStatus.unknown => 'unknown',
+      };
 }
 
 enum ResolutionStatus { pending, inProgress, done, unknown }

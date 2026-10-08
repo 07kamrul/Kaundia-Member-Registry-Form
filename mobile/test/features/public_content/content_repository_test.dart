@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaundia_app/core/network/api_client.dart';
 import 'package:kaundia_app/core/network/api_exception.dart';
-import 'package:kaundia_app/features/home/data/stats_repository.dart';
+import 'package:kaundia_app/features/dashboard/data/public_stats_repository.dart';
 import 'package:kaundia_app/features/public_content/data/content_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -75,7 +75,7 @@ void main() {
     });
   });
 
-  group('StatsRepository', () {
+  group('PublicStatsRepositoryImpl', () {
     test('getStats maps snake_case fields to camelCase with defaults', () async {
       when(() => api.getUri('/public/stats')).thenAnswer(
         (_) async => {
@@ -84,7 +84,7 @@ void main() {
           'monthly_subscription_total': 12500,
         },
       );
-      final repo = StatsRepository(apiClient: api);
+      final repo = PublicStatsRepositoryImpl(apiClient: api);
       final stats = await repo.getStats();
       expect(stats.pendingCount, 4);
       expect(stats.approvedCount, 25);
@@ -93,7 +93,7 @@ void main() {
 
     test('missing keys fall back to zero', () async {
       when(() => api.getUri('/public/stats')).thenAnswer((_) async => {});
-      final repo = StatsRepository(apiClient: api);
+      final repo = PublicStatsRepositoryImpl(apiClient: api);
       final stats = await repo.getStats();
       expect(stats.pendingCount, 0);
       expect(stats.approvedCount, 0);

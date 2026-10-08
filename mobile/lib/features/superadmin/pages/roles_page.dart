@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/injector.dart';
-import '../../core/network/api_client.dart';
-import '../../l10n/app_localizations.dart';
-import '../../shared/widgets/widgets.dart';
+import '../../../core/di/injector.dart';
+import '../../../core/network/api_client.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/widgets.dart';
 import '../data/rbac_repository.dart';
 import '../domain/rbac_entities.dart';
 import '../presentation/bloc/rbac_bloc.dart';

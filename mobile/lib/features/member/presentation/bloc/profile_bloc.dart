@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injector.dart';
+import '../../../../core/enums/enums.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../shared/utils/file_utils.dart';
@@ -138,6 +139,7 @@ class ProfileState extends Equatable {
   ProfileState copyWith({
     ProfileStatus? status,
     MemberProfile? profile,
+    String? error,
     bool clearError = false,
     bool? editing,
     MemberProfileUpdate? draft,
@@ -307,7 +309,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // Photo upload goes first: on failure the text edits stay in draft.
       if (event.photoPath != null) {
         try {
-          final prepared = await prepareImage(event.photoPath!);
+          final compressed = await prepareImage(event.photoPath!);
+          final prepared = compressed ??
+              AttachedFile(
+                path: event.photoPath!,
+                fileName: event.photoPath!.split(Platform.pathSeparator).last,
+                mimeType: 'image/jpeg',
+              );
           final bytes = await File(prepared.path).readAsBytes();
           profile = await _repository.uploadPhoto(AttachedFileBytes(
             bytes: bytes,

@@ -86,19 +86,29 @@ class GeoRepository {
 
   /// Districts of [divisionName] matched by bn_name or en name (mirrors
   /// getDistrictsByDivisionName). Dropdowns store the bn_name value.
-  List<GeoDistrict> districtsByDivisionName(GeoData data, String divisionName) {
-    final division = data.divisions.firstWhere(
-      (d) => d.bnName == divisionName || d.name == divisionName,
-      orElse: () => GeoDivision(id: '', name: '', bnName: ''),
-    );
-    return [for (final d in data.districts) if (d.divisionId == division.id) d];
+  List<GeoDistrict> districtsByDivisionName(GeoData data, String divisionName) =>
+      data.districtsByDivisionName(divisionName);
+
+  List<GeoUpazila> upazilasByDistrictName(GeoData data, String districtName) =>
+      data.upazilasByDistrictName(districtName);
+}
+
+extension GeoDataX on GeoData {
+  /// Districts of [divisionName] matched by bn_name or en name (mirrors
+  /// getDistrictsByDivisionName). Dropdown values are bn_name.
+  List<GeoDistrict> districtsByDivisionName(String divisionName) {
+    final division = divisions.firstWhere(
+          (d) => d.bnName == divisionName || d.name == divisionName,
+          orElse: () => GeoDivision(id: '', name: '', bnName: ''),
+        );
+    return [for (final d in districts) if (d.divisionId == division.id) d];
   }
 
-  List<GeoUpazila> upazilasByDistrictName(GeoData data, String districtName) {
-    final district = data.districts.firstWhere(
-      (d) => d.bnName == districtName || d.name == districtName,
-      orElse: () => GeoDistrict(id: '', divisionId: '', name: '', bnName: ''),
-    );
-    return [for (final u in data.upazilas) if (u.districtId == district.id) u];
+  List<GeoUpazila> upazilasByDistrictName(String districtName) {
+    final district = districts.firstWhere(
+          (d) => d.bnName == districtName || d.name == districtName,
+          orElse: () => GeoDistrict(id: '', divisionId: '', name: '', bnName: ''),
+        );
+    return [for (final u in upazilas) if (u.districtId == district.id) u];
   }
 }

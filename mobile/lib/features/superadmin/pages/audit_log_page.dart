@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/di/injector.dart';
-import '../../core/network/api_client.dart';
-import '../../l10n/app_localizations.dart';
-import '../../shared/widgets/widgets.dart';
+import '../../../core/di/injector.dart';
+import '../../../core/network/api_client.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/widgets.dart';
 import '../data/audit_repository.dart';
 import '../data/rbac_repository.dart';
 import '../domain/audit_entities.dart';
@@ -174,6 +174,7 @@ class _FilterBar extends StatelessWidget {
                   onPressed: () => bloc.add(const AuditLogFiltersCleared()),
                 ),
               ],
+            ],
           ),
         );
       },

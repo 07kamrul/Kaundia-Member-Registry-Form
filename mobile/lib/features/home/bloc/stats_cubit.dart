@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/di/injector.dart';
-import '../../../core/network/api_client.dart';
-import '../data/stats_repository.dart';
+import '../../dashboard/data/public_stats_repository.dart';
+import '../../dashboard/domain/entity/public_stats.dart';
 
 sealed class StatsState extends Equatable {
   const StatsState();
@@ -32,11 +32,11 @@ class StatsFailure extends StatsState {
 
 /// Landing stats: on error the card falls back to zeros (Angular behaviour).
 class StatsCubit extends Cubit<StatsState> {
-  StatsCubit({StatsRepository? repository})
-      : _repo = repository ?? StatsRepository(apiClient: sl<ApiClient>()),
+  StatsCubit({PublicStatsRepository? repository})
+      : _repo = repository ?? sl<PublicStatsRepository>(),
         super(const StatsInitial());
 
-  final StatsRepository _repo;
+  final PublicStatsRepository _repo;
 
   Future<void> loadStats() async {
     emit(const StatsLoading());

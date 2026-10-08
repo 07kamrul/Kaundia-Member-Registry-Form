@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart' show Dio;
 import 'package:flutter/material.dart';
 
 import '../../core/config/app_config.dart';
@@ -6,7 +5,7 @@ import '../../core/di/injector.dart';
 import '../../core/network/api_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../utils/download_utils.dart';
-import 'widgets.dart' show showAppToast;
+import 'widgets.dart';
 
 enum AttachmentKind { image, pdf, other }
 

@@ -147,7 +147,7 @@ class PropertyRequestInput {
 // Mappers (hand-written, snake_case asserted in tests)
 // ---------------------------------------------------------------------------
 
-String? _s(dynamic v) => v == null ? null : v.toString();
+String? _s(dynamic v) => v?.toString();
 String _str(dynamic v) => v?.toString() ?? '';
 
 String? _toFileUrl(dynamic path) {

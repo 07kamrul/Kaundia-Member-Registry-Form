@@ -48,7 +48,7 @@ enum SubmitErrorKind {
 enum SubmitErrorReason { required, invalid }
 
 /// One server-side error message. [kind] == field entries render as
-/// "<field label>[ <position>]: <reason>"; other kinds map to a single key.
+/// "field label, optional position: reason"; other kinds map to a single key.
 class SubmitErrorItem {
   const SubmitErrorItem._({
     required this.kind,
@@ -104,13 +104,13 @@ const _serverFailureStatuses = {500, 502, 503, 504};
 /// separately (DuplicateSubmissionException).
 MappedSubmissionError mapSubmissionError(ApiException err) {
   if (err.isNetwork) {
-    return const MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.network)]);
+    return MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.network)]);
   }
   if (err.statusCode == 413) {
-    return const MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.fileTooLarge)]);
+    return MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.fileTooLarge)]);
   }
   if (_serverFailureStatuses.contains(err.statusCode) || err.isServer) {
-    return const MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.server)]);
+    return MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.server)]);
   }
 
   // Field errors: keys are 'root' or 'root.index' (snake_case), values are the
@@ -122,14 +122,14 @@ MappedSubmissionError mapSubmissionError(ApiException err) {
   }
 
   if (err.businessMessage == 'FEE_NOT_CONFIGURED') {
-    return const MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.feeNotConfigured)], step: 4);
+    return MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.feeNotConfigured)], step: 4);
   }
   if (err.businessMessage == 'INVALID_SHARE_QUANTITY') {
-    return const MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.invalidShareQuantity)], step: 2);
+    return MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.invalidShareQuantity)], step: 2);
   }
 
   if (err.isValidation) {
-    return const MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.invalidData)]);
+    return MappedSubmissionError(items: [SubmitErrorItem.plain(SubmitErrorKind.invalidData)]);
   }
   return MappedSubmissionError(
     items: [SubmitErrorItem.plain(SubmitErrorKind.generic, status: err.statusCode ?? 0)],

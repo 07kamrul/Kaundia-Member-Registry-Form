@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 
+import '../../../../core/enums/enums.dart';
 import '../../../../core/network/api_client.dart';
-import '../../domain/admin_entities.dart';
-import '../../domain/admin_mappers.dart';
-import '../../domain/finance_entities.dart';
-import '../../domain/finance_mappers.dart';
+import '../domain/admin_entities.dart';
+import '../domain/admin_mappers.dart';
+import '../domain/finance_entities.dart';
+import '../domain/finance_mappers.dart';
 
 /// Admin portal endpoints (mirrors Angular AdminService.ts). All payloads are
 /// snake_case; ids become String client-side.
@@ -23,7 +24,7 @@ class AdminRepository {
     final data = await _api.getUri('$_base/submissions', query: {
       if (status != null && status != SubmissionStatus.unknown) 'status': status.apiName,
     });
-    return _rows(data).map((r) => r.toSummaryEntity()).toList(growable: false);
+    return _rows(data).map((r) => SubmissionSummaryApiX(r).toSummaryEntity()).toList(growable: false);
   }
 
   Future<SubmissionDetail> getSubmission(String id) async {
@@ -584,7 +585,7 @@ class SocietyCostRepository {
       if (dateFrom != null && dateFrom.isNotEmpty) 'date_from': dateFrom,
       if (dateTo != null && dateTo.isNotEmpty) 'date_to': dateTo,
     });
-    return Map<String, dynamic>.from(data as Map).toSummaryEntity();
+    return SocietyCostSummaryApiX(Map<String, dynamic>.from(data as Map)).toSummaryEntity();
   }
 }
 
