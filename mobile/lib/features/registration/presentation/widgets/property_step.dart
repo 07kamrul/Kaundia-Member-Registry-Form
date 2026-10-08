@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/widgets.dart';
 import '../../../../core/enums/enums.dart';
 import '../../domain/registration_validators.dart';
 import '../bloc/registration_bloc.dart';
@@ -25,22 +24,22 @@ class PropertyStep extends StatelessWidget {
     final f = state.form;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         RegSectionTitle(text: l10n.registrationStepTitlesProperty),
-        RegDropdown(
-          label: l10n.registrationPropertyCountLabel,
-          required: true,
-          value: f.propertyCount?.toString() ?? '',
-          items: [for (var i = 1; i <= 9; i++) '$i'],
-          error: findError(state.stepErrors, RegErrorKind.propertyCountRequired) != null
-              ? l10n.registrationValidationPropertyCountRequired
-              : null,
-          onChanged: (v) => bloc.add(PropertyCountChanged(int.tryParse(v ?? '') ?? 0)),
+        RegSectionCard(
+          child: RegDropdown(
+            label: l10n.registrationPropertyCountLabel,
+            required: true,
+            value: f.propertyCount?.toString() ?? '',
+            items: [for (var i = 1; i <= 9; i++) '$i'],
+            error: findError(state.stepErrors, RegErrorKind.propertyCountRequired) != null
+                ? l10n.registrationValidationPropertyCountRequired
+                : null,
+            onChanged: (v) => bloc.add(PropertyCountChanged(int.tryParse(v ?? '') ?? 0)),
+          ),
         ),
-        const SizedBox(height: 12),
-        for (var i = 0; i < f.properties.length; i++)
-          _PropertyCard(index: i),
+        for (var i = 0; i < f.properties.length; i++) _PropertyCard(index: i),
         if (state.fileError != null && state.fileError!.propertyIndex != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -53,12 +52,34 @@ class PropertyStep extends StatelessWidget {
 
 Widget _fileErrorText(BuildContext context, FilePickError error) {
   final l10n = AppLocalizations.of(context);
+  final theme = Theme.of(context);
   return Text(
     error.kind == FileErrorKind.type
         ? l10n.registrationPropertyDocFileTypeError
         : l10n.registrationPropertyDocFileSizeError(5),
-    style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
   );
+}
+
+/// Lays checkbox options out in two columns when there is room.
+class _OptionGrid extends StatelessWidget {
+  const _OptionGrid({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColumns = constraints.maxWidth >= 440;
+        final width = twoColumns ? (constraints.maxWidth - 8) / 2 : constraints.maxWidth;
+        return Wrap(
+          spacing: 8,
+          children: [for (final c in children) SizedBox(width: width, child: c)],
+        );
+      },
+    );
+  }
 }
 
 class _PropertyCard extends StatelessWidget {
@@ -79,26 +100,26 @@ class _PropertyCard extends StatelessWidget {
       return e == null ? null : regErrorMessage(l10n, e);
     }
 
-    return AppCard(
+    void change(PropertyField field, String v) => bloc.add(PropertyFieldChanged(index, field, v));
+
+    return RegSectionCard(
+      title: '${l10n.registrationPropertyItemTitle} #${index + 1}',
+      icon: Icons.home_work_outlined,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            '${l10n.registrationPropertyItemTitle} #${index + 1}',
-            style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary),
+          RegLabel(
+            required: true,
+            text: l10n.registrationPropertyTypeLabel,
+            error: propErr(RegErrorKind.propertyTypeRequired),
           ),
-          const SizedBox(height: 12),
-          RegLabel(required: true, text: l10n.registrationPropertyTypeLabel, error: propErr(RegErrorKind.propertyTypeRequired)),
-          Wrap(
+          _OptionGrid(
             children: [
               for (final t in state.propertyTypes)
-                SizedBox(
-                  width: 220,
-                  child: RegCheckboxRow(
-                    value: p.propertyType.contains(t),
-                    label: t,
-                    onChanged: (_) => bloc.add(PropertyTypeToggled(index, t)),
-                  ),
+                RegCheckboxRow(
+                  value: p.propertyType.contains(t),
+                  label: t,
+                  onChanged: (_) => bloc.add(PropertyTypeToggled(index, t)),
                 ),
             ],
           ),
@@ -108,40 +129,38 @@ class _PropertyCard extends StatelessWidget {
               child: RegTextField(
                 label: l10n.registrationPropertyTypeOtherPlaceholder,
                 value: p.propertyTypeOther,
-                onChanged: (v) => bloc.add(PropertyFieldChanged(index, PropertyField.propertyTypeOther, v)),
+                onChanged: (v) => change(PropertyField.propertyTypeOther, v),
               ),
             ),
           const SizedBox(height: 12),
-          LayoutBuilder(builder: (context, constraints) {
-            final fields = <Widget>[
-              RegTextField(
-                label: l10n.registrationPropertyKhatianNoLabel,
-                required: true,
-                value: p.khatianNo,
-                error: propErr(RegErrorKind.khatianRequired),
-                onChanged: (v) => bloc.add(PropertyFieldChanged(index, PropertyField.khatianNo, v)),
-              ),
-              RegTextField(
-                label: l10n.registrationPropertyHoldingNumberLabel,
-                value: p.holdingNumber,
-                onChanged: (v) => bloc.add(PropertyFieldChanged(index, PropertyField.holdingNumber, v)),
-              ),
-            ];
-            if (constraints.maxWidth >= 600) {
-              return Row(children: [for (final f in fields) Expanded(child: f)]);
-            }
-            return Column(children: fields);
-          }),
+          RegFieldPair(
+            first: RegTextField(
+              label: l10n.registrationPropertyKhatianNoLabel,
+              required: true,
+              value: p.khatianNo,
+              prefixIcon: Icons.tag,
+              error: propErr(RegErrorKind.khatianRequired),
+              onChanged: (v) => change(PropertyField.khatianNo, v),
+            ),
+            second: RegTextField(
+              label: l10n.registrationPropertyHoldingNumberLabel,
+              value: p.holdingNumber,
+              prefixIcon: Icons.numbers,
+              onChanged: (v) => change(PropertyField.holdingNumber, v),
+            ),
+          ),
           const SizedBox(height: 12),
           RegLabel(required: true, text: l10n.registrationPropertyDagNoLabel),
+          const SizedBox(height: 6),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: RegTextField(
                   label: 'CS',
                   value: p.dagNoCs,
                   error: _dagError(context, 'cs'),
-                  onChanged: (v) => bloc.add(PropertyFieldChanged(index, PropertyField.dagNoCs, v)),
+                  onChanged: (v) => change(PropertyField.dagNoCs, v),
                 ),
               ),
               const SizedBox(width: 12),
@@ -150,59 +169,37 @@ class _PropertyCard extends StatelessWidget {
                   label: 'RS',
                   value: p.dagNoRs,
                   error: _dagError(context, 'rs'),
-                  onChanged: (v) => bloc.add(PropertyFieldChanged(index, PropertyField.dagNoRs, v)),
+                  onChanged: (v) => change(PropertyField.dagNoRs, v),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          RegTextField(
-            label: l10n.registrationPropertyLandQuantityLabel,
-            required: true,
-            value: p.landQuantity,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            hint: l10n.registrationPropertyLandQuantityPlaceholder,
-            error: propErr(RegErrorKind.landQuantityRequired) ?? propErr(RegErrorKind.landQuantityInvalid),
-            onChanged: (v) => bloc.add(PropertyFieldChanged(index, PropertyField.landQuantity, v)),
+          RegFieldPair(
+            first: RegTextField(
+              label: l10n.registrationPropertyLandQuantityLabel,
+              required: true,
+              value: p.landQuantity,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              hint: l10n.registrationPropertyLandQuantityPlaceholder,
+              error: propErr(RegErrorKind.landQuantityRequired) ??
+                  propErr(RegErrorKind.landQuantityInvalid),
+              onChanged: (v) => change(PropertyField.landQuantity, v),
+            ),
+            second: RegTextField(
+              label: l10n.registrationPropertyMyShareQuantityLabel,
+              required: true,
+              value: p.myShareQuantity,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              hint: l10n.registrationPropertyMyShareQuantityPlaceholder,
+              error: propErr(RegErrorKind.shareQuantityRequired) ??
+                  propErr(RegErrorKind.shareQuantityInvalid) ??
+                  propErr(RegErrorKind.shareQuantityExceedsTotal),
+              onChanged: (v) => change(PropertyField.myShareQuantity, v),
+            ),
           ),
           const SizedBox(height: 12),
-          RegTextField(
-            label: l10n.registrationPropertyMyShareQuantityLabel,
-            required: true,
-            value: p.myShareQuantity,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            hint: l10n.registrationPropertyMyShareQuantityPlaceholder,
-            error: propErr(RegErrorKind.shareQuantityRequired) ??
-                propErr(RegErrorKind.shareQuantityInvalid) ??
-                propErr(RegErrorKind.shareQuantityExceedsTotal),
-            onChanged: (v) => bloc.add(PropertyFieldChanged(index, PropertyField.myShareQuantity, v)),
-          ),
-          const SizedBox(height: 12),
-          RegLabel(
-            required: true,
-            text: l10n.registrationPropertyOwnershipLabel,
-            error: propErr(RegErrorKind.ownershipRequired),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: RegRadioRow<OwnershipType>(
-                  value: OwnershipType.single,
-                  groupValue: p.ownership == OwnershipType.unknown ? null : p.ownership,
-                  label: 'একক',
-                  onChanged: (o) => bloc.add(OwnershipSelected(index, o)),
-                ),
-              ),
-              Expanded(
-                child: RegRadioRow<OwnershipType>(
-                  value: OwnershipType.joint,
-                  groupValue: p.ownership == OwnershipType.unknown ? null : p.ownership,
-                  label: 'যৌথ',
-                  onChanged: (o) => bloc.add(OwnershipSelected(index, o)),
-                ),
-              ),
-            ],
-          ),
+          _OwnershipField(index: index, error: propErr(RegErrorKind.ownershipRequired)),
           if (p.isJoint)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -210,19 +207,19 @@ class _PropertyCard extends StatelessWidget {
                 label: l10n.registrationPropertyJointOwnerCountLabel,
                 required: true,
                 value: p.jointOwnerCount?.toString() ?? '',
+                prefixIcon: Icons.groups_outlined,
                 keyboardType: TextInputType.number,
                 error: propErr(RegErrorKind.jointOwnerCountRequired),
                 onChanged: (v) => bloc.add(JointOwnerCountChanged(index, int.tryParse(v))),
               ),
             ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           RegLabel(
             required: true,
             text: l10n.registrationPropertyApplicableDocsLabel,
             error: propErr(RegErrorKind.applicableDocsRequired),
           ),
-          for (final docType in state.documentOptions)
-            _DocSection(index: index, docType: docType),
+          for (final docType in state.documentOptions) _DocSection(index: index, docType: docType),
         ],
       ),
     );
@@ -234,6 +231,47 @@ class _PropertyCard extends StatelessWidget {
     final kind = which == 'cs' ? RegErrorKind.dagCsRequired : RegErrorKind.dagRsRequired;
     final e = findError(state.stepErrors, kind, propertyIndex: index);
     return e == null ? null : regErrorMessage(l10n, e).split(': ').last;
+  }
+}
+
+class _OwnershipField extends StatelessWidget {
+  const _OwnershipField({required this.index, required this.error});
+
+  final int index;
+  final String? error;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<RegistrationBloc>().state;
+    final bloc = context.read<RegistrationBloc>();
+    final l10n = AppLocalizations.of(context);
+    final p = state.form.properties[index];
+    final group = p.ownership == OwnershipType.unknown ? null : p.ownership;
+    return RegLabel(
+      required: true,
+      text: l10n.registrationPropertyOwnershipLabel,
+      error: error,
+      child: Row(
+        children: [
+          Expanded(
+            child: RegRadioRow<OwnershipType>(
+              value: OwnershipType.single,
+              groupValue: group,
+              label: 'একক',
+              onChanged: (o) => bloc.add(OwnershipSelected(index, o)),
+            ),
+          ),
+          Expanded(
+            child: RegRadioRow<OwnershipType>(
+              value: OwnershipType.joint,
+              groupValue: group,
+              label: 'যৌথ',
+              onChanged: (o) => bloc.add(OwnershipSelected(index, o)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -260,14 +298,22 @@ class _DocSection extends StatelessWidget {
     final state = context.watch<RegistrationBloc>().state;
     final bloc = context.read<RegistrationBloc>();
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final p = state.form.properties[index];
     final doc = p.applicableDocs.where((d) => d.type == docType).firstOrNull;
-    final missing = findError(state.stepErrors, RegErrorKind.docFileRequired, propertyIndex: index, docType: docType) != null;
+    final missing = findError(
+          state.stepErrors,
+          RegErrorKind.docFileRequired,
+          propertyIndex: index,
+          docType: docType,
+        ) !=
+        null;
+    final errorStyle = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 4),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           RegCheckboxRow(
             value: doc != null,
@@ -276,25 +322,15 @@ class _DocSection extends StatelessWidget {
           ),
           if (doc != null)
             Padding(
-              padding: const EdgeInsets.only(left: 28),
+              padding: const EdgeInsetsDirectional.only(start: 38, bottom: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (doc.hasFile)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            doc.fileName,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => bloc.add(DocFileRemoved(index, docType)),
-                          child: Text(l10n.registrationPropertyRemoveFileButton),
-                        ),
-                      ],
+                    RegFileChip(
+                      fileName: doc.fileName,
+                      removeLabel: l10n.registrationPropertyRemoveFileButton,
+                      onRemove: () => bloc.add(DocFileRemoved(index, docType)),
                     )
                   else
                     OutlinedButton.icon(
@@ -302,17 +338,15 @@ class _DocSection extends StatelessWidget {
                       label: Text(l10n.registrationPropertyAttachFileButton),
                       onPressed: () => _pickFile(context),
                     ),
-                  Text(l10n.registrationPropertyMaxFileSizeNote(5), style: const TextStyle(fontSize: 11)),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.registrationPropertyMaxFileSizeNote(5),
+                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                  ),
                   if (missing && !doc.hasFile)
-                    Text(
-                      l10n.registrationPropertyDocFileMissing,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 11),
-                    ),
+                    Text(l10n.registrationPropertyDocFileMissing, style: errorStyle),
                   if (doc.hasFile && !File(doc.path!).existsSync())
-                    Text(
-                      l10n.registrationDraftReattachFilesNotice,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 11),
-                    ),
+                    Text(l10n.registrationDraftReattachFilesNotice, style: errorStyle),
                 ],
               ),
             ),

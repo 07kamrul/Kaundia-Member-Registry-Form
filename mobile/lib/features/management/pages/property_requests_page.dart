@@ -11,6 +11,7 @@ import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
 import '../presentation/bloc/property_requests_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
+import '../presentation/widgets/property_requests_widgets.dart';
 import 'submissions_list_page.dart' show statusLabel;
 
 /// Property change request review queue (Angular property-requests): status
@@ -25,311 +26,239 @@ class PropertyRequestsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) => PropertyRequestsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
         ..add(const PropertyRequestsLoadRequested()),
-      child: BlocConsumer<PropertyRequestsBloc, PropertyRequestsState>(
-        listener: (context, state) {
-          if (state.actionError != null) {
-            if (state.actionError == 'reasonRequired') {
-              showAppToast(
-                  context, loc.adminPropertyRequestsErrorsReasonRequired,
-                  error: true);
-            } else {
-              showAppToast(
-                  context, describeApiError(context, state.actionError),
-                  error: true);
-            }
-          }
-          if (state.error != null) {
-            showAppToast(context, loc.adminPropertyRequestsErrorsLoadFailed,
-                error: true);
-          }
-        },
-        builder: (context, state) {
-          final bloc = context.read<PropertyRequestsBloc>();
-          return ListView(
-            children: [
-              PageHeader(
-                  title: loc.adminPropertyRequestsTitle,
-                  subtitle: loc.adminPropertyRequestsSubtitle),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: DropdownButtonFormField<PropertyRequestStatus?>(
-                  initialValue: state.statusFilter,
-                  decoration: InputDecoration(
-                    labelText: loc.adminPropertyRequestsStatusLabelsAll,
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: [
-                    DropdownMenuItem<PropertyRequestStatus?>(
-                      value: PropertyRequestStatus.unknown,
-                      child: Text(loc.adminPropertyRequestsStatusLabelsAll),
-                    ),
-                    DropdownMenuItem<PropertyRequestStatus?>(
-                      value: PropertyRequestStatus.pending,
-                      child: Text(loc.adminPropertyRequestsStatusLabelsPending),
-                    ),
-                    DropdownMenuItem<PropertyRequestStatus?>(
-                      value: PropertyRequestStatus.approved,
-                      child:
-                          Text(loc.adminPropertyRequestsStatusLabelsApproved),
-                    ),
-                    DropdownMenuItem<PropertyRequestStatus?>(
-                      value: PropertyRequestStatus.cancelled,
-                      child:
-                          Text(loc.adminPropertyRequestsStatusLabelsCancelled),
-                    ),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) {
-                      bloc.add(PropertyRequestsStatusFilterChanged(status: v));
-                    }
-                  },
-                ),
-              ),
-              if (state.loading)
-                const SkeletonLoader(lines: 4)
-              else if (state.items.isEmpty)
-                EmptyState(message: loc.adminPropertyRequestsNoRequests)
-              else
-                AppDataTableCards<MemberPropertyRequest>(
-                  items: state.items,
-                  rowBuilder: (context, r) => _row(context, loc, bloc, r),
-                ),
-              const SizedBox(height: 32),
-            ],
-          );
-        },
-      ),
+      child: const _PropertyRequestsView(),
     );
   }
+}
 
-  String _actionLabel(AppLocalizations loc, PropertyRequestAction action) =>
-      switch (action) {
-        PropertyRequestAction.add => loc.adminPropertyRequestsActionsAdd,
-        PropertyRequestAction.edit => loc.adminPropertyRequestsActionsEdit,
-        PropertyRequestAction.delete => loc.adminPropertyRequestsActionsDelete,
-        _ => '—',
-      };
+String _statusText(AppLocalizations loc, PropertyRequestStatus status) =>
+    switch (status) {
+      PropertyRequestStatus.pending =>
+        loc.adminPropertyRequestsStatusLabelsPending,
+      PropertyRequestStatus.approved =>
+        loc.adminPropertyRequestsStatusLabelsApproved,
+      PropertyRequestStatus.cancelled =>
+        loc.adminPropertyRequestsStatusLabelsCancelled,
+      _ => statusLabel(loc, SubmissionStatus.unknown),
+    };
 
-  Widget _row(BuildContext context, AppLocalizations loc,
-      PropertyRequestsBloc bloc, MemberPropertyRequest r) {
-    final year = DateTime.tryParse(r.createdAt)?.year ?? DateTime.now().year;
-    final reference = 'PR-$year-${'${r.id}'.padLeft(4, '0')}';
-    final date = DateTime.tryParse(r.createdAt);
-    final p = r.payload;
-    final types = [
-      ...p.propertyType,
-      if (p.propertyTypeOther?.isNotEmpty == true) p.propertyTypeOther!
-    ];
-    final summary = [
-      if (types.isNotEmpty) types.join(' / '),
-      if (p.khatianNo != null) 'Khatian ${p.khatianNo}',
-      if (p.dagNoCs != null) 'CS ${p.dagNoCs}',
-      if (p.dagNoRs != null) 'RS ${p.dagNoRs}',
-    ].join(' · ');
-    final busy = bloc.state.busyId == r.id;
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+StatusKind _statusKind(PropertyRequestStatus status) => switch (status) {
+      PropertyRequestStatus.pending => StatusKind.pending,
+      PropertyRequestStatus.approved => StatusKind.approved,
+      PropertyRequestStatus.cancelled => StatusKind.rejected,
+      _ => StatusKind.neutral,
+    };
+
+class _PropertyRequestsView extends StatelessWidget {
+  const _PropertyRequestsView();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return BlocConsumer<PropertyRequestsBloc, PropertyRequestsState>(
+      listener: (context, state) => _notify(context, loc, state),
+      builder: (context, state) {
+        final bloc = context.read<PropertyRequestsBloc>();
+        return PageBody(
+          onRefresh: () => reloadAndWait(
+              bloc, const PropertyRequestsLoadRequested(), (s) => s.loading),
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${r.memberName ?? '—'} ${r.memberCode ?? ''}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      Text(summary,
-                          style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
+            PageHeader(
+              icon: Icons.home_work_outlined,
+              title: loc.adminPropertyRequestsTitle,
+              subtitle: loc.adminPropertyRequestsSubtitle,
+            ),
+            ManagementFilterChips<PropertyRequestStatus>(
+              selected: state.statusFilter,
+              options: [
+                (
+                  PropertyRequestStatus.unknown,
+                  loc.adminPropertyRequestsStatusLabelsAll
                 ),
-                StatusBadge(
-                  kind: switch (r.status) {
-                    PropertyRequestStatus.pending => StatusKind.pending,
-                    PropertyRequestStatus.approved => StatusKind.approved,
-                    PropertyRequestStatus.cancelled => StatusKind.rejected,
-                    _ => StatusKind.neutral,
-                  },
-                  label: switch (r.status) {
-                    PropertyRequestStatus.pending =>
-                      loc.adminPropertyRequestsStatusLabelsPending,
-                    PropertyRequestStatus.approved =>
-                      loc.adminPropertyRequestsStatusLabelsApproved,
-                    PropertyRequestStatus.cancelled =>
-                      loc.adminPropertyRequestsStatusLabelsCancelled,
-                    _ => statusLabel(loc, SubmissionStatus.unknown),
-                  },
-                ),
+                for (final s in const [
+                  PropertyRequestStatus.pending,
+                  PropertyRequestStatus.approved,
+                  PropertyRequestStatus.cancelled,
+                ])
+                  (s, _statusText(loc, s)),
               ],
+              onSelected: (v) =>
+                  bloc.add(PropertyRequestsStatusFilterChanged(status: v)),
             ),
-            const SizedBox(height: 6),
-            InfoRow(
-                label: loc.adminPropertyRequestsTableHeadersReference,
-                value: reference),
-            InfoRow(
-                label: loc.adminPropertyRequestsTableHeadersAction,
-                value: _actionLabel(loc, r.action)),
-            InfoRow(
-              label: loc.adminPropertyRequestsTableHeadersDate,
-              value: date == null
-                  ? r.createdAt
-                  : DateFormat('yyyy-MM-dd').format(date),
-            ),
-            // Payload detail.
-            ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              title: Text(loc.adminPropertyRequestsTableHeadersProperty,
-                  style: Theme.of(context).textTheme.bodyMedium),
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (types.isNotEmpty)
-                        InfoRow(
-                            label: loc.adminSubmissionDetailFieldLabelsType,
-                            value: types.join(' / ')),
-                      if (p.khatianNo != null)
-                        InfoRow(
-                            label:
-                                loc.adminSubmissionDetailFieldLabelsKhatianNo,
-                            value: p.khatianNo!),
-                      if (p.dagNoCs != null)
-                        InfoRow(
-                            label: loc.adminSubmissionDetailFieldLabelsDagNoCs,
-                            value: p.dagNoCs!),
-                      if (p.dagNoRs != null)
-                        InfoRow(
-                            label: loc.adminSubmissionDetailFieldLabelsDagNoRs,
-                            value: p.dagNoRs!),
-                      if (p.holdingNumber != null)
-                        InfoRow(
-                            label: loc
-                                .adminSubmissionDetailFieldLabelsHoldingNumber,
-                            value: p.holdingNumber!),
-                      if (p.landQuantity != null)
-                        InfoRow(
-                            label: loc
-                                .adminSubmissionDetailFieldLabelsLandQuantity,
-                            value: p.landQuantity!),
-                      if (p.myShareQuantity != null)
-                        InfoRow(
-                            label: loc
-                                .adminSubmissionDetailFieldLabelsMyShareQuantity,
-                            value: p.myShareQuantity!),
-                      if (p.ownership != null)
-                        InfoRow(
-                            label:
-                                loc.adminSubmissionDetailFieldLabelsOwnership,
-                            value: p.ownership!),
-                      if (p.coOwners.isNotEmpty)
-                        InfoRow(
-                          label: loc.adminPropertyRequestsPayloadCoOwners,
-                          value: p.coOwners
-                              .map((c) => '${c.ownerName} (${c.ownerPhone})')
-                              .join(', '),
-                          expanded: true,
-                        ),
-                      if (p.docs.isNotEmpty)
-                        InfoRow(
-                          label: loc.adminPropertyRequestsPayloadDocs,
-                          value: p.docs.map((d) => d.docType).join(', '),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (r.cancelReason != null && r.cancelReason!.isNotEmpty)
-              InfoRow(
-                  label: loc.adminPropertyRequestsCancelReasonLabel,
-                  value: r.cancelReason!),
-            if (r.status == PropertyRequestStatus.pending)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  AppButton(
-                    label: loc.adminPropertyRequestsCancelButton,
-                    variant: AppButtonVariant.danger,
-                    onPressed: busy
-                        ? null
-                        : () => _cancelDialog(context, loc, bloc, r),
-                  ),
-                  const SizedBox(width: 8),
-                  AppButton(
-                    label: loc.adminPropertyRequestsApproveButton,
-                    icon: Icons.check,
-                    onPressed: busy
-                        ? null
-                        : () async {
-                            final confirmed = await confirmDialog(
-                              context,
-                              title: loc.adminPropertyRequestsApproveModalTitle,
-                              message: loc
-                                  .adminPropertyRequestsApproveModalMessageSuffix,
-                              confirmLabel: loc
-                                  .adminPropertyRequestsApproveModalConfirmLabel,
-                            );
-                            if (confirmed && context.mounted) {
-                              bloc.add(PropertyRequestApproved(request: r));
-                            }
-                          },
-                  ),
-                ],
-              ),
+            const SizedBox(height: 8),
+            ..._content(loc, bloc, state),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Future<void> _cancelDialog(BuildContext context, AppLocalizations loc,
-      PropertyRequestsBloc bloc, MemberPropertyRequest r) async {
-    final controller = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(loc.adminPropertyRequestsCancelModalTitle),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: InputDecoration(
-            labelText: loc.adminPropertyRequestsCancelReasonLabel,
-            hintText: loc.adminPropertyRequestsCancelModalPlaceholder,
-            border: const OutlineInputBorder(),
-          ),
+  void _notify(
+      BuildContext context, AppLocalizations loc, PropertyRequestsState state) {
+    if (state.actionError != null) {
+      showAppToast(
+        context,
+        state.actionError == 'reasonRequired'
+            ? loc.adminPropertyRequestsErrorsReasonRequired
+            : describeApiError(context, state.actionError),
+        error: true,
+      );
+    }
+    // An empty list shows the load error inline instead.
+    if (state.error != null && state.items.isNotEmpty) {
+      showAppToast(context, loc.adminPropertyRequestsErrorsLoadFailed,
+          error: true);
+    }
+  }
+
+  List<Widget> _content(AppLocalizations loc, PropertyRequestsBloc bloc,
+      PropertyRequestsState state) {
+    if (state.loading) return const [SkeletonLoader(lines: 4, height: 120)];
+    if (state.items.isEmpty && state.error != null) {
+      return [
+        InlineError(
+          message: loc.adminPropertyRequestsErrorsLoadFailed,
+          onRetry: () => bloc.add(const PropertyRequestsLoadRequested()),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(loc.commonCancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(loc.adminPropertyRequestsCancelModalConfirmLabel),
-          ),
+      ];
+    }
+    if (state.items.isEmpty) {
+      return [
+        EmptyState(
+          message: loc.adminPropertyRequestsNoRequests,
+          icon: Icons.home_work_outlined,
+        ),
+      ];
+    }
+    return [
+      ManagementRecordGrid(
+        minItemWidth: 360,
+        children: [
+          for (final r in state.items)
+            _RequestCard(request: r, busy: state.busyId == r.id),
         ],
       ),
+    ];
+  }
+}
+
+enum _RequestAction { approve, cancel }
+
+class _RequestCard extends StatefulWidget {
+  const _RequestCard({required this.request, required this.busy});
+
+  final MemberPropertyRequest request;
+  final bool busy;
+
+  @override
+  State<_RequestCard> createState() => _RequestCardState();
+}
+
+class _RequestCardState extends State<_RequestCard> {
+  _RequestAction? _active;
+
+  bool _loading(_RequestAction action) => widget.busy && _active == action;
+
+  String get _reference {
+    final r = widget.request;
+    final year = DateTime.tryParse(r.createdAt)?.year ?? DateTime.now().year;
+    return 'PR-$year-${'${r.id}'.padLeft(4, '0')}';
+  }
+
+  Future<void> _approve(AppLocalizations loc) async {
+    final bloc = context.read<PropertyRequestsBloc>();
+    final confirmed = await confirmDialog(
+      context,
+      title: loc.adminPropertyRequestsApproveModalTitle,
+      message: '$_reference ${loc.adminPropertyRequestsApproveModalMessageSuffix}',
+      confirmLabel: loc.adminPropertyRequestsApproveModalConfirmLabel,
     );
-    if (confirmed != true || !context.mounted) return;
-    bloc.add(PropertyRequestCancelled(request: r, reason: controller.text));
+    if (!confirmed || !mounted) return;
+    setState(() => _active = _RequestAction.approve);
+    bloc.add(PropertyRequestApproved(request: widget.request));
+  }
+
+  Future<void> _cancel(AppLocalizations loc) async {
+    final bloc = context.read<PropertyRequestsBloc>();
+    final reason = await showReasonDialog(
+      context,
+      title: loc.adminPropertyRequestsCancelModalTitle,
+      summary: '$_reference ${loc.adminPropertyRequestsCancelModalMessageSuffix}',
+      label: loc.adminPropertyRequestsCancelReasonLabel,
+      hint: loc.adminPropertyRequestsCancelModalPlaceholder,
+      confirmLabel: loc.adminPropertyRequestsCancelModalConfirmLabel,
+      validator: (text) =>
+          text.isEmpty ? loc.adminPropertyRequestsErrorsReasonRequired : null,
+    );
+    if (reason == null || !mounted) return;
+    setState(() => _active = _RequestAction.cancel);
+    bloc.add(PropertyRequestCancelled(request: widget.request, reason: reason));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final r = widget.request;
+    final date = DateTime.tryParse(r.createdAt);
+    final cancelReason = r.cancelReason;
+    return ManagementRecordCard(
+      leading: ManagementAvatar(name: r.memberName ?? '?'),
+      title: '${r.memberName ?? '—'} ${r.memberCode ?? ''}'.trim(),
+      subtitle: propertyRequestSummary(r.payload),
+      badge: StatusBadge(
+          kind: _statusKind(r.status), label: _statusText(loc, r.status)),
+      actions: _actions(loc),
+      children: [
+        InfoRow(
+            label: loc.adminPropertyRequestsTableHeadersReference,
+            value: _reference),
+        InfoRow(
+            label: loc.adminPropertyRequestsTableHeadersAction,
+            value: propertyRequestActionLabel(loc, r.action)),
+        InfoRow(
+          label: loc.adminPropertyRequestsTableHeadersDate,
+          value:
+              date == null ? r.createdAt : DateFormat('yyyy-MM-dd').format(date),
+        ),
+        if (r.action == PropertyRequestAction.delete)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: ManagementCallout(
+              message: loc.adminPropertyRequestsDeleteRequestNote,
+              icon: Icons.delete_sweep_outlined,
+            ),
+          ),
+        PropertyRequestPayloadTile(payload: r.payload),
+        if (cancelReason != null && cancelReason.isNotEmpty)
+          InfoRow(
+              label: loc.adminPropertyRequestsCancelReasonLabel,
+              value: cancelReason,
+              expanded: true),
+      ],
+    );
+  }
+
+  List<Widget> _actions(AppLocalizations loc) {
+    if (widget.request.status != PropertyRequestStatus.pending) return const [];
+    final busy = widget.busy;
+    return [
+      AppButton(
+        label: loc.adminPropertyRequestsCancelButton,
+        variant: AppButtonVariant.danger,
+        icon: Icons.close,
+        loading: _loading(_RequestAction.cancel),
+        onPressed: busy ? null : () => _cancel(loc),
+      ),
+      AppButton(
+        label: loc.adminPropertyRequestsApproveButton,
+        icon: Icons.check,
+        loading: _loading(_RequestAction.approve),
+        onPressed: busy ? null : () => _approve(loc),
+      ),
+    ];
   }
 }

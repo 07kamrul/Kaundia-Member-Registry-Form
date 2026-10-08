@@ -14,7 +14,7 @@ import 'installments_management_page.dart' show monthLabelOf;
 
 /// Committee queue for member-reported installment payments (Angular
 /// payment-verifications): status filter tabs, approve / reject with reason.
-class PaymentVerificationsPage extends StatefulWidget {
+class PaymentVerificationsPage extends StatelessWidget {
   final String? id;
   final String? propertyId;
   final String? returnUrl;
@@ -23,214 +23,225 @@ class PaymentVerificationsPage extends StatefulWidget {
       {super.key, this.id, this.propertyId, this.returnUrl});
 
   @override
-  State<PaymentVerificationsPage> createState() =>
-      _PaymentVerificationsPageState();
-}
-
-class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
-  @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) => PaymentVerificationsBloc(
         repository: InstallmentPaymentRepository(apiClient: sl<ApiClient>()),
       )..add(const PaymentVerificationsLoadRequested()),
-      child: BlocConsumer<PaymentVerificationsBloc, PaymentVerificationsState>(
-        listener: (context, state) {
-          if (state.error != null) {
-            showAppToast(context, describeApiError(context, state.error),
-                error: true);
-          }
-        },
-        builder: (context, state) {
-          final bloc = context.read<PaymentVerificationsBloc>();
-          return ListView(
-            children: [
-              PageHeader(
-                  title: loc.adminPaymentVerificationsTitle,
-                  subtitle: loc.adminPaymentVerificationsSubtitle),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: AppTabs(
-                  labels: [
-                    loc.commonStatusPending,
-                    loc.commonStatusApproved,
-                    loc.commonStatusRejected,
-                  ],
-                  selectedIndex: switch (state.statusFilter) {
-                    'pending' => 0,
-                    'approved' => 1,
-                    _ => 2,
-                  },
-                  onChanged: (index) =>
-                      bloc.add(PaymentVerificationsStatusFilterChanged(
-                          status: switch (index) {
-                    0 => 'pending',
-                    1 => 'approved',
-                    _ => 'rejected',
-                  })),
-                ),
-              ),
-              if (state.loading)
-                const SkeletonLoader(lines: 4)
-              else if (state.payments.isEmpty)
-                EmptyState(
-                  message: loc.adminPaymentVerificationsEmpty,
-                  icon: Icons.check_circle_outline,
-                )
-              else
-                for (final p in state.payments)
-                  _paymentCard(context, loc, bloc, p),
-              const SizedBox(height: 32),
-            ],
-          );
-        },
-      ),
+      child: const _PaymentVerificationsView(),
+    );
+  }
+}
+
+String _statusText(AppLocalizations loc, String status) => switch (status) {
+      'pending' => loc.commonStatusPending,
+      'approved' => loc.commonStatusApproved,
+      _ => loc.commonStatusRejected,
+    };
+
+StatusKind _statusKind(String status) => switch (status) {
+      'pending' => StatusKind.pending,
+      'approved' => StatusKind.approved,
+      'rejected' => StatusKind.rejected,
+      _ => StatusKind.neutral,
+    };
+
+class _PaymentVerificationsView extends StatelessWidget {
+  const _PaymentVerificationsView();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return BlocConsumer<PaymentVerificationsBloc, PaymentVerificationsState>(
+      listener: (context, state) {
+        // Load failures render inline; toast action failures.
+        if (state.error != null && state.payments.isNotEmpty) {
+          showAppToast(context, describeApiError(context, state.error),
+              error: true);
+        }
+      },
+      builder: (context, state) {
+        final bloc = context.read<PaymentVerificationsBloc>();
+        return PageBody(
+          onRefresh: () => reloadAndWait(bloc,
+              const PaymentVerificationsLoadRequested(), (s) => s.loading),
+          children: [
+            PageHeader(
+              icon: Icons.fact_check_outlined,
+              title: loc.adminPaymentVerificationsTitle,
+              subtitle: loc.adminPaymentVerificationsSubtitle,
+            ),
+            ManagementFilterChips<String>(
+              selected: state.statusFilter,
+              options: [
+                for (final s in const ['pending', 'approved', 'rejected'])
+                  (s, _statusText(loc, s)),
+              ],
+              onSelected: (status) => bloc.add(
+                  PaymentVerificationsStatusFilterChanged(status: status)),
+            ),
+            const SizedBox(height: 8),
+            ..._content(loc, bloc, state),
+          ],
+        );
+      },
     );
   }
 
-  Widget _paymentCard(BuildContext context, AppLocalizations loc,
-      PaymentVerificationsBloc bloc, AdminInstallmentPayment p) {
+  List<Widget> _content(AppLocalizations loc, PaymentVerificationsBloc bloc,
+      PaymentVerificationsState state) {
+    if (state.loading) return const [SkeletonLoader(lines: 4, height: 120)];
+    if (state.payments.isEmpty && state.error != null) {
+      return [
+        InlineError(
+          message: loc.adminPaymentVerificationsLoadError,
+          onRetry: () => bloc.add(const PaymentVerificationsLoadRequested()),
+        ),
+      ];
+    }
+    if (state.payments.isEmpty) {
+      return [
+        EmptyState(
+          message: loc.adminPaymentVerificationsEmpty,
+          icon: Icons.check_circle_outline,
+        ),
+      ];
+    }
+    return [
+      SectionTitle(
+        _statusText(loc, state.statusFilter),
+        trailing: StatusBadge(
+          kind: _statusKind(state.statusFilter),
+          label: '${state.payments.length}',
+        ),
+      ),
+      ManagementRecordGrid(
+        children: [
+          for (final p in state.payments)
+            _PaymentCard(payment: p, busy: state.busyId == p.id),
+        ],
+      ),
+    ];
+  }
+}
+
+enum _PaymentAction { approve, reject }
+
+class _PaymentCard extends StatefulWidget {
+  const _PaymentCard({required this.payment, required this.busy});
+
+  final AdminInstallmentPayment payment;
+  final bool busy;
+
+  @override
+  State<_PaymentCard> createState() => _PaymentCardState();
+}
+
+class _PaymentCardState extends State<_PaymentCard> {
+  _PaymentAction? _active;
+
+  bool _loading(_PaymentAction action) => widget.busy && _active == action;
+
+  void _approve() {
+    setState(() => _active = _PaymentAction.approve);
+    context
+        .read<PaymentVerificationsBloc>()
+        .add(PaymentVerificationsApproved(payment: widget.payment));
+  }
+
+  Future<void> _reject(AppLocalizations loc) async {
+    final bloc = context.read<PaymentVerificationsBloc>();
+    final p = widget.payment;
+    final reason = await showReasonDialog(
+      context,
+      title: loc.adminPaymentVerificationsRejectTitle,
+      summary:
+          '${p.memberName ?? '—'} · ${formatTaka(p.amount)} · ${p.transactionRef}',
+      label: loc.adminPaymentVerificationsReason,
+      hint: loc.adminPaymentVerificationsReasonPlaceholder,
+      cancelLabel: loc.adminPaymentVerificationsCancel,
+      confirmLabel: loc.adminPaymentVerificationsReject,
+      validator: (text) =>
+          text.length < 3 ? loc.adminPaymentVerificationsReason : null,
+    );
+    if (reason == null || reason.length < 3 || !mounted) return;
+    setState(() => _active = _PaymentAction.reject);
+    bloc.add(PaymentVerificationsRejected(payment: p, reason: reason));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final p = widget.payment;
     final months = p.installments
         .map((i) => '${monthLabelOf(loc, i.month)} ${i.year}')
         .join(', ');
-    final busy = _isBusy(bloc, p.id);
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${p.memberName ?? '—'} ${p.memberDisplayId ?? ''}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      Text(months,
-                          style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                ),
-                Text(
-                  formatTaka(p.amount, decimals: 0),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            InfoRow(
-                label: loc.adminPaymentVerificationsMethod, value: p.method),
-            InfoRow(
-                label: loc.adminPaymentVerificationsReference,
-                value: p.transactionRef),
-            InfoRow(
-                label: loc.adminPaymentVerificationsPaidOn, value: p.paidOn),
-            if (p.senderAccount != null && p.senderAccount!.isNotEmpty)
-              InfoRow(
-                  label: loc.adminPaymentVerificationsSender,
-                  value: p.senderAccount!),
-            if (p.note != null && p.note!.isNotEmpty) Text('"${p.note}"'),
-            if (p.rejectionReason != null && p.rejectionReason!.isNotEmpty)
-              Text(
-                p.rejectionReason!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            const SizedBox(height: 8),
-            Wrap(
-              alignment: WrapAlignment.end,
-              spacing: 8,
-              children: [
-                if (p.proofUrl != null)
-                  AppButton(
-                    label: loc.adminPaymentVerificationsViewProof,
-                    variant: AppButtonVariant.ghost,
-                    icon: Icons.visibility_outlined,
-                    onPressed: () => showImagePreview(
-                        context, p.proofUrl!, p.transactionRef),
-                  ),
-                if (p.status == 'pending') ...[
-                  AppButton(
-                    label: loc.adminPaymentVerificationsReject,
-                    variant: AppButtonVariant.danger,
-                    onPressed: busy
-                        ? null
-                        : () => _rejectDialog(context, loc, bloc, p),
-                  ),
-                  AppButton(
-                    label: loc.adminPaymentVerificationsApprove,
-                    icon: Icons.check,
-                    onPressed: busy
-                        ? null
-                        : () =>
-                            bloc.add(PaymentVerificationsApproved(payment: p)),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
+    final note = p.note;
+    final rejection = p.rejectionReason;
+    return ManagementRecordCard(
+      leading: ManagementAvatar(name: p.memberName ?? '?'),
+      title: '${p.memberName ?? '—'} ${p.memberDisplayId ?? ''}'.trim(),
+      subtitle: months,
+      badge: Text(
+        formatTaka(p.amount),
+        style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.primary, fontWeight: FontWeight.w700),
       ),
+      actions: _actions(loc),
+      children: [
+        InfoRow(label: loc.adminPaymentVerificationsMethod, value: p.method),
+        InfoRow(
+            label: loc.adminPaymentVerificationsReference,
+            value: p.transactionRef),
+        InfoRow(label: loc.adminPaymentVerificationsPaidOn, value: p.paidOn),
+        if (p.senderAccount != null && p.senderAccount!.isNotEmpty)
+          InfoRow(
+              label: loc.adminPaymentVerificationsSender,
+              value: p.senderAccount!),
+        if (note != null && note.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text('"$note"',
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(fontStyle: FontStyle.italic)),
+          ),
+        if (rejection != null && rejection.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: ManagementCallout(
+                message: rejection, icon: Icons.block_outlined, error: true),
+          ),
+      ],
     );
   }
 
-  bool _isBusy(PaymentVerificationsBloc bloc, int id) =>
-      bloc.state.busyId == id;
-
-  Future<void> _rejectDialog(BuildContext context, AppLocalizations loc,
-      PaymentVerificationsBloc bloc, AdminInstallmentPayment p) async {
-    final controller = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(loc.adminPaymentVerificationsRejectTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-                '${p.memberName ?? '—'} · ${formatTaka(p.amount, decimals: 0)} · ${p.transactionRef}'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              maxLines: 3,
-              maxLength: 500,
-              decoration: InputDecoration(
-                labelText: loc.adminPaymentVerificationsReason,
-                hintText: loc.adminPaymentVerificationsReasonPlaceholder,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
+  List<Widget> _actions(AppLocalizations loc) {
+    final p = widget.payment;
+    final busy = widget.busy;
+    return [
+      if (p.proofUrl != null)
+        AppButton(
+          label: loc.adminPaymentVerificationsViewProof,
+          variant: AppButtonVariant.ghost,
+          icon: Icons.visibility_outlined,
+          onPressed: () => showImagePreview(context, p.proofUrl!, p.transactionRef),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(loc.adminPaymentVerificationsCancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(loc.adminPaymentVerificationsReject),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !context.mounted) return;
-    final reason = controller.text.trim();
-    if (reason.length < 3) {
-      showAppToast(context, loc.adminPaymentVerificationsReason, error: true);
-      return;
-    }
-    bloc.add(PaymentVerificationsRejected(payment: p, reason: reason));
+      if (p.status == 'pending') ...[
+        AppButton(
+          label: loc.adminPaymentVerificationsReject,
+          variant: AppButtonVariant.danger,
+          icon: Icons.close,
+          loading: _loading(_PaymentAction.reject),
+          onPressed: busy ? null : () => _reject(loc),
+        ),
+        AppButton(
+          label: loc.adminPaymentVerificationsApprove,
+          icon: Icons.check,
+          loading: _loading(_PaymentAction.approve),
+          onPressed: busy ? null : _approve,
+        ),
+      ],
+    ];
   }
 }

@@ -86,6 +86,7 @@ class AppTheme {
     required Color outline,
     required Color error,
   }) {
+    final isDark = brightness == Brightness.dark;
     final colorScheme = ColorScheme(
       brightness: brightness,
       primary: primary,
@@ -96,8 +97,19 @@ class AppTheme {
       onError: Colors.white,
       surface: surface,
       onSurface: onSurface,
+      onSurfaceVariant: muted,
+      surfaceContainerLowest: surface,
+      surfaceContainerLow: surface,
+      surfaceContainer: scaffold,
+      surfaceContainerHigh: surface2,
       surfaceContainerHighest: surface2,
+      primaryContainer: isDark ? AppColors.emerald700 : AppColors.emerald50,
+      onPrimaryContainer: isDark ? AppColors.darkText : AppColors.emerald900,
+      secondaryContainer: isDark ? const Color(0xFF3A3220) : AppColors.amber50,
+      onSecondaryContainer: isDark ? AppColors.amber200 : AppColors.goldStrong,
       outline: outline,
+      outlineVariant: outline,
+      surfaceTint: Colors.transparent,
     );
 
     final base = ThemeData(
@@ -108,11 +120,26 @@ class AppTheme {
       fontFamily: fontFamilyBody,
     );
 
+    final text = base.textTheme.apply(bodyColor: onSurface, displayColor: onSurface);
+    final textTheme = text.copyWith(
+      headlineSmall: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700, height: 1.25),
+      titleLarge: text.titleLarge?.copyWith(fontWeight: FontWeight.w700, height: 1.3),
+      titleMedium: text.titleMedium?.copyWith(fontWeight: FontWeight.w600, height: 1.35),
+      titleSmall: text.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+      bodyLarge: text.bodyLarge?.copyWith(height: 1.5),
+      bodyMedium: text.bodyMedium?.copyWith(height: 1.5),
+      bodySmall: text.bodySmall?.copyWith(color: muted, height: 1.45),
+      labelLarge: text.labelLarge?.copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.2),
+    );
+    final navIndicator = isDark ? AppColors.emerald700 : AppColors.emerald50;
+
     return base.copyWith(
+      textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: primary,
         foregroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 2,
         centerTitle: false,
         titleTextStyle: const TextStyle(
           fontFamily: 'Tiro Bangla',
@@ -123,8 +150,9 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: surface,
-        elevation: 1,
-        shadowColor: Colors.black26,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
           side: BorderSide(color: outline),
@@ -210,6 +238,75 @@ class AppTheme {
         indicatorColor: secondary,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: primary),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surface,
+        indicatorColor: navIndicator,
+        surfaceTintColor: Colors.transparent,
+        elevation: 3,
+        height: 68,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (s) => IconThemeData(color: s.contains(WidgetState.selected) ? primary : muted),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (s) => TextStyle(
+            fontSize: 12,
+            fontWeight: s.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
+            color: s.contains(WidgetState.selected) ? primary : muted,
+          ),
+        ),
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: surface,
+        indicatorColor: navIndicator,
+        selectedIconTheme: IconThemeData(color: primary),
+        unselectedIconTheme: IconThemeData(color: muted),
+        selectedLabelTextStyle:
+            TextStyle(color: primary, fontWeight: FontWeight.w700, fontSize: 13),
+        unselectedLabelTextStyle: TextStyle(color: muted, fontSize: 13),
+      ),
+      drawerTheme: DrawerThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.horizontal(right: Radius.circular(AppRadius.lg)),
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: muted,
+        selectedColor: primary,
+        selectedTileColor: navIndicator,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: secondary,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        constraints: const BoxConstraints(maxWidth: 640),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: SegmentedButton.styleFrom(
+          selectedBackgroundColor: navIndicator,
+          selectedForegroundColor: primary,
+          side: BorderSide(color: outline),
+        ),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: onSurface,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+        ),
+        textStyle: TextStyle(color: scaffold, fontSize: 12),
+      ),
     );
   }
 }

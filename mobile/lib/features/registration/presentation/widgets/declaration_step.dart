@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,42 +25,53 @@ class DeclarationStep extends StatelessWidget {
     final state = context.watch<RegistrationBloc>().state;
     final bloc = context.read<RegistrationBloc>();
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
 
     final declarationError = findError(state.stepErrors, RegErrorKind.declarationRequired) != null;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        RegTextField(
-          label: l10n.registrationHeaderSubmissionDateLabel,
-          value: state.form.submissionDate,
-          readOnly: true,
-          onChanged: (_) {},
+        RegSectionTitle(text: l10n.registrationStepTitlesDeclarationAndSignature),
+        RegSectionCard(
+          child: RegTextField(
+            label: l10n.registrationHeaderSubmissionDateLabel,
+            value: state.form.submissionDate,
+            readOnly: true,
+            prefixIcon: Icons.event_outlined,
+            onChanged: (_) {},
+          ),
         ),
-        const SizedBox(height: 12),
-        const _SignaturePad(),
-        const SizedBox(height: 12),
-        AppCard(
+        const RegSectionCard(child: _SignaturePad()),
+        RegSectionCard(
+          title: l10n.registrationDeclarationTitle,
+          icon: Icons.gavel_outlined,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(text: '${l10n.registrationDeclarationTitle}: ', style: const TextStyle(fontWeight: FontWeight.w700)),
-                    TextSpan(text: l10n.registrationDeclarationText),
-                  ],
+              Text(l10n.registrationDeclarationText, style: theme.textTheme.bodyMedium),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: declarationError ? theme.colorScheme.error : theme.colorScheme.outline,
+                  ),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: RegCheckboxRow(
+                  value: state.form.declarationAccepted,
+                  label: l10n.registrationDeclarationConsentLabel,
+                  onChanged: (v) => bloc.add(DeclarationToggled(v)),
                 ),
               ),
-              RegCheckboxRow(
-                value: state.form.declarationAccepted,
-                label: l10n.registrationDeclarationConsentLabel,
-                onChanged: (v) => bloc.add(DeclarationToggled(v)),
-              ),
               if (declarationError)
-                Text(
-                  l10n.registrationDeclarationConsentRequired,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    l10n.registrationDeclarationConsentRequired,
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                  ),
                 ),
             ],
           ),
@@ -79,34 +91,51 @@ class _SignaturePad extends StatefulWidget {
 }
 
 class _SignaturePadState extends State<_SignaturePad> {
+  static const double _padHeight = 180;
+
   final _boundaryKey = GlobalKey();
   final List<List<Offset>> _strokes = [];
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final hasSignature = context.watch<RegistrationBloc>().state.form.memberSignature.isNotEmpty;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        RegLabel(
-          text: l10n.registrationSignatureSectionTitle,
-          child: Text(l10n.registrationSignatureHint, style: Theme.of(context).textTheme.bodySmall),
+        Row(
+          children: [
+            Expanded(child: RegLabel(text: l10n.registrationSignatureSectionTitle)),
+            if (hasSignature)
+              StatusBadge(kind: StatusKind.approved, label: l10n.registrationSignatureSavedButton),
+          ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
+        Text(l10n.registrationSignatureHint, style: theme.textTheme.bodySmall),
+        const SizedBox(height: 8),
         Container(
-          height: 160,
+          height: _padHeight,
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: theme.colorScheme.outline, width: 1.5),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
             color: Colors.white,
           ),
-          child: GestureDetector(
-            onPanStart: (d) => setState(() => _strokes.add([d.localPosition])),
-            onPanUpdate: (d) => setState(() => _strokes.last.add(d.localPosition)),
+          // Claims the pointer on touch-down so vertical strokes draw instead
+          // of scrolling the surrounding form.
+          child: RawGestureDetector(
+            gestures: {
+              _EagerPanRecognizer: GestureRecognizerFactoryWithHandlers<_EagerPanRecognizer>(
+                () => _EagerPanRecognizer(debugOwner: this),
+                (recognizer) {
+                  recognizer.onStart = (d) => setState(() => _strokes.add([d.localPosition]));
+                  recognizer.onUpdate = (d) => setState(() => _strokes.last.add(d.localPosition));
+                },
+              ),
+            },
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(7),
+              borderRadius: BorderRadius.circular(AppRadius.sm - 1),
               child: RepaintBoundary(
                 key: _boundaryKey,
                 child: CustomPaint(
@@ -117,15 +146,22 @@ class _SignaturePadState extends State<_SignaturePad> {
             ),
           ),
         ),
-        Row(
+        const SizedBox(height: 8),
+        OverflowBar(
+          alignment: MainAxisAlignment.spaceBetween,
+          overflowAlignment: OverflowBarAlignment.end,
+          overflowSpacing: 8,
           children: [
-            TextButton(
-              onPressed: () => setState(() => _strokes.clear()),
-              child: Text(l10n.registrationSignatureClearButton),
+            TextButton.icon(
+              icon: const Icon(Icons.restart_alt, size: 18),
+              onPressed: _strokes.isEmpty ? null : () => setState(() => _strokes.clear()),
+              label: Text(l10n.registrationSignatureClearButton),
             ),
-            const Spacer(),
             AppButton(
-              label: hasSignature ? l10n.registrationSignatureSavedButton : l10n.registrationSignatureSaveButton,
+              label: hasSignature
+                  ? l10n.registrationSignatureSavedButton
+                  : l10n.registrationSignatureSaveButton,
+              icon: hasSignature ? Icons.check_circle_outline : Icons.draw_outlined,
               onPressed: _strokes.isEmpty ? null : () => _save(context),
               variant: AppButtonVariant.secondary,
             ),
@@ -148,6 +184,17 @@ class _SignaturePadState extends State<_SignaturePad> {
 
     if (!context.mounted) return;
     context.read<RegistrationBloc>().add(SignatureSaved(file.path));
+  }
+}
+
+/// Pan recognizer that wins the gesture arena immediately on pointer down.
+class _EagerPanRecognizer extends PanGestureRecognizer {
+  _EagerPanRecognizer({super.debugOwner});
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    resolve(GestureDisposition.accepted);
   }
 }
 

@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +12,7 @@ import '../domain/admin_entities.dart';
 import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/submission_detail_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
+import '../presentation/widgets/submission_detail_widgets.dart';
 import 'submissions_list_page.dart';
 
 /// Full submission review (Angular submission-detail): every section of the
@@ -31,7 +31,8 @@ class SubmissionDetailPage extends StatelessWidget {
     final id =
         this.id ?? (ModalRoute.of(context)?.settings.arguments as String?);
     if (id == null) {
-      return EmptyState(message: loc.commonNoData);
+      return EmptyState(
+          message: loc.commonNoData, icon: Icons.assignment_late_outlined);
     }
     return BlocProvider(
       create: (_) => SubmissionDetailBloc(
@@ -42,19 +43,6 @@ class SubmissionDetailPage extends StatelessWidget {
     );
   }
 }
-
-String _joinAddress(
-  String? house,
-  String? road,
-  String? po,
-  String? up,
-  String? dist,
-  String? div,
-) =>
-    [house, road, po, up, dist, div]
-        .whereType<String>()
-        .where((e) => e.isNotEmpty)
-        .join(', ');
 
 class _SubmissionDetailView extends StatelessWidget {
   const _SubmissionDetailView();
@@ -72,7 +60,7 @@ class _SubmissionDetailView extends StatelessWidget {
       builder: (context, state) {
         final bloc = context.read<SubmissionDetailBloc>();
         if (state.loading) {
-          return const SkeletonLoader(lines: 8);
+          return const SkeletonLoader(lines: 8, height: 88);
         }
         if (state.error != null) {
           return InlineError(
@@ -80,555 +68,188 @@ class _SubmissionDetailView extends StatelessWidget {
               onRetry: () => bloc.add(const SubmissionDetailLoadRequested()));
         }
         final s = state.submission;
-        if (s == null) return EmptyState(message: loc.commonNoData);
-
-        final reviewMode = s.status == SubmissionStatus.pending;
-        return ListView(
+        if (s == null) {
+          return EmptyState(
+              message: loc.commonNoData, icon: Icons.assignment_late_outlined);
+        }
+        final body = PageBody(
+          onRefresh: () => reloadAndWait(
+              bloc, const SubmissionDetailLoadRequested(), (st) => st.loading),
+          children: _content(context, loc, bloc, state, s),
+        );
+        if (s.status != SubmissionStatus.pending) return body;
+        return Column(
           children: [
-            PageHeader(
-              title: loc.adminSubmissionDetailTitle,
-              subtitle: s.fullName,
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: StatusBadge(
-                    kind: switch (s.status) {
-                      SubmissionStatus.pending => StatusKind.pending,
-                      SubmissionStatus.approved => StatusKind.approved,
-                      SubmissionStatus.rejected => StatusKind.rejected,
-                      _ => StatusKind.neutral,
-                    },
-                    label: statusLabel(loc, s.status),
-                  ),
-                ),
-              ],
-            ),
-            if (state.rejectionNotice != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Card(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(loc.adminSubmissionDetailErrorsRejectEmailFailed),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: AppButton(
-                            label: loc.adminSubmissionDetailResendButton,
-                            variant: AppButtonVariant.secondary,
-                            onPressed: state.busy
-                                ? null
-                                : () => bloc.add(
-                                    const SubmissionDetailResendNotificationRequested()),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            _personalSection(context, loc, s),
-            _addressSection(context, loc, s),
-            _emergencySection(context, loc, s),
-            _attachmentsSection(context, loc, s, bloc, state.busy),
-            _propertiesSection(context, loc, s, bloc, state.busy),
-            _nomineesSection(context, loc, s),
-            _paymentSection(context, loc, s),
-            if (s.rejectionReason != null && s.rejectionReason!.isNotEmpty)
-              AppCard(
-                title: loc.adminSubmissionDetailFieldsRejectionReason,
-                child: Text(s.rejectionReason!),
-              ),
-            if (reviewMode) _reviewActions(context, loc, bloc, state.busy),
-            const SizedBox(height: 32),
+            Expanded(child: body),
+            _ReviewActionBar(
+                bloc: bloc, busy: state.busy, applicantName: s.fullName),
           ],
         );
       },
     );
   }
 
-  Widget _personalSection(
-      BuildContext context, AppLocalizations loc, SubmissionDetail s) {
-    return AppCard(
-      title: loc.adminSubmissionDetailPersonalInfo,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsName, value: s.fullName),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsFatherOrHusband,
-              value: s.fatherOrHusband),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsMother, value: s.mother),
-          InfoRow(label: loc.adminSubmissionDetailFieldsDob, value: s.dob),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsNationality,
-              value: s.nationality),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsOccupation,
-              value: s.occupation),
-          InfoRow(label: loc.adminSubmissionDetailFieldLabelsNid, value: s.nid),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsGender, value: s.gender),
-          InfoRow(label: loc.adminSubmissionDetailFieldsEmail, value: s.email),
-          if (s.memberId != null)
-            InfoRow(label: loc.adminMemberDetailFMemberId, value: s.memberId!),
-        ],
-      ),
-    );
-  }
-
-  Widget _addressSection(
-      BuildContext context, AppLocalizations loc, SubmissionDetail s) {
-    return AppCard(
-      title: loc.adminSubmissionDetailFieldsAddress,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InfoRow(
-            label: loc.adminSubmissionDetailPermanentAddress,
-            value: _joinAddress(
-                s.permanentHouse,
-                s.permanentRoad,
-                s.permanentPostOffice,
-                s.permanentUpazila,
-                s.permanentDistrict,
-                s.permanentDivision),
-          ),
-          InfoRow(
-            label: loc.adminSubmissionDetailCurrentAddress,
-            value: _joinAddress(
-                s.currentHouse,
-                s.currentRoad,
-                s.currentPostOffice,
-                s.currentUpazila,
-                s.currentDistrict,
-                s.currentDivision),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _emergencySection(
-      BuildContext context, AppLocalizations loc, SubmissionDetail s) {
-    final name = s.urgentContactName;
-    if (name == null || name.isEmpty) return const SizedBox.shrink();
-    return AppCard(
-      title: loc.adminSubmissionDetailUrgentContact,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InfoRow(label: loc.adminSubmissionDetailFieldsName, value: name),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsRelation,
-              value: s.urgentContactRelation ?? ''),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsMobile,
-              value: s.urgentContactMobile ?? ''),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsAddress,
-              value: s.urgentContactAddress ?? ''),
-        ],
-      ),
-    );
-  }
-
-  Widget _attachmentsSection(BuildContext context, AppLocalizations loc,
-      SubmissionDetail s, SubmissionDetailBloc bloc, bool busy) {
-    Widget preview(String? url, String label) {
-      if (url == null || url.isEmpty) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Text(
-            loc.adminSubmissionDetailNoAttachment,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        );
-      }
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: GestureDetector(
-          onTap: () => showImagePreview(context, url, label),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              url,
-              height: 140,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  Text(loc.adminSubmissionDetailFileMissing),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return AppCard(
-      title: loc.adminSubmissionDetailAttachments,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          preview(s.memberPhotoUrl, loc.adminSubmissionDetailFieldsMemberPhoto),
-          _replaceButton(
-            context,
-            '${loc.adminSubmissionDetailUploadAgain} — ${loc.adminSubmissionDetailFieldsMemberPhoto}',
-            enabled: !busy,
-            imagesOnly: true,
-            onPicked: (path) => bloc.add(
-                SubmissionDetailAttachmentReplaceRequested(
-                    'member_photo', path)),
-          ),
-          preview(
-              s.receiptPhotoUrl, loc.adminSubmissionDetailFieldsReceiptPhoto),
-          _replaceButton(
-            context,
-            '${loc.adminSubmissionDetailUploadAgain} — ${loc.adminSubmissionDetailFieldsReceiptPhoto}',
-            enabled: !busy,
-            imagesOnly: true,
-            onPicked: (path) => bloc.add(
-                SubmissionDetailAttachmentReplaceRequested(
-                    'receipt_photo', path)),
-          ),
-          if (s.memberSignature != null && s.memberSignature!.isNotEmpty)
-            InfoRow(
-                label: loc.adminSubmissionDetailFieldsMemberSignature,
-                value: s.memberSignature!),
-        ],
-      ),
-    );
-  }
-
-  Widget _replaceButton(
-    BuildContext context,
-    String label, {
-    required bool enabled,
-    required bool imagesOnly,
-    required ValueChanged<String> onPicked,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: AppButton(
-        label: label,
-        variant: AppButtonVariant.ghost,
-        onPressed: enabled
-            ? () async {
-                final result = await FilePicker.platform.pickFiles(
-                  type: imagesOnly ? FileType.image : FileType.any,
-                );
-                final path = result?.files.single.path;
-                if (path != null && context.mounted) onPicked(path);
-              }
-            : null,
-      ),
-    );
-  }
-
-  Widget _propertiesSection(BuildContext context, AppLocalizations loc,
-      SubmissionDetail s, SubmissionDetailBloc bloc, bool busy) {
-    if (s.properties.isEmpty) {
-      return AppCard(
-        title: loc.adminSubmissionDetailProperties,
-        child: Text(loc.adminSubmissionDetailNoProperties),
-      );
-    }
-    return AppCard(
-      title:
-          '${loc.adminSubmissionDetailProperties} (${loc.adminSubmissionDetailPropertyCount(s.properties.length)})',
-      child: Column(
-        children: [
-          for (final p in s.properties)
-            _PropertyTile(property: p, bloc: bloc, busy: busy),
-        ],
-      ),
-    );
-  }
-
-  Widget _nomineesSection(
-      BuildContext context, AppLocalizations loc, SubmissionDetail s) {
-    if (s.nominees.isEmpty) {
-      return AppCard(
-        title: loc.adminSubmissionDetailNominees,
-        child: Text(loc.adminSubmissionDetailNoNominees),
-      );
-    }
-    num shareTotal = 0;
-    var shareDeclared = false;
-    for (final n in s.nominees) {
-      final share = n.sharePercentage;
-      if (share != null) {
-        shareDeclared = true;
-        shareTotal += share;
-      }
-    }
-    return AppCard(
-      title:
-          '${loc.adminSubmissionDetailNominees} (${loc.adminSubmissionDetailNomineeCount(s.nominees.length)})',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final n in s.nominees) ...[
-            InfoRow(label: loc.adminSubmissionDetailFieldsName, value: n.name),
-            InfoRow(
-                label: loc.adminSubmissionDetailFieldsRelation,
-                value: n.relation),
-            InfoRow(
-                label: loc.adminSubmissionDetailFieldsMobile, value: n.mobile),
-            if (n.sharePercentage != null)
-              InfoRow(
-                label: loc.adminSubmissionDetailFieldLabelsPercentage,
-                value: '${n.sharePercentage}%',
-              ),
-            const Divider(height: 16),
-          ],
-          if (shareDeclared)
-            InfoRow(
-              label: loc.adminSubmissionDetailFieldLabelsPercentage,
-              value: loc.adminSubmissionDetailShareTotal(shareTotal),
-            ),
-          if (shareDeclared && shareTotal.round() != 100)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                loc.adminSubmissionDetailShareWarning(shareTotal),
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _paymentSection(
-      BuildContext context, AppLocalizations loc, SubmissionDetail s) {
-    return AppCard(
-      title: loc.adminSubmissionDetailPaymentSummary,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsAdmissionFee,
-              value: s.admissionFee),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsSubscription,
-              value: s.subscription),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsReceiptNo,
-              value: s.receiptNo),
-          InfoRow(
-              label: loc.adminSubmissionDetailFieldsPaymentMethod,
-              value: s.paymentMethod),
-        ],
-      ),
-    );
-  }
-
-  Widget _reviewActions(BuildContext context, AppLocalizations loc,
-      SubmissionDetailBloc bloc, bool busy) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: AppButton(
-              label: loc.adminSubmissionDetailApproveButton,
-              icon: Icons.check,
-              expanded: true,
-              onPressed: busy
-                  ? null
-                  : () async {
-                      final confirmed = await confirmDialog(
-                        context,
-                        title: loc.adminSubmissionDetailApproveModalTitle,
-                        message:
-                            loc.adminSubmissionDetailApproveModalMessageSuffix,
-                        confirmLabel:
-                            loc.adminSubmissionDetailApproveModalConfirmLabel,
-                      );
-                      if (confirmed && context.mounted) {
-                        final ok = await dispatchForBool(
-                            bloc,
-                            (c) =>
-                                SubmissionDetailApproveRequested(completer: c));
-                        if (ok && context.mounted) context.go('/submissions');
-                      }
-                    },
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: AppButton(
-              label: loc.adminSubmissionDetailRejectButton,
-              variant: AppButtonVariant.danger,
-              icon: Icons.close,
-              expanded: true,
-              onPressed:
-                  busy ? null : () => _openRejectDialog(context, loc, bloc),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _openRejectDialog(BuildContext context, AppLocalizations loc,
-      SubmissionDetailBloc bloc) async {
-    final controller = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(loc.adminSubmissionDetailRejectModalTitle),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          maxLength: 500,
-          decoration: InputDecoration(
-            hintText: loc.adminSubmissionDetailRejectModalPlaceholder,
-            border: const OutlineInputBorder(),
-          ),
-        ),
+  List<Widget> _content(BuildContext context, AppLocalizations loc,
+      SubmissionDetailBloc bloc, SubmissionDetailState state,
+      SubmissionDetail s) {
+    final rejection = s.rejectionReason;
+    return [
+      PageHeader(
+        icon: Icons.assignment_ind_outlined,
+        title: loc.adminSubmissionDetailTitle,
+        subtitle: s.fullName,
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(loc.commonCancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(loc.adminSubmissionDetailRejectModalConfirmLabel),
+          StatusBadge(
+            kind: submissionStatusKind(s.status),
+            label: statusLabel(loc, s.status),
           ),
         ],
       ),
-    );
-    if (confirmed != true) return;
-    final reason = controller.text.trim();
-    if (reason.isEmpty) {
-      if (context.mounted) {
-        showAppToast(context, loc.adminSubmissionDetailErrorsReasonRequired,
-            error: true);
-      }
-      return;
-    }
-    final emailSent = await dispatchForBool(
-        bloc, (c) => SubmissionDetailRejectRequested(reason, completer: c));
-    if (emailSent && context.mounted) context.go('/submissions');
+      DetailSectionsPadding(
+        child: ManagementTwoPane(
+          primary: [
+            if (state.rejectionNotice != null)
+              _ResendNotice(bloc: bloc, busy: state.busy),
+            if (rejection != null && rejection.isNotEmpty)
+              ManagementSectionCard(
+                title: loc.adminSubmissionDetailFieldsRejectionReason,
+                icon: Icons.block_outlined,
+                child: Text(rejection),
+              ),
+            SubmissionPersonalCard(submission: s),
+            SubmissionAddressCard(submission: s),
+            SubmissionEmergencyCard(submission: s),
+            SubmissionPaymentCard(submission: s),
+          ],
+          secondary: [
+            SubmissionAttachmentsCard(
+              submission: s,
+              busy: state.busy,
+              onReplace: (kind, path) => bloc
+                  .add(SubmissionDetailAttachmentReplaceRequested(kind, path)),
+            ),
+            SubmissionPropertiesCard(
+              submission: s,
+              busy: state.busy,
+              onReplaceDocument: (docId, path) => bloc
+                  .add(SubmissionDetailDocumentReplaceRequested(docId, path)),
+            ),
+            SubmissionNomineesCard(submission: s),
+          ],
+        ),
+      ),
+    ];
   }
 }
 
-class _PropertyTile extends StatelessWidget {
-  const _PropertyTile(
-      {required this.property, required this.bloc, required this.busy});
+/// Rejected, but the applicant email failed: offer a resend.
+class _ResendNotice extends StatelessWidget {
+  const _ResendNotice({required this.bloc, required this.busy});
 
-  final SubmissionProperty property;
   final SubmissionDetailBloc bloc;
   final bool busy;
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final docs = property.applicableDocs;
-    final types = [
-      ...property.propertyType,
-      if (property.propertyTypeOther?.trim().isNotEmpty == true)
-        property.propertyTypeOther!.trim(),
-    ];
-    return ExpansionTile(
-      tilePadding: EdgeInsets.zero,
-      childrenPadding: const EdgeInsets.only(bottom: 8),
-      title: Text(
-        types.isEmpty
-            ? loc.adminSubmissionDetailPropertyCardTitle
-            : types.join(', '),
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall
-            ?.copyWith(fontWeight: FontWeight.w600),
-      ),
-      subtitle: Text(
-        [
-          if (property.khatianNo?.isNotEmpty == true)
-            '${loc.adminSubmissionDetailFieldLabelsKhatianNo} ${property.khatianNo}',
-          if (property.landQuantity?.isNotEmpty == true)
-            '${loc.adminSubmissionDetailFieldLabelsLandQuantity} ${property.landQuantity}',
-          if (property.ownership?.isNotEmpty == true) property.ownership!,
-        ].join(' · '),
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (property.dagNoCs?.isNotEmpty == true)
-                InfoRow(
-                    label: loc.adminSubmissionDetailFieldLabelsDagNoCs,
-                    value: property.dagNoCs!),
-              if (property.dagNoRs?.isNotEmpty == true)
-                InfoRow(
-                    label: loc.adminSubmissionDetailFieldLabelsDagNoRs,
-                    value: property.dagNoRs!),
-              if (property.holdingNumber?.isNotEmpty == true)
-                InfoRow(
-                    label: loc.adminSubmissionDetailFieldLabelsHoldingNumber,
-                    value: property.holdingNumber!),
-              if (property.myShareQuantity?.isNotEmpty == true)
-                InfoRow(
-                    label: loc.adminSubmissionDetailFieldLabelsMyShareQuantity,
-                    value: property.myShareQuantity!),
-              if (property.jointOwnerCount != null)
-                InfoRow(
-                    label: loc.adminSubmissionDetailJointOwnerCountLabel,
-                    value: '${property.jointOwnerCount}'),
-              const SizedBox(height: 8),
-              Text(
-                docs.isEmpty
-                    ? loc.adminSubmissionDetailNoApplicableDocs
-                    : loc.adminSubmissionDetailApplicableDocs,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              for (final doc in docs)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  leading: const Icon(Icons.description_outlined),
-                  title: Text(doc.docType),
-                  subtitle: doc.fileUrl == null
-                      ? Text(loc.adminSubmissionDetailFileMissing)
-                      : null,
-                  trailing: IconButton(
-                    icon: Icon(doc.fileUrl == null
-                        ? Icons.upload_file_outlined
-                        : Icons.visibility_outlined),
-                    tooltip: doc.fileUrl == null
-                        ? loc.adminSubmissionDetailReplaceFile
-                        : loc.adminSubmissionDetailView,
-                    onPressed: busy
-                        ? null
-                        : () async {
-                            if (doc.fileUrl != null) {
-                              showImagePreview(
-                                  context, doc.fileUrl!, doc.docType);
-                              return;
-                            }
-                            final result = await FilePicker.platform
-                                .pickFiles(type: FileType.any);
-                            final path = result?.files.single.path;
-                            if (path != null) {
-                              bloc.add(SubmissionDetailDocumentReplaceRequested(
-                                  doc.id, path));
-                            }
-                          },
-                  ),
-                ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: ManagementCallout(
+        message: loc.adminSubmissionDetailErrorsRejectEmailFailed,
+        icon: Icons.mark_email_unread_outlined,
+        error: true,
+        action: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: AppButton(
+            label: loc.adminSubmissionDetailResendButton,
+            icon: Icons.send_outlined,
+            variant: AppButtonVariant.secondary,
+            loading: busy,
+            onPressed: () =>
+                bloc.add(const SubmissionDetailResendNotificationRequested()),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _ReviewAction { approve, reject }
+
+/// Sticky approve (primary) / reject (danger) bar shown in review mode.
+class _ReviewActionBar extends StatefulWidget {
+  const _ReviewActionBar({
+    required this.bloc,
+    required this.busy,
+    required this.applicantName,
+  });
+
+  final SubmissionDetailBloc bloc;
+  final bool busy;
+  final String applicantName;
+
+  @override
+  State<_ReviewActionBar> createState() => _ReviewActionBarState();
+}
+
+class _ReviewActionBarState extends State<_ReviewActionBar> {
+  _ReviewAction? _active;
+
+  bool _isLoading(_ReviewAction action) => widget.busy && _active == action;
+
+  Future<void> _approve(AppLocalizations loc) async {
+    final confirmed = await confirmDialog(
+      context,
+      title: loc.adminSubmissionDetailApproveModalTitle,
+      message:
+          '${widget.applicantName} ${loc.adminSubmissionDetailApproveModalMessageSuffix}',
+      confirmLabel: loc.adminSubmissionDetailApproveModalConfirmLabel,
+    );
+    if (!confirmed || !mounted) return;
+    setState(() => _active = _ReviewAction.approve);
+    final ok = await dispatchForBool(widget.bloc,
+        (c) => SubmissionDetailApproveRequested(completer: c));
+    if (ok && mounted) context.go('/submissions');
+  }
+
+  Future<void> _reject(AppLocalizations loc) async {
+    final reason = await showReasonDialog(
+      context,
+      title: loc.adminSubmissionDetailRejectModalTitle,
+      summary:
+          '${widget.applicantName}${loc.adminSubmissionDetailRejectModalMessageSuffix}',
+      hint: loc.adminSubmissionDetailRejectModalPlaceholder,
+      confirmLabel: loc.adminSubmissionDetailRejectModalConfirmLabel,
+      validator: (text) =>
+          text.isEmpty ? loc.adminSubmissionDetailErrorsReasonRequired : null,
+    );
+    if (reason == null || reason.isEmpty || !mounted) return;
+    setState(() => _active = _ReviewAction.reject);
+    final emailSent = await dispatchForBool(widget.bloc,
+        (c) => SubmissionDetailRejectRequested(reason, completer: c));
+    if (emailSent && mounted) context.go('/submissions');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final busy = widget.busy;
+    return ManagementActionBar(
+      children: [
+        AppButton(
+          label: loc.adminSubmissionDetailRejectButton,
+          variant: AppButtonVariant.danger,
+          icon: Icons.close,
+          expanded: true,
+          loading: _isLoading(_ReviewAction.reject),
+          onPressed: busy ? null : () => _reject(loc),
+        ),
+        AppButton(
+          label: loc.adminSubmissionDetailApproveButton,
+          icon: Icons.check,
+          expanded: true,
+          loading: _isLoading(_ReviewAction.approve),
+          onPressed: busy ? null : () => _approve(loc),
         ),
       ],
     );

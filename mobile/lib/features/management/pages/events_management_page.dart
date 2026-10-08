@@ -9,6 +9,8 @@ import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
 import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/events_bloc.dart';
+import '../presentation/widgets/content_management_widgets.dart';
+import '../presentation/widgets/management_page_kit.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'notices_management_page.dart' show datetimeParts, isoFromParts;
 
@@ -35,407 +37,308 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
           EventsBloc(repository: AdminRepository(apiClient: sl<ApiClient>()))
             ..add(const EventsInitRequested()),
       child: BlocConsumer<EventsBloc, ContentListState<EventItem>>(
+        listenWhen: (a, b) => a.saveError != b.saveError,
         listener: (context, state) {
           if (state.saveError != null) {
             showAppToast(context, loc.adminEventsErrorsSaveFailed, error: true);
           }
-          if (state.error != null) {
-            showAppToast(context, loc.adminEventsErrorsLoadFailed, error: true);
-          }
         },
-        builder: (context, state) {
-          final bloc = context.read<EventsBloc>();
-          return ListView(
-            children: [
-              PageHeader(
-                  title: loc.adminEventsTitle,
-                  subtitle: loc.adminEventsSubtitle),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: AppTabs(
-                  labels: [
-                    loc.adminEventsFiltersAll,
-                    loc.adminEventsFiltersPublished,
-                    loc.adminEventsFiltersDraft,
-                  ],
-                  selectedIndex: state.publishedFilter == null
-                      ? 0
-                      : state.publishedFilter == true
-                          ? 1
-                          : 2,
-                  onChanged: (index) =>
-                      bloc.add(EventsStatusFilterChanged(index)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: DropdownButtonFormField<String?>(
-                  initialValue: state.categoryFilter,
-                  decoration: InputDecoration(
-                    labelText: loc.adminEventsFiltersCategory,
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text(loc.adminEventsFiltersAllCategories),
-                    ),
-                    for (final c in state.categories)
-                      DropdownMenuItem<String?>(
-                          value: c.id, child: Text(c.label)),
-                  ],
-                  onChanged: (categoryId) =>
-                      bloc.add(EventsCategoryFilterChanged(categoryId)),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: AppButton(
-                  label: loc.adminEventsCreate,
-                  icon: Icons.add,
-                  onPressed: () => _openForm(context, loc, bloc),
-                ),
-              ),
-              if (state.loading)
-                const SkeletonLoader(lines: 4)
-              else if (state.items.isEmpty)
-                EmptyState(message: loc.adminEventsNoItems)
-              else
-                AppDataTableCards<EventItem>(
-                  items: state.items,
-                  rowBuilder: (context, e) => _row(context, loc, bloc, e),
-                ),
-              const SizedBox(height: 32),
-            ],
-          );
-        },
+        builder: (context, state) => _buildScaffold(context, state),
       ),
     );
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, EventsBloc bloc,
-      EventItem e) {
-    String categoryLabel(String? categoryId) {
-      if (categoryId == null) return '—';
-      for (final c in bloc.state.categories) {
-        if (c.id == categoryId) return c.label;
-      }
-      return '—';
-    }
-
-    final startParts = datetimeParts(e.startAt);
-    final endParts = datetimeParts(e.endAt);
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    e.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                StatusBadge(
-                  kind:
-                      e.isPublished ? StatusKind.approved : StatusKind.neutral,
-                  label: e.isPublished
-                      ? loc.adminEventsStatusPublished
-                      : loc.adminEventsStatusDraft,
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            InfoRow(
-                label: loc.adminEventsTableCategory,
-                value: categoryLabel(e.categoryId)),
-            InfoRow(
-              label: loc.adminEventsTableWhen,
-              value:
-                  '${startParts.$1} ${startParts.$2}${endParts.$1.isEmpty ? '' : ' → ${endParts.$1} ${endParts.$2}'}',
-            ),
-            if (e.location != null && e.location!.isNotEmpty)
-              InfoRow(label: loc.adminEventsTableLocation, value: e.location!),
-            if (e.isMembersOnly)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: StatusBadge(
-                  kind: StatusKind.pending,
-                  label: loc.adminEventsMembersOnlyBadge,
-                ),
-              ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                AppButton(
-                  label: e.isPublished
-                      ? loc.adminEventsUnpublish
-                      : loc.adminEventsPublish,
-                  variant: AppButtonVariant.ghost,
-                  onPressed: bloc.state.busyId == e.id
-                      ? null
-                      : () => bloc.add(EventPublishToggled(e)),
-                ),
-                AppButton(
-                  label: loc.commonEdit,
-                  variant: AppButtonVariant.ghost,
-                  onPressed: () => _openForm(context, loc, bloc, editing: e),
-                ),
-                AppButton(
-                  label: loc.commonDelete,
-                  variant: AppButtonVariant.ghost,
-                  onPressed: () async {
-                    final confirmed = await confirmDialog(
-                      context,
-                      title: loc.adminEventsDeleteModalTitle,
-                      message: loc.adminEventsDeleteModalMessageSuffix,
-                      destructive: true,
-                    );
-                    if (confirmed && context.mounted) {
-                      bloc.add(EventDeleteRequested(e));
-                    }
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
+  Widget _buildScaffold(BuildContext context, ContentListState<EventItem> state) {
+    final loc = AppLocalizations.of(context);
+    final bloc = context.read<EventsBloc>();
+    return Scaffold(
+      floatingActionButton: AddFab(
+        label: loc.adminEventsCreate,
+        onPressed: () => _openForm(context, bloc),
       ),
-    );
-  }
-
-  Future<void> _openForm(
-      BuildContext context, AppLocalizations loc, EventsBloc bloc,
-      {EventItem? editing}) async {
-    final titleController = TextEditingController(text: editing?.title ?? '');
-    final descriptionController =
-        TextEditingController(text: editing?.description ?? '');
-    final locationController =
-        TextEditingController(text: editing?.location ?? '');
-    var categoryId = editing?.categoryId ?? '';
-    final startParts = datetimeParts(editing?.startAt);
-    var startDate = startParts.$1;
-    var startTime = startParts.$2;
-    final endParts = datetimeParts(editing?.endAt);
-    var endDate = endParts.$1;
-    var endTime = endParts.$2;
-    var published = editing?.isPublished ?? false;
-    var membersOnly = editing?.isMembersOnly ?? false;
-
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 16,
+      body: PageBody(
+        padding: const EdgeInsets.only(bottom: kFabClearance),
+        onRefresh: () => reloadAndWait<EventsEvent, ContentListState<EventItem>>(
+          bloc,
+          const EventsLoadRequested(),
+          (s) => s.loading,
         ),
-        child: StatefulBuilder(
-          builder: (sheetContext, setSheetState) => SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  editing == null
-                      ? loc.adminEventsFormCreateTitle
-                      : loc.adminEventsFormEditTitle,
-                  style: Theme.of(sheetContext).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: loc.adminEventsFormTitle,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: descriptionController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: loc.adminEventsFormDescription,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: locationController,
-                  decoration: InputDecoration(
-                    labelText: loc.adminEventsFormLocation,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: categoryId.isEmpty ? null : categoryId,
-                  decoration: InputDecoration(
-                    labelText: loc.adminEventsFormCategory,
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Text(loc.adminEventsFormNoCategory),
-                    ),
-                    for (final c in bloc.state.categories)
-                      DropdownMenuItem<String>(
-                          value: c.id, child: Text(c.label)),
-                  ],
-                  onChanged: (v) => setSheetState(() => categoryId = v ?? ''),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DateField(
-                        label: loc.adminEventsFormStartAt,
-                        value: startDate,
-                        onChanged: (v) => setSheetState(() => startDate = v),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: startTime,
-                        readOnly: true,
-                        decoration: const InputDecoration(
-                          labelText: 'HH:mm',
-                          border: OutlineInputBorder(),
-                        ),
-                        onTap: () async {
-                          final initial =
-                              _parseTime(startTime) ?? TimeOfDay.now();
-                          final picked = await showTimePicker(
-                            context: sheetContext,
-                            initialTime: initial,
-                          );
-                          if (picked != null) {
-                            setSheetState(
-                                () => startTime = picked.format(sheetContext));
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DateField(
-                        label: loc.adminEventsFormEndAt,
-                        value: endDate,
-                        onChanged: (v) => setSheetState(() => endDate = v),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: endTime,
-                        readOnly: true,
-                        decoration: const InputDecoration(
-                          labelText: 'HH:mm',
-                          border: OutlineInputBorder(),
-                        ),
-                        onTap: () async {
-                          final initial =
-                              _parseTime(endTime) ?? TimeOfDay.now();
-                          final picked = await showTimePicker(
-                            context: sheetContext,
-                            initialTime: initial,
-                          );
-                          if (picked != null) {
-                            setSheetState(
-                                () => endTime = picked.format(sheetContext));
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                CheckboxListTile(
-                  value: published,
-                  title: Text(loc.adminEventsFormPublished),
-                  onChanged: (v) => setSheetState(() => published = v ?? false),
-                ),
-                CheckboxListTile(
-                  value: membersOnly,
-                  title: Text(loc.adminEventsFormMembersOnly),
-                  onChanged: (v) =>
-                      setSheetState(() => membersOnly = v ?? false),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    label: editing == null
-                        ? loc.adminEventsFormCreate
-                        : loc.commonSave,
-                    onPressed: () async {
-                      if (titleController.text.trim().isEmpty ||
-                          startDate.isEmpty) {
-                        return;
-                      }
-                      final startAt = isoFromParts(startDate, startTime);
-                      final endAt = endDate.isEmpty
-                          ? null
-                          : isoFromParts(endDate, endTime);
-                      final ok = await dispatchForBool(
-                          bloc,
-                          (c) => EventSaveRequested(
-                              completer: c,
-                              editingId: editing?.id,
-                              payload: EventInput(
-                                title: titleController.text.trim(),
-                                description:
-                                    descriptionController.text.trim().isEmpty
-                                        ? null
-                                        : descriptionController.text.trim(),
-                                location: locationController.text.trim().isEmpty
-                                    ? null
-                                    : locationController.text.trim(),
-                                categoryId:
-                                    categoryId.isEmpty ? null : categoryId,
-                                startAt: startAt,
-                                endAt: endAt,
-                                isPublished: published,
-                                isMembersOnly: membersOnly,
-                              )));
-                      if (sheetContext.mounted) {
-                        Navigator.of(sheetContext).pop(ok);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+        children: [
+          PageHeader(
+            icon: Icons.event_outlined,
+            title: loc.adminEventsTitle,
+            subtitle: loc.adminEventsSubtitle,
           ),
-        ),
+          ContentFilterBar(
+            statusLabels: [
+              loc.adminEventsFiltersAll,
+              loc.adminEventsFiltersPublished,
+              loc.adminEventsFiltersDraft,
+            ],
+            publishedFilter: state.publishedFilter,
+            onStatusChanged: (i) => bloc.add(EventsStatusFilterChanged(i)),
+            categoryLabel: loc.adminEventsFiltersCategory,
+            allCategoriesLabel: loc.adminEventsFiltersAllCategories,
+            categories: state.categories,
+            categoryFilter: state.categoryFilter,
+            onCategoryChanged: (id) => bloc.add(EventsCategoryFilterChanged(id)),
+          ),
+          ..._list(context, state, bloc),
+        ],
       ),
+    );
+  }
+
+  List<Widget> _list(BuildContext context, ContentListState<EventItem> state,
+      EventsBloc bloc) {
+    final loc = AppLocalizations.of(context);
+    if (state.loading && state.items.isEmpty) return const [SkeletonLoader(lines: 4)];
+    if (state.error != null && state.items.isEmpty) {
+      return [
+        InlineError(
+          message: loc.adminEventsErrorsLoadFailed,
+          onRetry: () => bloc.add(const EventsLoadRequested()),
+        ),
+      ];
+    }
+    if (state.items.isEmpty) {
+      return [
+        ContentEmptyState(
+          icon: Icons.event_outlined,
+          message: loc.adminEventsNoItems,
+          helper: loc.adminEventsEmptyHelper,
+          actionLabel: loc.adminEventsCreateFirst,
+          onCreate: () => _openForm(context, bloc),
+        ),
+      ];
+    }
+    return [
+      ReloadingBar(visible: state.loading),
+      CardGrid(
+        children: [
+          for (final e in state.items) _card(context, state, bloc, e),
+        ],
+      ),
+    ];
+  }
+
+  Widget _card(BuildContext context, ContentListState<EventItem> state,
+      EventsBloc bloc, EventItem e) {
+    final loc = AppLocalizations.of(context);
+    final (startDate, startTime) = datetimeParts(e.startAt);
+    final (endDate, endTime) = datetimeParts(e.endAt);
+    final when = endDate.isEmpty
+        ? '$startDate $startTime'
+        : '$startDate $startTime → $endDate $endTime';
+    return ContentItemCard(
+      key: ValueKey(e.id),
+      title: e.title,
+      preview: e.description,
+      statusLabel:
+          e.isPublished ? loc.adminEventsStatusPublished : loc.adminEventsStatusDraft,
+      published: e.isPublished,
+      metas: [
+        (Icons.schedule_rounded, when),
+        if (e.location != null && e.location!.isNotEmpty)
+          (Icons.place_outlined, e.location!),
+        (Icons.sell_outlined, contentCategoryLabel(state.categories, e.categoryId)),
+      ],
+      membersOnlyLabel: e.isMembersOnly ? loc.adminEventsMembersOnlyBadge : null,
+      publishLabel: e.isPublished ? loc.adminEventsUnpublish : loc.adminEventsPublish,
+      busy: state.busyId == e.id,
+      onTogglePublish: () => bloc.add(EventPublishToggled(e)),
+      onEdit: () => _openForm(context, bloc, editing: e),
+      onDelete: () => _delete(context, bloc, e),
+    );
+  }
+
+  Future<void> _delete(BuildContext context, EventsBloc bloc, EventItem e) async {
+    final loc = AppLocalizations.of(context);
+    final confirmed = await confirmDialog(
+      context,
+      title: loc.adminEventsDeleteModalTitle,
+      message: '${e.title}\n\n${loc.adminEventsDeleteModalMessageSuffix}',
+      confirmLabel: loc.adminEventsDeleteModalConfirmLabel,
+      destructive: true,
+    );
+    if (confirmed && context.mounted) bloc.add(EventDeleteRequested(e));
+  }
+
+  Future<void> _openForm(BuildContext context, EventsBloc bloc,
+      {EventItem? editing}) async {
+    final saved = await showFormSheet<bool>(
+      context,
+      builder: (_) => _EventForm(bloc: bloc, editing: editing),
     );
     if (saved == true && context.mounted) {
-      showAppToast(context, loc.commonSave);
+      showAppToast(context, AppLocalizations.of(context).commonSave);
     }
   }
 }
 
-TimeOfDay? _parseTime(String text) {
-  final parts = text.split(':');
-  if (parts.length != 2) return null;
-  final h = int.tryParse(parts[0]);
-  final m = int.tryParse(parts[1]);
-  if (h == null || m == null) return null;
-  return TimeOfDay(hour: h, minute: m);
+class _EventForm extends StatefulWidget {
+  const _EventForm({required this.bloc, this.editing});
+
+  final EventsBloc bloc;
+  final EventItem? editing;
+
+  @override
+  State<_EventForm> createState() => _EventFormState();
+}
+
+class _EventFormState extends State<_EventForm> {
+  late final _title = TextEditingController(text: widget.editing?.title ?? '');
+  late final _description =
+      TextEditingController(text: widget.editing?.description ?? '');
+  late final _location = TextEditingController(text: widget.editing?.location ?? '');
+  late String _categoryId = widget.editing?.categoryId ?? '';
+  late String _startDate = datetimeParts(widget.editing?.startAt).$1;
+  late String _startTime = datetimeParts(widget.editing?.startAt).$2;
+  late String _endDate = datetimeParts(widget.editing?.endAt).$1;
+  late String _endTime = datetimeParts(widget.editing?.endAt).$2;
+  late bool _published = widget.editing?.isPublished ?? false;
+  late bool _membersOnly = widget.editing?.isMembersOnly ?? false;
+  bool _saving = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _description.dispose();
+    _location.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final categories = widget.bloc.state.categories;
+    return FormSheet(
+      icon: Icons.event_outlined,
+      title: widget.editing == null
+          ? loc.adminEventsFormCreateTitle
+          : loc.adminEventsFormEditTitle,
+      actions: [
+        AppButton(
+          label: widget.editing == null ? loc.adminEventsFormCreate : loc.commonSave,
+          loading: _saving,
+          onPressed: _title.text.trim().isEmpty ? null : _save,
+        ),
+      ],
+      children: [
+        TextField(
+          controller: _title,
+          textCapitalization: TextCapitalization.sentences,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(labelText: loc.adminEventsFormTitle),
+        ),
+        TextField(
+          controller: _description,
+          minLines: 2,
+          maxLines: 5,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            labelText: loc.adminEventsFormDescription,
+            alignLabelWithHint: true,
+          ),
+        ),
+        TextField(
+          controller: _location,
+          decoration: InputDecoration(
+            labelText: loc.adminEventsFormLocation,
+            prefixIcon: const Icon(Icons.place_outlined),
+          ),
+        ),
+        LabeledDropdown<String>(
+          label: loc.adminEventsFormCategory,
+          value: categories.any((c) => c.id == _categoryId) ? _categoryId : null,
+          prefixIcon: Icons.sell_outlined,
+          options: [
+            (null, loc.adminEventsFormNoCategory),
+            for (final c in categories) (c.id, c.label),
+          ],
+          onChanged: (v) => setState(() => _categoryId = v ?? ''),
+        ),
+        DateTimeFields(
+          label: loc.adminEventsFormStartAt,
+          date: _startDate,
+          time: _startTime,
+          onDateChanged: (v) => setState(() {
+            _startDate = v;
+            _error = null;
+          }),
+          onTimeChanged: (v) => setState(() => _startTime = v),
+        ),
+        DateTimeFields(
+          label: loc.adminEventsFormEndAt,
+          date: _endDate,
+          time: _endTime,
+          onDateChanged: (v) => setState(() {
+            _endDate = v;
+            _error = null;
+          }),
+          onTimeChanged: (v) => setState(() {
+            _endTime = v;
+            _error = null;
+          }),
+        ),
+        if (_error != null)
+          Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _published,
+          title: Text(loc.adminEventsFormPublished),
+          onChanged: (v) => setState(() => _published = v),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _membersOnly,
+          title: Text(loc.adminEventsFormMembersOnly),
+          onChanged: (v) => setState(() => _membersOnly = v),
+        ),
+      ],
+    );
+  }
+
+  String? _validate(AppLocalizations loc, String startAt, String? endAt) {
+    if (_startDate.isEmpty) return loc.adminEventsFormStartAtRequired;
+    if (endAt != null && !DateTime.parse(endAt).isAfter(DateTime.parse(startAt))) {
+      return loc.adminEventsFormEndBeforeStart;
+    }
+    return null;
+  }
+
+  Future<void> _save() async {
+    final loc = AppLocalizations.of(context);
+    final startAt = isoFromParts(_startDate, _startTime);
+    final endAt = _endDate.isEmpty ? null : isoFromParts(_endDate, _endTime);
+    final error = _validate(loc, startAt, endAt);
+    if (error != null) {
+      setState(() => _error = error);
+      return;
+    }
+    String? optional(TextEditingController c) =>
+        c.text.trim().isEmpty ? null : c.text.trim();
+    setState(() => _saving = true);
+    final ok = await dispatchForBool(
+      widget.bloc,
+      (c) => EventSaveRequested(
+        completer: c,
+        editingId: widget.editing?.id,
+        payload: EventInput(
+          title: _title.text.trim(),
+          description: optional(_description),
+          location: optional(_location),
+          categoryId: _categoryId.isEmpty ? null : _categoryId,
+          startAt: startAt,
+          endAt: endAt,
+          isPublished: _published,
+          isMembersOnly: _membersOnly,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (ok) Navigator.of(context).pop(true);
+  }
 }

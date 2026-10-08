@@ -4,12 +4,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/session.dart';
 import '../../../core/di/injector.dart';
+import '../../../core/layout/responsive.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/resolution_book_repository.dart';
 import '../domain/resolution_book_entities.dart';
 import '../presentation/bloc/resolution_book_bloc.dart';
+import '../presentation/widgets/member_ui.dart';
 
 /// Port of Angular ResolutionBookComponent: dashboard summary, filters,
 /// paginated meeting list. The add/edit entry only appears with
@@ -53,159 +56,50 @@ class _ResolutionBookViewState extends State<_ResolutionBookView> {
     final loc = AppLocalizations.of(context);
     final canManage = sl<SessionManager>().session?.can(AppPermissions.resolutionBookManage) ?? false;
     return Scaffold(
+      floatingActionButton: canManage
+          ? FloatingActionButton.extended(
+              tooltip: loc.rbActionsAddMeeting,
+              onPressed: () => context.go('/resolution-book/add'),
+              icon: const Icon(Icons.add),
+              label: Text(loc.rbActionsAddMeeting),
+            )
+          : null,
       body: BlocBuilder<ResolutionBookBloc, ResolutionBookState>(
         builder: (context, state) {
           final bloc = context.read<ResolutionBookBloc>();
-          if (state.status == ResolutionBookStatus.loading) {
+          final hasData = state.summary != null || state.meetings.isNotEmpty;
+          if (state.status == ResolutionBookStatus.loading && !hasData) {
             return const SkeletonLoader(lines: 8);
           }
-          if (state.error && state.meetings.isEmpty && state.summary == null) {
+          if (state.error && !hasData) {
             return InlineError(
               message: loc.rbLoadError,
               onRetry: () => bloc.add(const ResolutionBookLoaded()),
             );
           }
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 32),
+          return PageBody(
+            // Leave room so the FAB never hides the pager.
+            padding: EdgeInsets.only(bottom: canManage ? 96 : 24),
+            onRefresh: () => reloadAndWait<ResolutionBookState>(
+              bloc,
+              () => bloc.add(const ResolutionBookLoaded()),
+              (s) => s.status != ResolutionBookStatus.loading && !s.listLoading,
+            ),
             children: [
-              PageHeader(
-                title: loc.rbTitle,
-                subtitle: loc.rbSubtitle,
-                actions: [
-                  if (canManage)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: IconButton(
-                        tooltip: loc.rbActionsAddMeeting,
-                        icon: const Icon(Icons.add),
-                        onPressed: () => context.go('/resolution-book/add'),
-                      ),
-                    ),
-                ],
-              ),
-              if (state.summary != null)
-                AppCard(
-                  child: Row(
-                    children: [
-                      _stat(context, loc.rbSummaryTotalMeetings,
-                          '${state.summary!.totalMeetings}'),
-                      _stat(context, loc.rbSummaryThisYear,
-                          '${state.summary!.meetingsThisYear}'),
-                      _stat(context, loc.rbSummaryAvgAttendance,
-                          '${state.summary!.averageAttendancePercent.toStringAsFixed(0)}%'),
-                      _stat(context, loc.rbSummaryOpenActions,
-                          '${state.summary!.openActionItems}'),
-                    ],
+              PageHeader(title: loc.rbTitle, subtitle: loc.rbSubtitle, icon: Icons.menu_book_outlined),
+              if (state.error)
+                NoticeBanner(
+                  tone: NoticeTone.error,
+                  message: loc.rbLoadError,
+                  action: TextButton(
+                    onPressed: () => bloc.add(const ResolutionBookLoaded()),
+                    child: Text(loc.commonRetry),
                   ),
                 ),
-              // Filters.
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: _search,
-                  decoration: InputDecoration(
-                    hintText: loc.rbFiltersSearchPlaceholder,
-                    prefixIcon: const Icon(Icons.search),
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  onSubmitted: (q) => bloc.add(ResolutionBookFiltersChanged(query: q)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    DropdownButton<String>(
-                      value: state.meetingType,
-                      hint: Text(loc.rbFiltersType),
-                      items: [
-                        DropdownMenuItem(value: '', child: Text(loc.rbFiltersAllTypes)),
-                        DropdownMenuItem(value: 'online', child: Text(loc.rbTypeOnline)),
-                        DropdownMenuItem(value: 'offline', child: Text(loc.rbTypeOffline)),
-                      ],
-                      onChanged: (v) => bloc.add(ResolutionBookFiltersChanged(meetingType: v ?? '')),
-                    ),
-                    DropdownButton<String>(
-                      value: state.meetingStatus,
-                      hint: Text(loc.rbFiltersStatus),
-                      items: [
-                        DropdownMenuItem(value: '', child: Text(loc.rbFiltersAllStatuses)),
-                        DropdownMenuItem(value: 'scheduled', child: Text(loc.rbStatusScheduled)),
-                        DropdownMenuItem(value: 'completed', child: Text(loc.rbStatusCompleted)),
-                        DropdownMenuItem(value: 'cancelled', child: Text(loc.rbStatusCancelled)),
-                      ],
-                      onChanged: (v) => bloc.add(ResolutionBookFiltersChanged(meetingStatus: v ?? '')),
-                    ),
-                    if (state.hasFilters)
-                      TextButton(
-                        onPressed: () {
-                          _search.clear();
-                          bloc.add(const ResolutionBookFiltersCleared());
-                        },
-                        child: Text(loc.rbFiltersClear),
-                      ),
-                  ],
-                ),
-              ),
-              if (state.listLoading)
-                const SkeletonLoader(lines: 3)
-              else if (state.meetings.isEmpty)
-                EmptyState(
-                  message: state.hasFilters ? loc.rbListEmptyFiltered : loc.rbListEmpty,
-                  icon: Icons.menu_book_outlined,
-                )
-              else
-                for (final meeting in state.meetings)
-                  AppCard(
-                    onTap: () => context.go('/resolution-book/meeting/${meeting.id}'),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                meeting.meetingNo,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                            _meetingBadge(context, meeting.status, loc),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${_typeLabel(meeting.meetingType, loc)} · ${loc.rbListResolutions}: ${meeting.resolutionCount}'
-                          ' · ${loc.rbListAttendance}: ${meeting.attendancePresent}/${meeting.attendanceTotal}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-              if (state.totalPages > 1)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: state.page > 0
-                          ? () => bloc.add(ResolutionBookPageChanged(state.page - 1))
-                          : null,
-                      icon: const Icon(Icons.chevron_left),
-                    ),
-                    Text('${state.page + 1} / ${state.totalPages}'),
-                    IconButton(
-                      onPressed: state.page < state.totalPages - 1
-                          ? () => bloc.add(ResolutionBookPageChanged(state.page + 1))
-                          : null,
-                      icon: const Icon(Icons.chevron_right),
-                    ),
-                  ],
-                ),
+              if (state.summary != null) Gutter(vertical: 6, child: _SummaryGrid(summary: state.summary!)),
+              _Filters(state: state, bloc: bloc, search: _search),
+              SectionTitle(loc.rbListTitle),
+              ..._list(context, state, loc, bloc),
             ],
           );
         },
@@ -213,25 +107,225 @@ class _ResolutionBookViewState extends State<_ResolutionBookView> {
     );
   }
 
-  Widget _stat(BuildContext context, String label, String value) {
-    return Expanded(
+  List<Widget> _list(
+    BuildContext context,
+    ResolutionBookState state,
+    AppLocalizations loc,
+    ResolutionBookBloc bloc,
+  ) {
+    if (state.listLoading) return const [SkeletonLoader(lines: 3, height: 88)];
+    if (state.meetings.isEmpty) {
+      return [
+        EmptyState(
+          message: state.hasFilters ? loc.rbListEmptyFiltered : loc.rbListEmpty,
+          icon: Icons.menu_book_outlined,
+        ),
+      ];
+    }
+    return [
+      Gutter(
+        child: ResponsiveGrid(
+          minItemWidth: 340,
+          maxColumns: 3,
+          children: [for (final m in state.meetings) _MeetingCard(meeting: m)],
+        ),
+      ),
+      if (state.totalPages > 1)
+        PagerBar(
+          label: '${state.page + 1} / ${state.totalPages}',
+          previousTooltip: loc.rbNavPrevious,
+          nextTooltip: loc.rbNavNext,
+          onPrevious: state.page > 0 ? () => bloc.add(ResolutionBookPageChanged(state.page - 1)) : null,
+          onNext: state.page < state.totalPages - 1
+              ? () => bloc.add(ResolutionBookPageChanged(state.page + 1))
+              : null,
+        ),
+    ];
+  }
+}
+
+class _SummaryGrid extends StatelessWidget {
+  const _SummaryGrid({required this.summary});
+
+  final MeetingSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return ResponsiveGrid(
+      minItemWidth: 240,
+      maxColumns: 4,
+      children: [
+        StatTile(
+          label: loc.rbSummaryTotalMeetings,
+          value: '${summary.totalMeetings}',
+          icon: Icons.event_note_outlined,
+        ),
+        StatTile(
+          label: loc.rbSummaryThisYear,
+          value: '${summary.meetingsThisYear}',
+          icon: Icons.calendar_today_outlined,
+          accent: AppColors.gold,
+        ),
+        StatTile(
+          label: loc.rbSummaryAvgAttendance,
+          value: '${summary.averageAttendancePercent.toStringAsFixed(0)}%',
+          icon: Icons.groups_outlined,
+        ),
+        StatTile(
+          label: loc.rbSummaryOpenActions,
+          value: '${summary.openActionItems}',
+          icon: Icons.pending_actions_outlined,
+          accent: Theme.of(context).colorScheme.error,
+        ),
+      ],
+    );
+  }
+}
+
+class _Filters extends StatelessWidget {
+  const _Filters({required this.state, required this.bloc, required this.search});
+
+  final ResolutionBookState state;
+  final ResolutionBookBloc bloc;
+  final TextEditingController search;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return AppCard(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
-          Text(value,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700)),
+          TextField(
+            controller: search,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: loc.rbFiltersSearchPlaceholder,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: IconButton(
+                tooltip: loc.rbFiltersApply,
+                icon: const Icon(Icons.arrow_forward),
+                onPressed: () => bloc.add(ResolutionBookFiltersChanged(query: search.text)),
+              ),
+            ),
+            onSubmitted: (q) => bloc.add(ResolutionBookFiltersChanged(query: q)),
+          ),
+          const SizedBox(height: 12),
+          FieldGrid(
+            minFieldWidth: 220,
+            children: [
+              DropdownButtonFormField<String>(
+                key: ValueKey('type-${state.meetingType}'),
+                initialValue: state.meetingType,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: loc.rbFiltersType,
+                  prefixIcon: const Icon(Icons.videocam_outlined),
+                ),
+                items: [
+                  DropdownMenuItem(value: '', child: Text(loc.rbFiltersAllTypes)),
+                  DropdownMenuItem(value: 'online', child: Text(loc.rbTypeOnline)),
+                  DropdownMenuItem(value: 'offline', child: Text(loc.rbTypeOffline)),
+                ],
+                onChanged: (v) => bloc.add(ResolutionBookFiltersChanged(meetingType: v ?? '')),
+              ),
+              DropdownButtonFormField<String>(
+                key: ValueKey('status-${state.meetingStatus}'),
+                initialValue: state.meetingStatus,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: loc.rbFiltersStatus,
+                  prefixIcon: const Icon(Icons.flag_outlined),
+                ),
+                items: [
+                  DropdownMenuItem(value: '', child: Text(loc.rbFiltersAllStatuses)),
+                  DropdownMenuItem(value: 'scheduled', child: Text(loc.rbStatusScheduled)),
+                  DropdownMenuItem(value: 'completed', child: Text(loc.rbStatusCompleted)),
+                  DropdownMenuItem(value: 'cancelled', child: Text(loc.rbStatusCancelled)),
+                ],
+                onChanged: (v) => bloc.add(ResolutionBookFiltersChanged(meetingStatus: v ?? '')),
+              ),
+            ],
+          ),
+          if (state.hasFilters)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () {
+                  search.clear();
+                  bloc.add(const ResolutionBookFiltersCleared());
+                },
+                icon: const Icon(Icons.filter_alt_off_outlined, size: 18),
+                label: Text(loc.rbFiltersClear),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MeetingCard extends StatelessWidget {
+  const _MeetingCard({required this.meeting});
+
+  final MeetingListItem meeting;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final online = meeting.meetingType == MeetingType.online;
+    final when = [meeting.date, if ((meeting.time ?? '').isNotEmpty) meeting.time!].join(' · ');
+    return AppCard(
+      margin: EdgeInsets.zero,
+      onTap: () => context.go('/resolution-book/meeting/${meeting.id}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              LeadingIcon(icon: online ? Icons.videocam_outlined : Icons.groups_outlined),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      meeting.meetingNo,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    Text(when, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _meetingBadge(meeting.status, loc),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 14,
+            runSpacing: 6,
+            children: [
+              MetaChip(icon: Icons.wifi_tethering, text: online ? loc.rbTypeOnline : loc.rbTypeOffline),
+              MetaChip(icon: Icons.gavel_outlined, text: loc.rbListResolutions(meeting.resolutionCount)),
+              MetaChip(
+                icon: Icons.how_to_reg_outlined,
+                text: loc.rbListAttendance(meeting.attendancePresent, meeting.attendanceTotal),
+              ),
+              if (meeting.chairperson.isNotEmpty)
+                MetaChip(icon: Icons.person_outline, text: meeting.chairperson),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  String _typeLabel(MeetingType type, AppLocalizations loc) =>
-      type == MeetingType.online ? loc.rbTypeOnline : loc.rbTypeOffline;
-
-  Widget _meetingBadge(BuildContext context, MeetingStatus status, AppLocalizations loc) {
+  Widget _meetingBadge(MeetingStatus status, AppLocalizations loc) {
     final (kind, label) = switch (status) {
       MeetingStatus.scheduled => (StatusKind.pending, loc.rbStatusScheduled),
       MeetingStatus.completed => (StatusKind.approved, loc.rbStatusCompleted),

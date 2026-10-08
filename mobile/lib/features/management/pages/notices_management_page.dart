@@ -10,6 +10,8 @@ import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
 import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/notices_bloc.dart';
+import '../presentation/widgets/content_management_widgets.dart';
+import '../presentation/widgets/management_page_kit.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// ISO instant -> local "yyyy-MM-ddTHH:mm" (Angular toDatetimeLocal).
@@ -52,85 +54,89 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
           NoticesBloc(repository: AdminRepository(apiClient: sl<ApiClient>()))
             ..add(const NoticesInitRequested()),
       child: BlocConsumer<NoticesBloc, ContentListState<Notice>>(
+        listenWhen: (a, b) => a.saveError != b.saveError,
         listener: (context, state) {
           if (state.saveError != null) {
-            showAppToast(context, loc.adminNoticesErrorsSaveFailed,
-                error: true);
-          }
-          if (state.error != null) {
-            showAppToast(context, loc.adminNoticesErrorsLoadFailed,
-                error: true);
+            showAppToast(context, loc.adminNoticesErrorsSaveFailed, error: true);
           }
         },
-        builder: (context, state) {
-          final bloc = context.read<NoticesBloc>();
-          return ListView(
-            children: [
-              PageHeader(
-                  title: loc.adminNoticesTitle,
-                  subtitle: loc.adminNoticesSubtitle),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: AppTabs(
-                  labels: [
-                    loc.adminNoticesFiltersAll,
-                    loc.adminNoticesFiltersPublished,
-                    loc.adminNoticesFiltersDraft,
-                  ],
-                  selectedIndex: state.publishedFilter == null
-                      ? 0
-                      : state.publishedFilter == true
-                          ? 1
-                          : 2,
-                  onChanged: (index) =>
-                      bloc.add(NoticesStatusFilterChanged(index)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: DropdownButtonFormField<String?>(
-                  initialValue: state.categoryFilter,
-                  decoration: InputDecoration(
-                    labelText: loc.adminNoticesFiltersCategory,
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text(loc.adminNoticesFiltersAllCategories),
-                    ),
-                    for (final c in state.categories)
-                      DropdownMenuItem<String?>(
-                          value: c.id, child: Text(c.label)),
-                  ],
-                  onChanged: (categoryId) =>
-                      bloc.add(NoticesCategoryFilterChanged(categoryId)),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: AppButton(
-                  label: loc.adminNoticesCreate,
-                  icon: Icons.add,
-                  onPressed: () => _openForm(context, loc, bloc),
-                ),
-              ),
-              if (state.loading)
-                const SkeletonLoader(lines: 4)
-              else if (state.items.isEmpty)
-                EmptyState(message: loc.adminNoticesNoItems)
-              else
-                AppDataTableCards<Notice>(
-                  items: state.items,
-                  rowBuilder: (context, n) => _row(context, loc, bloc, n),
-                ),
-              const SizedBox(height: 32),
-            ],
-          );
-        },
+        builder: (context, state) => _buildScaffold(context, state),
       ),
     );
+  }
+
+  Widget _buildScaffold(BuildContext context, ContentListState<Notice> state) {
+    final loc = AppLocalizations.of(context);
+    final bloc = context.read<NoticesBloc>();
+    return Scaffold(
+      floatingActionButton: AddFab(
+        label: loc.adminNoticesCreate,
+        onPressed: () => _openForm(context, bloc),
+      ),
+      body: PageBody(
+        padding: const EdgeInsets.only(bottom: kFabClearance),
+        onRefresh: () => reloadAndWait<NoticesEvent, ContentListState<Notice>>(
+          bloc,
+          const NoticesLoadRequested(),
+          (s) => s.loading,
+        ),
+        children: [
+          PageHeader(
+            icon: Icons.campaign_outlined,
+            title: loc.adminNoticesTitle,
+            subtitle: loc.adminNoticesSubtitle,
+          ),
+          ContentFilterBar(
+            statusLabels: [
+              loc.adminNoticesFiltersAll,
+              loc.adminNoticesFiltersPublished,
+              loc.adminNoticesFiltersDraft,
+            ],
+            publishedFilter: state.publishedFilter,
+            onStatusChanged: (i) => bloc.add(NoticesStatusFilterChanged(i)),
+            categoryLabel: loc.adminNoticesFiltersCategory,
+            allCategoriesLabel: loc.adminNoticesFiltersAllCategories,
+            categories: state.categories,
+            categoryFilter: state.categoryFilter,
+            onCategoryChanged: (id) => bloc.add(NoticesCategoryFilterChanged(id)),
+          ),
+          ..._list(context, state, bloc),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _list(
+      BuildContext context, ContentListState<Notice> state, NoticesBloc bloc) {
+    final loc = AppLocalizations.of(context);
+    if (state.loading && state.items.isEmpty) return const [SkeletonLoader(lines: 4)];
+    if (state.error != null && state.items.isEmpty) {
+      return [
+        InlineError(
+          message: loc.adminNoticesErrorsLoadFailed,
+          onRetry: () => bloc.add(const NoticesLoadRequested()),
+        ),
+      ];
+    }
+    if (state.items.isEmpty) {
+      return [
+        ContentEmptyState(
+          icon: Icons.campaign_outlined,
+          message: loc.adminNoticesNoItems,
+          helper: loc.adminNoticesEmptyHelper,
+          actionLabel: loc.adminNoticesCreateFirst,
+          onCreate: () => _openForm(context, bloc),
+        ),
+      ];
+    }
+    return [
+      ReloadingBar(visible: state.loading),
+      CardGrid(
+        children: [
+          for (final n in state.items) _card(context, state, bloc, n),
+        ],
+      ),
+    ];
   }
 
   String _statusLabel(AppLocalizations loc, Notice n) {
@@ -142,271 +148,172 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
     return loc.adminNoticesStatusPublished;
   }
 
-  Widget _row(
-      BuildContext context, AppLocalizations loc, NoticesBloc bloc, Notice n) {
-    final category = _categoryLabel(context, n.categoryId);
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    n.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                StatusBadge(
-                  kind:
-                      n.isPublished ? StatusKind.approved : StatusKind.neutral,
-                  label: _statusLabel(loc, n),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            InfoRow(label: loc.adminNoticesTableCategory, value: category),
-            if (n.publishAt != null)
-              InfoRow(
-                label: loc.adminNoticesTablePublishAt,
-                value: datetimeParts(n.publishAt).$1.isNotEmpty
-                    ? '${datetimeParts(n.publishAt).$1} ${datetimeParts(n.publishAt).$2}'
-                    : '—',
-              ),
-            if (n.isMembersOnly)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: StatusBadge(
-                  kind: StatusKind.pending,
-                  label: loc.adminNoticesMembersOnlyBadge,
-                ),
-              ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                AppButton(
-                  label: n.isPublished
-                      ? loc.adminNoticesUnpublish
-                      : loc.adminNoticesPublish,
-                  variant: AppButtonVariant.ghost,
-                  onPressed: _isBusy(context, n.id)
-                      ? null
-                      : () => bloc.add(NoticePublishToggled(n)),
-                ),
-                AppButton(
-                  label: loc.commonEdit,
-                  variant: AppButtonVariant.ghost,
-                  onPressed: () => _openForm(context, loc, bloc, editing: n),
-                ),
-                AppButton(
-                  label: loc.commonDelete,
-                  variant: AppButtonVariant.ghost,
-                  onPressed: () async {
-                    final confirmed = await confirmDialog(
-                      context,
-                      title: loc.adminNoticesDeleteModalTitle,
-                      message: loc.adminNoticesDeleteModalMessageSuffix,
-                      destructive: true,
-                    );
-                    if (confirmed && context.mounted) {
-                      bloc.add(NoticeDeleteRequested(n));
-                    }
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+  Widget _card(BuildContext context, ContentListState<Notice> state,
+      NoticesBloc bloc, Notice n) {
+    final loc = AppLocalizations.of(context);
+    final (date, time) = datetimeParts(n.publishAt);
+    return ContentItemCard(
+      key: ValueKey(n.id),
+      title: n.title,
+      preview: n.body,
+      statusLabel: _statusLabel(loc, n),
+      published: n.isPublished,
+      metas: [
+        (Icons.sell_outlined, contentCategoryLabel(state.categories, n.categoryId)),
+        if (date.isNotEmpty) (Icons.schedule_rounded, '$date $time'),
+      ],
+      membersOnlyLabel: n.isMembersOnly ? loc.adminNoticesMembersOnlyBadge : null,
+      publishLabel: n.isPublished ? loc.adminNoticesUnpublish : loc.adminNoticesPublish,
+      busy: state.busyId == n.id,
+      onTogglePublish: () => bloc.add(NoticePublishToggled(n)),
+      onEdit: () => _openForm(context, bloc, editing: n),
+      onDelete: () => _delete(context, bloc, n),
     );
   }
 
-  bool _isBusy(BuildContext context, String id) =>
-      context.read<NoticesBloc>().state.busyId == id;
-
-  String _categoryLabel(BuildContext context, String? categoryId) {
-    if (categoryId == null) return '—';
-    final categories = context.read<NoticesBloc>().state.categories;
-    for (final c in categories) {
-      if (c.id == categoryId) return c.label;
-    }
-    return '—';
+  Future<void> _delete(BuildContext context, NoticesBloc bloc, Notice n) async {
+    final loc = AppLocalizations.of(context);
+    final confirmed = await confirmDialog(
+      context,
+      title: loc.adminNoticesDeleteModalTitle,
+      message: '${n.title}\n\n${loc.adminNoticesDeleteModalMessageSuffix}',
+      confirmLabel: loc.adminNoticesDeleteModalConfirmLabel,
+      destructive: true,
+    );
+    if (confirmed && context.mounted) bloc.add(NoticeDeleteRequested(n));
   }
 
-  Future<void> _openForm(
-      BuildContext context, AppLocalizations loc, NoticesBloc bloc,
+  Future<void> _openForm(BuildContext context, NoticesBloc bloc,
       {Notice? editing}) async {
-    final titleController = TextEditingController(text: editing?.title ?? '');
-    final bodyController = TextEditingController(text: editing?.body ?? '');
-    var categoryId = editing?.categoryId ?? '';
-    final publishParts = datetimeParts(editing?.publishAt);
-    var publishDate = publishParts.$1;
-    var publishTime = publishParts.$2;
-    var published = editing?.isPublished ?? false;
-    var membersOnly = editing?.isMembersOnly ?? false;
-
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 16,
-        ),
-        child: StatefulBuilder(
-          builder: (sheetContext, setSheetState) => SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  editing == null
-                      ? loc.adminNoticesFormCreateTitle
-                      : loc.adminNoticesFormEditTitle,
-                  style: Theme.of(sheetContext).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: loc.adminNoticesFormTitle,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: bodyController,
-                  maxLines: 5,
-                  decoration: InputDecoration(
-                    labelText: loc.adminNoticesFormBody,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: categoryId.isEmpty ? null : categoryId,
-                  decoration: InputDecoration(
-                    labelText: loc.adminNoticesFormCategory,
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Text(loc.adminNoticesFormNoCategory),
-                    ),
-                    for (final c in bloc.state.categories)
-                      DropdownMenuItem<String>(
-                          value: c.id, child: Text(c.label)),
-                  ],
-                  onChanged: (v) => setSheetState(() => categoryId = v ?? ''),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DateField(
-                        label: loc.adminNoticesFormPublishAt,
-                        hint: loc.adminNoticesFormPublishAtHint,
-                        value: publishDate,
-                        onChanged: (v) => setSheetState(() => publishDate = v),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: publishTime,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: 'HH:mm',
-                          border: const OutlineInputBorder(),
-                        ),
-                        onTap: () async {
-                          final initial =
-                              _parseTime(publishTime) ?? TimeOfDay.now();
-                          final picked = await showTimePicker(
-                            context: sheetContext,
-                            initialTime: initial,
-                          );
-                          if (picked != null) {
-                            setSheetState(() =>
-                                publishTime = picked.format(sheetContext));
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                CheckboxListTile(
-                  value: published,
-                  title: Text(loc.adminNoticesFormPublished),
-                  onChanged: (v) => setSheetState(() => published = v ?? false),
-                ),
-                CheckboxListTile(
-                  value: membersOnly,
-                  title: Text(loc.adminNoticesFormMembersOnly),
-                  onChanged: (v) =>
-                      setSheetState(() => membersOnly = v ?? false),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    label: editing == null
-                        ? loc.adminNoticesFormCreate
-                        : loc.commonSave,
-                    onPressed: () async {
-                      if (titleController.text.trim().isEmpty ||
-                          bodyController.text.trim().isEmpty) {
-                        return;
-                      }
-                      final publishAt = publishDate.isEmpty
-                          ? null
-                          : isoFromParts(publishDate, publishTime);
-                      final ok = await dispatchForBool(
-                          bloc,
-                          (c) => NoticeSaveRequested(
-                              completer: c,
-                              editingId: editing?.id,
-                              payload: NoticeInput(
-                                title: titleController.text.trim(),
-                                body: bodyController.text.trim(),
-                                categoryId:
-                                    categoryId.isEmpty ? null : categoryId,
-                                isPublished: published,
-                                isMembersOnly: membersOnly,
-                                publishAt: publishAt,
-                              )));
-                      if (sheetContext.mounted) {
-                        Navigator.of(sheetContext).pop(ok);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    final saved = await showFormSheet<bool>(
+      context,
+      builder: (_) => _NoticeForm(bloc: bloc, editing: editing),
     );
     if (saved == true && context.mounted) {
-      showAppToast(context, loc.commonSave);
+      showAppToast(context, AppLocalizations.of(context).commonSave);
     }
   }
 }
 
-TimeOfDay? _parseTime(String text) {
-  final parts = text.split(':');
-  if (parts.length != 2) return null;
-  final h = int.tryParse(parts[0]);
-  final m = int.tryParse(parts[1]);
-  if (h == null || m == null) return null;
-  return TimeOfDay(hour: h, minute: m);
+class _NoticeForm extends StatefulWidget {
+  const _NoticeForm({required this.bloc, this.editing});
+
+  final NoticesBloc bloc;
+  final Notice? editing;
+
+  @override
+  State<_NoticeForm> createState() => _NoticeFormState();
+}
+
+class _NoticeFormState extends State<_NoticeForm> {
+  late final _title = TextEditingController(text: widget.editing?.title ?? '');
+  late final _body = TextEditingController(text: widget.editing?.body ?? '');
+  late String _categoryId = widget.editing?.categoryId ?? '';
+  late String _publishDate = datetimeParts(widget.editing?.publishAt).$1;
+  late String _publishTime = datetimeParts(widget.editing?.publishAt).$2;
+  late bool _published = widget.editing?.isPublished ?? false;
+  late bool _membersOnly = widget.editing?.isMembersOnly ?? false;
+  bool _saving = false;
+
+  bool get _canSave =>
+      _title.text.trim().isNotEmpty && _body.text.trim().isNotEmpty;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _body.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final categories = widget.bloc.state.categories;
+    return FormSheet(
+      icon: Icons.campaign_outlined,
+      title: widget.editing == null
+          ? loc.adminNoticesFormCreateTitle
+          : loc.adminNoticesFormEditTitle,
+      actions: [
+        AppButton(
+          label: widget.editing == null ? loc.adminNoticesFormCreate : loc.commonSave,
+          loading: _saving,
+          onPressed: _canSave ? _save : null,
+        ),
+      ],
+      children: [
+        TextField(
+          controller: _title,
+          textCapitalization: TextCapitalization.sentences,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(labelText: loc.adminNoticesFormTitle),
+        ),
+        TextField(
+          controller: _body,
+          minLines: 4,
+          maxLines: 8,
+          textCapitalization: TextCapitalization.sentences,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: loc.adminNoticesFormBody,
+            alignLabelWithHint: true,
+          ),
+        ),
+        LabeledDropdown<String>(
+          label: loc.adminNoticesFormCategory,
+          value: categories.any((c) => c.id == _categoryId) ? _categoryId : null,
+          prefixIcon: Icons.sell_outlined,
+          options: [
+            (null, loc.adminNoticesFormNoCategory),
+            for (final c in categories) (c.id, c.label),
+          ],
+          onChanged: (v) => setState(() => _categoryId = v ?? ''),
+        ),
+        DateTimeFields(
+          label: loc.adminNoticesFormPublishAt,
+          hint: loc.adminNoticesFormPublishAtHint,
+          date: _publishDate,
+          time: _publishTime,
+          onDateChanged: (v) => setState(() => _publishDate = v),
+          onTimeChanged: (v) => setState(() => _publishTime = v),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _published,
+          title: Text(loc.adminNoticesFormPublished),
+          onChanged: (v) => setState(() => _published = v),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _membersOnly,
+          title: Text(loc.adminNoticesFormMembersOnly),
+          onChanged: (v) => setState(() => _membersOnly = v),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    final publishAt =
+        _publishDate.isEmpty ? null : isoFromParts(_publishDate, _publishTime);
+    final ok = await dispatchForBool(
+      widget.bloc,
+      (c) => NoticeSaveRequested(
+        completer: c,
+        editingId: widget.editing?.id,
+        payload: NoticeInput(
+          title: _title.text.trim(),
+          body: _body.text.trim(),
+          categoryId: _categoryId.isEmpty ? null : _categoryId,
+          isPublished: _published,
+          isMembersOnly: _membersOnly,
+          publishAt: publishAt,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (ok) Navigator.of(context).pop(true);
+  }
 }

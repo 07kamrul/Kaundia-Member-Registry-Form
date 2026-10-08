@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/member_repository.dart';
 import '../presentation/bloc/change_password_bloc.dart';
+import '../presentation/widgets/member_ui.dart';
 
 /// Port of Angular ChangePasswordComponent: current/new/confirm fields with
 /// password policy validation, server 422 field mapping and the success state
@@ -30,6 +31,9 @@ class ChangePasswordPage extends StatelessWidget {
   }
 }
 
+/// A password card reads best narrow, even on tablets.
+const double _cardMaxWidth = 560;
+
 class _ChangePasswordView extends StatefulWidget {
   const _ChangePasswordView();
 
@@ -51,6 +55,21 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
     super.dispose();
   }
 
+  void _submit(ChangePasswordBloc bloc) {
+    bloc.add(ChangePasswordValidated(
+      current: _current.text,
+      next: _next.text,
+      confirm: _confirm.text,
+    ));
+    if (validateChangePassword(
+      current: _current.text,
+      next: _next.text,
+      confirm: _confirm.text,
+    ).ok) {
+      bloc.add(ChangePasswordSubmitted(current: _current.text, next: _next.text));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
@@ -67,120 +86,85 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
           }
         },
         builder: (context, state) {
-          final bloc = context.read<ChangePasswordBloc>();
-          return SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: state.success
-                          ? Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.check_circle_outline,
-                                    color: Colors.green.shade700, size: 40),
-                                const SizedBox(height: 8),
-                                Text(
-                                  loc.memberChangePasswordSuccessMessage,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.green.shade800),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  loc.memberChangePasswordTitle,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                if (state.generalError) ...[
-                                  const SizedBox(height: 12),
-                                  InlineError(
-                                    message: loc.memberChangePasswordChangeFailedError,
-                                    onRetry: () => bloc.add(ChangePasswordSubmitted(
-                                      current: _current.text,
-                                      next: _next.text,
-                                    )),
-                                  ),
-                                ],
-                                const SizedBox(height: 16),
-                                _field(
-                                  label: loc.memberChangePasswordCurrentPasswordLabel,
-                                  controller: _current,
-                                  errorText: _errorText(
-                                      state.currentError, state.currentServerError, loc),
-                                ),
-                                const SizedBox(height: 12),
-                                _field(
-                                  label: loc.memberChangePasswordNewPasswordLabel,
-                                  controller: _next,
-                                  errorText: _errorText(
-                                      state.newError, state.newServerError, loc),
-                                ),
-                                const SizedBox(height: 12),
-                                _field(
-                                  label: loc.memberChangePasswordConfirmPasswordLabel,
-                                  controller: _confirm,
-                                  errorText: _errorText(state.confirmError, null, loc),
-                                ),
-                                const SizedBox(height: 20),
-                                AppButton(
-                                  label: state.submitting
-                                      ? loc.memberChangePasswordSavingButton
-                                      : loc.memberChangePasswordSaveButton,
-                                  expanded: true,
-                                  onPressed: state.submitting
-                                      ? null
-                                      : () {
-                                          bloc.add(ChangePasswordValidated(
-                                            current: _current.text,
-                                            next: _next.text,
-                                            confirm: _confirm.text,
-                                          ));
-                                          if (validateChangePassword(
-                                            current: _current.text,
-                                            next: _next.text,
-                                            confirm: _confirm.text,
-                                          ).ok) {
-                                            bloc.add(ChangePasswordSubmitted(
-                                              current: _current.text,
-                                              next: _next.text,
-                                            ));
-                                          }
-                                        },
-                                ),
-                              ],
-                            ),
-                    ),
-                  ),
+          return PageBody(
+            maxWidth: _cardMaxWidth,
+            children: [
+              PageHeader(title: loc.memberChangePasswordTitle, icon: Icons.lock_reset_outlined),
+              AppCard(
+                padding: const EdgeInsets.all(20),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: state.success
+                      ? _SuccessPanel(message: loc.memberChangePasswordSuccessMessage)
+                      : _form(context, state, loc),
                 ),
               ),
-            ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _field({
-    required String label,
-    required TextEditingController controller,
-    String? errorText,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: true,
-      decoration: InputDecoration(
-        labelText: label,
-        errorText: errorText,
-        border: const OutlineInputBorder(),
+  Widget _form(BuildContext context, ChangePasswordState state, AppLocalizations loc) {
+    final bloc = context.read<ChangePasswordBloc>();
+    return AutofillGroup(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (state.generalError)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: NoticeBanner(
+                margin: EdgeInsets.zero,
+                tone: NoticeTone.error,
+                message: loc.memberChangePasswordChangeFailedError,
+                action: TextButton.icon(
+                  onPressed: () => bloc.add(
+                    ChangePasswordSubmitted(current: _current.text, next: _next.text),
+                  ),
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: Text(loc.commonRetry),
+                ),
+              ),
+            ),
+          _PasswordField(
+            label: loc.memberChangePasswordCurrentPasswordLabel,
+            controller: _current,
+            icon: Icons.lock_outline,
+            autofillHint: AutofillHints.password,
+            errorText: _errorText(state.currentError, state.currentServerError, loc),
+          ),
+          const SizedBox(height: 16),
+          _PasswordField(
+            label: loc.memberChangePasswordNewPasswordLabel,
+            controller: _next,
+            icon: Icons.key_outlined,
+            autofillHint: AutofillHints.newPassword,
+            errorText: _errorText(state.newError, state.newServerError, loc),
+          ),
+          const SizedBox(height: 16),
+          _PasswordField(
+            label: loc.memberChangePasswordConfirmPasswordLabel,
+            controller: _confirm,
+            icon: Icons.verified_user_outlined,
+            autofillHint: AutofillHints.newPassword,
+            textInputAction: TextInputAction.done,
+            onSubmitted: state.submitting ? null : (_) => _submit(bloc),
+            errorText: _errorText(state.confirmError, null, loc),
+          ),
+          const SizedBox(height: 24),
+          AppButton(
+            label: state.submitting
+                ? loc.memberChangePasswordSavingButton
+                : loc.memberChangePasswordSaveButton,
+            icon: Icons.check,
+            expanded: true,
+            loading: state.submitting,
+            onPressed: () => _submit(bloc),
+          ),
+        ],
       ),
     );
   }
@@ -198,5 +182,98 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
         loc.memberChangePasswordPasswordMismatchError,
       ChangePasswordFieldError.none => null,
     };
+  }
+}
+
+class _PasswordField extends StatefulWidget {
+  const _PasswordField({
+    required this.label,
+    required this.controller,
+    required this.icon,
+    required this.autofillHint,
+    this.errorText,
+    this.textInputAction = TextInputAction.next,
+    this.onSubmitted,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final IconData icon;
+  final String autofillHint;
+  final String? errorText;
+  final TextInputAction textInputAction;
+  final ValueChanged<String>? onSubmitted;
+
+  @override
+  State<_PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<_PasswordField> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return TextField(
+      controller: widget.controller,
+      obscureText: _obscure,
+      enableSuggestions: false,
+      autocorrect: false,
+      keyboardType: TextInputType.visiblePassword,
+      textInputAction: widget.textInputAction,
+      autofillHints: [widget.autofillHint],
+      onSubmitted: widget.onSubmitted,
+      decoration: InputDecoration(
+        labelText: widget.label,
+        errorText: widget.errorText,
+        errorMaxLines: 3,
+        prefixIcon: Icon(widget.icon),
+        suffixIcon: IconButton(
+          tooltip: _obscure ? loc.passwordfieldShow : loc.passwordfieldHide,
+          icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+          onPressed: () => setState(() => _obscure = !_obscure),
+        ),
+      ),
+    );
+  }
+}
+
+class _SuccessPanel extends StatelessWidget {
+  const _SuccessPanel({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.check_circle_outline, color: theme.colorScheme.primary, size: 40),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary),
+          ),
+          const SizedBox(height: 16),
+          const SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/layout/responsive.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/widgets.dart';
 import '../../domain/registration_form.dart';
@@ -16,39 +17,8 @@ class ReviewStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<RegistrationBloc>().state;
-    final bloc = context.read<RegistrationBloc>();
     final l10n = AppLocalizations.of(context);
     final f = state.form;
-
-    Widget buildSection({required String title, required int step, required List<(String, String)> rows}) {
-      return AppCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w700))),
-                TextButton(
-                  onPressed: () => bloc.add(StepGoToRequested(step)),
-                  child: Text(l10n.registrationReviewEdit),
-                ),
-              ],
-            ),
-            for (final (label, value) in rows)
-              if (value.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text.rich(
-                    TextSpan(children: [
-                      TextSpan(text: '$label: ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                      TextSpan(text: value),
-                    ]),
-                  ),
-                ),
-          ],
-        ),
-      );
-    }
 
     List<(String, String)> addressRows(bool current) {
       final a = current ? f.currentAddress : f.permanentAddress;
@@ -62,12 +32,19 @@ class ReviewStep extends StatelessWidget {
       ];
     }
 
+    final gender = switch (f.gender) {
+      Gender.male => l10n.registrationMemberInfoGenderMale,
+      Gender.female => l10n.registrationMemberInfoGenderFemale,
+      _ => '',
+    };
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         RegSectionTitle(text: l10n.registrationReviewIntro),
-        buildSection(
+        _ReviewSection(
           title: l10n.registrationReviewMemberInfoTitle,
+          icon: Icons.person_outline,
           step: 1,
           rows: [
             (l10n.registrationReviewNameLabel, f.fullName),
@@ -78,22 +55,25 @@ class ReviewStep extends StatelessWidget {
             (l10n.registrationMemberInfoOccupationLabel, f.occupation),
             (l10n.registrationMemberInfoNidLabel, f.nid),
             (l10n.registrationReviewMobileLabel, f.mobile),
-            (l10n.registrationMemberInfoGenderLabel, f.gender == Gender.male ? l10n.registrationMemberInfoGenderMale : (f.gender == Gender.female ? l10n.registrationMemberInfoGenderFemale : '')),
+            (l10n.registrationMemberInfoGenderLabel, gender),
             (l10n.registrationMemberInfoEmailLabel, f.email),
           ],
         ),
-        buildSection(
+        _ReviewSection(
           title: l10n.registrationAddressInfoCurrentAddressTitle,
+          icon: Icons.home_outlined,
           step: 1,
           rows: addressRows(true),
         ),
-        buildSection(
+        _ReviewSection(
           title: l10n.registrationAddressInfoPermanentAddressTitle,
+          icon: Icons.location_city_outlined,
           step: 1,
           rows: addressRows(false),
         ),
-        buildSection(
+        _ReviewSection(
           title: l10n.registrationReviewPropertyInfoTitle,
+          icon: Icons.home_work_outlined,
           step: 2,
           rows: [
             (l10n.registrationPropertyCountLabel, f.propertyCount?.toString() ?? ''),
@@ -101,19 +81,13 @@ class ReviewStep extends StatelessWidget {
             for (var i = 0; i < f.properties.length; i++)
               (
                 '${l10n.registrationPropertyItemTitle} #${i + 1}',
-                [
-                  f.properties[i].propertyType.join(', '),
-                  f.properties[i].khatianNo,
-                  'CS ${f.properties[i].dagNoCs} / RS ${f.properties[i].dagNoRs}',
-                  f.properties[i].landQuantity,
-                  f.properties[i].myShareQuantity,
-                  f.properties[i].ownership == OwnershipType.joint ? 'যৌথ' : 'একক',
-                ].where((s) => s.isNotEmpty).join(' · ')
+                _propertySummary(f.properties[i]),
               ),
           ],
         ),
-        buildSection(
+        _ReviewSection(
           title: l10n.registrationReviewUrgentContactAndNomineeTitle,
+          icon: Icons.contact_phone_outlined,
           step: 3,
           rows: [
             (l10n.registrationReviewUrgentContactLabel, f.urgentContactName),
@@ -122,16 +96,18 @@ class ReviewStep extends StatelessWidget {
             for (final n in f.nominees) (l10n.registrationNomineeNameLabel, n.name),
           ],
         ),
-        buildSection(
+        _ReviewSection(
           title: l10n.registrationReviewPaymentInfoTitle,
+          icon: Icons.payments_outlined,
           step: 4,
           rows: [
             (l10n.registrationPaymentReceiptNoLabel, f.receiptNo),
             (l10n.registrationReviewMethodLabel, f.paymentMethod.apiValue),
           ],
         ),
-        buildSection(
+        _ReviewSection(
           title: l10n.registrationReviewDeclarationTitle,
+          icon: Icons.gavel_outlined,
           step: 5,
           rows: [
             (
@@ -141,6 +117,58 @@ class ReviewStep extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  String _propertySummary(PropertyItem p) => [
+        p.propertyType.join(', '),
+        p.khatianNo,
+        'CS ${p.dagNoCs} / RS ${p.dagNoRs}',
+        p.landQuantity,
+        p.myShareQuantity,
+        p.ownership == OwnershipType.joint ? 'যৌথ' : 'একক',
+      ].where((s) => s.isNotEmpty).join(' · ');
+}
+
+class _ReviewSection extends StatelessWidget {
+  const _ReviewSection({
+    required this.title,
+    required this.icon,
+    required this.step,
+    required this.rows,
+  });
+
+  final String title;
+  final IconData icon;
+  final int step;
+  final List<(String, String)> rows;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final bloc = context.read<RegistrationBloc>();
+    return RegSectionCard(
+      title: title,
+      icon: icon,
+      // Icon-only on phones so long section titles keep their room.
+      trailing: context.isCompact
+          ? IconButton(
+              tooltip: l10n.registrationReviewEdit,
+              icon: const Icon(Icons.edit_outlined, size: 20),
+              onPressed: () => bloc.add(StepGoToRequested(step)),
+            )
+          : TextButton.icon(
+              icon: const Icon(Icons.edit_outlined, size: 16),
+              onPressed: () => bloc.add(StepGoToRequested(step)),
+              label: Text(l10n.registrationReviewEdit),
+            ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (label, value) in rows)
+            if (value.isNotEmpty) DetailRow(label: label, value: value),
+        ],
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/di/injector.dart';
+import '../../../core/layout/responsive.dart';
 import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -9,6 +10,8 @@ import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
 import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/config_lists_bloc.dart';
+import '../presentation/widgets/config_lists_widgets.dart';
+import '../presentation/widgets/management_widgets.dart';
 
 /// Config list management (Angular config-lists): category tabs, add item,
 /// activate/deactivate toggle, inline label edit, reorder.
@@ -24,9 +27,14 @@ class ConfigListsPage extends StatefulWidget {
 }
 
 class _ConfigListsPageState extends State<ConfigListsPage> {
+  /// Content width from which the add form sits beside the item list.
+  static const double _sidePaneMinWidth = 900;
+  static const double _sidePaneWidth = 320;
+
   final _valueController = TextEditingController();
   final _labelController = TextEditingController();
   final _editController = TextEditingController();
+  bool _adding = false;
 
   String _categoryLabel(AppLocalizations loc, String category) =>
       switch (category) {
@@ -61,97 +69,33 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
         ..add(const ConfigListsLoadRequested()),
       child: BlocConsumer<ConfigListsBloc, ConfigListsState>(
         listener: (context, state) {
-          if (state.saveError != null) {
-            showAppToast(context, loc.adminConfigListsErrorsSaveFailed,
-                error: true);
-          } else if (state.error != null) {
+          // Load failures on an empty list render inline instead.
+          if (state.saveError != null ||
+              (state.error != null && state.items.isNotEmpty)) {
             showAppToast(context, loc.adminConfigListsErrorsSaveFailed,
                 error: true);
           }
         },
         builder: (context, state) {
           final bloc = context.read<ConfigListsBloc>();
-          return ListView(
+          return PageBody(
+            onRefresh: () => reloadAndWait(
+                bloc, const ConfigListsLoadRequested(), (s) => s.loading),
             children: [
               PageHeader(
-                  title: loc.adminConfigListsTitle,
-                  subtitle: loc.adminConfigListsSubtitle),
-              // Category tabs.
-              SizedBox(
-                height: 48,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: configCategories.length,
-                  itemBuilder: (context, index) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(_categoryLabel(loc, configCategories[index])),
-                      selected:
-                          state.selectedCategory == configCategories[index],
-                      onSelected: (_) => bloc.add(
-                          ConfigListsCategorySelected(configCategories[index])),
-                    ),
-                  ),
-                ),
+                icon: Icons.tune,
+                title: loc.adminConfigListsTitle,
+                subtitle: loc.adminConfigListsSubtitle,
               ),
-              // Add item.
-              AppCard(
-                title: loc.adminConfigListsAddItem,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _valueController,
-                      enabled: canManage,
-                      decoration: InputDecoration(
-                        labelText: loc.adminConfigListsFormValue,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _labelController,
-                      enabled: canManage,
-                      decoration: InputDecoration(
-                        labelText: loc.adminConfigListsFormLabel,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: AppButton(
-                        label: loc.adminConfigListsFormSubmit,
-                        onPressed: canManage
-                            ? () async {
-                                await dispatchForBool(
-                                  bloc,
-                                  (c) => ConfigListItemAddRequested(
-                                    _valueController.text,
-                                    _labelController.text,
-                                    c,
-                                  ),
-                                );
-                                _valueController.clear();
-                                _labelController.clear();
-                              }
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
+              ManagementFilterChips<String>(
+                selected: state.selectedCategory,
+                options: [
+                  for (final c in configCategories) (c, _categoryLabel(loc, c)),
+                ],
+                onSelected: (c) => bloc.add(ConfigListsCategorySelected(c)),
               ),
-              if (state.loading)
-                const SkeletonLoader(lines: 4)
-              else if (state.items.isEmpty)
-                EmptyState(message: loc.adminConfigListsNoItems)
-              else
-                AppDataTableCards<ConfigListItem>(
-                  items: state.items,
-                  rowBuilder: (context, item) =>
-                      _row(context, loc, bloc, state, item, canManage),
-                ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 8),
+              _body(context, loc, bloc, state, canManage),
             ],
           );
         },
@@ -159,120 +103,140 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
     );
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, ConfigListsBloc bloc,
-      ConfigListsState state, ConfigListItem item, bool canManage) {
-    final busy = state.busyId == item.id;
-    final editing = state.editingId == item.id;
-    final index = state.items.indexOf(item);
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    item.value,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                StatusBadge(
-                  kind:
-                      item.isActive ? StatusKind.approved : StatusKind.neutral,
-                  label: item.isActive
-                      ? loc.adminConfigListsActive
-                      : loc.adminConfigListsInactive,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Inline label edit.
-            if (editing)
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _editController,
-                      autofocus: true,
-                      enabled: !busy,
-                      decoration:
-                          const InputDecoration(border: OutlineInputBorder()),
-                      onFieldSubmitted: (v) =>
-                          bloc.add(ConfigListItemLabelSaveRequested(item, v)),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.check),
-                    onPressed: busy
-                        ? null
-                        : () => bloc.add(ConfigListItemLabelSaveRequested(
-                            item, _editController.text)),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: busy
-                        ? null
-                        : () => bloc.add(const ConfigListItemEditCancelled()),
-                  ),
-                ],
-              )
-            else
-              InkWell(
-                onTap: canManage
-                    ? () {
-                        _editController.text = item.label;
-                        bloc.add(ConfigListItemEditStarted(item));
-                      }
-                    : null,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      Expanded(child: Text(item.label)),
-                      if (canManage) const Icon(Icons.edit_outlined, size: 16),
-                    ],
-                  ),
-                ),
+  Widget _body(BuildContext context, AppLocalizations loc,
+      ConfigListsBloc bloc, ConfigListsState state, bool canManage) {
+    final items = _items(loc, bloc, state, canManage);
+    if (!canManage) return Column(children: items);
+    return LayoutBuilder(
+      builder: (context, c) {
+        if (c.maxWidth < _sidePaneMinWidth) {
+          return Column(children: [_addForm(context, loc, bloc), ...items]);
+        }
+        return Padding(
+          padding: EdgeInsets.only(left: context.pageGutter),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: _sidePaneWidth,
+                child: _addForm(context, loc, bloc, margin: EdgeInsets.zero),
               ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  tooltip: loc.adminConfigListsActionsMoveUp,
-                  icon: const Icon(Icons.arrow_upward),
-                  onPressed: canManage && !busy && index > 0
-                      ? () => bloc.add(ConfigListItemMoveRequested(index, -1))
-                      : null,
-                ),
-                IconButton(
-                  tooltip: loc.adminConfigListsActionsMoveDown,
-                  icon: const Icon(Icons.arrow_downward),
-                  onPressed: canManage &&
-                          !busy &&
-                          index < state.items.length - 1
-                      ? () => bloc.add(ConfigListItemMoveRequested(index, 1))
-                      : null,
-                ),
-                if (canManage)
-                  Switch(
-                    value: item.isActive,
-                    onChanged: busy
-                        ? null
-                        : (_) =>
-                            bloc.add(ConfigListItemToggleActiveRequested(item)),
-                  ),
-              ],
-            ),
-          ],
-        ),
+              Expanded(child: Column(children: items)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _addForm(BuildContext context, AppLocalizations loc,
+      ConfigListsBloc bloc,
+      {EdgeInsetsGeometry? margin}) {
+    return AppCard(
+      title: loc.adminConfigListsAddItem,
+      margin: margin,
+      trailing: Icon(Icons.add_circle_outline,
+          color: Theme.of(context).colorScheme.primary),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextFormField(
+            controller: _valueController,
+            textInputAction: TextInputAction.next,
+            decoration:
+                InputDecoration(labelText: loc.adminConfigListsFormValue),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _labelController,
+            textInputAction: TextInputAction.done,
+            decoration:
+                InputDecoration(labelText: loc.adminConfigListsFormLabel),
+            onFieldSubmitted: (_) => _add(bloc),
+          ),
+          const SizedBox(height: 12),
+          AppButton(
+            label: loc.adminConfigListsFormSubmit,
+            icon: Icons.add,
+            expanded: true,
+            loading: _adding,
+            onPressed: () => _add(bloc),
+          ),
+        ],
       ),
+    );
+  }
+
+  Future<void> _add(ConfigListsBloc bloc) async {
+    if (_adding) return;
+    setState(() => _adding = true);
+    final ok = await dispatchForBool(
+      bloc,
+      (c) => ConfigListItemAddRequested(
+        _valueController.text,
+        _labelController.text,
+        c,
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _adding = false);
+    if (ok) {
+      _valueController.clear();
+      _labelController.clear();
+    }
+  }
+
+  List<Widget> _items(AppLocalizations loc, ConfigListsBloc bloc,
+      ConfigListsState state, bool canManage) {
+    if (state.loading) return const [SkeletonLoader(lines: 4, height: 96)];
+    if (state.items.isEmpty && state.error != null) {
+      return [
+        InlineError(
+          message: loc.adminConfigListsErrorsLoadFailed,
+          onRetry: () => bloc.add(const ConfigListsLoadRequested()),
+        ),
+      ];
+    }
+    if (state.items.isEmpty) {
+      return [
+        EmptyState(
+            message: loc.adminConfigListsNoItems, icon: Icons.list_alt_outlined),
+      ];
+    }
+    return [
+      ManagementRecordGrid(
+        minItemWidth: 300,
+        children: [
+          for (var i = 0; i < state.items.length; i++)
+            _itemCard(bloc, state, state.items[i], i, canManage),
+        ],
+      ),
+    ];
+  }
+
+  Widget _itemCard(ConfigListsBloc bloc, ConfigListsState state,
+      ConfigListItem item, int index, bool canManage) {
+    final busy = state.busyId == item.id;
+    final canMove = canManage && !busy;
+    return ConfigListItemCard(
+      item: item,
+      canManage: canManage,
+      busy: busy,
+      editing: state.editingId == item.id,
+      editController: _editController,
+      onEditStart: () {
+        _editController.text = item.label;
+        bloc.add(ConfigListItemEditStarted(item));
+      },
+      onEditSave: (v) => bloc.add(ConfigListItemLabelSaveRequested(item, v)),
+      onEditCancel: () => bloc.add(const ConfigListItemEditCancelled()),
+      onToggle: () => bloc.add(ConfigListItemToggleActiveRequested(item)),
+      onMoveUp: canMove && index > 0
+          ? () => bloc.add(ConfigListItemMoveRequested(index, -1))
+          : null,
+      onMoveDown: canMove && index < state.items.length - 1
+          ? () => bloc.add(ConfigListItemMoveRequested(index, 1))
+          : null,
     );
   }
 }

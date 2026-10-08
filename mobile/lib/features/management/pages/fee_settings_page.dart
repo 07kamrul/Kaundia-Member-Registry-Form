@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/di/injector.dart';
+import '../../../core/layout/responsive.dart';
 import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
+import '../domain/admin_entities.dart';
 import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/fee_settings_bloc.dart';
+import '../presentation/widgets/management_page_kit.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// Versioned fee settings (Angular fee-settings): active rows with expandable
@@ -23,7 +27,335 @@ class FeeSettingsPage extends StatefulWidget {
   State<FeeSettingsPage> createState() => _FeeSettingsPageState();
 }
 
+final monthlySubscriptionTierKeySet = <String>{
+  monthlySubscriptionTierKeys.base,
+  monthlySubscriptionTierKeys.rate,
+  monthlySubscriptionTierKeys.threshold,
+};
+
+final _numberFormatter = FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'));
+
+String _keyLabel(AppLocalizations loc, String key) => switch (key) {
+      'admission_fee' => loc.adminFeeSettingsKeysAdmissionFee,
+      'picnic_head_fee' => loc.adminFeeSettingsKeysPicnicHeadFee,
+      'picnic_additional_head_fee' =>
+        loc.adminFeeSettingsKeysPicnicAdditionalHeadFee,
+      monthlySubscriptionGroupKey => loc.adminFeeSettingsKeysMonthlySubscription,
+      _ => key,
+    };
+
+String _unitLabel(AppLocalizations loc, String? unit) => switch (unit) {
+      'taka' => loc.adminFeeSettingsUnitsTaka,
+      'percent' => loc.adminFeeSettingsUnitsPercent,
+      _ => unit ?? '',
+    };
+
+String _valueText(AppLocalizations loc, FeeSetting s) =>
+    '${s.value} ${_unitLabel(loc, s.unit)}'.trim();
+
 class _FeeSettingsPageState extends State<FeeSettingsPage> {
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return BlocProvider(
+      create: (_) => FeeSettingsBloc(
+          repository: AdminRepository(apiClient: sl<ApiClient>()))
+        ..add(const FeeSettingsLoadRequested()),
+      child: BlocConsumer<FeeSettingsBloc, FeeSettingsState>(
+        listenWhen: (a, b) => a.saveError != b.saveError,
+        listener: (context, state) {
+          if (state.saveError != null) {
+            showAppToast(context, loc.adminFeeSettingsErrorsSaveFailed,
+                error: true);
+          }
+        },
+        builder: (context, state) {
+          final bloc = context.read<FeeSettingsBloc>();
+          return PageBody(
+            onRefresh: () => reloadAndWait<FeeSettingsEvent, FeeSettingsState>(
+              bloc,
+              const FeeSettingsLoadRequested(),
+              (s) => s.loading,
+            ),
+            children: [
+              PageHeader(
+                icon: Icons.tune_rounded,
+                title: loc.adminFeeSettingsTitle,
+                subtitle: loc.adminFeeSettingsSubtitle,
+              ),
+              if (state.error != null)
+                InlineError(
+                  message: loc.adminFeeSettingsErrorsLoadFailed,
+                  onRetry: () => bloc.add(const FeeSettingsLoadRequested()),
+                ),
+              if (!state.loading && !state.picnicConfigured)
+                _Callout(text: loc.adminFeeSettingsPicnicNotConfigured),
+              _layout(context, state),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Active settings and the add-version form sit side by side on wide
+  /// screens, stacked (settings first) on phones.
+  Widget _layout(BuildContext context, FeeSettingsState state) {
+    final settings = _ActiveSettings(state: state);
+    final tools = _Tools(state: state);
+    if (!context.isExpanded) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [settings, tools],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: 3, child: settings),
+        Expanded(flex: 2, child: tools),
+      ],
+    );
+  }
+}
+
+class _Callout extends StatelessWidget {
+  const _Callout({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: context.pageGutter, vertical: 6),
+      color: scheme.errorContainer.withValues(alpha: 0.5),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: scheme.error),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text, style: TextStyle(color: scheme.error))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Current versions (tiered group first) with inline history.
+class _ActiveSettings extends StatelessWidget {
+  const _ActiveSettings({required this.state});
+
+  final FeeSettingsState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    if (state.loading) return const SkeletonLoader(lines: 4);
+    final tierBase = state.tierRow(monthlySubscriptionTierKeys.base);
+    final tierRate = state.tierRow(monthlySubscriptionTierKeys.rate);
+    final tierThreshold = state.tierRow(monthlySubscriptionTierKeys.threshold);
+    final hasTier = tierBase != null && tierRate != null && tierThreshold != null;
+    final rows = state.active
+        .where((s) => !monthlySubscriptionTierKeySet.contains(s.key))
+        .toList();
+    if (rows.isEmpty && !hasTier) {
+      return EmptyState(icon: Icons.tune_rounded, message: loc.adminFeeSettingsNoSettings);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionTitle(loc.adminFeeSettingsActive),
+        CardGrid(
+          minItemWidth: 300,
+          maxColumns: 2,
+          children: [
+            if (hasTier)
+              _SettingCard(
+                state: state,
+                historyKey: monthlySubscriptionGroupKey,
+                title: loc.adminFeeSettingsKeysMonthlySubscription,
+                value: loc.adminFeeSettingsTieredSummary(
+                    tierBase.value, tierRate.value, tierThreshold.value),
+                startDate: tierBase.startDate,
+              ),
+            for (final row in rows)
+              _SettingCard(
+                state: state,
+                historyKey: row.key,
+                title: _keyLabel(loc, row.key),
+                caption: row.key,
+                value: _valueText(loc, row),
+                startDate: row.startDate,
+                emphasise: true,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SettingCard extends StatelessWidget {
+  const _SettingCard({
+    required this.state,
+    required this.historyKey,
+    required this.title,
+    required this.value,
+    required this.startDate,
+    this.caption,
+    this.emphasise = false,
+  });
+
+  final FeeSettingsState state;
+  final String historyKey;
+  final String title;
+  final String? caption;
+  final String value;
+  final String startDate;
+  final bool emphasise;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final open = state.expandedKey == historyKey;
+    return AppCard(
+      margin: EdgeInsets.zero,
+      title: title,
+      trailing: IconButton(
+        icon: Icon(open ? Icons.history_toggle_off : Icons.history),
+        tooltip: open ? loc.adminFeeSettingsHideHistory : loc.adminFeeSettingsViewHistory,
+        isSelected: open,
+        onPressed: () =>
+            context.read<FeeSettingsBloc>().add(FeeSettingsHistoryToggled(historyKey)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 6,
+        children: [
+          if (caption != null)
+            Text(caption!, style: theme.textTheme.labelSmall),
+          Text(
+            value,
+            style: emphasise
+                ? theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.primary, fontWeight: FontWeight.w700)
+                : theme.textTheme.bodyMedium,
+          ),
+          MetaText(
+            icon: Icons.event_available_outlined,
+            text: '${loc.adminFeeSettingsTableStartDate}: $startDate',
+          ),
+          if (open) ...[
+            const Divider(height: 16),
+            if (state.loadingHistory)
+              const LinearProgressIndicator()
+            else
+              _HistoryList(state: state),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryList extends StatelessWidget {
+  const _HistoryList({required this.state});
+
+  final FeeSettingsState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isTiered = state.expandedKey == monthlySubscriptionGroupKey;
+    final rows = isTiered ? state.tieredHistory : state.history;
+    if (rows.isEmpty) {
+      return Text(loc.commonNoData, style: theme.textTheme.bodySmall);
+    }
+    return Column(
+      children: [
+        for (final h in rows)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isTiered ? '${_keyLabel(loc, h.key)}: ${_valueText(loc, h)}' : _valueText(loc, h),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      Text('${h.startDate} → ${h.endDate ?? '—'}',
+                          style: theme.textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                StatusBadge(
+                  kind: h.isActive ? StatusKind.approved : StatusKind.neutral,
+                  label: h.isActive
+                      ? loc.adminFeeSettingsActive
+                      : loc.adminFeeSettingsInactive,
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Add-version form plus the tiered fee calculator.
+class _Tools extends StatelessWidget {
+  const _Tools({required this.state});
+
+  final FeeSettingsState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final tierBase = state.tierRow(monthlySubscriptionTierKeys.base);
+    final tierRate = state.tierRow(monthlySubscriptionTierKeys.rate);
+    final tierThreshold = state.tierRow(monthlySubscriptionTierKeys.threshold);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionTitle(loc.adminFeeSettingsAddVersion),
+        _AddVersionForm(saving: state.saving),
+        if (tierBase != null && tierRate != null && tierThreshold != null) ...[
+          SectionTitle(loc.adminFeeSettingsCalculatorTitle),
+          _TierCalculator(
+            base: tierBase.value,
+            rate: tierRate.value,
+            threshold: tierThreshold.value,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _AddVersionForm extends StatefulWidget {
+  const _AddVersionForm({required this.saving});
+
+  final bool saving;
+
+  @override
+  State<_AddVersionForm> createState() => _AddVersionFormState();
+}
+
+class _AddVersionFormState extends State<_AddVersionForm> {
+  static const _unitOptions = ['taka', 'percent'];
+
   String _draftKey = '';
   final _valueController = TextEditingController();
   final _baseController = TextEditingController();
@@ -32,7 +364,15 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
   String _unit = '';
   String _startDate = '';
 
-  static const _unitOptions = ['taka', 'percent'];
+  bool get _isTiered => _draftKey == monthlySubscriptionGroupKey;
+
+  bool get _canSave =>
+      _draftKey.isNotEmpty &&
+      (_isTiered
+          ? _baseController.text.isNotEmpty &&
+              _rateController.text.isNotEmpty &&
+              _thresholdController.text.isNotEmpty
+          : _valueController.text.isNotEmpty);
 
   @override
   void dispose() {
@@ -43,315 +383,118 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
     super.dispose();
   }
 
-  String _keyLabel(AppLocalizations loc, String key) => switch (key) {
-        'admission_fee' => loc.adminFeeSettingsKeysAdmissionFee,
-        'picnic_head_fee' => loc.adminFeeSettingsKeysPicnicHeadFee,
-        'picnic_additional_head_fee' =>
-          loc.adminFeeSettingsKeysPicnicAdditionalHeadFee,
-        monthlySubscriptionGroupKey =>
-          loc.adminFeeSettingsKeysMonthlySubscription,
-        _ => key,
-      };
-
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    return BlocProvider(
-      create: (_) => FeeSettingsBloc(
-          repository: AdminRepository(apiClient: sl<ApiClient>()))
-        ..add(const FeeSettingsLoadRequested()),
-      child: BlocConsumer<FeeSettingsBloc, FeeSettingsState>(
-        listener: (context, state) {
-          if (state.saveError != null) {
-            showAppToast(context, loc.adminFeeSettingsErrorsSaveFailed,
-                error: true);
-          }
-        },
-        builder: (context, state) {
-          final bloc = context.read<FeeSettingsBloc>();
-          final tierBase = state.tierRow(monthlySubscriptionTierKeys.base);
-          final tierRate = state.tierRow(monthlySubscriptionTierKeys.rate);
-          final tierThreshold =
-              state.tierRow(monthlySubscriptionTierKeys.threshold);
-          final tableRows = state.active
-              .where((s) => !monthlySubscriptionTierKeySet.contains(s.key))
-              .toList();
-
-          return ListView(
-            children: [
-              PageHeader(
-                  title: loc.adminFeeSettingsTitle,
-                  subtitle: loc.adminFeeSettingsSubtitle),
-              if (state.error != null)
-                InlineError(
-                    message: loc.adminFeeSettingsErrorsLoadFailed,
-                    onRetry: () => bloc.add(const FeeSettingsLoadRequested())),
-
-              _addVersionForm(context, loc, bloc, state),
-
-              // Tiered calculator.
-              if (tierBase != null && tierRate != null && tierThreshold != null)
-                _TierCalculator(
-                  base: tierBase.value,
-                  rate: tierRate.value,
-                  threshold: tierThreshold.value,
-                ),
-
-              if (!state.loading && !state.picnicConfigured)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    loc.adminFeeSettingsPicnicNotConfigured,
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                ),
-
-              if (state.loading)
-                const SkeletonLoader(lines: 4)
-              else ...[
-                // Tiered summary row.
-                if (tierBase != null &&
-                    tierRate != null &&
-                    tierThreshold != null)
-                  AppCard(
-                    title: loc.adminFeeSettingsKeysMonthlySubscription,
-                    trailing: IconButton(
-                      icon: const Icon(Icons.history),
-                      tooltip: state.expandedKey == monthlySubscriptionGroupKey
-                          ? loc.adminFeeSettingsHideHistory
-                          : loc.adminFeeSettingsViewHistory,
-                      onPressed: () => bloc.add(FeeSettingsHistoryToggled(
-                          monthlySubscriptionGroupKey)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(loc.adminFeeSettingsTieredSummary(
-                          tierBase.value,
-                          tierThreshold.value,
-                          tierRate.value,
-                        )),
-                        InfoRow(
-                            label: loc.adminFeeSettingsTableStartDate,
-                            value: tierBase.startDate),
-                      ],
-                    ),
-                  ),
-                for (final row in tableRows)
-                  AppCard(
-                    title: '${_keyLabel(loc, row.key)} (${row.key})',
-                    trailing: IconButton(
-                      icon: const Icon(Icons.history),
-                      tooltip: state.expandedKey == row.key
-                          ? loc.adminFeeSettingsHideHistory
-                          : loc.adminFeeSettingsViewHistory,
-                      onPressed: () =>
-                          bloc.add(FeeSettingsHistoryToggled(row.key)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: InfoRow(
-                                label: loc.adminFeeSettingsTableValue,
-                                value: '${row.value} ${row.unit ?? ''}'.trim(),
-                              ),
-                            ),
-                          ],
-                        ),
-                        InfoRow(
-                            label: loc.adminFeeSettingsTableStartDate,
-                            value: row.startDate),
-                      ],
-                    ),
-                  ),
-                // Expanded history panel.
-                if (state.expandedKey != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: state.loadingHistory
-                            ? const SkeletonLoader(lines: 2)
-                            : _HistoryList(state: state, loc: loc),
-                      ),
-                    ),
-                  ),
-                if (tableRows.isEmpty &&
-                    state.expandedKey == null &&
-                    tierBase == null)
-                  EmptyState(message: loc.adminFeeSettingsNoSettings),
-              ],
-              const SizedBox(height: 32),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _addVersionForm(BuildContext context, AppLocalizations loc,
-      FeeSettingsBloc bloc, FeeSettingsState state) {
-    final isTiered = _draftKey == monthlySubscriptionGroupKey;
-    final canSave = _draftKey.isNotEmpty &&
-        (isTiered
-            ? _baseController.text.isNotEmpty &&
-                _rateController.text.isNotEmpty &&
-                _thresholdController.text.isNotEmpty
-            : _valueController.text.isNotEmpty);
-
     return AppCard(
-      title: loc.adminFeeSettingsAddVersion,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
         children: [
-          DropdownButtonFormField<String>(
-            initialValue: _draftKey.isEmpty ? null : _draftKey,
-            decoration: InputDecoration(
-              labelText: loc.adminFeeSettingsFormKey,
-              border: const OutlineInputBorder(),
-            ),
-            items: [
-              for (final k in knownFeeKeys)
-                DropdownMenuItem<String>(
-                    value: k, child: Text(_keyLabel(loc, k))),
-            ],
+          LabeledDropdown<String>(
+            label: loc.adminFeeSettingsFormKey,
+            value: _draftKey.isEmpty ? null : _draftKey,
+            prefixIcon: Icons.key_outlined,
+            options: [for (final k in knownFeeKeys) (k, _keyLabel(loc, k))],
             onChanged: (v) => setState(() => _draftKey = v ?? ''),
           ),
-          if (isTiered) ...[
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _baseController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: loc.adminFeeSettingsFormBaseAmount,
-                border: const OutlineInputBorder(),
-              ),
+          if (_isTiered) ...[
+            _numberField(_baseController, loc.adminFeeSettingsFormBaseAmount),
+            FieldPair(
+              first: _numberField(_rateController, loc.adminFeeSettingsFormAdditionalRate,
+                  helper: loc.adminFeeSettingsFormAdditionalRateHint),
+              second: _numberField(
+                  _thresholdController, loc.adminFeeSettingsFormBaseThreshold),
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _rateController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: loc.adminFeeSettingsFormAdditionalRate,
-                helperText: loc.adminFeeSettingsFormAdditionalRateHint,
-                border: const OutlineInputBorder(),
-              ),
+          ] else
+            _numberField(_valueController, loc.adminFeeSettingsFormValue),
+          FieldPair(
+            first: LabeledDropdown<String>(
+              label: loc.adminFeeSettingsFormUnit,
+              value: _unit.isEmpty ? null : _unit,
+              options: [for (final u in _unitOptions) (u, _unitLabel(loc, u))],
+              onChanged: (v) => setState(() => _unit = v ?? ''),
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _thresholdController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: loc.adminFeeSettingsFormBaseThreshold,
-                border: const OutlineInputBorder(),
-              ),
+            second: DateField(
+              label: loc.adminFeeSettingsFormStartDate,
+              hint: loc.adminFeeSettingsFormStartDateHint,
+              value: _startDate,
+              onChanged: (v) => setState(() => _startDate = v),
             ),
-          ] else ...[
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _valueController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: loc.adminFeeSettingsFormValue,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            initialValue: _unit.isEmpty ? null : _unit,
-            decoration: InputDecoration(
-              labelText: loc.adminFeeSettingsFormUnit,
-              border: const OutlineInputBorder(),
-            ),
-            items: [
-              for (final u in _unitOptions)
-                DropdownMenuItem<String>(
-                  value: u,
-                  child: Text(u == 'taka'
-                      ? loc.adminFeeSettingsUnitsTaka
-                      : loc.adminFeeSettingsUnitsPercent),
-                ),
-            ],
-            onChanged: (v) => setState(() => _unit = v ?? ''),
           ),
-          const SizedBox(height: 12),
-          DateField(
-            label: loc.adminFeeSettingsFormStartDate,
-            hint: loc.adminFeeSettingsFormStartDateHint,
-            value: _startDate,
-            onChanged: (v) => setState(() => _startDate = v),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              label: loc.adminFeeSettingsFormSubmit,
-              onPressed: canSave && !state.saving
-                  ? () async {
-                      final confirmed = await confirmDialog(
-                        context,
-                        title: loc.adminFeeSettingsConfirmTitle,
-                        message: loc.adminFeeSettingsConfirmMessage,
-                        confirmLabel: loc.adminFeeSettingsFormSubmit,
-                      );
-                      if (!confirmed || !context.mounted) return;
-                      final bloc = context.read<FeeSettingsBloc>();
-                      final ok = isTiered
-                          ? await dispatchForBool(
-                              bloc,
-                              (c) => FeeSettingTieredVersionCreateRequested(
-                                  completer: c,
-                                  baseAmount:
-                                      num.tryParse(_baseController.text) ?? 0,
-                                  additionalRate:
-                                      num.tryParse(_rateController.text) ?? 0,
-                                  baseThreshold:
-                                      num.tryParse(_thresholdController.text) ??
-                                          0,
-                                  unit: _unit.isEmpty ? null : _unit,
-                                  startDate:
-                                      _startDate.isEmpty ? null : _startDate))
-                          : await dispatchForBool(
-                              bloc,
-                              (c) => FeeSettingVersionCreateRequested(
-                                  completer: c,
-                                  key: _draftKey,
-                                  value:
-                                      num.tryParse(_valueController.text) ?? 0,
-                                  unit: _unit.isEmpty ? null : _unit,
-                                  startDate:
-                                      _startDate.isEmpty ? null : _startDate));
-                      if (ok && mounted) {
-                        setState(() {
-                          _draftKey = '';
-                          _valueController.clear();
-                          _baseController.clear();
-                          _rateController.clear();
-                          _thresholdController.clear();
-                          _unit = '';
-                          _startDate = '';
-                        });
-                      }
-                    }
-                  : null,
-            ),
+          AppButton(
+            label: loc.adminFeeSettingsFormSubmit,
+            icon: Icons.add_task_rounded,
+            expanded: true,
+            loading: widget.saving,
+            onPressed: _canSave ? _submit : null,
           ),
         ],
       ),
     );
   }
-}
 
-final monthlySubscriptionTierKeySet = <String>{
-  monthlySubscriptionTierKeys.base,
-  monthlySubscriptionTierKeys.rate,
-  monthlySubscriptionTierKeys.threshold,
-};
+  Widget _numberField(TextEditingController controller, String label,
+      {String? helper}) {
+    return TextField(
+      controller: controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [_numberFormatter],
+      onChanged: (_) => setState(() {}),
+      decoration: InputDecoration(
+        labelText: label,
+        helperText: helper,
+        helperMaxLines: 3,
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    final loc = AppLocalizations.of(context);
+    final confirmed = await confirmDialog(
+      context,
+      title: loc.adminFeeSettingsConfirmTitle,
+      message: loc.adminFeeSettingsConfirmMessage,
+      confirmLabel: loc.adminFeeSettingsFormSubmit,
+    );
+    if (!confirmed || !mounted) return;
+    final bloc = context.read<FeeSettingsBloc>();
+    final unit = _unit.isEmpty ? null : _unit;
+    final startDate = _startDate.isEmpty ? null : _startDate;
+    final ok = _isTiered
+        ? await dispatchForBool(
+            bloc,
+            (c) => FeeSettingTieredVersionCreateRequested(
+                completer: c,
+                baseAmount: num.tryParse(_baseController.text) ?? 0,
+                additionalRate: num.tryParse(_rateController.text) ?? 0,
+                baseThreshold: num.tryParse(_thresholdController.text) ?? 0,
+                unit: unit,
+                startDate: startDate))
+        : await dispatchForBool(
+            bloc,
+            (c) => FeeSettingVersionCreateRequested(
+                completer: c,
+                key: _draftKey,
+                value: num.tryParse(_valueController.text) ?? 0,
+                unit: unit,
+                startDate: startDate));
+    if (ok && mounted) _reset();
+  }
+
+  void _reset() {
+    setState(() {
+      _draftKey = '';
+      _valueController.clear();
+      _baseController.clear();
+      _rateController.clear();
+      _thresholdController.clear();
+      _unit = '';
+      _startDate = '';
+    });
+    showAppToast(context, AppLocalizations.of(context).commonSave);
+  }
+}
 
 class _TierCalculator extends StatefulWidget {
   const _TierCalculator({
@@ -377,74 +520,51 @@ class _TierCalculatorState extends State<_TierCalculator> {
     super.dispose();
   }
 
+  num? _fee() {
+    final landSize = num.tryParse(_controller.text);
+    if (landSize == null || landSize <= 0) return null;
+    if (landSize <= widget.threshold) return widget.base;
+    final extra = (landSize - widget.threshold).ceil();
+    return widget.base + extra * widget.rate;
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final landSize = num.tryParse(_controller.text);
-    num? fee;
-    if (landSize != null && landSize > 0) {
-      if (landSize <= widget.threshold) {
-        fee = widget.base;
-      } else {
-        final extra = (landSize - widget.threshold).ceil();
-        fee = widget.base + extra * widget.rate;
-      }
-    }
+    final theme = Theme.of(context);
+    final fee = _fee();
     return AppCard(
-      title: loc.adminFeeSettingsCalculatorTitle,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
         children: [
-          TextFormField(
+          TextField(
             controller: _controller,
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [_numberFormatter],
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               labelText: loc.adminFeeSettingsCalculatorLandSize,
-              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.square_foot_rounded),
             ),
           ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              fee == null ? '—' : '${loc.adminFeeSettingsCalculatorFee}: $fee',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(loc.adminFeeSettingsCalculatorFee,
+                    style: theme.textTheme.bodyMedium),
+              ),
+              Text(
+                fee == null
+                    ? '—'
+                    : formatTaka(fee, decimals: fee % 1 == 0 ? 0 : 2),
+                style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.primary, fontWeight: FontWeight.w700),
+              ),
+            ],
           ),
         ],
       ),
-    );
-  }
-}
-
-class _HistoryList extends StatelessWidget {
-  const _HistoryList({required this.state, required this.loc});
-
-  final FeeSettingsState state;
-  final AppLocalizations loc;
-
-  @override
-  Widget build(BuildContext context) {
-    final isTiered = state.expandedKey == monthlySubscriptionGroupKey;
-    final rows = isTiered ? state.tieredHistory : state.history;
-    if (rows.isEmpty) return Text(loc.commonNoData);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final h in rows)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-            title: Text('${h.value} ${h.unit ?? ''}'.trim()),
-            subtitle: Text('${h.startDate} → ${h.endDate ?? '—'}'),
-            trailing: StatusBadge(
-              kind: h.isActive ? StatusKind.approved : StatusKind.neutral,
-              label: h.isActive
-                  ? loc.adminFeeSettingsActive
-                  : loc.adminFeeSettingsInactive,
-            ),
-          ),
-      ],
     );
   }
 }

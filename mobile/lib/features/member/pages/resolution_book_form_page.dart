@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injector.dart';
+import '../../../core/layout/responsive.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/resolution_book_repository.dart';
 import '../domain/resolution_book_entities.dart';
 import '../presentation/bloc/resolution_book_form_bloc.dart';
+import '../presentation/widgets/member_ui.dart';
 
 /// Port of Angular MeetingFormComponent (reachable only with
 /// manage_resolution_book, enforced by the router guards): meeting core
@@ -74,256 +78,315 @@ class _FormView extends StatelessWidget {
     AppLocalizations loc,
     ResolutionBookFormBloc bloc,
   ) {
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 32),
+    final submitting = state.status == ResolutionBookFormStatus.submitting;
+    return PageBody(
+      maxWidth: Breakpoints.formMaxWidth,
       children: [
         PageHeader(
           title: state.isEdit ? loc.rbFormEditTitle : loc.rbFormTitle,
           subtitle: loc.rbFormSubtitle,
+          icon: state.isEdit ? Icons.edit_note : Icons.post_add,
         ),
-        AppCard(
-          title: loc.rbFormMeetingInfo,
-          child: Column(
+        _MeetingInfoCard(state: state, bloc: bloc),
+        _ResolutionsCard(state: state, bloc: bloc),
+        if (state.submitAttempted && !state.formValid)
+          NoticeBanner(tone: NoticeTone.error, message: loc.rbFormSubmitError),
+        Gutter(
+          vertical: 12,
+          child: Row(
             children: [
-              _text(
-                label: loc.rbFormMeetingNo,
-                value: state.meetingNo,
-                onChanged: (v) => bloc.add(ResolutionBookFormChanged(meetingNo: v)),
+              Expanded(
+                child: AppButton(
+                  label: loc.commonCancel,
+                  variant: AppButtonVariant.secondary,
+                  onPressed: submitting
+                      ? null
+                      : () => context.canPop() ? context.pop() : context.go('/resolution-book'),
+                ),
               ),
-              _dateField(
-                context,
-                label: loc.rbFormDate,
-                value: state.date,
-                onPicked: (v) => bloc.add(ResolutionBookFormChanged(date: v)),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: AppButton(
+                  label: submitting ? loc.commonLoading : loc.rbFormSave,
+                  icon: Icons.save_outlined,
+                  loading: submitting,
+                  onPressed: () => bloc.add(const ResolutionBookFormSubmitted()),
+                ),
               ),
-              _text(
-                label: loc.rbFormTime,
-                value: state.time,
-                onChanged: (v) => bloc.add(ResolutionBookFormChanged(time: v)),
-              ),
-              DropdownButtonFormField<MeetingType>(
-                initialValue: state.meetingType,
-                decoration: InputDecoration(
-                    labelText: loc.rbFormType, border: const OutlineInputBorder()),
-                items: [
-                  DropdownMenuItem(value: MeetingType.online, child: Text(loc.rbTypeOnline)),
-                  DropdownMenuItem(value: MeetingType.offline, child: Text(loc.rbTypeOffline)),
-                ],
-                onChanged: (v) =>
-                    bloc.add(ResolutionBookFormChanged(meetingType: v ?? MeetingType.offline)),
-              ),
-              const SizedBox(height: 10),
-              _text(
-                label: loc.rbFormChairperson,
-                value: state.chairperson,
-                hint: loc.rbFormChairpersonPlaceholder,
-                onChanged: (v) => bloc.add(ResolutionBookFormChanged(chairperson: v)),
-              ),
-              _text(
-                label: loc.rbFormAgenda,
-                value: state.agenda,
-                maxLines: 3,
-                onChanged: (v) => bloc.add(ResolutionBookFormChanged(agenda: v)),
-              ),
-              _text(
-                label: loc.rbFormSummary,
-                value: state.summary,
-                maxLines: 3,
-                onChanged: (v) => bloc.add(ResolutionBookFormChanged(summary: v)),
-              ),
-              _dateField(
-                context,
-                label: loc.rbFormNextMeeting,
-                value: state.nextMeetingDate,
-                onPicked: (v) => bloc.add(ResolutionBookFormChanged(nextMeetingDate: v)),
-              ),
-              DropdownButtonFormField<MeetingStatus>(
-                initialValue: state.status_,
-                decoration: InputDecoration(
-                    labelText: loc.rbFormStatus, border: const OutlineInputBorder()),
-                items: [
-                  DropdownMenuItem(value: MeetingStatus.completed, child: Text(loc.rbStatusCompleted)),
-                  DropdownMenuItem(value: MeetingStatus.scheduled, child: Text(loc.rbStatusScheduled)),
-                  DropdownMenuItem(value: MeetingStatus.cancelled, child: Text(loc.rbStatusCancelled)),
-                ],
-                onChanged: (v) =>
-                    bloc.add(ResolutionBookFormChanged(status: v ?? MeetingStatus.completed)),
-              ),
-            ].expand((w) sync* {
-              yield w;
-              yield const SizedBox(height: 10);
-            }).toList(),
+            ],
           ),
         ),
-        AppCard(
-          title: loc.rbFormResolutions,
-          trailing: IconButton(
-            tooltip: loc.rbFormAddResolution,
-            icon: const Icon(Icons.add),
+      ],
+    );
+  }
+}
+
+class _MeetingInfoCard extends StatelessWidget {
+  const _MeetingInfoCard({required this.state, required this.bloc});
+
+  final ResolutionBookFormState state;
+  final ResolutionBookFormBloc bloc;
+
+  void _change(ResolutionBookFormChanged event) => bloc.add(event);
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return AppCard(
+      title: loc.rbFormMeetingInfo,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FieldGrid(children: _gridFields(loc)),
+          const SizedBox(height: 12),
+          SyncedTextField(
+            label: loc.rbFormAgenda,
+            value: state.agenda,
+            maxLines: 5,
+            onChanged: (v) => _change(ResolutionBookFormChanged(agenda: v)),
+          ),
+          const SizedBox(height: 12),
+          SyncedTextField(
+            label: loc.rbFormSummary,
+            value: state.summary,
+            maxLines: 6,
+            onChanged: (v) => _change(ResolutionBookFormChanged(summary: v)),
+          ),
+          const SizedBox(height: 12),
+          DatePickerField(
+            label: loc.rbFormNextMeeting,
+            value: state.nextMeetingDate,
+            icon: Icons.event_repeat_outlined,
+            onPicked: (v) => _change(ResolutionBookFormChanged(nextMeetingDate: v)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _gridFields(AppLocalizations loc) {
+    return [
+      SyncedTextField(
+        label: loc.rbFormMeetingNo,
+        value: state.meetingNo,
+        icon: Icons.tag,
+        onChanged: (v) => _change(ResolutionBookFormChanged(meetingNo: v)),
+      ),
+      DatePickerField(
+        label: loc.rbFormDate,
+        value: state.date,
+        onPicked: (v) => _change(ResolutionBookFormChanged(date: v)),
+      ),
+      SyncedTextField(
+        label: loc.rbFormTime,
+        value: state.time,
+        icon: Icons.schedule,
+        keyboardType: TextInputType.datetime,
+        onChanged: (v) => _change(ResolutionBookFormChanged(time: v)),
+      ),
+      DropdownButtonFormField<MeetingType>(
+        initialValue: state.meetingType,
+        isExpanded: true,
+        decoration: InputDecoration(
+          labelText: loc.rbFormType,
+          prefixIcon: const Icon(Icons.videocam_outlined),
+        ),
+        items: [
+          DropdownMenuItem(value: MeetingType.online, child: Text(loc.rbTypeOnline)),
+          DropdownMenuItem(value: MeetingType.offline, child: Text(loc.rbTypeOffline)),
+        ],
+        onChanged: (v) =>
+            _change(ResolutionBookFormChanged(meetingType: v ?? MeetingType.offline)),
+      ),
+      SyncedTextField(
+        label: loc.rbFormChairperson,
+        value: state.chairperson,
+        hint: loc.rbFormChairpersonPlaceholder,
+        icon: Icons.person_outline,
+        keyboardType: TextInputType.name,
+        onChanged: (v) => _change(ResolutionBookFormChanged(chairperson: v)),
+      ),
+      DropdownButtonFormField<MeetingStatus>(
+        initialValue: state.status_,
+        isExpanded: true,
+        decoration: InputDecoration(
+          labelText: loc.rbFormStatus,
+          prefixIcon: const Icon(Icons.flag_outlined),
+        ),
+        items: [
+          DropdownMenuItem(value: MeetingStatus.completed, child: Text(loc.rbStatusCompleted)),
+          DropdownMenuItem(value: MeetingStatus.scheduled, child: Text(loc.rbStatusScheduled)),
+          DropdownMenuItem(value: MeetingStatus.cancelled, child: Text(loc.rbStatusCancelled)),
+        ],
+        onChanged: (v) =>
+            _change(ResolutionBookFormChanged(status: v ?? MeetingStatus.completed)),
+      ),
+    ];
+  }
+}
+
+class _ResolutionsCard extends StatelessWidget {
+  const _ResolutionsCard({required this.state, required this.bloc});
+
+  final ResolutionBookFormState state;
+  final ResolutionBookFormBloc bloc;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return AppCard(
+      title: '${loc.rbFormResolutions} (${state.resolutions.length})',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < state.resolutions.length; i++) ...[
+            if (i > 0) const SizedBox(height: 12),
+            _ResolutionEditor(index: i, state: state, bloc: bloc),
+          ],
+          AddItemButton(
+            label: loc.rbFormAddResolution,
             onPressed: () => bloc.add(const ResolutionBookFormResolutionAdded()),
           ),
-          child: state.resolutions.isEmpty
-              ? Text(loc.rbFormAddResolution)
-              : Column(
-                  children: [
-                    for (var i = 0; i < state.resolutions.length; i++)
-                      _resolutionCard(context, bloc, state, i, loc),
-                  ],
-                ),
-        ),
-        if (state.submitAttempted && !state.formValid)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              loc.rbFormSubmitError,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: AppButton(
-            label: state.status == ResolutionBookFormStatus.submitting
-                ? loc.commonLoading
-                : loc.rbFormSave,
-            expanded: true,
-            onPressed: state.status == ResolutionBookFormStatus.submitting
-                ? null
-                : () => bloc.add(const ResolutionBookFormSubmitted()),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+}
 
-  Widget _resolutionCard(
-    BuildContext context,
-    ResolutionBookFormBloc bloc,
-    ResolutionBookFormState state,
-    int index,
-    AppLocalizations loc,
-  ) {
+class _ResolutionEditor extends StatelessWidget {
+  const _ResolutionEditor({required this.index, required this.state, required this.bloc});
+
+  final int index;
+  final ResolutionBookFormState state;
+  final ResolutionBookFormBloc bloc;
+
+  void _update(FormResolutionRow row) => bloc.add(ResolutionBookFormResolutionChanged(index, row));
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final row = state.resolutions[index];
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text('${loc.rbDetailResolutionNo} ${index + 1}')),
-                IconButton(
-                  tooltip: loc.rbFormRemoveResolution,
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () =>
-                      bloc.add(ResolutionBookFormResolutionRemoved(index)),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
+        border: Border.all(color: theme.colorScheme.outline),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  loc.rbDetailResolutionNo(index + 1),
+                  style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary),
                 ),
-              ],
-            ),
-            TextField(
-              decoration: InputDecoration(
-                labelText: loc.rbFormDecision,
-                border: const OutlineInputBorder(),
-                errorText: state.submitAttempted && row.decision.trim().isEmpty
-                    ? loc.rbFormSubmitError
-                    : null,
               ),
-              onChanged: (v) => bloc
-                  .add(ResolutionBookFormResolutionChanged(index, row.copyWith(decision: v))),
-            ),
-            Row(
-              children: [
-                _voteField(context, loc.rbVoteFor, row.voteFor,
-                    (v) => bloc.add(ResolutionBookFormResolutionChanged(index, row.copyWith(voteFor: v)))),
-                _voteField(context, loc.rbVoteAgainst, row.voteAgainst,
-                    (v) => bloc.add(ResolutionBookFormResolutionChanged(index, row.copyWith(voteAgainst: v)))),
-                _voteField(context, loc.rbVoteNeutral, row.voteNeutral,
-                    (v) => bloc.add(ResolutionBookFormResolutionChanged(index, row.copyWith(voteNeutral: v)))),
-              ],
-            ),
-            TextField(
-              decoration: InputDecoration(
-                labelText: loc.rbFormTask,
-                border: const OutlineInputBorder(),
+              IconButton(
+                tooltip: loc.rbFormRemoveResolution,
+                icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+                onPressed: () => bloc.add(ResolutionBookFormResolutionRemoved(index)),
               ),
-              onChanged: (v) =>
-                  bloc.add(ResolutionBookFormResolutionChanged(index, row.copyWith(task: v))),
-            ),
-          ].expand((w) sync* {
-            yield w;
-            yield const SizedBox(height: 10);
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _voteField(BuildContext context, String label, int value, ValueChanged<int> onChanged) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(right: 6),
-        child: TextFormField(
-          initialValue: '$value',
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: label,
-            border: const OutlineInputBorder(),
+            ],
           ),
-          onChanged: (v) => onChanged(int.tryParse(v) ?? 0),
-        ),
+          SyncedTextField(
+            label: loc.rbFormDecision,
+            value: row.decision,
+            maxLines: 3,
+            errorText: state.submitAttempted && row.decision.trim().isEmpty
+                ? loc.rbFormSubmitError
+                : null,
+            onChanged: (v) => _update(row.copyWith(decision: v)),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _VoteField(
+                  label: loc.rbVoteFor,
+                  value: row.voteFor,
+                  onChanged: (v) => _update(row.copyWith(voteFor: v)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _VoteField(
+                  label: loc.rbVoteAgainst,
+                  value: row.voteAgainst,
+                  onChanged: (v) => _update(row.copyWith(voteAgainst: v)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _VoteField(
+                  label: loc.rbVoteNeutral,
+                  value: row.voteNeutral,
+                  onChanged: (v) => _update(row.copyWith(voteNeutral: v)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SyncedTextField(
+            label: loc.rbFormTask,
+            value: row.task,
+            icon: Icons.task_alt,
+            textInputAction: TextInputAction.done,
+            onChanged: (v) => _update(row.copyWith(task: v)),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _text({
-    required String label,
-    required String value,
-    String? hint,
-    int maxLines = 1,
-    required ValueChanged<String> onChanged,
-  }) {
+/// Numeric vote input. Re-syncs from state only when the parsed number
+/// differs, so clearing the field to retype doesn't snap back to "0".
+class _VoteField extends StatefulWidget {
+  const _VoteField({required this.label, required this.value, required this.onChanged});
+
+  final String label;
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  @override
+  State<_VoteField> createState() => _VoteFieldState();
+}
+
+class _VoteFieldState extends State<_VoteField> {
+  late final TextEditingController _controller = TextEditingController(text: '${widget.value}');
+
+  @override
+  void didUpdateWidget(covariant _VoteField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if ((int.tryParse(_controller.text) ?? 0) != widget.value) {
+      _controller.text = '${widget.value}';
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return TextField(
-      controller: TextEditingController(text: value),
-      maxLines: maxLines,
+      controller: _controller,
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.next,
+      textAlign: TextAlign.center,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
+        labelText: widget.label,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
       ),
-      onChanged: onChanged,
-    );
-  }
-
-  Widget _dateField(
-    BuildContext context, {
-    required String label,
-    required String value,
-    required ValueChanged<String> onPicked,
-  }) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            readOnly: true,
-            controller: TextEditingController(text: value),
-            decoration: InputDecoration(
-              labelText: label,
-              border: const OutlineInputBorder(),
-            ),
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-                initialDate: DateTime.tryParse(value) ?? DateTime.now(),
-              );
-              if (picked != null) {
-                onPicked(picked.toIso8601String().substring(0, 10));
-              }
-            },
-          ),
-        ),
-      ],
+      onChanged: (v) => widget.onChanged(int.tryParse(v) ?? 0),
     );
   }
 }

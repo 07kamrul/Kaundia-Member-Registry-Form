@@ -24,138 +24,136 @@ class SubmissionsListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) => SubmissionsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
         ..add(const SubmissionsLoadRequested()),
-      child: BlocBuilder<SubmissionsBloc, SubmissionsState>(
-          builder: (context, state) {
+      child: const _SubmissionsView(),
+    );
+  }
+}
+
+class _SubmissionsView extends StatelessWidget {
+  const _SubmissionsView();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return BlocBuilder<SubmissionsBloc, SubmissionsState>(
+      builder: (context, state) {
         final bloc = context.read<SubmissionsBloc>();
-        return ListView(
+        return PageBody(
+          onRefresh: () => reloadAndWait(
+              bloc, const SubmissionsLoadRequested(), (s) => s.loading),
           children: [
             PageHeader(
-                title: loc.adminSubmissionsListTitle,
-                subtitle: loc.adminSubmissionsListSubtitle),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: DropdownButtonFormField<SubmissionStatus?>(
-                initialValue: state.filter,
-                decoration: InputDecoration(
-                  labelText: loc.adminSubmissionsListFilterLabel,
-                  border: const OutlineInputBorder(),
-                ),
-                items: [
-                  DropdownMenuItem<SubmissionStatus?>(
-                    value: null,
-                    child: Text(loc.adminSubmissionsListAllOption),
-                  ),
-                  for (final s in const [
-                    SubmissionStatus.pending,
-                    SubmissionStatus.approved,
-                    SubmissionStatus.rejected,
-                  ])
-                    DropdownMenuItem<SubmissionStatus?>(
-                      value: s,
-                      child: Text(statusLabel(loc, s)),
-                    ),
-                ],
-                onChanged: (filter) =>
-                    bloc.add(SubmissionsFilterChanged(filter)),
-              ),
+              icon: Icons.assignment_outlined,
+              title: loc.adminSubmissionsListTitle,
+              subtitle: loc.adminSubmissionsListSubtitle,
             ),
-            if (state.loading)
-              const SkeletonLoader(lines: 5)
-            else if (state.error != null)
-              InlineError(
-                message: loc.adminSubmissionsListErrorsLoadFailed,
-                onRetry: () => bloc.add(const SubmissionsLoadRequested()),
-              )
-            else ...[
-              if (state.items.isNotEmpty)
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  child: StatusBadge(
-                    kind: switch (state.filter) {
-                      SubmissionStatus.pending => StatusKind.pending,
-                      SubmissionStatus.approved => StatusKind.approved,
-                      SubmissionStatus.rejected => StatusKind.rejected,
-                      _ => StatusKind.neutral,
-                    },
-                    label: '${state.items.length}',
-                  ),
-                ),
-              AppDataTableCards<SubmissionSummary>(
-                items: state.items,
-                rowBuilder: (context, s) => _row(context, loc, s),
-                onRowTap: (s) => context.go('/submissions/${s.id}'),
-              ),
-            ],
+            ManagementFilterChips<SubmissionStatus?>(
+              label: loc.adminSubmissionsListFilterLabel,
+              selected: state.filter,
+              options: [
+                (null, loc.adminSubmissionsListAllOption),
+                for (final s in const [
+                  SubmissionStatus.pending,
+                  SubmissionStatus.approved,
+                  SubmissionStatus.rejected,
+                ])
+                  (s, statusLabel(loc, s)),
+              ],
+              onSelected: (filter) =>
+                  bloc.add(SubmissionsFilterChanged(filter)),
+            ),
+            const SizedBox(height: 8),
+            ..._content(context, loc, bloc, state),
           ],
         );
-      }),
+      },
     );
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, SubmissionSummary s) {
-    final year = DateTime.tryParse(s.createdAt)?.year ?? DateTime.now().year;
-    final reference = 'REF-$year-${s.id.padLeft(4, '0')}';
-    final date = DateTime.tryParse(s.createdAt);
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    s.fullName,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                StatusBadge(
-                  kind: switch (s.status) {
-                    SubmissionStatus.pending => StatusKind.pending,
-                    SubmissionStatus.approved => StatusKind.approved,
-                    SubmissionStatus.rejected => StatusKind.rejected,
-                    _ => StatusKind.neutral,
-                  },
-                  label: statusLabel(loc, s.status),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            InfoRow(
-                label: loc.adminSubmissionsListTableHeadersReference,
-                value: reference),
-            InfoRow(
-                label: loc.adminSubmissionsListTableHeadersMobile,
-                value: s.mobile),
-            InfoRow(
-              label: loc.adminSubmissionsListTableHeadersDate,
-              value: date == null
-                  ? s.createdAt
-                  : DateFormat('yyyy-MM-dd').format(date),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: AppButton(
-                label: loc.adminSubmissionsListDetailsLink,
-                icon: Icons.chevron_right,
-                onPressed: () => context.go('/submissions/${s.id}'),
-              ),
-            ),
-          ],
+  List<Widget> _content(BuildContext context, AppLocalizations loc,
+      SubmissionsBloc bloc, SubmissionsState state) {
+    if (state.loading) return const [SkeletonLoader(lines: 5, height: 96)];
+    if (state.error != null) {
+      return [
+        InlineError(
+          message: loc.adminSubmissionsListErrorsLoadFailed,
+          onRetry: () => bloc.add(const SubmissionsLoadRequested()),
+        ),
+      ];
+    }
+    if (state.items.isEmpty) {
+      return [
+        EmptyState(
+          message: loc.adminSubmissionsListNoSubmissions,
+          icon: Icons.assignment_turned_in_outlined,
+        ),
+      ];
+    }
+    return [
+      SectionTitle(
+        state.filter == null
+            ? loc.adminSubmissionsListAllOption
+            : statusLabel(loc, state.filter!),
+        trailing: StatusBadge(
+          kind: submissionStatusKind(state.filter),
+          label: '${state.items.length}',
         ),
       ),
+      ManagementRecordGrid(
+        children: [
+          for (final s in state.items) _SubmissionCard(submission: s),
+        ],
+      ),
+    ];
+  }
+}
+
+class _SubmissionCard extends StatelessWidget {
+  const _SubmissionCard({required this.submission});
+
+  final SubmissionSummary submission;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final s = submission;
+    final date = DateTime.tryParse(s.createdAt);
+    final year = date?.year ?? DateTime.now().year;
+    final reference = 'REF-$year-${s.id.padLeft(4, '0')}';
+    void open() => context.go('/submissions/${s.id}');
+    return ManagementRecordCard(
+      leading: ManagementAvatar(name: s.fullName),
+      title: s.fullName,
+      subtitle: reference,
+      badge: StatusBadge(
+        kind: submissionStatusKind(s.status),
+        label: statusLabel(loc, s.status),
+      ),
+      onTap: open,
+      actions: [
+        AppButton(
+          label: loc.adminSubmissionsListDetailsLink,
+          icon: Icons.arrow_forward,
+          variant: s.status == SubmissionStatus.pending
+              ? AppButtonVariant.primary
+              : AppButtonVariant.secondary,
+          onPressed: open,
+        ),
+      ],
+      children: [
+        InfoRow(
+            label: loc.adminSubmissionsListTableHeadersMobile,
+            value: s.mobile),
+        InfoRow(
+          label: loc.adminSubmissionsListTableHeadersDate,
+          value:
+              date == null ? s.createdAt : DateFormat('yyyy-MM-dd').format(date),
+        ),
+      ],
     );
   }
 }
@@ -166,4 +164,12 @@ String statusLabel(AppLocalizations loc, SubmissionStatus status) =>
       SubmissionStatus.approved => loc.adminStatusLabelsApproved,
       SubmissionStatus.rejected => loc.adminStatusLabelsRejected,
       _ => loc.adminStatusLabelsAll,
+    };
+
+/// Badge colour for an application / member status.
+StatusKind submissionStatusKind(SubmissionStatus? status) => switch (status) {
+      SubmissionStatus.pending => StatusKind.pending,
+      SubmissionStatus.approved => StatusKind.approved,
+      SubmissionStatus.rejected => StatusKind.rejected,
+      _ => StatusKind.neutral,
     };

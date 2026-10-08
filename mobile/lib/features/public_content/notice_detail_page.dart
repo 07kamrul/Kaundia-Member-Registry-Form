@@ -3,12 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/di/injector.dart';
-import '../../../core/network/api_client.dart';
+import '../../core/di/injector.dart';
+import '../../core/layout/responsive.dart';
+import '../../core/network/api_client.dart';
 import 'data/content_repository.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/widgets.dart';
+import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/widgets.dart';
 import 'bloc/notices_bloc.dart';
+import 'domain/content_entities.dart';
+import 'public_content_widgets.dart';
 
 /// Port of Angular `notice-detail-page.component.*`: there is no single-row
 /// public endpoint, so the detail view reads the same list feed and picks its
@@ -28,78 +31,87 @@ class NoticeDetailPage extends StatelessWidget {
           NoticesBloc(repository: ContentRepository(apiClient: sl<ApiClient>()))
             ..add(const NoticesRequested()),
       child: Scaffold(
-        appBar: AppBar(title: Text(loc.noticesTitle)),
+        appBar: publicAppBar(
+          context,
+          title: loc.noticesTitle,
+          fallbackRoute: '/notices',
+          fallbackTooltip: loc.noticesBackToList,
+        ),
         body: BlocBuilder<NoticesBloc, NoticesState>(
           builder: (context, state) {
-            if (state is NoticesLoading) {
-              return const SkeletonLoader(lines: 5);
-            }
             if (state is NoticesFailure) {
               return InlineError(
                 message: loc.noticesErrorsLoadFailed,
-                onRetry: () =>
-                    context.read<NoticesBloc>().add(const NoticesRequested()),
+                onRetry: () => context.read<NoticesBloc>().add(const NoticesRequested()),
               );
             }
-            if (state is NoticesLoaded) {
-              final matches =
-                  state.notices.where((row) => row.id == noticeId).toList();
-              final notice = matches.isEmpty ? null : matches.first;
-              if (notice == null) {
-                return EmptyState(
-                  message: loc.noticesNotFound,
-                  action: AppButton(
-                    label: loc.noticesBackToList,
-                    variant: AppButtonVariant.secondary,
-                    onPressed: () => context.go('/notices'),
-                  ),
-                );
-              }
-              final date = DateTime.tryParse(notice.publishAt ?? notice.createdAt);
-              return ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  TextButton.icon(
-                    onPressed: () => context.go('/notices'),
-                    icon: const Icon(Icons.arrow_back),
-                    label: Text(loc.noticesBackToList),
-                  ),
-                  Card(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (date != null)
-                            Text(
-                              DateFormat.yMMMMd().format(date),
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurfaceVariant),
-                            ),
-                          const SizedBox(height: 8),
-                          Text(
-                            notice.title,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            notice.body,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(height: 1.7),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+            if (state is! NoticesLoaded) {
+              return const PageBody(
+                maxWidth: Breakpoints.formMaxWidth,
+                children: [SizedBox(height: 16), SkeletonLoader(lines: 1, height: 280)],
               );
             }
-            return const SizedBox.shrink();
+            final matches = state.notices.where((row) => row.id == noticeId);
+            if (matches.isEmpty) {
+              return EmptyState(
+                message: loc.noticesNotFound,
+                icon: Icons.search_off_rounded,
+                action: AppButton(
+                  label: loc.noticesBackToList,
+                  icon: Icons.arrow_back,
+                  variant: AppButtonVariant.secondary,
+                  onPressed: () => context.go('/notices'),
+                ),
+              );
+            }
+            return PageBody(
+              maxWidth: Breakpoints.formMaxWidth,
+              children: [
+                BackToListLink(label: loc.noticesBackToList, route: '/notices'),
+                _NoticeArticle(notice: matches.first),
+              ],
+            );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _NoticeArticle extends StatelessWidget {
+  const _NoticeArticle({required this.notice});
+
+  final Notice notice;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final date = DateTime.tryParse(notice.publishAt ?? notice.createdAt);
+    return AppCard(
+      padding: EdgeInsets.all(context.responsive<double>(compact: 16, medium: 24)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (date != null) ...[
+            MetaLine(
+              icon: Icons.calendar_today_outlined,
+              text: DateFormat.yMMMMd().format(date.toLocal()),
+            ),
+            const SizedBox(height: 8),
+          ],
+          SelectableText(
+            notice.title,
+            style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Divider(height: 1),
+          ),
+          SelectableText(
+            notice.body,
+            style: theme.textTheme.bodyMedium?.copyWith(height: 1.7),
+          ),
+        ],
       ),
     );
   }

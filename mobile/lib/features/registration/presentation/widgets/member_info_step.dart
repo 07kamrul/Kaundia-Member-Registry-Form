@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/widgets.dart';
 import '../../data/geo_repository.dart';
@@ -21,117 +22,125 @@ class MemberInfoStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        RegSectionTitle(text: l10n.registrationStepTitlesMemberInfo),
+        const RegSectionCard(child: _PersonalFields()),
+        const SizedBox(height: 16),
+        const _AddressBlocks(),
+      ],
+    );
+  }
+}
+
+class _PersonalFields extends StatelessWidget {
+  const _PersonalFields();
+
+  @override
+  Widget build(BuildContext context) {
     final state = context.watch<RegistrationBloc>().state;
     final bloc = context.read<RegistrationBloc>();
     final l10n = AppLocalizations.of(context);
     final f = state.form;
-    final errs = state.stepErrors;
 
     String? err(RegErrorKind kind) {
-      final e = findError(errs, kind);
+      final e = findError(state.stepErrors, kind);
       return e == null ? null : regErrorMessage(l10n, e);
     }
 
-    final memberColumn = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    void change(MemberField field, String v) => bloc.add(MemberFieldChanged(field, v));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const _MemberPhotoField(),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         RegTextField(
           label: l10n.registrationMemberInfoFullNameLabel,
           required: true,
           value: f.fullName,
+          prefixIcon: Icons.person_outline,
+          autofillHints: const [AutofillHints.name],
+          textCapitalization: TextCapitalization.words,
           error: err(RegErrorKind.fullNameRequired),
-          onChanged: (v) => bloc.add(MemberFieldChanged(MemberField.fullName, v)),
+          onChanged: (v) => change(MemberField.fullName, v),
         ),
         const SizedBox(height: 12),
-        RegTextField(
-          label: l10n.registrationMemberInfoFatherOrHusbandLabel,
-          required: true,
-          value: f.fatherOrHusband,
-          error: err(RegErrorKind.fatherOrHusbandRequired),
-          onChanged: (v) => bloc.add(MemberFieldChanged(MemberField.fatherOrHusband, v)),
+        RegFieldPair(
+          first: RegTextField(
+            label: l10n.registrationMemberInfoFatherOrHusbandLabel,
+            required: true,
+            value: f.fatherOrHusband,
+            textCapitalization: TextCapitalization.words,
+            error: err(RegErrorKind.fatherOrHusbandRequired),
+            onChanged: (v) => change(MemberField.fatherOrHusband, v),
+          ),
+          second: RegTextField(
+            label: l10n.registrationMemberInfoMotherLabel,
+            required: true,
+            value: f.mother,
+            textCapitalization: TextCapitalization.words,
+            error: err(RegErrorKind.motherRequired),
+            onChanged: (v) => change(MemberField.mother, v),
+          ),
         ),
         const SizedBox(height: 12),
-        RegTextField(
-          label: l10n.registrationMemberInfoMotherLabel,
-          required: true,
-          value: f.mother,
-          error: err(RegErrorKind.motherRequired),
-          onChanged: (v) => bloc.add(MemberFieldChanged(MemberField.mother, v)),
+        RegFieldPair(
+          first: const _DobField(),
+          second: RegTextField(
+            label: l10n.registrationMemberInfoNidLabel,
+            required: true,
+            value: f.nid,
+            hint: l10n.registrationMemberInfoNidPlaceholder,
+            prefixIcon: Icons.badge_outlined,
+            keyboardType: TextInputType.number,
+            error: err(RegErrorKind.nidInvalid),
+            onChanged: (v) => change(MemberField.nid, v),
+          ),
         ),
         const SizedBox(height: 12),
-        const _DobField(),
-      ],
-    );
-
-    final secondColumn = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RegTextField(
-          label: l10n.registrationMemberInfoNidLabel,
-          required: true,
-          value: f.nid,
-          hint: l10n.registrationMemberInfoNidPlaceholder,
-          keyboardType: TextInputType.number,
-          error: err(RegErrorKind.nidInvalid),
-          onChanged: (v) => bloc.add(MemberFieldChanged(MemberField.nid, v)),
+        RegFieldPair(
+          first: RegTextField(
+            label: l10n.registrationMemberInfoMobileLabel,
+            required: true,
+            value: f.mobile,
+            prefixIcon: Icons.phone_outlined,
+            keyboardType: TextInputType.phone,
+            autofillHints: const [AutofillHints.telephoneNumber],
+            error: err(RegErrorKind.mobileRequired) ?? err(RegErrorKind.mobileInvalid),
+            hint: '+8801XXXXXXXXX',
+            onChanged: (v) => change(MemberField.mobile, v),
+          ),
+          second: RegTextField(
+            label: l10n.registrationMemberInfoEmailLabel,
+            required: true,
+            value: f.email,
+            prefixIcon: Icons.alternate_email,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            error: err(RegErrorKind.emailInvalid),
+            onChanged: (v) => change(MemberField.email, v),
+          ),
         ),
         const SizedBox(height: 12),
-        RegTextField(
-          label: l10n.registrationMemberInfoMobileLabel,
-          required: true,
-          value: f.mobile,
-          keyboardType: TextInputType.phone,
-          error: err(RegErrorKind.mobileRequired) ?? err(RegErrorKind.mobileInvalid),
-          hint: '+8801XXXXXXXXX',
-          onChanged: (v) => bloc.add(MemberFieldChanged(MemberField.mobile, v)),
-        ),
-        const SizedBox(height: 12),
-        RegTextField(
-          label: l10n.registrationMemberInfoEmailLabel,
-          required: true,
-          value: f.email,
-          keyboardType: TextInputType.emailAddress,
-          error: err(RegErrorKind.emailInvalid),
-          onChanged: (v) => bloc.add(MemberFieldChanged(MemberField.email, v)),
-        ),
-        const SizedBox(height: 12),
-        RegTextField(
-          label: l10n.registrationMemberInfoOccupationLabel,
-          value: f.occupation,
-          onChanged: (v) => bloc.add(MemberFieldChanged(MemberField.occupation, v)),
-        ),
-        const SizedBox(height: 12),
-        RegTextField(
-          label: l10n.registrationMemberInfoNationalityLabel,
-          value: f.nationality,
-          onChanged: (v) => bloc.add(MemberFieldChanged(MemberField.nationality, v)),
+        RegFieldPair(
+          first: RegTextField(
+            label: l10n.registrationMemberInfoOccupationLabel,
+            value: f.occupation,
+            prefixIcon: Icons.work_outline,
+            onChanged: (v) => change(MemberField.occupation, v),
+          ),
+          second: RegTextField(
+            label: l10n.registrationMemberInfoNationalityLabel,
+            value: f.nationality,
+            prefixIcon: Icons.flag_outlined,
+            onChanged: (v) => change(MemberField.nationality, v),
+          ),
         ),
         const SizedBox(height: 12),
         const _GenderField(),
-      ],
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RegSectionTitle(text: l10n.registrationStepTitlesMemberInfo),
-        LayoutBuilder(builder: (context, constraints) {
-          if (constraints.maxWidth >= 600) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: memberColumn),
-                const SizedBox(width: 16),
-                Expanded(child: secondColumn),
-              ],
-            );
-          }
-          return Column(children: [memberColumn, const SizedBox(height: 12), secondColumn]);
-        }),
-        const SizedBox(height: 16),
-        const _AddressBlocks(),
       ],
     );
   }
@@ -154,6 +163,7 @@ class _MemberPhotoField extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<RegistrationBloc>().state;
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final bloc = context.read<RegistrationBloc>();
     final photoError = findError(state.stepErrors, RegErrorKind.photoRequired) != null;
     final hasPhoto = state.form.memberPhoto?.hasFile ?? false;
@@ -161,41 +171,49 @@ class _MemberPhotoField extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          InkWell(
-            onTap: () => _showSourceSheet(context),
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: photoError ? Theme.of(context).colorScheme.error : Theme.of(context).dividerColor,
-                  width: photoError ? 2 : 1,
+          Semantics(
+            button: true,
+            label: l10n.registrationMemberInfoPhotoAlt,
+            child: InkWell(
+              onTap: () => _showSourceSheet(context),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: Container(
+                width: 128,
+                height: 128,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  border: Border.all(
+                    color: photoError ? theme.colorScheme.error : theme.colorScheme.outline,
+                    width: photoError ? 2 : 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
-                borderRadius: BorderRadius.circular(8),
+                child: hasPhoto
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadius.md - 1),
+                        child: Image.file(
+                          File(state.form.memberPhoto!.path!),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _placeholder(context, l10n),
+                        ),
+                      )
+                    : _placeholder(context, l10n),
               ),
-              child: hasPhoto
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(7),
-                      child: Image.file(
-                        File(state.form.memberPhoto!.path!),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _placeholder(l10n),
-                      ),
-                    )
-                  : _placeholder(l10n),
             ),
           ),
           if (hasPhoto)
-            TextButton(
+            TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
+              icon: const Icon(Icons.delete_outline, size: 18),
               onPressed: () => bloc.add(MemberPhotoCleared()),
-              child: Text(l10n.registrationMemberInfoClearPhotoButton),
+              label: Text(l10n.registrationMemberInfoClearPhotoButton),
             ),
           if (photoError)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: 6),
               child: Text(
                 l10n.registrationMemberInfoMemberPhotoRequired,
-                style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
               ),
             ),
         ],
@@ -203,36 +221,61 @@ class _MemberPhotoField extends StatelessWidget {
     );
   }
 
-  Widget _placeholder(AppLocalizations l10n) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.person_add_alt_1_outlined, size: 32),
-          const SizedBox(height: 4),
-          Text(l10n.registrationMemberInfoPhotoPlaceholder,
-              textAlign: TextAlign.center, style: const TextStyle(fontSize: 11)),
-          const Text('2"×2"', style: TextStyle(fontSize: 11)),
-        ],
-      );
+  Widget _placeholder(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(fontSize: 11);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.add_a_photo_outlined, size: 32, color: theme.colorScheme.primary),
+        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Text(
+            l10n.registrationMemberInfoPhotoPlaceholder,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: muted,
+          ),
+        ),
+        Text('2"×2"', style: muted),
+      ],
+    );
+  }
 
   void _showSourceSheet(BuildContext context) {
-    showModalBottomSheet(
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
       context: context,
-      builder: (sheetContext) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: Text(AppLocalizations.of(sheetContext).registrationMemberInfoPhotoAlt),
-              onTap: () => _pick(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: Text(AppLocalizations.of(sheetContext).registrationMemberInfoPhotoAlt),
-              onTap: () => _pick(context, ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
+      useSafeArea: true,
+      builder: (sheetContext) {
+        void pick(ImageSource source) {
+          Navigator.of(sheetContext).pop();
+          _pick(context, source);
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: Text(l10n.registrationMemberInfoPhotoAlt),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => pick(ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(l10n.registrationMemberInfoPhotoAlt),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => pick(ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -248,18 +291,21 @@ class _DobField extends StatelessWidget {
     final bloc = context.read<RegistrationBloc>();
     final f = state.form;
     final error = findError(state.stepErrors, RegErrorKind.dobRequired) != null;
+    final theme = Theme.of(context);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         RegLabel(required: true, text: l10n.registrationMemberInfoDobLabel),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
           onTap: () async {
             final picked = await showDatePicker(
               context: context,
               initialDate: DateTime.tryParse(f.dob) ?? DateTime(1990),
               firstDate: DateTime(1900),
               lastDate: DateTime.now(),
+              initialEntryMode: DatePickerEntryMode.calendarOnly,
             );
             if (picked != null) {
               bloc.add(MemberFieldChanged(
@@ -271,16 +317,16 @@ class _DobField extends StatelessWidget {
           child: InputDecorator(
             decoration: InputDecoration(
               isDense: true,
-              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.cake_outlined, size: 20),
+              suffixIcon: const Icon(Icons.calendar_month_outlined, size: 20),
               errorText: error ? l10n.registrationValidationDobRequired : null,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(f.dob.isEmpty ? 'YYYY-MM-DD' : f.dob),
-                const Icon(Icons.calendar_today, size: 18),
-              ],
+            child: Text(
+              f.dob.isEmpty ? 'YYYY-MM-DD' : f.dob,
+              style: f.dob.isEmpty
+                  ? theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)
+                  : theme.textTheme.bodyLarge,
             ),
           ),
         ),
@@ -344,27 +390,18 @@ class _AddressBlocks extends StatelessWidget {
               message: l10n.commonNetworkError,
               onRetry: () => bloc.add(const RegistrationStarted()),
             )
-          : const SkeletonLoader(height: 120);
+          : const SkeletonLoader(lines: 2, height: 120);
     }
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         RegSectionTitle(text: l10n.registrationStepTitlesAddressInfo),
-        LayoutBuilder(builder: (context, constraints) {
-          _AddressBlock block(bool isCurrent) => _AddressBlock(isCurrent: isCurrent);
-          if (constraints.maxWidth >= 600) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: block(true)),
-                const SizedBox(width: 16),
-                Expanded(child: block(false)),
-              ],
-            );
-          }
-          return Column(children: [block(true), block(false)]);
-        }),
+        const RegFieldPair(
+          minWidth: 600,
+          first: _AddressBlock(isCurrent: true),
+          second: _AddressBlock(isCurrent: false),
+        ),
       ],
     );
   }
@@ -399,23 +436,22 @@ class _AddressBlock extends StatelessWidget {
     final districts = geo.districtsByDivisionName(address.division);
     final upazilas = geo.upazilasByDistrictName(address.district);
 
-    return AppCard(
+    return RegSectionCard(
+      title: isCurrent
+          ? l10n.registrationAddressInfoCurrentAddressTitle
+          : l10n.registrationAddressInfoPermanentAddressTitle,
+      icon: isCurrent ? Icons.home_outlined : Icons.location_city_outlined,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (!isCurrent)
+          if (!isCurrent) ...[
             RegCheckboxRow(
               value: state.form.sameAsCurrentAddress,
               label: l10n.registrationAddressInfoSameAsCurrentLabel,
               onChanged: (v) => bloc.add(SameAsCurrentToggled(v)),
             ),
-          Text(
-            isCurrent
-                ? l10n.registrationAddressInfoCurrentAddressTitle
-                : l10n.registrationAddressInfoPermanentAddressTitle,
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
+          ],
           RegDropdown(
             label: l10n.registrationAddressInfoDivisionLabel,
             required: true,
@@ -455,6 +491,7 @@ class _AddressBlock extends StatelessWidget {
             label: l10n.registrationAddressInfoRoadLabel,
             required: true,
             value: address.road,
+            autofillHints: isCurrent ? const [AutofillHints.streetAddressLine1] : null,
             error: err(AddressField.road),
             onChanged: (v) => change(AddressField.road, v),
           ),
