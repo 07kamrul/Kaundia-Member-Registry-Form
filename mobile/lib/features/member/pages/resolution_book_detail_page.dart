@@ -63,7 +63,7 @@ class _DetailViewState extends State<_DetailView> {
             return const SkeletonLoader(lines: 8);
           }
           if (state.error || state.meeting == null) {
-            return InlineError(message: loc.rbLoadError, onRetry: () => bloc.add(const ResolutionBookDetailLoadRequested('')));
+            return InlineError(message: loc.rbLoadError, onRetry: () => bloc.add(ResolutionBookDetailLoadRequested(id ?? '')));
           }
           final meeting = state.meeting!;
           return ListView(
