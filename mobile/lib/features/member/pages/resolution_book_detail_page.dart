@@ -28,13 +28,15 @@ class ResolutionBookDetailPage extends StatelessWidget {
       create: (_) => ResolutionBookDetailBloc(
         repository: ResolutionBookRepository(apiClient: sl<ApiClient>()),
       )..add(ResolutionBookDetailLoadRequested(id ?? '')),
-      child: const _DetailView(),
+      child: _DetailView(id: id ?? ''),
     );
   }
 }
 
 class _DetailView extends StatefulWidget {
-  const _DetailView();
+  const _DetailView({required this.id});
+
+  final String id;
 
   @override
   State<_DetailView> createState() => _DetailViewState();
@@ -63,7 +65,7 @@ class _DetailViewState extends State<_DetailView> {
             return const SkeletonLoader(lines: 8);
           }
           if (state.error || state.meeting == null) {
-            return InlineError(message: loc.rbLoadError, onRetry: () => bloc.add(ResolutionBookDetailLoadRequested(id ?? '')));
+            return InlineError(message: loc.rbLoadError, onRetry: () => bloc.add(ResolutionBookDetailLoadRequested(widget.id)));
           }
           final meeting = state.meeting!;
           return ListView(
