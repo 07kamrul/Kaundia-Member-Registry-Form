@@ -337,6 +337,7 @@ def _property_request_snapshot(property_: Property) -> PropertyRequestPayload:
         land_quantity=property_.land_quantity,
         my_share_quantity=property_.my_share_quantity,
         ownership=property_.ownership,
+        joint_owner_count=property_.joint_owner_count,
         co_owners=[
             {"owner_name": co.owner_name, "owner_phone": co.owner_phone}
             for co in property_.co_owners

@@ -281,6 +281,7 @@ async def create_submission(
                 land_quantity=property_in.land_quantity,
                 my_share_quantity=property_in.my_share_quantity,
                 ownership=property_in.ownership,
+                joint_owner_count=property_in.joint_owner_count,
                 co_owners=[
                     CoOwner(owner_name=co_owner_in.owner_name, owner_phone=co_owner_in.owner_phone)
                     for co_owner_in in property_in.co_owners

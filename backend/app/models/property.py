@@ -21,6 +21,7 @@ class Property(Base):
     land_quantity: Mapped[str | None] = mapped_column(String(128), nullable=True)
     my_share_quantity: Mapped[str | None] = mapped_column(String(128), nullable=True)
     ownership: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    joint_owner_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     member: Mapped["Member"] = relationship(back_populates="properties")
     co_owners: Mapped[list["CoOwner"]] = relationship(

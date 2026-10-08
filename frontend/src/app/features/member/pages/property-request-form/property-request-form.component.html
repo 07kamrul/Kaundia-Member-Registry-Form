@@ -131,41 +131,23 @@
           <p class="field-error">{{ 'registration.property.ownershipRequired' | translate }}</p>
         }
 
-        @if (ownership === 'যৌথ') {
+        @if (isJoint()) {
           <div class="pr-co-owners">
-            <label>{{ 'member.propertyRequests.coOwnersLabel' | translate }}</label>
-            @for (owner of coOwners; track $index; let i = $index) {
-              <div class="pr-co-owner-row">
-                <input
-                  class="pr-co-owner-name"
-                  type="text"
-                  [(ngModel)]="owner.ownerName"
-                  [placeholder]="'member.propertyRequests.coOwnerNamePlaceholder' | translate"
-                />
-                <input
-                  class="pr-co-owner-phone"
-                  type="text"
-                  inputmode="tel"
-                  [(ngModel)]="owner.ownerPhone"
-                  [placeholder]="'member.profile.mobileLabel' | translate"
-                />
-                <button
-                  type="button"
-                  class="btn btn-danger btn-sm pr-remove-btn"
-                  (click)="removeCoOwner(i)"
-                  [attr.aria-label]="'common.delete' | translate"
-                >
-                  <app-icon name="trash" [size]="14" />
-                </button>
-              </div>
-            }
-            @if (showCoOwnersError()) {
-              <p class="field-error">{{ 'member.propertyRequests.coOwnerNameRequired' | translate }}</p>
-            }
-            <button type="button" class="btn btn-secondary btn-sm pr-add-btn" (click)="addCoOwner()">
-              <app-icon name="plus" [size]="14" />
-              {{ 'member.propertyRequests.addCoOwnerButton' | translate }}
-            </button>
+            <div class="field" style="margin-top:0.5rem;margin-bottom:0">
+              <label for="pr-jointOwnerCount">{{ 'registration.property.jointOwnerCountLabel' | translate }} <span class="required">*</span></label>
+              <input
+                id="pr-jointOwnerCount"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                [(ngModel)]="jointOwnerCount"
+                style="max-width: 8rem; width: 100%"
+              />
+              @if (showJointOwnerCountError()) {
+                <p class="field-error">{{ 'registration.property.jointOwnerCountRequired' | translate }}</p>
+              }
+            </div>
           </div>
         }
       </div>

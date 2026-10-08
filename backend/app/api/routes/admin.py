@@ -387,6 +387,7 @@ async def _apply_property_payload(db: AsyncSession, request: PropertyChangeReque
                 land_quantity=payload.land_quantity,
                 my_share_quantity=payload.my_share_quantity,
                 ownership=payload.ownership,
+                joint_owner_count=payload.joint_owner_count,
                 co_owners=[
                     CoOwner(owner_name=co.owner_name, owner_phone=co.owner_phone)
                     for co in payload.co_owners
@@ -424,6 +425,7 @@ async def _apply_property_payload(db: AsyncSession, request: PropertyChangeReque
         property_.land_quantity = payload.land_quantity
         property_.my_share_quantity = payload.my_share_quantity
         property_.ownership = payload.ownership
+        property_.joint_owner_count = payload.joint_owner_count
         # Replacing the relationship collections lets the delete-orphan
         # cascade retire removed co-owners/docs in the same commit.
         property_.co_owners = [

@@ -30,6 +30,7 @@ export interface MemberProperty {
   landQuantity?: string;
   myShareQuantity?: string;
   ownership?: string;
+  jointOwnerCount?: number | null;
   coOwners: MemberCoOwner[];
   applicableDocs: MemberPropertyDoc[];
 }
@@ -53,6 +54,7 @@ interface PropertyApiModel {
   land_quantity?: string | null;
   my_share_quantity?: string | null;
   ownership?: string | null;
+  joint_owner_count?: number | null;
   co_owners?: { id: number; owner_name: string; owner_phone: string }[];
   applicable_docs?: { id: number; doc_type: string; file_path: string | null }[];
 }
@@ -159,6 +161,7 @@ function toProperty(api: PropertyApiModel): MemberProperty {
     landQuantity: api.land_quantity ?? undefined,
     myShareQuantity: api.my_share_quantity ?? undefined,
     ownership: api.ownership ?? undefined,
+    jointOwnerCount: api.joint_owner_count ?? null,
     coOwners: (api.co_owners ?? []).map((c) => ({
       id: c.id,
       ownerName: c.owner_name,
@@ -324,7 +327,7 @@ export interface PropertyRequestFormData {
     landQuantity: string;
     myShareQuantity: string;
     ownership: string;
-    coOwners: { ownerName: string; ownerPhone: string }[];
+    jointOwnerCount: number | null;
     docs: { docType: string; keepPath: string | null }[];
   };
   /** One file per docs[] entry whose keepPath is null, in the same order. */
@@ -436,7 +439,7 @@ export class MemberService {
             land_quantity: form.payload.landQuantity,
             my_share_quantity: form.payload.myShareQuantity,
             ownership: form.payload.ownership,
-            co_owners: form.payload.coOwners,
+            joint_owner_count: form.payload.jointOwnerCount,
             docs: form.payload.docs,
           };
     body.append('payload', JSON.stringify(payloadBody));

@@ -217,7 +217,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           landQuantity: '',
           myShareQuantity: '',
           ownership: '',
-          coOwners: [],
+          jointOwnerCount: null,
           docs: [],
         },
         newDocFiles: [],

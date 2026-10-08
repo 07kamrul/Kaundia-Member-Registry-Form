@@ -78,6 +78,7 @@ class PropertyOut(BaseModel):
     land_quantity: str | None = None
     my_share_quantity: str | None = None
     ownership: str | None = None
+    joint_owner_count: int | None = None
     co_owners: list[CoOwnerOut] = []
     applicable_docs: list[ApplicableDocOut] = []
 

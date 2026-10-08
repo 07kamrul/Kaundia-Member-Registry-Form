@@ -36,11 +36,6 @@ interface NewDocRow {
   error: string;
 }
 
-interface CoOwnerRow {
-  ownerName: string;
-  ownerPhone: string;
-}
-
 // The backend caps request doc uploads at 10 MB (JPG/PNG/PDF).
 const MAX_DOC_FILE_BYTES = 10 * 1024 * 1024;
 
@@ -87,7 +82,7 @@ export class PropertyRequestFormComponent implements OnInit {
   landQuantity = '';
   myShareQuantity = '';
   ownership = '';
-  coOwners: CoOwnerRow[] = [];
+  jointOwnerCount: number | null = null;
   /** Existing property docs (edit mode): kept by default via keep checkbox. */
   existingDocs: ExistingDocRow[] = [];
   /** Docs the member wants to attach with this request (File objects). */
@@ -144,10 +139,7 @@ export class PropertyRequestFormComponent implements OnInit {
     this.landQuantity = property.landQuantity ?? '';
     this.myShareQuantity = property.myShareQuantity ?? '';
     this.ownership = property.ownership ?? '';
-    this.coOwners = property.coOwners.map((c) => ({
-      ownerName: c.ownerName,
-      ownerPhone: c.ownerPhone,
-    }));
+    this.jointOwnerCount = property.jointOwnerCount ?? null;
     this.existingDocs = property.applicableDocs.map((d) => ({
       docType: d.docType,
       filePath: d.filePath,
@@ -165,16 +157,6 @@ export class PropertyRequestFormComponent implements OnInit {
     this.propertyType = this.propertyType.includes(type)
       ? this.propertyType.filter((t) => t !== type)
       : [...this.propertyType, type];
-  }
-
-  /* ---------- co-owners ---------- */
-
-  addCoOwner(): void {
-    this.coOwners = [...this.coOwners, { ownerName: '', ownerPhone: '' }];
-  }
-
-  removeCoOwner(index: number): void {
-    this.coOwners = this.coOwners.filter((_, i) => i !== index);
   }
 
   /* ---------- docs ---------- */
@@ -259,11 +241,15 @@ export class PropertyRequestFormComponent implements OnInit {
     return this.submitAttempted && !this.ownership;
   }
 
-  showCoOwnersError(): boolean {
+  isJoint(): boolean {
+    return this.ownership === 'যৌথ';
+  }
+
+  showJointOwnerCountError(): boolean {
     return (
-      this.ownership === 'যৌথ' &&
+      this.isJoint() &&
       this.submitAttempted &&
-      this.coOwners.some((c) => !c.ownerName.trim())
+      (this.jointOwnerCount === null || this.jointOwnerCount < 1 || !Number.isInteger(this.jointOwnerCount))
     );
   }
 
@@ -282,7 +268,7 @@ export class PropertyRequestFormComponent implements OnInit {
       this.showMyShareQuantityError() ||
       this.showMyShareQuantityInvalidError() ||
       this.showOwnershipError() ||
-      this.showCoOwnersError() ||
+      this.showJointOwnerCountError() ||
       this.hasDocErrors()
     ) {
       return;
@@ -311,9 +297,7 @@ export class PropertyRequestFormComponent implements OnInit {
           landQuantity: this.landQuantity.trim(),
           myShareQuantity: this.myShareQuantity.trim(),
           ownership: this.ownership,
-          coOwners: this.coOwners
-            .filter((c) => c.ownerName.trim())
-            .map((c) => ({ ownerName: c.ownerName.trim(), ownerPhone: c.ownerPhone.trim() })),
+          jointOwnerCount: this.isJoint() ? this.jointOwnerCount : null,
           docs,
         },
         newDocFiles,
