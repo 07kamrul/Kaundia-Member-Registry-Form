@@ -9,7 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/members_cubit.dart';
+import '../presentation/bloc/members_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'submissions_list_page.dart';
 
@@ -56,10 +56,10 @@ class MemberDetailPage extends StatelessWidget {
     final memberId = id;
     if (memberId == null) return EmptyState(message: loc.commonNoData);
     return BlocProvider(
-      create: (_) => MemberDetailCubit(
+      create: (_) => MemberDetailBloc(
         repository: AdminRepository(apiClient: sl<ApiClient>()),
         id: memberId,
-      )..load(),
+      )..add(const MemberDetailLoadRequested()),
       child: const _MemberDetailView(),
     );
   }
@@ -71,13 +71,13 @@ class _MemberDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    return BlocBuilder<MemberDetailCubit, MemberDetailState>(
+    return BlocBuilder<MemberDetailBloc, MemberDetailState>(
         builder: (context, state) {
-      final cubit = context.read<MemberDetailCubit>();
+      final bloc = context.read<MemberDetailBloc>();
       if (state.loading) return const SkeletonLoader(lines: 8);
       if (state.error != null) {
         return InlineError(
-            message: loc.adminMemberDetailLoadFailed, onRetry: cubit.load);
+            message: loc.adminMemberDetailLoadFailed, onRetry: () => bloc.add(const MemberDetailLoadRequested()));
       }
       final p = state.profile;
       if (p == null) return EmptyState(message: loc.commonNoData);

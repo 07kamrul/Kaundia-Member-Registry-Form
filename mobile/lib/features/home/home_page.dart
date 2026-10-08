@@ -9,7 +9,7 @@ import '../../../core/di/injector.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../dashboard/data/public_stats_repository.dart';
-import 'bloc/stats_cubit.dart';
+import 'bloc/stats_bloc.dart';
 
 /// Public landing page, port of Angular `home.component.*` (hero, apply/login
 /// actions, live public stats card, how-it-works steps) plus the registration
@@ -157,18 +157,18 @@ class _StatsCard extends StatefulWidget {
 }
 
 class _StatsCardState extends State<_StatsCard> {
-  late final StatsCubit _cubit;
+  late final StatsBloc _bloc;
 
   @override
   void initState() {
     super.initState();
-    _cubit = StatsCubit(repository: sl<PublicStatsRepository>());
-    _cubit.loadStats();
+    _bloc = StatsBloc(repository: sl<PublicStatsRepository>());
+    _bloc.add(const StatsLoadRequested());
   }
 
   @override
   void dispose() {
-    _cubit.close();
+    _bloc.close();
     super.dispose();
   }
 
@@ -195,8 +195,8 @@ class _StatsCardState extends State<_StatsCard> {
               ],
             ),
             const SizedBox(height: 12),
-            BlocBuilder<StatsCubit, StatsState>(
-              bloc: _cubit,
+            BlocBuilder<StatsBloc, StatsState>(
+              bloc: _bloc,
               builder: (context, state) {
                 final stats = state is StatsLoaded ? state.stats : null;
                 String value(int Function() pick) =>

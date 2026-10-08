@@ -7,7 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/config_lists_cubit.dart';
+import '../presentation/bloc/config_lists_bloc.dart';
 
 /// Config list management (Angular config-lists): category tabs, add item,
 /// activate/deactivate toggle, inline label edit, reorder.
@@ -55,10 +55,10 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
     final canManage =
         sl<SessionManager>().session?.can('manage_system_config') ?? false;
     return BlocProvider(
-      create: (_) => ConfigListsCubit(
+      create: (_) => ConfigListsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
         ..load(),
-      child: BlocConsumer<ConfigListsCubit, ConfigListsState>(
+      child: BlocConsumer<ConfigListsBloc, ConfigListsState>(
         listener: (context, state) {
           if (state.saveError != null) {
             showAppToast(context, loc.adminConfigListsErrorsSaveFailed,
@@ -69,7 +69,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<ConfigListsCubit>();
+          final bloc = context.read<ConfigListsBloc>();
           return ListView(
             children: [
               PageHeader(
@@ -89,7 +89,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                       selected:
                           state.selectedCategory == configCategories[index],
                       onSelected: (_) =>
-                          cubit.selectCategory(configCategories[index]),
+                          bloc.add(ConfigListsCategorySelected(configCategories[index])),
                     ),
                   ),
                 ),
@@ -123,10 +123,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                         label: loc.adminConfigListsFormSubmit,
                         onPressed: canManage
                             ? () async {
-                                await cubit.addItem(
-                                  _valueController.text,
-                                  _labelController.text,
-                                );
+                                bloc.add(ConfigListItemAddRequested(_valueController.text, _labelController.text));
                                 _valueController.clear();
                                 _labelController.clear();
                               }
@@ -144,7 +141,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                 AppDataTableCards<ConfigListItem>(
                   items: state.items,
                   rowBuilder: (context, item) =>
-                      _row(context, loc, cubit, state, item, canManage),
+                      _row(context, loc, bloc, state, item, canManage),
                 ),
               const SizedBox(height: 32),
             ],
@@ -157,7 +154,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
   Widget _row(
       BuildContext context,
       AppLocalizations loc,
-      ConfigListsCubit cubit,
+      ConfigListsBloc bloc,
       ConfigListsState state,
       ConfigListItem item,
       bool canManage) {
@@ -203,18 +200,18 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                       enabled: !busy,
                       decoration:
                           const InputDecoration(border: OutlineInputBorder()),
-                      onFieldSubmitted: (v) => cubit.saveLabel(item, v),
+                      onFieldSubmitted: (v) => bloc.add(ConfigListItemLabelSaveRequested(item, v)),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.check),
                     onPressed: busy
                         ? null
-                        : () => cubit.saveLabel(item, _editController.text),
+                        : () => bloc.add(ConfigListItemLabelSaveRequested(item, _editController.text)),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: busy ? null : cubit.cancelEdit,
+                    onPressed: busy ? null : () => bloc.add(const ConfigListItemEditCancelled()),
                   ),
                 ],
               )
@@ -223,7 +220,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                 onTap: canManage
                     ? () {
                         _editController.text = item.label;
-                        cubit.startEdit(item);
+                        bloc.add(ConfigListItemEditStarted(item));
                       }
                     : null,
                 child: Padding(
@@ -244,7 +241,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                   tooltip: loc.adminConfigListsActionsMoveUp,
                   icon: const Icon(Icons.arrow_upward),
                   onPressed: canManage && !busy && index > 0
-                      ? () => cubit.moveItem(index, -1)
+                      ? () => bloc.add(ConfigListItemMoveRequested(index, -1))
                       : null,
                 ),
                 IconButton(
@@ -252,13 +249,13 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                   icon: const Icon(Icons.arrow_downward),
                   onPressed:
                       canManage && !busy && index < state.items.length - 1
-                          ? () => cubit.moveItem(index, 1)
+                          ? () => bloc.add(ConfigListItemMoveRequested(index, 1))
                           : null,
                 ),
                 if (canManage)
                   Switch(
                     value: item.isActive,
-                    onChanged: busy ? null : (_) => cubit.toggleActive(item),
+                    onChanged: busy ? null : (_) => bloc.add(ConfigListItemToggleActiveRequested(item)),
                   ),
               ],
             ),

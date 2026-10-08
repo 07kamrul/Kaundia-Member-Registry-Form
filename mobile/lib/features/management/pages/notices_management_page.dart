@@ -8,7 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/content_cubit.dart';
+import '../presentation/bloc/content_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// ISO instant -> local "yyyy-MM-ddTHH:mm" (Angular toDatetimeLocal).
@@ -48,9 +48,9 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) =>
-          NoticesCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))
+          NoticesBloc(repository: AdminRepository(apiClient: sl<ApiClient>()))
             ..init(),
-      child: BlocConsumer<NoticesCubit, ContentListState<Notice>>(
+      child: BlocConsumer<NoticesBloc, ContentListState<Notice>>(
         listener: (context, state) {
           if (state.saveError != null) {
             showAppToast(context, loc.adminNoticesErrorsSaveFailed,
@@ -62,7 +62,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<NoticesCubit>();
+          final bloc = context.read<NoticesBloc>();
           return ListView(
             children: [
               PageHeader(
@@ -81,7 +81,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       : state.publishedFilter == true
                           ? 1
                           : 2,
-                  onChanged: cubit.setStatusFilter,
+                  onChanged: bloc.add(NoticesStatusFilterChanged(,
                 ),
               ),
               Padding(
@@ -101,7 +101,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       DropdownMenuItem<String?>(
                           value: c.id, child: Text(c.label)),
                   ],
-                  onChanged: cubit.setCategoryFilter,
+                  onChanged: bloc.setCategoryFilter,
                 ),
               ),
               Padding(
@@ -110,7 +110,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                 child: AppButton(
                   label: loc.adminNoticesCreate,
                   icon: Icons.add,
-                  onPressed: () => _openForm(context, loc, cubit),
+                  onPressed: () => _openForm(context, loc, bloc),
                 ),
               ),
               if (state.loading)
@@ -120,7 +120,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
               else
                 AppDataTableCards<Notice>(
                   items: state.items,
-                  rowBuilder: (context, n) => _row(context, loc, cubit, n),
+                  rowBuilder: (context, n) => _row(context, loc, bloc, n),
                 ),
               const SizedBox(height: 32),
             ],
@@ -139,7 +139,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
     return loc.adminNoticesStatusPublished;
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, NoticesCubit cubit,
+  Widget _row(BuildContext context, AppLocalizations loc, NoticesBloc bloc,
       Notice n) {
     final category = _categoryLabel(context, n.categoryId);
     return Card(
@@ -195,12 +195,12 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                   variant: AppButtonVariant.ghost,
                   onPressed: _isBusy(context, n.id)
                       ? null
-                      : () => cubit.togglePublished(n),
+                      : () => bloc.add(NoticePublishToggled(n)),
                 ),
                 AppButton(
                   label: loc.commonEdit,
                   variant: AppButtonVariant.ghost,
-                  onPressed: () => _openForm(context, loc, cubit, editing: n),
+                  onPressed: () => _openForm(context, loc, bloc, editing: n),
                 ),
                 AppButton(
                   label: loc.commonDelete,
@@ -212,7 +212,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       message: loc.adminNoticesDeleteModalMessageSuffix,
                       destructive: true,
                     );
-                    if (confirmed && context.mounted) await cubit.delete(n);
+                    if (confirmed && context.mounted) bloc.add(NoticeDeleteRequested(n));
                   },
                 ),
               ],
@@ -224,11 +224,11 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
   }
 
   bool _isBusy(BuildContext context, String id) =>
-      context.read<NoticesCubit>().state.busyId == id;
+      context.read<NoticesBloc>().state.busyId == id;
 
   String _categoryLabel(BuildContext context, String? categoryId) {
     if (categoryId == null) return '—';
-    final categories = context.read<NoticesCubit>().state.categories;
+    final categories = context.read<NoticesBloc>().state.categories;
     for (final c in categories) {
       if (c.id == categoryId) return c.label;
     }
@@ -236,7 +236,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
   }
 
   Future<void> _openForm(
-      BuildContext context, AppLocalizations loc, NoticesCubit cubit,
+      BuildContext context, AppLocalizations loc, NoticesBloc bloc,
       {Notice? editing}) async {
     final titleController = TextEditingController(text: editing?.title ?? '');
     final bodyController = TextEditingController(text: editing?.body ?? '');
@@ -297,7 +297,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       value: null,
                       child: Text(loc.adminNoticesFormNoCategory),
                     ),
-                    for (final c in cubit.state.categories)
+                    for (final c in bloc.state.categories)
                       DropdownMenuItem<String>(
                           value: c.id, child: Text(c.label)),
                   ],
@@ -365,17 +365,14 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       final publishAt = publishDate.isEmpty
                           ? null
                           : isoFromParts(publishDate, publishTime);
-                      final ok = await cubit.save(
-                        editingId: editing?.id,
-                        payload: NoticeInput(
+                      final ok = bloc.add(NoticeSaveRequested(editingId: editing?.id, payload: NoticeInput(
                           title: titleController.text.trim(),
                           body: bodyController.text.trim(),
                           categoryId: categoryId.isEmpty ? null : categoryId,
                           isPublished: published,
                           isMembersOnly: membersOnly,
                           publishAt: publishAt,
-                        ),
-                      );
+                        )));
                       if (sheetContext.mounted) {
                         Navigator.of(sheetContext).pop(ok);
                       }

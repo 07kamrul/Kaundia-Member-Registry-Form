@@ -7,6 +7,26 @@ import '../../../../core/network/api_exception.dart';
 import '../../data/payment_repository.dart';
 import '../../domain/payment_entities.dart';
 
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+sealed class CostSharesEvent extends Equatable {
+  const CostSharesEvent();
+  @override
+  List<Object?> get props => const [];
+}
+
+final class CostSharesLoadRequested extends CostSharesEvent {
+  const CostSharesLoadRequested();
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+enum CostSharesStatus { loading, loaded, failure }
+
 class CostSharesState extends Equatable {
   const CostSharesState({
     this.status = CostSharesStatus.loading,
@@ -41,16 +61,23 @@ class CostSharesState extends Equatable {
   List<Object?> get props => [status, shares, error];
 }
 
-enum CostSharesStatus { loading, loaded, failure }
+// ---------------------------------------------------------------------------
+// Bloc
+// ---------------------------------------------------------------------------
 
-class CostSharesCubit extends Cubit<CostSharesState> {
-  CostSharesCubit({MemberPaymentRepository? repository})
+class CostSharesBloc extends Bloc<CostSharesEvent, CostSharesState> {
+  CostSharesBloc({MemberPaymentRepository? repository})
       : _repository = repository ?? MemberPaymentRepository(apiClient: sl<ApiClient>()),
-        super(const CostSharesState());
+        super(const CostSharesState()) {
+    on<CostSharesLoadRequested>(_onLoad);
+  }
 
   final MemberPaymentRepository _repository;
 
-  Future<void> load() async {
+  Future<void> _onLoad(
+    CostSharesLoadRequested e,
+    Emitter<CostSharesState> emit,
+  ) async {
     emit(state.copyWith(status: CostSharesStatus.loading, clearError: true));
     try {
       final shares = await _repository.myCostShares();

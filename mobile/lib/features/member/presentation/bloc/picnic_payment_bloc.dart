@@ -38,6 +38,80 @@ class PicnicHeadLabel {
   int get hashCode => Object.hash(name, relation);
 }
 
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+sealed class PicnicPaymentEvent extends Equatable {
+  const PicnicPaymentEvent();
+  @override
+  List<Object?> get props => const [];
+}
+
+final class PicnicStarted extends PicnicPaymentEvent {
+  const PicnicStarted();
+}
+
+final class PicnicHistoryRefreshRequested extends PicnicPaymentEvent {
+  const PicnicHistoryRefreshRequested();
+}
+
+final class PicnicRatesRefreshRequested extends PicnicPaymentEvent {
+  const PicnicRatesRefreshRequested();
+}
+
+final class PicnicDateChanged extends PicnicPaymentEvent {
+  const PicnicDateChanged(this.date);
+  final String date;
+  @override
+  List<Object?> get props => [date];
+}
+
+final class PicnicHeadsChanged extends PicnicPaymentEvent {
+  const PicnicHeadsChanged(this.count);
+  final int count;
+  @override
+  List<Object?> get props => [count];
+}
+
+final class PicnicLabelNameChanged extends PicnicPaymentEvent {
+  const PicnicLabelNameChanged(this.index, this.name);
+  final int index;
+  final String name;
+  @override
+  List<Object?> get props => [index, name];
+}
+
+final class PicnicLabelRelationChanged extends PicnicPaymentEvent {
+  const PicnicLabelRelationChanged(this.index, this.relation);
+  final int index;
+  final PicnicRelation relation;
+  @override
+  List<Object?> get props => [index, relation];
+}
+
+final class PicnicReceiptNoChanged extends PicnicPaymentEvent {
+  const PicnicReceiptNoChanged(this.value);
+  final String value;
+  @override
+  List<Object?> get props => [value];
+}
+
+final class PicnicPaymentMethodChanged extends PicnicPaymentEvent {
+  const PicnicPaymentMethodChanged(this.value);
+  final String value;
+  @override
+  List<Object?> get props => [value];
+}
+
+final class PicnicSubmitted extends PicnicPaymentEvent {
+  const PicnicSubmitted();
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
 class PicnicPaymentState extends Equatable {
   const PicnicPaymentState({
     this.status = PicnicPageStatus.loading,
@@ -142,25 +216,50 @@ class PicnicPaymentState extends Equatable {
       ];
 }
 
-class PicnicPaymentCubit extends Cubit<PicnicPaymentState> {
-  PicnicPaymentCubit({MemberRepository? repository})
+// ---------------------------------------------------------------------------
+// Bloc
+// ---------------------------------------------------------------------------
+
+class PicnicPaymentBloc extends Bloc<PicnicPaymentEvent, PicnicPaymentState> {
+  PicnicPaymentBloc({MemberRepository? repository})
       : _repository = repository ?? MemberRepository(apiClient: sl<ApiClient>()),
-        super(const PicnicPaymentState());
+        super(const PicnicPaymentState()) {
+    on<PicnicStarted>(_onStarted);
+    on<PicnicHistoryRefreshRequested>(_onHistory);
+    on<PicnicRatesRefreshRequested>(_onRates);
+    on<PicnicDateChanged>(_onDateChanged);
+    on<PicnicHeadsChanged>(_onHeadsChanged);
+    on<PicnicLabelNameChanged>(_onLabelNameChanged);
+    on<PicnicLabelRelationChanged>(_onLabelRelationChanged);
+    on<PicnicReceiptNoChanged>(
+      (e, emit) => emit(state.copyWith(receiptNo: e.value, clearFormError: true)),
+    );
+    on<PicnicPaymentMethodChanged>(
+      (e, emit) => emit(state.copyWith(paymentMethod: e.value, clearFormError: true)),
+    );
+    on<PicnicSubmitted>(_onSubmitted);
+  }
 
   final MemberRepository _repository;
 
-  Future<void> load() async {
+  Future<void> _onStarted(
+    PicnicStarted e,
+    Emitter<PicnicPaymentState> emit,
+  ) async {
     final today = DateTime.now().toIso8601String().substring(0, 10);
     emit(state.copyWith(
       status: PicnicPageStatus.loading,
       clearHistoryError: true,
       paymentDate: state.paymentDate.isEmpty ? today : state.paymentDate,
     ));
-    await loadHistory();
-    await loadRates();
+    await _onHistory(const PicnicHistoryRefreshRequested(), emit);
+    await _onRates(const PicnicRatesRefreshRequested(), emit);
   }
 
-  Future<void> loadHistory() async {
+  Future<void> _onHistory(
+    PicnicPaymentEvent e,
+    Emitter<PicnicPaymentState> emit,
+  ) async {
     emit(state.copyWith(historyLoading: true, clearHistoryError: true));
     try {
       final payments = await _repository.getPicnicPayments();
@@ -180,17 +279,20 @@ class PicnicPaymentCubit extends Cubit<PicnicPaymentState> {
   }
 
   /// Rates must be re-resolved whenever the payment date changes.
-  Future<void> loadRates() async {
+  Future<void> _onRates(
+    PicnicPaymentEvent e,
+    Emitter<PicnicPaymentState> emit,
+  ) async {
     if (state.paymentDate.isEmpty) return;
     emit(state.copyWith(feeLoading: true, ratesError: PicnicRatesError.none, clearRates: true));
     try {
       final rates = await _repository.getPicnicRates(state.paymentDate);
       emit(state.copyWith(rates: rates, feeLoading: false, ratesError: PicnicRatesError.none));
-    } on ApiException catch (e) {
+    } on ApiException catch (err) {
       emit(state.copyWith(
         clearRates: true,
         feeLoading: false,
-        ratesError: switch (e.statusCode) {
+        ratesError: switch (err.statusCode) {
           404 => PicnicRatesError.notConfigured,
           401 || 403 => PicnicRatesError.access,
           _ => PicnicRatesError.generic,
@@ -199,13 +301,16 @@ class PicnicPaymentCubit extends Cubit<PicnicPaymentState> {
     }
   }
 
-  Future<void> setDate(String date) async {
-    emit(state.copyWith(paymentDate: date));
-    await loadRates();
+  Future<void> _onDateChanged(
+    PicnicDateChanged e,
+    Emitter<PicnicPaymentState> emit,
+  ) async {
+    emit(state.copyWith(paymentDate: e.date));
+    await _onRates(const PicnicRatesRefreshRequested(), emit);
   }
 
-  void setHeads(int count) {
-    final clamped = count.clamp(0, maxAdditionalHeads);
+  void _onHeadsChanged(PicnicHeadsChanged e, Emitter<PicnicPaymentState> emit) {
+    final clamped = e.count.clamp(0, maxAdditionalHeads);
     if (clamped == state.additionalHeads) return;
     var labels = state.labels;
     while (labels.length < clamped) {
@@ -215,27 +320,30 @@ class PicnicPaymentCubit extends Cubit<PicnicPaymentState> {
     emit(state.copyWith(additionalHeads: clamped, labels: labels, clearFormError: true));
   }
 
-  void setLabelName(int index, String name) {
+  void _onLabelNameChanged(
+    PicnicLabelNameChanged e,
+    Emitter<PicnicPaymentState> emit,
+  ) {
     final labels = [...state.labels];
-    if (index < 0 || index >= labels.length) return;
-    labels[index] = PicnicHeadLabel(name: name, relation: labels[index].relation);
+    if (e.index < 0 || e.index >= labels.length) return;
+    labels[e.index] = PicnicHeadLabel(name: e.name, relation: labels[e.index].relation);
     emit(state.copyWith(labels: labels, clearFormError: true));
   }
 
-  void setLabelRelation(int index, PicnicRelation relation) {
+  void _onLabelRelationChanged(
+    PicnicLabelRelationChanged e,
+    Emitter<PicnicPaymentState> emit,
+  ) {
     final labels = [...state.labels];
-    if (index < 0 || index >= labels.length) return;
-    labels[index] = PicnicHeadLabel(name: labels[index].name, relation: relation);
+    if (e.index < 0 || e.index >= labels.length) return;
+    labels[e.index] = PicnicHeadLabel(name: labels[e.index].name, relation: e.relation);
     emit(state.copyWith(labels: labels, clearFormError: true));
   }
 
-  void setReceiptNo(String value) =>
-      emit(state.copyWith(receiptNo: value, clearFormError: true));
-
-  void setPaymentMethod(String value) =>
-      emit(state.copyWith(paymentMethod: value, clearFormError: true));
-
-  Future<void> submit() async {
+  Future<void> _onSubmitted(
+    PicnicSubmitted e,
+    Emitter<PicnicPaymentState> emit,
+  ) async {
     if (!state.canSubmit) return;
     emit(state.copyWith(saving: true, clearFormError: true, clearSuccessTotal: true));
     try {
@@ -256,13 +364,15 @@ class PicnicPaymentCubit extends Cubit<PicnicPaymentState> {
         labels: const [],
         receiptNo: '',
       ));
-      await loadHistory();
-    } on ApiException catch (e) {
+      await _onHistory(const PicnicHistoryRefreshRequested(), emit);
+    } on ApiException catch (err) {
       emit(state.copyWith(
         saving: false,
-        formError: e.isBusiness && e.businessMessage != null
-            ? e.businessMessage
-            : (e.isValidation && e.fieldErrors.isNotEmpty ? e.fieldErrors.values.first : 'saveError'),
+        formError: err.isBusiness && err.businessMessage != null
+            ? err.businessMessage
+            : (err.isValidation && err.fieldErrors.isNotEmpty
+                ? err.fieldErrors.values.first
+                : 'saveError'),
       ));
     }
   }

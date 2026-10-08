@@ -9,7 +9,9 @@ import '../../data/finance_repository.dart';
 import '../../domain/finance_entities.dart';
 import '../../domain/payment_entities.dart';
 
-// Events --------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
 
 sealed class FundTransparencyEvent extends Equatable {
   const FundTransparencyEvent();
@@ -18,7 +20,19 @@ sealed class FundTransparencyEvent extends Equatable {
   List<Object?> get props => const [];
 }
 
-class FundPeriodChanged extends FundTransparencyEvent {
+/// Initial load of the dashboard for a period.
+final class FundStarted extends FundTransparencyEvent {
+  const FundStarted(this.period, {this.dateFrom, this.dateTo});
+
+  final FinancePeriod period;
+  final String? dateFrom;
+  final String? dateTo;
+
+  @override
+  List<Object?> get props => [period, dateFrom, dateTo];
+}
+
+final class FundPeriodChanged extends FundTransparencyEvent {
   const FundPeriodChanged(this.period, {this.dateFrom, this.dateTo});
 
   final FinancePeriod period;
@@ -29,7 +43,7 @@ class FundPeriodChanged extends FundTransparencyEvent {
   List<Object?> get props => [period, dateFrom, dateTo];
 }
 
-class FundLedgerFiltersChanged extends FundTransparencyEvent {
+final class FundLedgerFiltersChanged extends FundTransparencyEvent {
   const FundLedgerFiltersChanged({this.type, this.search});
 
   final FinanceType? type;
@@ -39,7 +53,7 @@ class FundLedgerFiltersChanged extends FundTransparencyEvent {
   List<Object?> get props => [type, search];
 }
 
-class FundLedgerPageChanged extends FundTransparencyEvent {
+final class FundLedgerPageChanged extends FundTransparencyEvent {
   const FundLedgerPageChanged(this.delta);
 
   final int delta;
@@ -48,11 +62,17 @@ class FundLedgerPageChanged extends FundTransparencyEvent {
   List<Object?> get props => [delta];
 }
 
-class FundReportDownloaded extends FundTransparencyEvent {
+final class FundReportDownloaded extends FundTransparencyEvent {
   const FundReportDownloaded();
 }
 
-// State ---------------------------------------------------------------------
+final class FundPdfSavedPathCleared extends FundTransparencyEvent {
+  const FundPdfSavedPathCleared();
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
 
 enum FundStatus { loading, loaded, failure }
 
@@ -166,33 +186,50 @@ class FundTransparencyState extends Equatable {
       ];
 }
 
-class FundTransparencyCubit extends Cubit<FundTransparencyState> {
-  FundTransparencyCubit({FinanceRepository? repository})
+// ---------------------------------------------------------------------------
+// Bloc
+// ---------------------------------------------------------------------------
+
+class FundTransparencyBloc extends Bloc<FundTransparencyEvent, FundTransparencyState> {
+  FundTransparencyBloc({FinanceRepository? repository})
       : _repository = repository ?? FinanceRepository(apiClient: sl<ApiClient>()),
-        super(const FundTransparencyState());
+        super(const FundTransparencyState()) {
+    on<FundStarted>(_onPeriodApplied);
+    on<FundPeriodChanged>(_onPeriodApplied);
+    on<FundLedgerFiltersChanged>(_onFiltersChanged);
+    on<FundLedgerPageChanged>(_onPageChanged);
+    on<FundReportDownloaded>(_onReportDownloaded);
+    on<FundPdfSavedPathCleared>(
+      (_, emit) => emit(state.copyWith(clearPdfSavedPath: true)),
+    );
+  }
 
   final FinanceRepository _repository;
 
   /// Loads the summary, then chains the ledger with the summary's date bounds
   /// (mirrors Angular loadLedgerWithPeriodDates).
-  Future<void> applyPeriod(
-    FinancePeriod period, {
-    String? dateFrom,
-    String? dateTo,
-  }) async {
-    if (period == FinancePeriod.custom &&
-        ((dateFrom ?? '').isEmpty ||
-        (dateTo ?? '').isEmpty ||
-        dateFrom!.compareTo(dateTo!) > 0)) {
+  Future<void> _onPeriodApplied(
+    FundTransparencyEvent e,
+    Emitter<FundTransparencyState> emit,
+  ) async {
+    final period = switch (e) {
+      FundStarted(:final period, :final dateFrom, :final dateTo) ||
+      FundPeriodChanged(:final period, :final dateFrom, :final dateTo) => (period, dateFrom, dateTo),
+      _ => (state.period, null as String?, null as String?),
+    };
+    if (period.$1 == FinancePeriod.custom &&
+        ((period.$2 ?? '').isEmpty ||
+            (period.$3 ?? '').isEmpty ||
+            period.$2!.compareTo(period.$3!) > 0)) {
       // Caller surfaces the inline period error.
       return;
     }
-    emit(state.copyWith(status: FundStatus.loading, clearError: true, period: period));
+    emit(state.copyWith(status: FundStatus.loading, clearError: true, period: period.$1));
     try {
       final summary = await _repository.getSummary(
-        period,
-        dateFrom: period == FinancePeriod.custom ? dateFrom : null,
-        dateTo: period == FinancePeriod.custom ? dateTo : null,
+        period.$1,
+        dateFrom: period.$1 == FinancePeriod.custom ? period.$2 : null,
+        dateTo: period.$1 == FinancePeriod.custom ? period.$3 : null,
       );
       emit(state.copyWith(
         status: FundStatus.loaded,
@@ -202,31 +239,37 @@ class FundTransparencyCubit extends Cubit<FundTransparencyState> {
         ledgerDateTo: summary.periodDateTo,
         page: 1,
       ));
-      await _loadLedger();
+      await _loadLedger(emit);
     } on ApiException {
       emit(state.copyWith(status: FundStatus.failure, error: true));
     }
   }
 
-  Future<void> setFilters({FinanceType? type, String? search}) async {
+  Future<void> _onFiltersChanged(
+    FundLedgerFiltersChanged e,
+    Emitter<FundTransparencyState> emit,
+  ) async {
     emit(state.copyWith(
-      typeFilter: type,
-      clearTypeFilter: type == null,
-      search: search,
-      clearSearch: search == null,
+      typeFilter: e.type,
+      clearTypeFilter: e.type == null,
+      search: e.search,
+      clearSearch: e.search == null,
       page: 1,
     ));
-    await _loadLedger();
+    await _loadLedger(emit);
   }
 
-  Future<void> changePage(int delta) async {
-    final next = state.page + delta;
+  Future<void> _onPageChanged(
+    FundLedgerPageChanged e,
+    Emitter<FundTransparencyState> emit,
+  ) async {
+    final next = state.page + e.delta;
     if (next < 1 || next > state.totalPages) return;
     emit(state.copyWith(page: next));
-    await _loadLedger();
+    await _loadLedger(emit);
   }
 
-  Future<void> _loadLedger() async {
+  Future<void> _loadLedger(Emitter<FundTransparencyState> emit) async {
     emit(state.copyWith(ledgerLoading: true, clearLedgerError: true));
     try {
       final ledger = await _repository.getTransactions(state.ledgerFilters);
@@ -236,7 +279,10 @@ class FundTransparencyCubit extends Cubit<FundTransparencyState> {
     }
   }
 
-  Future<void> downloadReport() async {
+  Future<void> _onReportDownloaded(
+    FundReportDownloaded e,
+    Emitter<FundTransparencyState> emit,
+  ) async {
     if (state.pdfDownloading) return;
     emit(state.copyWith(pdfDownloading: true, clearPdfError: true, clearPdfSavedPath: true));
     try {
@@ -252,6 +298,4 @@ class FundTransparencyCubit extends Cubit<FundTransparencyState> {
       emit(state.copyWith(pdfDownloading: false, pdfError: true));
     }
   }
-
-  void clearPdfSavedPath() => emit(state.copyWith(clearPdfSavedPath: true));
 }

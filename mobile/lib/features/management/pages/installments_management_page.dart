@@ -7,7 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/installments_mgmt_cubit.dart';
+import '../presentation/bloc/installments_mgmt_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 String monthLabelOf(AppLocalizations loc, int month) => switch (month) {
@@ -49,10 +49,10 @@ class _InstallmentsManagementPageState
     final canManage =
         sl<SessionManager>().session?.can('member.manage') ?? false;
     return BlocProvider(
-      create: (_) => InstallmentsMgmtCubit(
+      create: (_) => InstallmentsMgmtBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
         ..loadMembers(),
-      child: BlocConsumer<InstallmentsMgmtCubit, InstallmentsMgmtState>(
+      child: BlocConsumer<InstallmentsMgmtBloc, InstallmentsMgmtState>(
         listener: (context, state) {
           if (state.error != null) {
             showAppToast(context, describeApiError(context, state.error),
@@ -60,8 +60,8 @@ class _InstallmentsManagementPageState
           }
         },
         builder: (context, state) {
-          final cubit = context.read<InstallmentsMgmtCubit>();
-          final selected = cubit.selectedMember;
+          final bloc = context.read<InstallmentsMgmtBloc>();
+          final selected = bloc.selectedMember;
           return ListView(
             children: [
               PageHeader(
@@ -87,7 +87,7 @@ class _InstallmentsManagementPageState
                         child: ChoiceChip(
                           label: Text(m.fullName),
                           selected: active,
-                          onSelected: (_) => cubit.selectMember(m.id),
+                          onSelected: (_) => bloc.add(InstallmentsMemberSelected(memberId: m.id)),
                         ),
                       );
                     },
@@ -115,7 +115,7 @@ class _InstallmentsManagementPageState
                           loc: loc,
                           canManage: canManage,
                           busy: state.markingId == i.id,
-                          onMarkPaid: () => cubit.markPaid(i),
+                          onMarkPaid: () => bloc.add(InstallmentMarkPaid(installment: i)),
                         ),
                     ],
                   ),

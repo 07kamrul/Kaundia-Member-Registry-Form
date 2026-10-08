@@ -1,3 +1,6 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -5,6 +8,10 @@ import '../../data/admin_repository.dart';
 import '../../domain/admin_entities.dart';
 
 // ----- Installments management (member picker + month cards) -----
+
+// Sentinel used by copyWith to distinguish 'not passed' from 'set to null'.
+// ignore: unused_element
+T _same<T>() => throw UnsupportedError('sentinel');
 
 class InstallmentsMgmtState extends Equatable {
   const InstallmentsMgmtState({
@@ -34,7 +41,7 @@ class InstallmentsMgmtState extends Equatable {
     List<Installment>? installments,
     bool? loadingInstallments,
     String? Function() markingId = _same,
-    Object? Function() error = _same,
+    Object? Function()? error,
   }) =>
       InstallmentsMgmtState(
         members: members ?? this.members,
@@ -45,10 +52,9 @@ class InstallmentsMgmtState extends Equatable {
         installments: installments ?? this.installments,
         loadingInstallments: loadingInstallments ?? this.loadingInstallments,
         markingId: markingId == _same ? this.markingId : markingId(),
-        error: error == _same ? this.error : error(),
+        error: error == null ? this.error : error(),
       );
 
-  static T _same<T>() => throw UnsupportedError('sentinel');
 
   @override
   List<Object?> get props => [
@@ -62,10 +68,53 @@ class InstallmentsMgmtState extends Equatable {
       ];
 }
 
-class InstallmentsMgmtCubit extends Cubit<InstallmentsMgmtState> {
-  InstallmentsMgmtCubit({required AdminRepository repository})
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+sealed class InstallmentsMgmtEvent extends Equatable {
+  const InstallmentsMgmtEvent();
+  @override
+  List<Object?> get props => const [];
+}
+
+final class InstallmentsMembersLoadRequested extends InstallmentsMgmtEvent {
+  const InstallmentsMembersLoadRequested();
+
+  @override
+  List<Object?> get props => const [];
+}
+
+final class InstallmentsMemberSelected extends InstallmentsMgmtEvent {
+  const InstallmentsMemberSelected({
+    required this.memberId,
+  });
+
+  final String memberId;
+
+  @override
+  List<Object?> get props => [memberId];
+}
+
+final class InstallmentMarkPaid extends InstallmentsMgmtEvent {
+  const InstallmentMarkPaid({
+    required this.installment,
+  });
+
+  final Installment installment;
+
+  @override
+  List<Object?> get props => [installment];
+}
+
+class InstallmentsMgmtBloc extends Bloc<InstallmentsMgmtEvent, InstallmentsMgmtState> {
+  InstallmentsMgmtBloc({required AdminRepository repository})
       : _repository = repository,
-        super(const InstallmentsMgmtState());
+        super(const InstallmentsMgmtState()) {
+    on<InstallmentsMembersLoadRequested>((e, emit) => loadMembers());
+    on<InstallmentsMemberSelected>((e, emit) => selectMember(e.memberId));
+    on<InstallmentMarkPaid>((e, emit) => markPaid(e.installment));
+  }
 
   final AdminRepository _repository;
 
@@ -150,7 +199,7 @@ class PicnicPaymentsState extends Equatable {
 
   PicnicPaymentsState copyWith({
     bool? loading,
-    Object? Function() error = _same,
+    Object? Function()? error,
   }) =>
       PicnicPaymentsState(
         memberFilter: memberFilter,
@@ -160,10 +209,9 @@ class PicnicPaymentsState extends Equatable {
         totalCollected: totalCollected,
         count: count,
         loading: loading ?? this.loading,
-        error: error == _same ? this.error : error(),
+        error: error == null ? this.error : error(),
       );
 
-  static T _same<T>() => throw UnsupportedError('sentinel');
 
   @override
   List<Object?> get props => [

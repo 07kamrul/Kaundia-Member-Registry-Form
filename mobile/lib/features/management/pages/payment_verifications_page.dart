@@ -5,9 +5,12 @@ import '../../../core/di/injector.dart';
 import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
+import '../presentation/bloc/finance_bloc.dart';
+import '../presentation/bloc/bloc_actions.dart';
+
 import '../data/admin_repository.dart';
 import '../domain/finance_entities.dart';
-import '../presentation/bloc/finance_cubit.dart';
+import '../presentation/bloc/finance_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'installments_management_page.dart' show monthLabelOf;
 
@@ -31,10 +34,10 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => PaymentVerificationsCubit(
+      create: (_) => PaymentVerificationsBloc(
         repository: InstallmentPaymentRepository(apiClient: sl<ApiClient>()),
       )..load(),
-      child: BlocConsumer<PaymentVerificationsCubit, PaymentVerificationsState>(
+      child: BlocConsumer<PaymentVerificationsBloc, PaymentVerificationsState>(
         listener: (context, state) {
           if (state.error != null) {
             showAppToast(context, describeApiError(context, state.error),
@@ -42,7 +45,7 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<PaymentVerificationsCubit>();
+          final bloc = context.read<PaymentVerificationsBloc>();
           return ListView(
             children: [
               PageHeader(
@@ -61,11 +64,11 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
                     'approved' => 1,
                     _ => 2,
                   },
-                  onChanged: (index) => cubit.setStatusFilter(switch (index) {
+                  onChanged: (index) => bloc.add(PaymentVerificationsStatusFilterChanged(status: switch (index) {
                     0 => 'pending',
                     1 => 'approved',
                     _ => 'rejected',
-                  }),
+                  })),
                 ),
               ),
               if (state.loading)
@@ -77,7 +80,7 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
                 )
               else
                 for (final p in state.payments)
-                  _paymentCard(context, loc, cubit, p),
+                  _paymentCard(context, loc, bloc, p),
               const SizedBox(height: 32),
             ],
           );
@@ -87,11 +90,11 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
   }
 
   Widget _paymentCard(BuildContext context, AppLocalizations loc,
-      PaymentVerificationsCubit cubit, AdminInstallmentPayment p) {
+      PaymentVerificationsBloc bloc, AdminInstallmentPayment p) {
     final months = p.installments
         .map((i) => '${monthLabelOf(loc, i.month)} ${i.year}')
         .join(', ');
-    final busy = _isBusy(cubit, p.id);
+    final busy = _isBusy(bloc, p.id);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Padding(
@@ -160,12 +163,12 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
                     variant: AppButtonVariant.danger,
                     onPressed: busy
                         ? null
-                        : () => _rejectDialog(context, loc, cubit, p),
+                        : () => _rejectDialog(context, loc, bloc, p),
                   ),
                   AppButton(
                     label: loc.adminPaymentVerificationsApprove,
                     icon: Icons.check,
-                    onPressed: busy ? null : () => cubit.approve(p),
+                    onPressed: busy ? null : () => bloc.add(PaymentVerificationsApproved(payment: p)),
                   ),
                 ],
               ],
@@ -176,11 +179,11 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
     );
   }
 
-  bool _isBusy(PaymentVerificationsCubit cubit, int id) =>
-      cubit.state.busyId == id;
+  bool _isBusy(PaymentVerificationsBloc bloc, int id) =>
+      bloc.state.busyId == id;
 
   Future<void> _rejectDialog(BuildContext context, AppLocalizations loc,
-      PaymentVerificationsCubit cubit, AdminInstallmentPayment p) async {
+      PaymentVerificationsBloc bloc, AdminInstallmentPayment p) async {
     final controller = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
@@ -225,6 +228,6 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
       showAppToast(context, loc.adminPaymentVerificationsReason, error: true);
       return;
     }
-    await cubit.reject(p, reason);
+    bloc.add(PaymentVerificationsRejected(payment: p, reason: reason));
   }
 }

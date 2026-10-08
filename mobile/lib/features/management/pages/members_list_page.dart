@@ -9,7 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/members_cubit.dart';
+import '../presentation/bloc/members_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'submissions_list_page.dart';
 
@@ -29,9 +29,9 @@ class MembersListPage extends StatelessWidget {
         sl<SessionManager>().session?.can('member.manage') ?? false;
     return BlocProvider(
       create: (_) =>
-          MembersCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))
-            ..load(),
-      child: BlocConsumer<MembersCubit, MembersState>(
+          MembersBloc(repository: AdminRepository(apiClient: sl<ApiClient>()))
+            ..add(const MembersLoadRequested()),
+      child: BlocConsumer<MembersBloc, MembersState>(
         listener: (context, state) {
           if (state.error != null) {
             showAppToast(context, describeApiError(context, state.error),
@@ -39,7 +39,7 @@ class MembersListPage extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<MembersCubit>();
+          final bloc = context.read<MembersBloc>();
           return ListView(
             children: [
               PageHeader(
@@ -53,7 +53,7 @@ class MembersListPage extends StatelessWidget {
                 AppDataTableCards<Member>(
                   items: state.items,
                   rowBuilder: (context, m) =>
-                      _row(context, loc, cubit, m, canManage, state),
+                      _row(context, loc, bloc, m, canManage, state),
                   onRowTap: (m) => context.go('/members/${m.id}'),
                 ),
             ],
@@ -63,7 +63,7 @@ class MembersListPage extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, MembersCubit cubit,
+  Widget _row(BuildContext context, AppLocalizations loc, MembersBloc bloc,
       Member m, bool canManage, MembersState state) {
     final contribution = m.status != SubmissionStatus.approved
         ? '—'
@@ -133,7 +133,7 @@ class MembersListPage extends StatelessWidget {
                                   loc.adminMembersListResetModalConfirmLabel,
                             );
                             if (confirmed && context.mounted) {
-                              final sent = await cubit.resetPassword(m.id);
+                              final sent = bloc.add(MemberPasswordResetRequested( m.id));
                               if (context.mounted) {
                                 showAppToast(
                                   context,
@@ -165,7 +165,7 @@ class MembersListPage extends StatelessWidget {
                               destructive: true,
                             );
                             if (confirmed && context.mounted) {
-                              await cubit.delete(m.id);
+                              bloc.add(MemberDeleted(memberId: txn: m.id));
                             }
                           },
                   ),

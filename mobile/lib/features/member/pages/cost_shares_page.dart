@@ -8,7 +8,7 @@ import '../domain/finance_entities.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/payment_repository.dart';
 import '../domain/payment_entities.dart';
-import '../presentation/bloc/cost_shares_cubit.dart';
+import '../presentation/bloc/cost_shares_bloc.dart';
 
 /// Port of Angular CostSharesComponent: own society-cost shares with the total
 /// outstanding card and a mobile list (table-cards idiom).
@@ -23,8 +23,8 @@ class CostSharesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-          CostSharesCubit(repository: MemberPaymentRepository(apiClient: sl<ApiClient>()))
-            ..load(),
+          CostSharesBloc(repository: MemberPaymentRepository(apiClient: sl<ApiClient>()))
+            ..add(const CostSharesLoadRequested()),
       child: const _CostSharesView(),
     );
   }
@@ -37,13 +37,13 @@ class _CostSharesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
-      body: BlocBuilder<CostSharesCubit, CostSharesState>(
+      body: BlocBuilder<CostSharesBloc, CostSharesState>(
         builder: (context, state) {
           final body = switch (state.status) {
             CostSharesStatus.loading => const SkeletonLoader(lines: 6),
             CostSharesStatus.failure => InlineError(
                 message: loc.memberCostSharesLoadError,
-                onRetry: () => context.read<CostSharesCubit>().load(),
+                onRetry: () => context.read<CostSharesBloc>().add(const CostSharesLoadRequested()),
               ),
             CostSharesStatus.loaded => ListView(
                 padding: const EdgeInsets.only(bottom: 24),

@@ -8,7 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/roadmap_repository.dart';
 import '../domain/roadmap_entities.dart';
-import '../presentation/bloc/roadmap_cubit.dart';
+import '../presentation/bloc/roadmap_bloc.dart';
 
 /// Port of Angular RoadmapComponent (+ slides): overall progress, status
 /// filters, per-timeframe collapsible item sections and PDF export. The
@@ -23,7 +23,8 @@ class RoadmapPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => RoadmapCubit(repository: RoadmapRepository(apiClient: sl<ApiClient>()))..load(),
+      create: (_) => RoadmapBloc(repository: RoadmapRepository(apiClient: sl<ApiClient>()))
+          ..add(const RoadmapLoadRequested()),
       child: const _RoadmapView(),
     );
   }
@@ -36,23 +37,23 @@ class _RoadmapView extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
-      body: BlocConsumer<RoadmapCubit, RoadmapState>(
+      body: BlocConsumer<RoadmapBloc, RoadmapState>(
         listener: (context, state) {
           final path = state.pdfSavedPath;
           if (path != null) {
             OpenFilex.open(path);
-            context.read<RoadmapCubit>().clearPdfSavedPath();
+            context.read<RoadmapBloc>().add(const RoadmapPdfSavedPathCleared());
           }
         },
         builder: (context, state) {
-          final cubit = context.read<RoadmapCubit>();
+          final bloc = context.read<RoadmapBloc>();
           return switch (state.status) {
             RoadmapPageStatus.loading => const SkeletonLoader(lines: 8),
             RoadmapPageStatus.failure => InlineError(
                 message: loc.memberRoadmapLoadError,
-                onRetry: cubit.load,
+                onRetry: () => bloc.add(const RoadmapLoadRequested()),
               ),
-            RoadmapPageStatus.loaded => _loaded(context, state, loc, cubit),
+            RoadmapPageStatus.loaded => _loaded(context, state, loc, bloc),
           };
         },
       ),
@@ -63,7 +64,7 @@ class _RoadmapView extends StatelessWidget {
     BuildContext context,
     RoadmapState state,
     AppLocalizations loc,
-    RoadmapCubit cubit,
+    RoadmapBloc bloc,
   ) {
     final roadmap = state.roadmap;
     if (roadmap == null || roadmap.timeframes.isEmpty) {
@@ -113,7 +114,7 @@ class _RoadmapView extends StatelessWidget {
                       : loc.memberRoadmapActionsPdf,
                   variant: AppButtonVariant.secondary,
                   icon: Icons.picture_as_pdf_outlined,
-                  onPressed: state.pdfDownloading ? null : cubit.downloadPdf,
+                  onPressed: state.pdfDownloading ? null : () => bloc.add(const RoadmapPdfDownloadRequested()),
                 ),
               ),
               const SizedBox(width: 8),
@@ -131,7 +132,8 @@ class _RoadmapView extends StatelessWidget {
           ),
         ),
         if (state.exportError)
-          InlineError(message: loc.memberRoadmapExportError, onRetry: cubit.downloadPdf),
+          InlineError(message: loc.memberRoadmapExportError,
+              onRetry: () => bloc.add(const RoadmapPdfDownloadRequested())),
         // Status filters.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -142,13 +144,13 @@ class _RoadmapView extends StatelessWidget {
                 ChoiceChip(
                   label: Text('${_filterLabel(f, loc)} (${state.filterCount(f)})'),
                   selected: state.filter == f,
-                  onSelected: (_) => cubit.setFilter(f),
+                  onSelected: (_) => bloc.add(RoadmapFilterChanged(f)),
                 ),
             ],
           ),
         ),
         for (final tf in roadmap.timeframes)
-          _TimeframeCard(timeframe: tf, state: state, cubit: cubit, isBn: isBn),
+          _TimeframeCard(timeframe: tf, state: state, bloc: bloc, isBn: isBn),
       ],
     );
   }
@@ -167,13 +169,13 @@ class _TimeframeCard extends StatelessWidget {
   const _TimeframeCard({
     required this.timeframe,
     required this.state,
-    required this.cubit,
+    required this.bloc,
     required this.isBn,
   });
 
   final RoadmapTimeframe timeframe;
   final RoadmapState state;
-  final RoadmapCubit cubit;
+  final RoadmapBloc bloc;
   final bool isBn;
 
   @override

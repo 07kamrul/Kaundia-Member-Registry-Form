@@ -2,7 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaundia_app/core/network/api_exception.dart';
 import 'package:kaundia_app/features/member/data/member_repository.dart';
-import 'package:kaundia_app/features/member/presentation/bloc/change_password_cubit.dart';
+import 'package:kaundia_app/features/member/presentation/bloc/change_password_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockRepo extends Mock implements MemberRepository {}
@@ -14,13 +14,15 @@ void main() {
     repo = _MockRepo();
   });
 
-  group('ChangePasswordCubit.validate', () {
-    blocTest<ChangePasswordCubit, ChangePasswordState>(
+  group('ChangePasswordBloc.validate', () {
+    blocTest<ChangePasswordBloc, ChangePasswordState>(
       'flags policy, mismatch and same-as-current errors',
-      build: () => ChangePasswordCubit(repository: repo),
-      act: (cubit) {
-        cubit.validate(current: '', next: 'short', confirm: 'other');
-        cubit.validate(current: 'abcdefgh1', next: 'abcdefgh1', confirm: 'abcdefgh1');
+      build: () => ChangePasswordBloc(repository: repo),
+      act: (bloc) {
+        bloc.add(const ChangePasswordValidated(
+            current: '', next: 'short', confirm: 'other'));
+        bloc.add(const ChangePasswordValidated(
+            current: 'abcdefgh1', next: 'abcdefgh1', confirm: 'abcdefgh1'));
       },
       expect: () => [
         predicate<ChangePasswordState>((s) =>
@@ -34,36 +36,33 @@ void main() {
       ],
     );
 
-    test('valid input passes', () {
-      final cubit = ChangePasswordCubit(repository: repo);
-      final ok = cubit.validate(
+    test('valid input passes the pure validator', () {
+      final v = validateChangePassword(
         current: 'oldpass1',
         next: 'newpass1',
         confirm: 'newpass1',
       );
-      expect(ok, isTrue);
-      expect(cubit.state.hasValidationErrors, isFalse);
-      cubit.close();
+      expect(v.ok, isTrue);
     });
   });
 
-  group('ChangePasswordCubit.submit', () {
-    blocTest<ChangePasswordCubit, ChangePasswordState>(
+  group('ChangePasswordBloc.submit', () {
+    blocTest<ChangePasswordBloc, ChangePasswordState>(
       'emits success when the API call succeeds',
       build: () {
         when(() => repo.changePassword(currentPassword: any(named: 'currentPassword'),
                 newPassword: any(named: 'newPassword')))
             .thenAnswer((_) async {});
-        return ChangePasswordCubit(repository: repo);
+        return ChangePasswordBloc(repository: repo);
       },
-      act: (cubit) => cubit.submit(current: 'old', next: 'Newpass1'),
+      act: (bloc) => bloc.add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
       expect: () => [
         predicate<ChangePasswordState>((s) => s.submitting && !s.success),
         predicate<ChangePasswordState>((s) => !s.submitting && s.success),
       ],
     );
 
-    blocTest<ChangePasswordCubit, ChangePasswordState>(
+    blocTest<ChangePasswordBloc, ChangePasswordState>(
       'maps 422 field errors to camelCase controls (current_password/new_password)',
       build: () {
         when(() => repo.changePassword(currentPassword: any(named: 'currentPassword'),
@@ -75,9 +74,9 @@ void main() {
             'new_password': 'too common',
           },
         ));
-        return ChangePasswordCubit(repository: repo);
+        return ChangePasswordBloc(repository: repo);
       },
-      act: (cubit) => cubit.submit(current: 'old', next: 'Newpass1'),
+      act: (bloc) => bloc.add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
       expect: () => [
         predicate<ChangePasswordState>((s) => s.submitting),
         predicate<ChangePasswordState>((s) =>
@@ -87,15 +86,15 @@ void main() {
       ],
     );
 
-    blocTest<ChangePasswordCubit, ChangePasswordState>(
+    blocTest<ChangePasswordBloc, ChangePasswordState>(
       'maps network failure to the generic error state',
       build: () {
         when(() => repo.changePassword(currentPassword: any(named: 'currentPassword'),
                 newPassword: any(named: 'newPassword')))
             .thenThrow(const ApiException(type: ApiExceptionType.network));
-        return ChangePasswordCubit(repository: repo);
+        return ChangePasswordBloc(repository: repo);
       },
-      act: (cubit) => cubit.submit(current: 'old', next: 'Newpass1'),
+      act: (bloc) => bloc.add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
       expect: () => [
         predicate<ChangePasswordState>((s) => s.submitting),
         predicate<ChangePasswordState>((s) =>

@@ -6,7 +6,7 @@ import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/member_repository.dart';
-import '../presentation/bloc/picnic_payment_cubit.dart';
+import '../presentation/bloc/picnic_payment_bloc.dart';
 
 /// Port of Angular PicnicPaymentComponent: date-driven rates with breakdown,
 /// additional-heads stepper + per-head name/relation rows, and payment history.
@@ -20,7 +20,8 @@ class PicnicPaymentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => PicnicPaymentCubit(repository: MemberRepository(apiClient: sl<ApiClient>()))..load(),
+      create: (_) => PicnicPaymentBloc(repository: MemberRepository(apiClient: sl<ApiClient>()))
+          ..add(const PicnicStarted()),
       child: const _PicnicView(),
     );
   }
@@ -33,7 +34,7 @@ class _PicnicView extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
-      body: BlocConsumer<PicnicPaymentCubit, PicnicPaymentState>(
+      body: BlocConsumer<PicnicPaymentBloc, PicnicPaymentState>(
         listener: (context, state) {
           final total = state.successTotal;
           if (total != null) {
@@ -49,7 +50,7 @@ class _PicnicView extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<PicnicPaymentCubit>();
+          final bloc = context.read<PicnicPaymentBloc>();
           return ListView(
             padding: const EdgeInsets.only(bottom: 32),
             children: [
@@ -78,7 +79,7 @@ class _PicnicView extends StatelessWidget {
                               initialDate: DateTime.tryParse(state.paymentDate) ?? DateTime.now(),
                             );
                             if (picked != null) {
-                              await cubit.setDate(picked.toIso8601String().substring(0, 10));
+                              bloc.add(PicnicDateChanged(picked.toIso8601String().substring(0, 10)));
                             }
                           },
                           child: Text(loc.commonSelect),
@@ -100,7 +101,7 @@ class _PicnicView extends StatelessWidget {
                         style: TextStyle(color: Theme.of(context).colorScheme.error),
                       ),
                       TextButton(
-                        onPressed: cubit.loadRates,
+                        onPressed: () => bloc.add(const PicnicRatesRefreshRequested()),
                         child: Text(loc.memberPicnicRetry),
                       ),
                     ] else if (state.breakdown != null) ...[
@@ -130,14 +131,14 @@ class _PicnicView extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: state.additionalHeads > 0
-                              ? () => cubit.setHeads(state.additionalHeads - 1)
+                              ? () => bloc.add(PicnicHeadsChanged(state.additionalHeads - 1))
                               : null,
                           icon: const Icon(Icons.remove_circle_outline),
                         ),
                         Text('${state.additionalHeads}'),
                         IconButton(
                           onPressed: state.additionalHeads < maxAdditionalHeads
-                              ? () => cubit.setHeads(state.additionalHeads + 1)
+                              ? () => bloc.add(PicnicHeadsChanged(state.additionalHeads + 1))
                               : null,
                           icon: const Icon(Icons.add_circle_outline),
                         ),
@@ -153,7 +154,7 @@ class _PicnicView extends StatelessWidget {
                           labelText: '${loc.memberPicnicHeadNameLabel} ${i + 1}',
                           border: const OutlineInputBorder(),
                         ),
-                        onChanged: (v) => cubit.setLabelName(i, v),
+                        onChanged: (v) => bloc.add(PicnicLabelNameChanged(i, v)),
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<PicnicRelation>(
@@ -174,7 +175,7 @@ class _PicnicView extends StatelessWidget {
                               child: Text(loc.memberPicnicRelationsGuest)),
                         ],
                         onChanged: (v) =>
-                            v == null ? null : cubit.setLabelRelation(i, v),
+                            v == null ? null : () => bloc.add(PicnicLabelRelationChanged(i, v)),
                       ),
                       const SizedBox(height: 10),
                     ],
@@ -190,7 +191,7 @@ class _PicnicView extends StatelessWidget {
                         labelText: loc.memberPicnicReceiptNoLabel,
                         border: const OutlineInputBorder(),
                       ),
-                      onChanged: cubit.setReceiptNo,
+                      onChanged: (v) => bloc.add(PicnicReceiptNoChanged(v)),
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
@@ -207,13 +208,13 @@ class _PicnicView extends StatelessWidget {
                             value: 'Bank Transfer', child: Text(loc.memberPicnicMethodsBankTransfer)),
                         DropdownMenuItem(value: 'Other', child: Text(loc.memberPicnicMethodsOther)),
                       ],
-                      onChanged: (v) => v == null ? null : cubit.setPaymentMethod(v),
+                      onChanged: (v) { if (v != null) bloc.add(PicnicPaymentMethodChanged(v)); },
                     ),
                     const SizedBox(height: 12),
                     AppButton(
                       label: state.saving ? loc.memberPicnicSaving : loc.memberPicnicSubmit,
                       expanded: true,
-                      onPressed: state.canSubmit ? cubit.submit : null,
+                      onPressed: state.canSubmit ? () => bloc.add(const PicnicSubmitted()) : null,
                     ),
                   ],
                 ),

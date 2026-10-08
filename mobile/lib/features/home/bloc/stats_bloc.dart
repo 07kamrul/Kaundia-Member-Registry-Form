@@ -5,6 +5,24 @@ import '../../../core/di/injector.dart';
 import '../../dashboard/data/public_stats_repository.dart';
 import '../../dashboard/domain/entity/public_stats.dart';
 
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+sealed class StatsEvent extends Equatable {
+  const StatsEvent();
+  @override
+  List<Object?> get props => const [];
+}
+
+final class StatsLoadRequested extends StatsEvent {
+  const StatsLoadRequested();
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
 sealed class StatsState extends Equatable {
   const StatsState();
   @override
@@ -31,14 +49,16 @@ class StatsFailure extends StatsState {
 }
 
 /// Landing stats: on error the card falls back to zeros (Angular behaviour).
-class StatsCubit extends Cubit<StatsState> {
-  StatsCubit({PublicStatsRepository? repository})
+class StatsBloc extends Bloc<StatsEvent, StatsState> {
+  StatsBloc({PublicStatsRepository? repository})
       : _repo = repository ?? sl<PublicStatsRepository>(),
-        super(const StatsInitial());
+        super(const StatsInitial()) {
+    on<StatsLoadRequested>(_onLoad);
+  }
 
   final PublicStatsRepository _repo;
 
-  Future<void> loadStats() async {
+  Future<void> _onLoad(StatsLoadRequested e, Emitter<StatsState> emit) async {
     emit(const StatsLoading());
     try {
       final stats = await _repo.getStats();

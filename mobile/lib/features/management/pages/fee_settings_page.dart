@@ -6,7 +6,7 @@ import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
-import '../presentation/bloc/fee_settings_cubit.dart';
+import '../presentation/bloc/fee_settings_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// Versioned fee settings (Angular fee-settings): active rows with expandable
@@ -56,10 +56,10 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => FeeSettingsCubit(
+      create: (_) => FeeSettingsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
         ..loadActive(),
-      child: BlocConsumer<FeeSettingsCubit, FeeSettingsState>(
+      child: BlocConsumer<FeeSettingsBloc, FeeSettingsState>(
         listener: (context, state) {
           if (state.saveError != null) {
             showAppToast(context, loc.adminFeeSettingsErrorsSaveFailed,
@@ -67,7 +67,7 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<FeeSettingsCubit>();
+          final bloc = context.read<FeeSettingsBloc>();
           final tierBase = state.tierRow(monthlySubscriptionTierKeys.base);
           final tierRate = state.tierRow(monthlySubscriptionTierKeys.rate);
           final tierThreshold =
@@ -84,9 +84,9 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
               if (state.error != null)
                 InlineError(
                     message: loc.adminFeeSettingsErrorsLoadFailed,
-                    onRetry: cubit.loadActive),
+                    onRetry: () => bloc.add(const FeeSettingsLoadRequested())),
 
-              _addVersionForm(context, loc, cubit, state),
+              _addVersionForm(context, loc, bloc, state),
 
               // Tiered calculator.
               if (tierBase != null && tierRate != null && tierThreshold != null)
@@ -121,7 +121,7 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                           ? loc.adminFeeSettingsHideHistory
                           : loc.adminFeeSettingsViewHistory,
                       onPressed: () =>
-                          cubit.toggleHistory(monthlySubscriptionGroupKey),
+                          bloc.add(FeeSettingsHistoryToggled(monthlySubscriptionGroupKey)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +145,7 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                       tooltip: state.expandedKey == row.key
                           ? loc.adminFeeSettingsHideHistory
                           : loc.adminFeeSettingsViewHistory,
-                      onPressed: () => cubit.toggleHistory(row.key),
+                      onPressed: () => bloc.add(FeeSettingsHistoryToggled(row.key)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +193,7 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
   }
 
   Widget _addVersionForm(BuildContext context, AppLocalizations loc,
-      FeeSettingsCubit cubit, FeeSettingsState state) {
+      FeeSettingsBloc bloc, FeeSettingsState state) {
     final isTiered = _draftKey == monthlySubscriptionGroupKey;
     final canSave = _draftKey.isNotEmpty &&
         (isTiered
@@ -298,24 +298,13 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                         confirmLabel: loc.adminFeeSettingsFormSubmit,
                       );
                       if (!confirmed || !context.mounted) return;
-                      final cubit = context.read<FeeSettingsCubit>();
+                      final bloc = context.read<FeeSettingsBloc>();
                       final ok = isTiered
-                          ? await cubit.createTieredVersion(
-                              baseAmount:
-                                  num.tryParse(_baseController.text) ?? 0,
-                              additionalRate:
-                                  num.tryParse(_rateController.text) ?? 0,
-                              baseThreshold:
-                                  num.tryParse(_thresholdController.text) ?? 0,
-                              unit: _unit.isEmpty ? null : _unit,
-                              startDate: _startDate.isEmpty ? null : _startDate,
-                            )
-                          : await cubit.createVersion(
-                              key: _draftKey,
-                              value: num.tryParse(_valueController.text) ?? 0,
-                              unit: _unit.isEmpty ? null : _unit,
-                              startDate: _startDate.isEmpty ? null : _startDate,
-                            );
+                          ? bloc.add(FeeSettingTieredVersionCreateRequested(baseAmount:
+                                  num.tryParse(_baseController.text) ?? 0, additionalRate:
+                                  num.tryParse(_rateController.text) ?? 0, baseThreshold:
+                                  num.tryParse(_thresholdController.text) ?? 0, unit: _unit.isEmpty ? null : _unit, startDate: _startDate.isEmpty ? null : _startDate))
+                          : bloc.add(FeeSettingVersionCreateRequested(key: _draftKey, value: num.tryParse(_valueController.text) ?? 0, unit: _unit.isEmpty ? null : _unit, startDate: _startDate.isEmpty ? null : _startDate));
                       if (ok && mounted) {
                         setState(() {
                           _draftKey = '';

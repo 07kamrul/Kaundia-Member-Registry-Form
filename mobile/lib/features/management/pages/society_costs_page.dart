@@ -8,7 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/finance_entities.dart';
-import '../presentation/bloc/society_costs_cubit.dart';
+import '../presentation/bloc/society_costs_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// Society costs (Angular society-costs): filters + summary, cost CRUD with
@@ -37,11 +37,11 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => SocietyCostsCubit(
+      create: (_) => SocietyCostsBloc(
         adminRepository: AdminRepository(apiClient: sl<ApiClient>()),
         costRepository: SocietyCostRepository(apiClient: sl<ApiClient>()),
       )..init(),
-      child: BlocConsumer<SocietyCostsCubit, SocietyCostsState>(
+      child: BlocConsumer<SocietyCostsBloc, SocietyCostsState>(
         listener: (context, state) {
           if (state.actionError != null) {
             showAppToast(context, loc.adminSocietyCostsErrorsSaveFailed,
@@ -49,7 +49,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<SocietyCostsCubit>();
+          final bloc = context.read<SocietyCostsBloc>();
           return ListView(
             children: [
               PageHeader(
@@ -98,7 +98,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                           DropdownMenuItem<String?>(
                               value: c.id, child: Text(c.label)),
                       ],
-                      onChanged: (v) => cubit.setFilters(categoryFilter: v),
+                      onChanged: (v) => bloc.add(FinanceFiltersChanged(categoryFilter: v)),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<CostPaymentSource?>(
@@ -121,7 +121,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                           child: Text(loc.adminSocietyCostsSourceMemberBilled),
                         ),
                       ],
-                      onChanged: (v) => cubit.setFilters(sourceFilter: v),
+                      onChanged: (v) => bloc.add(FinanceFiltersChanged(sourceFilter: v)),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<bool?>(
@@ -144,7 +144,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                           child: Text(loc.adminSocietyCostsFiltersUnbilledOnly),
                         ),
                       ],
-                      onChanged: (v) => cubit.setFilters(billedFilter: v),
+                      onChanged: (v) => bloc.add(FinanceFiltersChanged(billedFilter: v)),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -153,7 +153,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                           child: DateField(
                             label: loc.adminSocietyCostsFiltersDateRange,
                             value: state.dateFrom,
-                            onChanged: (v) => cubit.setFilters(dateFrom: v),
+                            onChanged: (v) => bloc.add(FinanceFiltersChanged(dateFrom: v)),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -161,7 +161,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                           child: DateField(
                             label: loc.adminSocietyCostsTableDate,
                             value: state.dateTo,
-                            onChanged: (v) => cubit.setFilters(dateTo: v),
+                            onChanged: (v) => bloc.add(FinanceFiltersChanged(dateTo: v)),
                           ),
                         ),
                       ],
@@ -173,7 +173,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                         labelText: loc.adminSocietyCostsFiltersSearch,
                         border: const OutlineInputBorder(),
                       ),
-                      onFieldSubmitted: (v) => cubit.setFilters(search: v),
+                      onFieldSubmitted: (v) => bloc.add(FinanceFiltersChanged(search: v)),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -181,7 +181,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                         Expanded(
                           child: AppButton(
                             label: loc.adminSocietyCostsCreate,
-                            onPressed: () => _openCostForm(context, loc, cubit),
+                            onPressed: () => _openCostForm(context, loc, bloc),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -191,7 +191,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                             variant: AppButtonVariant.secondary,
                             onPressed: () {
                               _searchController.clear();
-                              cubit.resetFilters();
+                              bloc.add(FinanceFiltersReset());
                             },
                           ),
                         ),
@@ -205,14 +205,14 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
               else if (state.error != null)
                 InlineError(
                     message: loc.adminSocietyCostsErrorsLoadFailed,
-                    onRetry: cubit.refresh)
+                    onRetry: () => bloc.add(const FinanceRefreshRequested()))
               else if (state.costs.isEmpty)
                 EmptyState(message: loc.adminSocietyCostsEmptyState)
               else
                 AppDataTableCards<SocietyCost>(
                   items: state.costs,
                   rowBuilder: (context, cost) =>
-                      _costRow(context, loc, cubit, state, cost),
+                      _costRow(context, loc, bloc, state, cost),
                 ),
               const SizedBox(height: 32),
             ],
@@ -223,7 +223,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
   }
 
   Widget _costRow(BuildContext context, AppLocalizations loc,
-      SocietyCostsCubit cubit, SocietyCostsState state, SocietyCost cost) {
+      SocietyCostsBloc bloc, SocietyCostsState state, SocietyCost cost) {
     final expanded = state.expandedId == cost.id;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -233,7 +233,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             InkWell(
-              onTap: () => cubit.toggleExpanded(cost.id),
+              onTap: () => bloc.add(FinanceRowToggled(id: cost.id)),
               child: Row(
                 children: [
                   Expanded(
@@ -312,7 +312,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                           icon: const Icon(Icons.payments_outlined),
                           tooltip: loc.adminSocietyCostsRecordPayment,
                           onPressed: () =>
-                              _openPaymentDialog(context, loc, cubit, share),
+                              _openPaymentDialog(context, loc, bloc, share),
                         ),
                       ],
                     ),
@@ -325,13 +325,13 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                       label: loc.adminSocietyCostsSplitAction,
                       variant: AppButtonVariant.secondary,
                       onPressed: () =>
-                          _openSplitDialog(context, loc, cubit, cost),
+                          _openSplitDialog(context, loc, bloc, cost),
                     ),
                   AppButton(
                     label: loc.commonEdit,
                     variant: AppButtonVariant.ghost,
                     onPressed: () =>
-                        _openCostForm(context, loc, cubit, editing: cost),
+                        _openCostForm(context, loc, bloc, editing: cost),
                   ),
                   AppButton(
                     label: loc.commonDelete,
@@ -343,8 +343,9 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                         message: loc.adminSocietyCostsDeleteMessage,
                         destructive: true,
                       );
-                      if (confirmed && context.mounted)
-                        await cubit.deleteCost(cost);
+                      if (confirmed && context.mounted) {
+                        bloc.add(SocietyCostDeleted(cost: cost));
+                      }
                     },
                   ),
                 ],
@@ -376,7 +377,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
   // ----- Create / edit form -----
 
   Future<void> _openCostForm(
-      BuildContext context, AppLocalizations loc, SocietyCostsCubit cubit,
+      BuildContext context, AppLocalizations loc, SocietyCostsBloc bloc,
       {SocietyCost? editing}) async {
     final titleController = TextEditingController(text: editing?.title ?? '');
     final descriptionController =
@@ -433,7 +434,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                       value: null,
                       child: Text(loc.adminSocietyCostsFormNoCategory),
                     ),
-                    for (final c in cubit.state.categories)
+                    for (final c in bloc.state.categories)
                       DropdownMenuItem<String>(
                           value: c.id, child: Text(c.label)),
                   ],
@@ -537,10 +538,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                         showAppToast(sheetContext, errors.first, error: true);
                         return;
                       }
-                      final ok = await cubit.saveCost(
-                        editingId: editing?.id,
-                        receiptPath: pickedReceipt,
-                        input: SocietyCostInput(
+                      final ok = bloc.add(SocietyCostSaved(editingId: editing?.id, receiptPath: pickedReceipt, input: SocietyCostInput(
                           title: titleController.text.trim(),
                           description: descriptionController.text.trim().isEmpty
                               ? null
@@ -554,8 +552,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                           notes: notesController.text.trim().isEmpty
                               ? null
                               : notesController.text.trim(),
-                        ),
-                      );
+                        )));
                       if (sheetContext.mounted) {
                         Navigator.of(sheetContext).pop(ok);
                       }
@@ -573,19 +570,19 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
   // ----- Split flow with live preview -----
 
   Future<void> _openSplitDialog(BuildContext context, AppLocalizations loc,
-      SocietyCostsCubit cubit, SocietyCost cost) async {
-    await cubit.openSplit(cost);
+      SocietyCostsBloc bloc, SocietyCost cost) async {
+    bloc.add(SocietySplitOpened(cost: cost));
     if (!context.mounted) return;
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       builder: (sheetContext) => BlocProvider.value(
-        value: cubit,
-        child: BlocBuilder<SocietyCostsCubit, SocietyCostsState>(
+        value: bloc,
+        child: BlocBuilder<SocietyCostsBloc, SocietyCostsState>(
           builder: (sheetContext, state) {
             final splitCost = state.splitCost;
             if (splitCost == null) return const SizedBox.shrink();
-            final mismatch = cubit.manualMismatch;
+            final mismatch = bloc.manualMismatch;
             return Padding(
               padding: const EdgeInsets.all(16),
               child: SingleChildScrollView(
@@ -624,7 +621,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                         ),
                       ],
                       onChanged: (v) {
-                        if (v != null) cubit.setSplitMethod(v);
+                        if (v != null) bloc.add(SocietySplitMethodChanged(method: v));
                       },
                     ),
                     const SizedBox(height: 12),
@@ -636,7 +633,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                     else if (state.splitError != null)
                       InlineError(
                         message: loc.adminSocietyCostsErrorsSplitPreviewFailed,
-                        onRetry: cubit.refreshSplitPreview,
+                        onRetry: () => bloc.add(const SocietySplitPreviewRefreshed()),
                       )
                     else if (state.splitMethod == CostSplitMethod.manual &&
                         state.manualAmounts.isNotEmpty) ...[
@@ -647,12 +644,11 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                             labelText: m.memberName,
                             border: const OutlineInputBorder(),
                           ),
-                          onChanged: (v) => cubit.setManualAmount(
-                              m.memberId, num.tryParse(v)),
+                          onChanged: (v) => bloc.add(SocietyManualAmountChanged(memberId: m.memberId, amount: num.tryParse(v))),
                         ),
                       const SizedBox(height: 8),
                       Text(
-                        '${loc.adminSocietyCostsSplitRunningTotal}: ${formatAmount(cubit.manualTotal)}',
+                        '${loc.adminSocietyCostsSplitRunningTotal}: ${formatAmount(bloc.manualTotal)}',
                         style: Theme.of(sheetContext).textTheme.bodyMedium,
                       ),
                       if (mismatch)
@@ -685,7 +681,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                             label: loc.commonCancel,
                             variant: AppButtonVariant.secondary,
                             onPressed: () {
-                              cubit.closeSplit();
+                              bloc.add(SocietySplitClosed());
                               Navigator.of(sheetContext).pop();
                             },
                           ),
@@ -697,8 +693,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                             onPressed: state.busy
                                 ? null
                                 : () async {
-                                    final ok = await cubit.confirmSplit(
-                                        allowMismatch: mismatch);
+                                    final ok = bloc.add(SocietySplitConfirmed(allowMismatch: mismatch));
                                     if (sheetContext.mounted && ok) {
                                       Navigator.of(sheetContext).pop();
                                     }
@@ -720,7 +715,7 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
   // ----- Record share payment -----
 
   Future<void> _openPaymentDialog(BuildContext context, AppLocalizations loc,
-      SocietyCostsCubit cubit, CostSplitShare share) async {
+      SocietyCostsBloc bloc, CostSplitShare share) async {
     final remaining = share.amountDue - share.amountPaid;
     final amountController =
         TextEditingController(text: '${remaining > 0 ? remaining : 0}');
@@ -772,13 +767,9 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                 onPressed: () async {
                   final amount = num.tryParse(amountController.text);
                   if (amount == null || amount < 0) return;
-                  final ok = await cubit.recordSharePayment(
-                    share,
-                    additionalAmount: amount,
-                    receiptNo: receiptController.text.trim().isEmpty
+                  final ok = bloc.add(SocietySharePaymentRecorded(share: share, additionalAmount: amount, receiptNo: receiptController.text.trim().isEmpty
                         ? null
-                        : receiptController.text.trim(),
-                  );
+                        : receiptController.text.trim()));
                   if (sheetContext.mounted && ok) {
                     Navigator.of(sheetContext).pop();
                   }

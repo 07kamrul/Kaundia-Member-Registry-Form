@@ -7,7 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/content_cubit.dart';
+import '../presentation/bloc/content_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'notices_management_page.dart' show datetimeParts, isoFromParts;
 
@@ -31,9 +31,9 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) =>
-          EventsCubit(repository: AdminRepository(apiClient: sl<ApiClient>()))
+          EventsBloc(repository: AdminRepository(apiClient: sl<ApiClient>()))
             ..init(),
-      child: BlocConsumer<EventsCubit, ContentListState<EventItem>>(
+      child: BlocConsumer<EventsBloc, ContentListState<EventItem>>(
         listener: (context, state) {
           if (state.saveError != null) {
             showAppToast(context, loc.adminEventsErrorsSaveFailed, error: true);
@@ -43,7 +43,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<EventsCubit>();
+          final bloc = context.read<EventsBloc>();
           return ListView(
             children: [
               PageHeader(
@@ -62,7 +62,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       : state.publishedFilter == true
                           ? 1
                           : 2,
-                  onChanged: cubit.setStatusFilter,
+                  onChanged: bloc.add(EventsStatusFilterChanged(,
                 ),
               ),
               Padding(
@@ -82,7 +82,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       DropdownMenuItem<String?>(
                           value: c.id, child: Text(c.label)),
                   ],
-                  onChanged: cubit.setCategoryFilter,
+                  onChanged: bloc.setCategoryFilter,
                 ),
               ),
               Padding(
@@ -91,7 +91,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                 child: AppButton(
                   label: loc.adminEventsCreate,
                   icon: Icons.add,
-                  onPressed: () => _openForm(context, loc, cubit),
+                  onPressed: () => _openForm(context, loc, bloc),
                 ),
               ),
               if (state.loading)
@@ -101,7 +101,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
               else
                 AppDataTableCards<EventItem>(
                   items: state.items,
-                  rowBuilder: (context, e) => _row(context, loc, cubit, e),
+                  rowBuilder: (context, e) => _row(context, loc, bloc, e),
                 ),
               const SizedBox(height: 32),
             ],
@@ -111,11 +111,11 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
     );
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, EventsCubit cubit,
+  Widget _row(BuildContext context, AppLocalizations loc, EventsBloc bloc,
       EventItem e) {
     String categoryLabel(String? categoryId) {
       if (categoryId == null) return '—';
-      for (final c in cubit.state.categories) {
+      for (final c in bloc.state.categories) {
         if (c.id == categoryId) return c.label;
       }
       return '—';
@@ -178,14 +178,14 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       ? loc.adminEventsUnpublish
                       : loc.adminEventsPublish,
                   variant: AppButtonVariant.ghost,
-                  onPressed: cubit.state.busyId == e.id
+                  onPressed: bloc.state.busyId == e.id
                       ? null
-                      : () => cubit.togglePublished(e),
+                      : () => bloc.add(EventPublishToggled(e)),
                 ),
                 AppButton(
                   label: loc.commonEdit,
                   variant: AppButtonVariant.ghost,
-                  onPressed: () => _openForm(context, loc, cubit, editing: e),
+                  onPressed: () => _openForm(context, loc, bloc, editing: e),
                 ),
                 AppButton(
                   label: loc.commonDelete,
@@ -197,7 +197,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       message: loc.adminEventsDeleteModalMessageSuffix,
                       destructive: true,
                     );
-                    if (confirmed && context.mounted) await cubit.delete(e);
+                    if (confirmed && context.mounted) bloc.add(EventDeleteRequested(e));
                   },
                 ),
               ],
@@ -209,7 +209,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
   }
 
   Future<void> _openForm(
-      BuildContext context, AppLocalizations loc, EventsCubit cubit,
+      BuildContext context, AppLocalizations loc, EventsBloc bloc,
       {EventItem? editing}) async {
     final titleController = TextEditingController(text: editing?.title ?? '');
     final descriptionController =
@@ -284,7 +284,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       value: null,
                       child: Text(loc.adminEventsFormNoCategory),
                     ),
-                    for (final c in cubit.state.categories)
+                    for (final c in bloc.state.categories)
                       DropdownMenuItem<String>(
                           value: c.id, child: Text(c.label)),
                   ],
@@ -387,9 +387,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       final endAt = endDate.isEmpty
                           ? null
                           : isoFromParts(endDate, endTime);
-                      final ok = await cubit.save(
-                        editingId: editing?.id,
-                        payload: EventInput(
+                      final ok = bloc.add(EventSaveRequested(editingId: editing?.id, payload: EventInput(
                           title: titleController.text.trim(),
                           description: descriptionController.text.trim().isEmpty
                               ? null
@@ -402,8 +400,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                           endAt: endAt,
                           isPublished: published,
                           isMembersOnly: membersOnly,
-                        ),
-                      );
+                        )));
                       if (sheetContext.mounted) {
                         Navigator.of(sheetContext).pop(ok);
                       }

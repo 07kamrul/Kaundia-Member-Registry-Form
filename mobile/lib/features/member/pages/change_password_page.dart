@@ -7,7 +7,7 @@ import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/member_repository.dart';
-import '../presentation/bloc/change_password_cubit.dart';
+import '../presentation/bloc/change_password_bloc.dart';
 
 /// Port of Angular ChangePasswordComponent: current/new/confirm fields with
 /// password policy validation, server 422 field mapping and the success state
@@ -22,7 +22,7 @@ class ChangePasswordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ChangePasswordCubit(
+      create: (_) => ChangePasswordBloc(
         repository: MemberRepository(apiClient: sl<ApiClient>()),
       ),
       child: const _ChangePasswordView(),
@@ -55,7 +55,7 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
-      body: BlocConsumer<ChangePasswordCubit, ChangePasswordState>(
+      body: BlocConsumer<ChangePasswordBloc, ChangePasswordState>(
         listener: (context, state) {
           if (state.success && !_redirecting) {
             _redirecting = true;
@@ -67,7 +67,7 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<ChangePasswordCubit>();
+          final bloc = context.read<ChangePasswordBloc>();
           return SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -104,10 +104,10 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
                                   const SizedBox(height: 12),
                                   InlineError(
                                     message: loc.memberChangePasswordChangeFailedError,
-                                    onRetry: () => cubit.submit(
+                                    onRetry: () => bloc.add(ChangePasswordSubmitted(
                                       current: _current.text,
                                       next: _next.text,
-                                    ),
+                                    )),
                                   ),
                                 ],
                                 const SizedBox(height: 16),
@@ -139,16 +139,20 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
                                   onPressed: state.submitting
                                       ? null
                                       : () {
-                                          final ok = cubit.validate(
+                                          bloc.add(ChangePasswordValidated(
                                             current: _current.text,
                                             next: _next.text,
                                             confirm: _confirm.text,
-                                          );
-                                          if (ok) {
-                                            cubit.submit(
+                                          ));
+                                          if (validateChangePassword(
+                                            current: _current.text,
+                                            next: _next.text,
+                                            confirm: _confirm.text,
+                                          ).ok) {
+                                            bloc.add(ChangePasswordSubmitted(
                                               current: _current.text,
                                               next: _next.text,
-                                            );
+                                            ));
                                           }
                                         },
                                 ),

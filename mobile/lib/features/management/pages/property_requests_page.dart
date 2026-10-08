@@ -9,7 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/property_requests_cubit.dart';
+import '../presentation/bloc/property_requests_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'submissions_list_page.dart' show statusLabel;
 
@@ -27,10 +27,10 @@ class PropertyRequestsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => PropertyRequestsCubit(
+      create: (_) => PropertyRequestsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
         ..load(),
-      child: BlocConsumer<PropertyRequestsCubit, PropertyRequestsState>(
+      child: BlocConsumer<PropertyRequestsBloc, PropertyRequestsState>(
         listener: (context, state) {
           if (state.actionError != null) {
             if (state.actionError == 'reasonRequired') {
@@ -49,7 +49,7 @@ class PropertyRequestsPage extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<PropertyRequestsCubit>();
+          final bloc = context.read<PropertyRequestsBloc>();
           return ListView(
             children: [
               PageHeader(
@@ -84,7 +84,7 @@ class PropertyRequestsPage extends StatelessWidget {
                     ),
                   ],
                   onChanged: (v) {
-                    if (v != null) cubit.setStatusFilter(v);
+                    if (v != null) bloc.add(PropertyRequestsStatusFilterChanged(status: v));
                   },
                 ),
               ),
@@ -95,7 +95,7 @@ class PropertyRequestsPage extends StatelessWidget {
               else
                 AppDataTableCards<MemberPropertyRequest>(
                   items: state.items,
-                  rowBuilder: (context, r) => _row(context, loc, cubit, r),
+                  rowBuilder: (context, r) => _row(context, loc, bloc, r),
                 ),
               const SizedBox(height: 32),
             ],
@@ -114,7 +114,7 @@ class PropertyRequestsPage extends StatelessWidget {
       };
 
   Widget _row(BuildContext context, AppLocalizations loc,
-      PropertyRequestsCubit cubit, MemberPropertyRequest r) {
+      PropertyRequestsBloc bloc, MemberPropertyRequest r) {
     final year = DateTime.tryParse(r.createdAt)?.year ?? DateTime.now().year;
     final reference = 'PR-$year-${'${r.id}'.padLeft(4, '0')}';
     final date = DateTime.tryParse(r.createdAt);
@@ -129,7 +129,7 @@ class PropertyRequestsPage extends StatelessWidget {
       if (p.dagNoCs != null) 'CS ${p.dagNoCs}',
       if (p.dagNoRs != null) 'RS ${p.dagNoRs}',
     ].join(' · ');
-    final busy = cubit.state.busyId == r.id;
+    final busy = bloc.state.busyId == r.id;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Padding(
@@ -266,7 +266,7 @@ class PropertyRequestsPage extends StatelessWidget {
                     variant: AppButtonVariant.danger,
                     onPressed: busy
                         ? null
-                        : () => _cancelDialog(context, loc, cubit, r),
+                        : () => _cancelDialog(context, loc, bloc, r),
                   ),
                   const SizedBox(width: 8),
                   AppButton(
@@ -284,7 +284,7 @@ class PropertyRequestsPage extends StatelessWidget {
                                   .adminPropertyRequestsApproveModalConfirmLabel,
                             );
                             if (confirmed && context.mounted) {
-                              await cubit.approve(r);
+                              bloc.add(PropertyRequestApproved(request: r));
                             }
                           },
                   ),
@@ -297,7 +297,7 @@ class PropertyRequestsPage extends StatelessWidget {
   }
 
   Future<void> _cancelDialog(BuildContext context, AppLocalizations loc,
-      PropertyRequestsCubit cubit, MemberPropertyRequest r) async {
+      PropertyRequestsBloc bloc, MemberPropertyRequest r) async {
     final controller = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
@@ -328,6 +328,6 @@ class PropertyRequestsPage extends StatelessWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    await cubit.cancel(r, controller.text);
+    bloc.add(PropertyRequestCancelled(request: r, reason: controller.text));
   }
 }

@@ -7,7 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/installments_mgmt_cubit.dart';
+import '../presentation/bloc/installments_mgmt_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// Picnic payments management (Angular picnic-payments): member/date filters,
@@ -24,12 +24,12 @@ class PicnicPaymentsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => PicnicPaymentsCubit(
+      create: (_) => PicnicPaymentsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
         ..load(),
-      child: BlocBuilder<PicnicPaymentsCubit, PicnicPaymentsState>(
+      child: BlocBuilder<PicnicPaymentsBloc, PicnicPaymentsState>(
           builder: (context, state) {
-        final cubit = context.read<PicnicPaymentsCubit>();
+        final bloc = context.read<PicnicPaymentsBloc>();
         final memberController = TextEditingController(
           text: state.memberFilter?.toString() ?? '',
         );
@@ -48,7 +48,7 @@ class PicnicPaymentsPage extends StatelessWidget {
                       labelText: loc.adminPicnicPaymentsMemberFilter,
                       border: const OutlineInputBorder(),
                     ),
-                    onFieldSubmitted: cubit.setMemberFilter,
+                    onFieldSubmitted: bloc.setMemberFilter,
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -58,7 +58,7 @@ class PicnicPaymentsPage extends StatelessWidget {
                           label: loc.adminPicnicPaymentsDateFrom,
                           value: state.dateFrom,
                           onChanged: (v) {
-                            cubit.setDateRange(from: v);
+                            bloc.add(PicnicPaymentsDateRangeChanged(from: v));
                           },
                         ),
                       ),
@@ -68,7 +68,7 @@ class PicnicPaymentsPage extends StatelessWidget {
                           label: loc.adminPicnicPaymentsDateTo,
                           value: state.dateTo,
                           onChanged: (v) {
-                            cubit.setDateRange(to: v);
+                            bloc.add(PicnicPaymentsDateRangeChanged(to: v));
                           },
                         ),
                       ),
@@ -81,7 +81,7 @@ class PicnicPaymentsPage extends StatelessWidget {
                         child: AppButton(
                           label: loc.adminPicnicPaymentsApply,
                           onPressed: () {
-                            cubit.setMemberFilter(memberController.text);
+                            bloc.add(PicnicPaymentsMemberFilterChanged(raw: memberController.text));
                           },
                         ),
                       ),
@@ -92,7 +92,7 @@ class PicnicPaymentsPage extends StatelessWidget {
                           variant: AppButtonVariant.secondary,
                           onPressed: () {
                             memberController.clear();
-                            cubit.resetFilters();
+                            bloc.add(PicnicPaymentsFiltersReset());
                           },
                         ),
                       ),
@@ -136,7 +136,7 @@ class PicnicPaymentsPage extends StatelessWidget {
             else if (state.error != null)
               InlineError(
                   message: loc.adminPicnicPaymentsLoadError,
-                  onRetry: cubit.load)
+                  onRetry: () => bloc.add(const PicnicPaymentsLoadRequested()))
             else
               AppDataTableCards<AdminPicnicPayment>(
                 items: state.items,

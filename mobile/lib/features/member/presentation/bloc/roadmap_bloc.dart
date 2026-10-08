@@ -8,6 +8,39 @@ import '../../../../shared/utils/download_utils.dart';
 import '../../data/roadmap_repository.dart';
 import '../../domain/roadmap_entities.dart';
 
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+sealed class RoadmapEvent extends Equatable {
+  const RoadmapEvent();
+  @override
+  List<Object?> get props => const [];
+}
+
+final class RoadmapLoadRequested extends RoadmapEvent {
+  const RoadmapLoadRequested();
+}
+
+final class RoadmapFilterChanged extends RoadmapEvent {
+  const RoadmapFilterChanged(this.filter);
+  final RoadmapStatusFilter filter;
+  @override
+  List<Object?> get props => [filter];
+}
+
+final class RoadmapPdfDownloadRequested extends RoadmapEvent {
+  const RoadmapPdfDownloadRequested();
+}
+
+final class RoadmapPdfSavedPathCleared extends RoadmapEvent {
+  const RoadmapPdfSavedPathCleared();
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
 enum RoadmapStatusFilter { all, inProgress, done, planned }
 
 enum RoadmapPageStatus { loading, loaded, failure }
@@ -83,14 +116,28 @@ class RoadmapState extends Equatable {
       ];
 }
 
-class RoadmapCubit extends Cubit<RoadmapState> {
-  RoadmapCubit({RoadmapRepository? repository})
+// ---------------------------------------------------------------------------
+// Bloc
+// ---------------------------------------------------------------------------
+
+class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
+  RoadmapBloc({RoadmapRepository? repository})
       : _repository = repository ?? RoadmapRepository(apiClient: sl<ApiClient>()),
-        super(const RoadmapState());
+        super(const RoadmapState()) {
+    on<RoadmapLoadRequested>(_onLoad);
+    on<RoadmapFilterChanged>((e, emit) => emit(state.copyWith(filter: e.filter)));
+    on<RoadmapPdfDownloadRequested>(_onDownloadPdf);
+    on<RoadmapPdfSavedPathCleared>(
+      (_, emit) => emit(state.copyWith(clearPdfSavedPath: true)),
+    );
+  }
 
   final RoadmapRepository _repository;
 
-  Future<void> load() async {
+  Future<void> _onLoad(
+    RoadmapLoadRequested e,
+    Emitter<RoadmapState> emit,
+  ) async {
     emit(state.copyWith(status: RoadmapPageStatus.loading, clearError: true));
     try {
       final roadmap = await _repository.getRoadmap();
@@ -100,10 +147,10 @@ class RoadmapCubit extends Cubit<RoadmapState> {
     }
   }
 
-  void setFilter(RoadmapStatusFilter filter) =>
-      emit(state.copyWith(filter: filter));
-
-  Future<void> downloadPdf() async {
+  Future<void> _onDownloadPdf(
+    RoadmapPdfDownloadRequested e,
+    Emitter<RoadmapState> emit,
+  ) async {
     if (state.pdfDownloading) return;
     emit(state.copyWith(pdfDownloading: true, clearExportError: true, clearPdfSavedPath: true));
     try {
@@ -114,6 +161,4 @@ class RoadmapCubit extends Cubit<RoadmapState> {
       emit(state.copyWith(pdfDownloading: false, exportError: true));
     }
   }
-
-  void clearPdfSavedPath() => emit(state.copyWith(clearPdfSavedPath: true));
 }

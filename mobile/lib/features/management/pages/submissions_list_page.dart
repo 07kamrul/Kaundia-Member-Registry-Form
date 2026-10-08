@@ -10,7 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/submissions_cubit.dart';
+import '../presentation/bloc/submissions_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// Review queue: submissions filtered by status (Angular submissions-list).
@@ -26,12 +26,12 @@ class SubmissionsListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => SubmissionsCubit(
+      create: (_) => SubmissionsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
         ..load(),
-      child: BlocBuilder<SubmissionsCubit, SubmissionsState>(
+      child: BlocBuilder<SubmissionsBloc, SubmissionsState>(
           builder: (context, state) {
-        final cubit = context.read<SubmissionsCubit>();
+        final bloc = context.read<SubmissionsBloc>();
         return ListView(
           children: [
             PageHeader(
@@ -60,7 +60,7 @@ class SubmissionsListPage extends StatelessWidget {
                       child: Text(statusLabel(loc, s)),
                     ),
                 ],
-                onChanged: cubit.setFilter,
+                onChanged: bloc.setFilter,
               ),
             ),
             if (state.loading)
@@ -68,7 +68,7 @@ class SubmissionsListPage extends StatelessWidget {
             else if (state.error != null)
               InlineError(
                 message: loc.adminSubmissionsListErrorsLoadFailed,
-                onRetry: cubit.load,
+                onRetry: () => bloc.add(const SubmissionsLoadRequested()),
               )
             else ...[
               if (state.items.isNotEmpty)

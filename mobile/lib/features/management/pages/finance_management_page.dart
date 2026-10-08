@@ -8,7 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/finance_entities.dart';
-import '../presentation/bloc/finance_cubit.dart';
+import '../presentation/bloc/finance_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// Finance management (Angular finance-management): overview cards, filters,
@@ -39,11 +39,11 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => FinanceCubit(
+      create: (_) => FinanceBloc(
         adminRepository: AdminRepository(apiClient: sl<ApiClient>()),
         financeRepository: FinanceRepository(apiClient: sl<ApiClient>()),
       )..init(),
-      child: BlocConsumer<FinanceCubit, FinanceState>(
+      child: BlocConsumer<FinanceBloc, FinanceState>(
         listener: (context, state) {
           if (state.actionError != null) {
             showAppToast(context, describeApiError(context, state.actionError),
@@ -51,7 +51,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<FinanceCubit>();
+          final bloc = context.read<FinanceBloc>();
           final ledger = state.ledger;
           return ListView(
             children: [
@@ -150,7 +150,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           child: Text(loc.adminFinanceManagementStatusRejected),
                         ),
                       ],
-                      onChanged: (v) => cubit.setFilters(statusFilter: v),
+                      onChanged: (v) => bloc.add(FinanceFiltersChanged(statusFilter: v)),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<FinanceType?>(
@@ -174,7 +174,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           child: Text(loc.adminFinanceManagementTypeExpense),
                         ),
                       ],
-                      onChanged: (v) => cubit.setFilters(typeFilter: v),
+                      onChanged: (v) => bloc.add(FinanceFiltersChanged(typeFilter: v)),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -184,7 +184,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                             label: loc.adminFinanceManagementLedgerDate,
                             value: state.dateFrom,
                             onChanged: (v) {
-                              cubit.setDateRange(from: v);
+                              bloc.add(FinanceDateRangeChanged(from: v));
                             },
                           ),
                         ),
@@ -194,8 +194,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                             label: loc.adminFinanceManagementLedgerDate,
                             value: state.dateTo,
                             onChanged: (v) {
-                              cubit.setDateRange(to: v);
-                              cubit.refresh();
+                              bloc.add(FinanceDateRangeChanged(to: v));
+                              bloc.add(FinanceRefreshRequested());
                             },
                           ),
                         ),
@@ -208,7 +208,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         labelText: loc.adminFinanceManagementFiltersSearch,
                         border: const OutlineInputBorder(),
                       ),
-                      onFieldSubmitted: (v) => cubit.setFilters(search: v),
+                      onFieldSubmitted: (v) => bloc.add(FinanceFiltersChanged(search: v)),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -216,7 +216,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         Expanded(
                           child: AppButton(
                             label: loc.adminFinanceManagementCreate,
-                            onPressed: () => _openForm(context, loc, cubit),
+                            onPressed: () => _openForm(context, loc, bloc),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -226,7 +226,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                             variant: AppButtonVariant.secondary,
                             onPressed: () {
                               _searchController.clear();
-                              cubit.resetFilters();
+                              bloc.add(FinanceFiltersReset());
                             },
                           ),
                         ),
@@ -248,7 +248,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         variant: AppButtonVariant.secondary,
                         onPressed: state.busy
                             ? null
-                            : () => cubit.publishReportNotice(),
+                            : () => bloc.add(FinanceReportNoticePublished()),
                       ),
                     ),
                   ],
@@ -259,7 +259,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
               else if (state.error != null)
                 InlineError(
                     message: loc.adminFinanceManagementErrorsLoadFailed,
-                    onRetry: cubit.refresh)
+                    onRetry: () => bloc.add(const FinanceRefreshRequested()))
               else if (ledger == null || ledger.items.isEmpty)
                 EmptyState(message: loc.adminFinanceManagementLedgerEmpty)
               else ...[
@@ -271,21 +271,21 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                       style: Theme.of(context).textTheme.bodySmall),
                 ),
                 for (final txn in ledger.items)
-                  _txnCard(context, loc, cubit, txn),
+                  _txnCard(context, loc, bloc, txn),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.chevron_left),
                       onPressed:
-                          state.page > 1 ? () => cubit.changePage(-1) : null,
+                          state.page > 1 ? () => bloc.add(FinancePageChanged(delta: -1)) : null,
                     ),
                     Text(loc.adminFinanceManagementLedgerPage(
-                        state.page, cubit.totalPages)),
+                        state.page, bloc.totalPages)),
                     IconButton(
                       icon: const Icon(Icons.chevron_right),
-                      onPressed: state.page < cubit.totalPages
-                          ? () => cubit.changePage(1)
+                      onPressed: state.page < bloc.totalPages
+                          ? () => bloc.add(FinancePageChanged(delta: 1))
                           : null,
                     ),
                   ],
@@ -300,8 +300,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
   }
 
   Widget _txnCard(BuildContext context, AppLocalizations loc,
-      FinanceCubit cubit, FinanceTransaction txn) {
-    final expanded = cubit.state.expandedId == txn.id;
+      FinanceBloc bloc, FinanceTransaction txn) {
+    final expanded = bloc.state.expandedId == txn.id;
     final sign = txn.type == FinanceType.income ? '+' : '−';
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -311,7 +311,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             InkWell(
-              onTap: () => cubit.toggleExpanded(txn.id),
+              onTap: () => bloc.add(FinanceRowToggled(id: txn.id)),
               child: Row(
                 children: [
                   Expanded(
@@ -403,15 +403,15 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                     AppButton(
                       label: loc.adminFinanceManagementActionsSubmit,
                       variant: AppButtonVariant.ghost,
-                      onPressed: cubit.state.busy
+                      onPressed: bloc.state.busy
                           ? null
-                          : () => cubit.submitDraft(txn),
+                          : () => bloc.add(FinanceDraftSubmitted(txn: txn)),
                     ),
                   if (txn.status == FinanceStatus.pending)
                     AppButton(
                       label: loc.adminFinanceManagementActionsApprove,
                       variant: AppButtonVariant.ghost,
-                      onPressed: cubit.state.busy
+                      onPressed: bloc.state.busy
                           ? null
                           : () async {
                               final confirmed = await confirmDialog(
@@ -422,7 +422,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                                     .adminFinanceManagementModalsApproveConfirm,
                               );
                               if (confirmed && context.mounted) {
-                                await cubit.approve(txn);
+                                await bloc.approve(txn);
                               }
                             },
                     ),
@@ -431,34 +431,34 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                     AppButton(
                       label: loc.adminFinanceManagementActionsReject,
                       variant: AppButtonVariant.ghost,
-                      onPressed: cubit.state.busy
+                      onPressed: bloc.state.busy
                           ? null
                           : () => _reasonDialog(
-                              context, loc, cubit, txn, _FinanceAction.reject),
+                              context, loc, bloc, txn, _FinanceAction.reject),
                     ),
                   if (txn.status == FinanceStatus.approved)
                     AppButton(
                       label: loc.adminFinanceManagementActionsReverse,
                       variant: AppButtonVariant.ghost,
-                      onPressed: cubit.state.busy
+                      onPressed: bloc.state.busy
                           ? null
                           : () => _reasonDialog(
-                              context, loc, cubit, txn, _FinanceAction.reverse),
+                              context, loc, bloc, txn, _FinanceAction.reverse),
                     ),
                   AppButton(
                     label: loc.commonEdit,
                     variant: AppButtonVariant.ghost,
-                    onPressed: cubit.state.busy
+                    onPressed: bloc.state.busy
                         ? null
-                        : () => _openForm(context, loc, cubit, editing: txn),
+                        : () => _openForm(context, loc, bloc, editing: txn),
                   ),
                   AppButton(
                     label: loc.commonDelete,
                     variant: AppButtonVariant.ghost,
-                    onPressed: cubit.state.busy
+                    onPressed: bloc.state.busy
                         ? null
                         : () => _reasonDialog(
-                            context, loc, cubit, txn, _FinanceAction.delete),
+                            context, loc, bloc, txn, _FinanceAction.delete),
                   ),
                 ],
               ),
@@ -481,7 +481,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
       };
 
   Future<void> _reasonDialog(BuildContext context, AppLocalizations loc,
-      FinanceCubit cubit, FinanceTransaction txn, _FinanceAction action) async {
+      FinanceBloc bloc, FinanceTransaction txn, _FinanceAction action) async {
     final controller = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
@@ -527,9 +527,9 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
       return;
     }
     final ok = switch (action) {
-      _FinanceAction.reject => await cubit.reject(txn, reason),
-      _FinanceAction.reverse => await cubit.reverse(txn, reason),
-      _FinanceAction.delete => await cubit.delete(txn, reason),
+      _FinanceAction.reject => await bloc.reject(txn, reason),
+      _FinanceAction.reverse => bloc.add(FinanceReversed(txn: txn, reason: reason)),
+      _FinanceAction.delete => bloc.add(FinanceDeleted(txn: txn, reason: reason)),
     };
     if (ok && context.mounted) showAppToast(context, loc.commonSave);
   }
@@ -537,7 +537,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
   // ----- Create / edit -----
 
   Future<void> _openForm(
-      BuildContext context, AppLocalizations loc, FinanceCubit cubit,
+      BuildContext context, AppLocalizations loc, FinanceBloc bloc,
       {FinanceTransaction? editing}) async {
     final type = editing?.type ?? FinanceType.income;
     final dateController = TextEditingController(
@@ -562,7 +562,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
       context: context,
       isScrollControlled: true,
       builder: (sheetContext) => BlocProvider.value(
-        value: cubit,
+        value: bloc,
         child: StatefulBuilder(
           builder: (sheetContext, setSheetState) {
             var currentType = type;
@@ -632,7 +632,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         border: const OutlineInputBorder(),
                       ),
                       items: [
-                        for (final c in cubit.state.categories)
+                        for (final c in bloc.state.categories)
                           if (c.type == currentType && c.isActive)
                             DropdownMenuItem<int>(
                                 value: c.id, child: Text(c.label)),
@@ -708,7 +708,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         onChanged: (v) {
                           setSheetState(() => linkPayment = v ?? false);
                           if (linkPayment) {
-                            cubit.loadUnlinkedPayments();
+                            bloc.add(FinanceUnlinkedPaymentsRequested());
                           }
                         },
                       ),
@@ -744,15 +744,15 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           ],
                           onChanged: (v) {
                             setSheetState(() => sourceFilter = v);
-                            cubit.loadUnlinkedPayments(sourceType: v);
+                            bloc.add(FinanceUnlinkedPaymentsRequested(sourceType: v));
                           },
                         ),
-                        if (cubit.state.unlinkedLoading)
+                        if (bloc.state.unlinkedLoading)
                           const Padding(
                             padding: EdgeInsets.all(8),
                             child: Center(child: CircularProgressIndicator()),
                           )
-                        else if (cubit.state.unlinkedPayments.isEmpty)
+                        else if (bloc.state.unlinkedPayments.isEmpty)
                           Padding(
                             padding: const EdgeInsets.all(8),
                             child: Text(
@@ -760,7 +760,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           )
                         else
                           for (final payment
-                              in cubit.state.unlinkedPayments)
+                              in bloc.state.unlinkedPayments)
                             ListTile(
                               dense: true,
                               leading: Icon(selectedPayment == payment
@@ -786,9 +786,9 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           child: AppButton(
                             label: loc.adminFinanceManagementActionsSaveDraft,
                             variant: AppButtonVariant.secondary,
-                            onPressed: cubit.state.busy
+                            onPressed: bloc.state.busy
                                 ? null
-                                : () => _submit(sheetContext, loc, cubit,
+                                : () => _submit(sheetContext, loc, bloc,
                                     editing: editing,
                                     type: currentType,
                                     dateController: dateController,
@@ -807,9 +807,9 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         Expanded(
                           child: AppButton(
                             label: loc.adminFinanceManagementActionsSavePending,
-                            onPressed: cubit.state.busy
+                            onPressed: bloc.state.busy
                                 ? null
-                                : () => _submit(sheetContext, loc, cubit,
+                                : () => _submit(sheetContext, loc, bloc,
                                     editing: editing,
                                     type: currentType,
                                     dateController: dateController,
@@ -839,7 +839,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
   Future<void> _submit(
     BuildContext sheetContext,
     AppLocalizations loc,
-    FinanceCubit cubit, {
+    FinanceBloc bloc, {
     required FinanceTransaction? editing,
     required FinanceType type,
     required TextEditingController dateController,
@@ -870,10 +870,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
       showAppToast(sheetContext, errors.first, error: true);
       return;
     }
-    final ok = await cubit.saveTransaction(
-      editingId: editing?.id,
-      attachmentPath: attachmentPath,
-      input: FinanceTransactionInput(
+    final ok = bloc.add(FinanceTransactionSaved(editingId: editing?.id, attachmentPath: attachmentPath, input: FinanceTransactionInput(
         txnDate: dateController.text,
         type: type,
         categoryId: categoryId!,
@@ -898,8 +895,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                 selectedPayment != null
             ? selectedPayment.sourceId
             : null,
-      ),
-    );
+      )));
     if (sheetContext.mounted && ok) Navigator.of(sheetContext).pop();
   }
 }

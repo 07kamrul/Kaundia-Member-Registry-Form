@@ -10,7 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/submissions_cubit.dart';
+import '../presentation/bloc/submissions_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'submissions_list_page.dart';
 
@@ -31,7 +31,7 @@ class SubmissionDetailPage extends StatelessWidget {
       return EmptyState(message: loc.commonNoData);
     }
     return BlocProvider(
-      create: (_) => SubmissionDetailCubit(
+      create: (_) => SubmissionDetailBloc(
         repository: AdminRepository(apiClient: sl<ApiClient>()),
         id: id,
       )..load(),
@@ -59,19 +59,19 @@ class _SubmissionDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    return BlocConsumer<SubmissionDetailCubit, SubmissionDetailState>(
+    return BlocConsumer<SubmissionDetailBloc, SubmissionDetailState>(
       listener: (context, state) {
         if (state.actionError != null) {
           showAppToast(context, describeApiError(context, state.actionError), error: true);
         }
       },
       builder: (context, state) {
-        final cubit = context.read<SubmissionDetailCubit>();
+        final bloc = context.read<SubmissionDetailBloc>();
         if (state.loading) {
           return const SkeletonLoader(lines: 8);
         }
         if (state.error != null) {
-          return InlineError(message: loc.adminSubmissionDetailErrorsLoadFailed, onRetry: cubit.load);
+          return InlineError(message: loc.adminSubmissionDetailErrorsLoadFailed, onRetry: () => bloc.add(const SubmissionsLoadRequested()));
         }
         final s = state.submission;
         if (s == null) return EmptyState(message: loc.commonNoData);
@@ -113,7 +113,7 @@ class _SubmissionDetailView extends StatelessWidget {
                           child: AppButton(
                             label: loc.adminSubmissionDetailResendButton,
                             variant: AppButtonVariant.secondary,
-                            onPressed: state.busy ? null : () => cubit.resendNotification(),
+                            onPressed: state.busy ? null : () => bloc.add(SubmissionDetailResendNotificationRequested()),
                           ),
                         ),
                       ],
@@ -124,8 +124,8 @@ class _SubmissionDetailView extends StatelessWidget {
             _personalSection(context, loc, s),
             _addressSection(context, loc, s),
             _emergencySection(context, loc, s),
-            _attachmentsSection(context, loc, s, cubit, state.busy),
-            _propertiesSection(context, loc, s, cubit, state.busy),
+            _attachmentsSection(context, loc, s, bloc, state.busy),
+            _propertiesSection(context, loc, s, bloc, state.busy),
             _nomineesSection(context, loc, s),
             _paymentSection(context, loc, s),
             if (s.rejectionReason != null && s.rejectionReason!.isNotEmpty)
@@ -133,7 +133,7 @@ class _SubmissionDetailView extends StatelessWidget {
                 title: loc.adminSubmissionDetailFieldsRejectionReason,
                 child: Text(s.rejectionReason!),
               ),
-            if (reviewMode) _reviewActions(context, loc, cubit, state.busy),
+            if (reviewMode) _reviewActions(context, loc, bloc, state.busy),
             const SizedBox(height: 32),
           ],
         );
@@ -202,7 +202,7 @@ class _SubmissionDetailView extends StatelessWidget {
   }
 
   Widget _attachmentsSection(
-      BuildContext context, AppLocalizations loc, SubmissionDetail s, SubmissionDetailCubit cubit, bool busy) {
+      BuildContext context, AppLocalizations loc, SubmissionDetail s, SubmissionDetailBloc bloc, bool busy) {
     Widget preview(String? url, String label) {
       if (url == null || url.isEmpty) {
         return Padding(
@@ -241,7 +241,7 @@ class _SubmissionDetailView extends StatelessWidget {
             '${loc.adminSubmissionDetailUploadAgain} — ${loc.adminSubmissionDetailFieldsMemberPhoto}',
             enabled: !busy,
             imagesOnly: true,
-            onPicked: (path) => cubit.replaceAttachment('member_photo', path),
+            onPicked: (path) => bloc.add(SubmissionDetailAttachmentReplaceRequested('member_photo', path)),
           ),
           preview(s.receiptPhotoUrl, loc.adminSubmissionDetailFieldsReceiptPhoto),
           _replaceButton(
@@ -249,7 +249,7 @@ class _SubmissionDetailView extends StatelessWidget {
             '${loc.adminSubmissionDetailUploadAgain} — ${loc.adminSubmissionDetailFieldsReceiptPhoto}',
             enabled: !busy,
             imagesOnly: true,
-            onPicked: (path) => cubit.replaceAttachment('receipt_photo', path),
+            onPicked: (path) => bloc.add(SubmissionDetailAttachmentReplaceRequested('receipt_photo', path)),
           ),
           if (s.memberSignature != null && s.memberSignature!.isNotEmpty)
             InfoRow(
@@ -286,7 +286,7 @@ class _SubmissionDetailView extends StatelessWidget {
   }
 
   Widget _propertiesSection(
-      BuildContext context, AppLocalizations loc, SubmissionDetail s, SubmissionDetailCubit cubit, bool busy) {
+      BuildContext context, AppLocalizations loc, SubmissionDetail s, SubmissionDetailBloc bloc, bool busy) {
     if (s.properties.isEmpty) {
       return AppCard(
         title: loc.adminSubmissionDetailProperties,
@@ -298,7 +298,7 @@ class _SubmissionDetailView extends StatelessWidget {
           '${loc.adminSubmissionDetailProperties} (${loc.adminSubmissionDetailPropertyCount(s.properties.length)})',
       child: Column(
         children: [
-          for (final p in s.properties) _PropertyTile(property: p, cubit: cubit, busy: busy),
+          for (final p in s.properties) _PropertyTile(property: p, bloc: bloc, busy: busy),
         ],
       ),
     );
@@ -371,7 +371,7 @@ class _SubmissionDetailView extends StatelessWidget {
   }
 
   Widget _reviewActions(
-      BuildContext context, AppLocalizations loc, SubmissionDetailCubit cubit, bool busy) {
+      BuildContext context, AppLocalizations loc, SubmissionDetailBloc bloc, bool busy) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -391,7 +391,7 @@ class _SubmissionDetailView extends StatelessWidget {
                         confirmLabel: loc.adminSubmissionDetailApproveModalConfirmLabel,
                       );
                       if (confirmed && context.mounted) {
-                        final ok = await cubit.approve();
+                        final ok = bloc.add(SubmissionDetailApproveRequested());
                         if (ok && context.mounted) context.go('/submissions');
                       }
                     },
@@ -404,7 +404,7 @@ class _SubmissionDetailView extends StatelessWidget {
               variant: AppButtonVariant.danger,
               icon: Icons.close,
               expanded: true,
-              onPressed: busy ? null : () => _openRejectDialog(context, loc, cubit),
+              onPressed: busy ? null : () => _openRejectDialog(context, loc, bloc),
             ),
           ),
         ],
@@ -413,7 +413,7 @@ class _SubmissionDetailView extends StatelessWidget {
   }
 
   Future<void> _openRejectDialog(
-      BuildContext context, AppLocalizations loc, SubmissionDetailCubit cubit) async {
+      BuildContext context, AppLocalizations loc, SubmissionDetailBloc bloc) async {
     final controller = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
@@ -451,16 +451,16 @@ class _SubmissionDetailView extends StatelessWidget {
       }
       return;
     }
-    final emailSent = await cubit.reject(reason);
+    final emailSent = bloc.add(SubmissionDetailRejectRequested(reason));
     if (emailSent && context.mounted) context.go('/submissions');
   }
 }
 
 class _PropertyTile extends StatelessWidget {
-  const _PropertyTile({required this.property, required this.cubit, required this.busy});
+  const _PropertyTile({required this.property, required this.bloc, required this.busy});
 
   final SubmissionProperty property;
-  final SubmissionDetailCubit cubit;
+  final SubmissionDetailBloc bloc;
   final bool busy;
 
   @override
@@ -547,7 +547,7 @@ class _PropertyTile extends StatelessWidget {
                                 await FilePicker.platform.pickFiles(type: FileType.any);
                             final path = result?.files.single.path;
                             if (path != null) {
-                              await cubit.replaceDocument(doc.id, path);
+                              bloc.add(SubmissionDetailDocumentReplaceRequested(doc.id, path));
                             }
                           },
                   ),

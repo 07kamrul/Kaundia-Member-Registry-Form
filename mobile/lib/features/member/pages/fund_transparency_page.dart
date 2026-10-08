@@ -10,7 +10,7 @@ import '../../../shared/widgets/widgets.dart';
 import '../data/finance_repository.dart';
 import '../domain/finance_entities.dart';
 import '../domain/payment_entities.dart';
-import '../presentation/bloc/fund_transparency_cubit.dart';
+import '../presentation/bloc/fund_transparency_bloc.dart';
 
 /// Port of Angular FundTransparencyComponent: period selector, totals +
 /// balance stat cards, category breakdowns as progress bars (charts are
@@ -26,7 +26,7 @@ class FundTransparencyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => FundTransparencyCubit(
+      create: (_) => FundTransparencyBloc(
         repository: FinanceRepository(apiClient: sl<ApiClient>()),
       ),
       child: const _FundView(),
@@ -45,30 +45,30 @@ class _FundViewState extends State<_FundView> {
   @override
   void initState() {
     super.initState();
-    context.read<FundTransparencyCubit>().applyPeriod(FinancePeriod.month);
+    context.read<FundTransparencyBloc>().add(const FundStarted(FinancePeriod.month));
   }
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
-      body: BlocConsumer<FundTransparencyCubit, FundTransparencyState>(
+      body: BlocConsumer<FundTransparencyBloc, FundTransparencyState>(
         listener: (context, state) {
           final path = state.pdfSavedPath;
           if (path != null) {
             OpenFilex.open(path);
-            context.read<FundTransparencyCubit>().clearPdfSavedPath();
+            context.read<FundTransparencyBloc>().add(const FundPdfSavedPathCleared());
           }
         },
         builder: (context, state) {
-          final cubit = context.read<FundTransparencyCubit>();
+          final bloc = context.read<FundTransparencyBloc>();
           final body = switch (state.status) {
             FundStatus.loading => const SkeletonLoader(lines: 8),
             FundStatus.failure => InlineError(
                 message: loc.memberFundTransparencyErrorsLoadFailed,
-                onRetry: () => cubit.applyPeriod(state.period),
+                onRetry: () => bloc.add(FundPeriodChanged(state.period)),
               ),
-            FundStatus.loaded => _loaded(context, state, loc, cubit),
+            FundStatus.loaded => _loaded(context, state, loc, bloc),
           };
           return body;
         },
@@ -80,13 +80,13 @@ class _FundViewState extends State<_FundView> {
     BuildContext context,
     FundTransparencyState state,
     AppLocalizations loc,
-    FundTransparencyCubit cubit,
+    FundTransparencyBloc bloc,
   ) {
     final summary = state.summary;
     if (summary == null) {
       return InlineError(
         message: loc.memberFundTransparencyErrorsLoadFailed,
-        onRetry: () => cubit.applyPeriod(state.period),
+        onRetry: () => bloc.add(FundPeriodChanged(state.period)),
       );
     }
     final isBn = Localizations.localeOf(context).languageCode == 'bn';
@@ -106,8 +106,8 @@ class _FundViewState extends State<_FundView> {
                   label: Text(_periodLabel(period, loc)),
                   selected: state.period == period,
                   onSelected: (_) => period == FinancePeriod.custom
-                      ? _pickCustomRange(context, cubit, state)
-                      : cubit.applyPeriod(period),
+                      ? _pickCustomRange(context, bloc, state)
+                      : bloc.add(FundPeriodChanged(period)),
                 ),
             ],
           ),
@@ -164,13 +164,13 @@ class _FundViewState extends State<_FundView> {
               icon: Icons.picture_as_pdf_outlined,
               variant: AppButtonVariant.secondary,
               expanded: true,
-              onPressed: state.pdfDownloading ? null : cubit.downloadReport,
+              onPressed: state.pdfDownloading ? null : () => bloc.add(const FundReportDownloaded()),
             ),
           ),
           if (state.pdfError)
             InlineError(
               message: loc.memberFundTransparencyErrorsPdfFailed,
-              onRetry: cubit.downloadReport,
+              onRetry: () => bloc.add(const FundReportDownloaded()),
             ),
           // Ledger.
           Padding(
@@ -184,7 +184,7 @@ class _FundViewState extends State<_FundView> {
                 ),
                 IconButton(
                   tooltip: loc.memberFundTransparencyFiltersClearAll,
-                  onPressed: () => cubit.setFilters(),
+                  onPressed: () => bloc.add(const FundLedgerFiltersChanged()),
                   icon: const Icon(Icons.filter_alt_off_outlined),
                 ),
               ],
@@ -199,13 +199,13 @@ class _FundViewState extends State<_FundView> {
                 border: const OutlineInputBorder(),
                 isDense: true,
               ),
-              onSubmitted: (q) => cubit.setFilters(search: q),
+              onSubmitted: (q) => bloc.add(FundLedgerFiltersChanged(search: q)),
             ),
           ),
           if (state.ledgerError)
             InlineError(
               message: loc.memberFundTransparencyErrorsLoadFailed,
-              onRetry: () => cubit.changePage(0),
+              onRetry: () => bloc.add(const FundLedgerPageChanged(0)),
             )
           else if (state.ledgerLoading)
             const SkeletonLoader(lines: 4)
@@ -257,13 +257,13 @@ class _FundViewState extends State<_FundView> {
               children: [
                 IconButton(
                   onPressed:
-                      state.page > 1 ? () => cubit.changePage(-1) : null,
+                      state.page > 1 ? () => bloc.add(const FundLedgerPageChanged(-1)) : null,
                   icon: const Icon(Icons.chevron_left),
                 ),
                 Text(loc.memberFundTransparencyLedgerPage(state.page, state.totalPages)),
                 IconButton(
                   onPressed: state.page < state.totalPages
-                      ? () => cubit.changePage(1)
+                      ? () => bloc.add(const FundLedgerPageChanged(1))
                       : null,
                   icon: const Icon(Icons.chevron_right),
                 ),
@@ -326,7 +326,7 @@ class _FundViewState extends State<_FundView> {
 
   Future<void> _pickCustomRange(
     BuildContext context,
-    FundTransparencyCubit cubit,
+    FundTransparencyBloc bloc,
     FundTransparencyState state,
   ) async {
     final loc = AppLocalizations.of(context);
@@ -347,10 +347,10 @@ class _FundViewState extends State<_FundView> {
       helpText: loc.memberFundTransparencyFiltersDateTo,
     );
     if (to == null || !context.mounted) return;
-    await cubit.applyPeriod(
+    bloc.add(FundPeriodChanged(
       FinancePeriod.custom,
       dateFrom: from.toIso8601String().substring(0, 10),
       dateTo: to.toIso8601String().substring(0, 10),
-    );
+    ));
   }
 }

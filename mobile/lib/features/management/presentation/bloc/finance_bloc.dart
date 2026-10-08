@@ -1,3 +1,6 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -50,46 +53,45 @@ class FinanceState extends Equatable {
   static const pageSize = 25;
 
   FinanceState copyWith({
-    FinanceOverview? Function() overview = _same,
+    FinanceOverview? Function()? overview,
     List<FinanceCategory>? categories,
-    FinanceLedgerPage? Function() ledger = _same,
+    FinanceLedgerPage? Function()? ledger,
     bool? loading,
-    Object? Function() error = _same,
-    FinanceStatus? Function() statusFilter = _same,
-    FinanceType? Function() typeFilter = _same,
+    Object? Function()? error,
+    FinanceStatus? Function()? statusFilter,
+    FinanceType? Function()? typeFilter,
     String? dateFrom,
     String? dateTo,
     String? search,
     int? page,
     bool? busy,
-    Object? Function() actionError = _same,
-    int? Function() expandedId = _same,
+    Object? Function()? actionError,
+    int? Function()? expandedId,
     List<UnlinkedPayment>? unlinkedPayments,
     bool? unlinkedLoading,
     bool? noticeDone,
   }) =>
       FinanceState(
-        overview: overview == _same ? this.overview : overview(),
+        overview: overview == null ? this.overview : overview(),
         categories: categories ?? this.categories,
-        ledger: ledger == _same ? this.ledger : ledger(),
+        ledger: ledger == null ? this.ledger : ledger(),
         loading: loading ?? this.loading,
-        error: error == _same ? this.error : error(),
+        error: error == null ? this.error : error(),
         statusFilter:
-            statusFilter == _same ? this.statusFilter : statusFilter(),
-        typeFilter: typeFilter == _same ? this.typeFilter : typeFilter(),
+            statusFilter == null ? this.statusFilter : statusFilter(),
+        typeFilter: typeFilter == null ? this.typeFilter : typeFilter(),
         dateFrom: dateFrom ?? this.dateFrom,
         dateTo: dateTo ?? this.dateTo,
         search: search ?? this.search,
         page: page ?? this.page,
         busy: busy ?? this.busy,
-        actionError: actionError == _same ? this.actionError : actionError(),
-        expandedId: expandedId == _same ? this.expandedId : expandedId(),
+        actionError: actionError == null ? this.actionError : actionError(),
+        expandedId: expandedId == null ? this.expandedId : expandedId(),
         unlinkedPayments: unlinkedPayments ?? this.unlinkedPayments,
         unlinkedLoading: unlinkedLoading ?? this.unlinkedLoading,
         noticeDone: noticeDone ?? this.noticeDone,
       );
 
-  static T _same<T>() => throw UnsupportedError('sentinel');
 
   @override
   List<Object?> get props => [
@@ -113,13 +115,278 @@ class FinanceState extends Equatable {
       ];
 }
 
-class FinanceCubit extends Cubit<FinanceState> {
-  FinanceCubit({
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+sealed class FinanceEvent extends Equatable {
+  const FinanceEvent();
+  @override
+  List<Object?> get props => const [];
+}
+
+final class FinanceInitRequested extends FinanceEvent {
+  const FinanceInitRequested();
+
+  @override
+  List<Object?> get props => const [];
+}
+
+final class FinanceCategoriesLoadRequested extends FinanceEvent {
+  const FinanceCategoriesLoadRequested();
+
+  @override
+  List<Object?> get props => const [];
+}
+
+final class FinanceOverviewLoadRequested extends FinanceEvent {
+  const FinanceOverviewLoadRequested();
+
+  @override
+  List<Object?> get props => const [];
+}
+
+final class FinanceRefreshRequested extends FinanceEvent {
+  const FinanceRefreshRequested();
+
+  @override
+  List<Object?> get props => const [];
+}
+
+final class FinanceFiltersChanged extends FinanceEvent {
+  const FinanceFiltersChanged({
+    this.statusFilter,
+    this.typeFilter,
+    this.search,
+  });
+
+  final FinanceStatus? statusFilter;
+  final FinanceType? typeFilter;
+  final String? search;
+
+  @override
+  List<Object?> get props => [statusFilter, typeFilter, search];
+}
+
+final class FinanceDateRangeChanged extends FinanceEvent {
+  const FinanceDateRangeChanged({
+    this.from,
+    this.to,
+  });
+
+  final String? from;
+  final String? to;
+
+  @override
+  List<Object?> get props => [from, to];
+}
+
+final class FinanceFiltersReset extends FinanceEvent {
+  const FinanceFiltersReset();
+
+  @override
+  List<Object?> get props => const [];
+}
+
+final class FinancePageChanged extends FinanceEvent {
+  const FinancePageChanged({
+    required this.delta,
+  });
+
+  final int delta;
+
+  @override
+  List<Object?> get props => [delta];
+}
+
+final class FinanceRowToggled extends FinanceEvent {
+  const FinanceRowToggled({
+    required this.id,
+  });
+
+  final int id;
+
+  @override
+  List<Object?> get props => [id];
+}
+
+final class FinanceTransactionSaved extends FinanceEvent {
+  const FinanceTransactionSaved({
+    required this.input,
+    this.editingId,
+    this.attachmentPath,
+    this.completer,
+  });
+
+  final FinanceTransactionInput input;
+  final int? editingId;
+  final String? attachmentPath;
+  final Completer<bool>? completer;
+
+  @override
+  List<Object?> get props => [input, editingId, attachmentPath];
+}
+
+final class FinanceDraftSubmitted extends FinanceEvent {
+  const FinanceDraftSubmitted({
+    required this.txn,
+    this.completer,
+  });
+
+  final FinanceTransaction txn;
+  final Completer<bool>? completer;
+
+  @override
+  List<Object?> get props => [txn];
+}
+
+final class FinanceApproved extends FinanceEvent {
+  const FinanceApproved({
+    required this.txn,
+    this.completer,
+  });
+
+  final FinanceTransaction txn;
+  final Completer<bool>? completer;
+
+  @override
+  List<Object?> get props => [txn];
+}
+
+final class FinanceRejected extends FinanceEvent {
+  const FinanceRejected({
+    required this.txn,
+    required this.reason,
+    this.completer,
+  });
+
+  final FinanceTransaction txn;
+  final String reason;
+  final Completer<bool>? completer;
+
+  @override
+  List<Object?> get props => [txn, reason];
+}
+
+final class FinanceReversed extends FinanceEvent {
+  const FinanceReversed({
+    required this.txn,
+    required this.reason,
+    this.completer,
+  });
+
+  final FinanceTransaction txn;
+  final String reason;
+  final Completer<bool>? completer;
+
+  @override
+  List<Object?> get props => [txn, reason];
+}
+
+final class FinanceDeleted extends FinanceEvent {
+  const FinanceDeleted({
+    required this.txn,
+    required this.reason,
+    this.completer,
+  });
+
+  final FinanceTransaction txn;
+  final String reason;
+  final Completer<bool>? completer;
+
+  @override
+  List<Object?> get props => [txn, reason];
+}
+
+final class FinanceUnlinkedPaymentsRequested extends FinanceEvent {
+  const FinanceUnlinkedPaymentsRequested({
+    this.sourceType,
+    this.search,
+  });
+
+  final PaymentSourceType? sourceType;
+  final String? search;
+
+  @override
+  List<Object?> get props => [sourceType, search];
+}
+
+final class FinanceCategoryAdded extends FinanceEvent {
+  const FinanceCategoryAdded({
+    required this.label,
+    this.completer,
+  });
+
+  final String label;
+  final Completer<FinanceCategory?>? completer;
+
+  @override
+  List<Object?> get props => [label];
+}
+
+final class FinanceReportNoticePublished extends FinanceEvent {
+  const FinanceReportNoticePublished({
+    this.period = FinancePeriod.month,
+    this.completer,
+  });
+
+  final FinancePeriod period;
+  final Completer<bool>? completer;
+
+  @override
+  List<Object?> get props => [period];
+}
+
+class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
+  FinanceBloc({
     required AdminRepository adminRepository,
     required FinanceRepository financeRepository,
   })  : _admin = adminRepository,
         _finance = financeRepository,
-        super(const FinanceState());
+        super(const FinanceState()) {
+    on<FinanceInitRequested>((e, emit) => init());
+    on<FinanceCategoriesLoadRequested>((e, emit) => loadCategories());
+    on<FinanceOverviewLoadRequested>((e, emit) => loadOverview());
+    on<FinanceRefreshRequested>((e, emit) => refresh());
+    on<FinanceFiltersChanged>((e, emit) => setFilters(statusFilter: e.statusFilter, typeFilter: e.typeFilter, search: e.search));
+    on<FinanceDateRangeChanged>((e, emit) => setDateRange(from: e.from, to: e.to));
+    on<FinanceFiltersReset>((e, emit) => resetFilters());
+    on<FinancePageChanged>((e, emit) => changePage(e.delta));
+    on<FinanceRowToggled>((e, emit) => toggleExpanded(e.id));
+    on<FinanceTransactionSaved>((e, emit) async {
+      final result = await saveTransaction(input: e.input, editingId: e.editingId, attachmentPath: e.attachmentPath);
+      e.completer?.complete(result);
+    });
+    on<FinanceDraftSubmitted>((e, emit) async {
+      final result = await submitDraft(e.txn);
+      e.completer?.complete(result);
+    });
+    on<FinanceApproved>((e, emit) async {
+      final result = await approve(e.txn);
+      e.completer?.complete(result);
+    });
+    on<FinanceRejected>((e, emit) async {
+      final result = await reject(e.txn, e.reason);
+      e.completer?.complete(result);
+    });
+    on<FinanceReversed>((e, emit) async {
+      final result = await reverse(e.txn, e.reason);
+      e.completer?.complete(result);
+    });
+    on<FinanceDeleted>((e, emit) async {
+      final result = await delete(e.txn, e.reason);
+      e.completer?.complete(result);
+    });
+    on<FinanceUnlinkedPaymentsRequested>((e, emit) => loadUnlinkedPayments(sourceType: e.sourceType, search: e.search));
+    on<FinanceCategoryAdded>((e, emit) async {
+      final result = await addCategory(e.label);
+      e.completer?.complete(result);
+    });
+    on<FinanceReportNoticePublished>((e, emit) async {
+      final result = await publishReportNotice(period: e.period);
+      e.completer?.complete(result);
+    });
+  }
 
   final AdminRepository _admin;
   final FinanceRepository _finance;
@@ -337,18 +604,17 @@ class PaymentVerificationsState extends Equatable {
     String? statusFilter,
     List<AdminInstallmentPayment>? payments,
     bool? loading,
-    Object? Function() error = _same,
-    int? Function() busyId = _same,
+    Object? Function()? error,
+    int? Function()? busyId,
   }) =>
       PaymentVerificationsState(
         statusFilter: statusFilter ?? this.statusFilter,
         payments: payments ?? this.payments,
         loading: loading ?? this.loading,
-        error: error == _same ? this.error : error(),
-        busyId: busyId == _same ? this.busyId : busyId(),
+        error: error == null ? this.error : error(),
+        busyId: busyId == null ? this.busyId : busyId(),
       );
 
-  static T _same<T>() => throw UnsupportedError('sentinel');
 
   @override
   List<Object?> get props => [statusFilter, payments, loading, error, busyId];
