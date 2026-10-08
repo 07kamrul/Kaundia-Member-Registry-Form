@@ -22,6 +22,10 @@ interface NavItem {
   // Absent = no role restriction. Present = visible only to these roles
   // (shared config - see MEMBER_PAYMENT_ROLES in auth.service.ts).
   requiredRoles?: readonly UserRole[];
+  // True for entries every authenticated account can see. They carry no
+  // requiredPermission, so list them here to keep the shared nav styling
+  // (gold link color) applied to them too.
+  openAccess?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -60,12 +64,14 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: 'nav.fundTransparency',
     route: '/fund-transparency',
     icon: 'chart',
+    openAccess: true,
   },
   // Society roadmap: visible to every authenticated account.
   {
     labelKey: 'nav.roadmap',
     route: '/roadmap',
     icon: 'map',
+    openAccess: true,
   },
   { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
   // Published notices/events - the same public pages logged-out visitors read.
