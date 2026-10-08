@@ -1,0 +1,1624 @@
+admin.auditLog.details.close	বন্ধ করুন	Close
+admin.auditLog.details.title	এন্ট্রির বিস্তারিত	Entry Details
+admin.auditLog.details.view	বিস্তারিত	Details
+admin.auditLog.errors.loadFailed	অডিট লগ লোড করা যায়নি।	Could not load the audit log.
+admin.auditLog.filters.action	কার্যক্রম	Action
+admin.auditLog.filters.actor	প্রশাসক	Admin
+admin.auditLog.filters.all	সব	All
+admin.auditLog.filters.dateFrom	শুরুর তারিখ	From date
+admin.auditLog.filters.dateTo	শেষের তারিখ	To date
+admin.auditLog.filters.entityType	সত্তার ধরন	Entity type
+admin.auditLog.noEntries	এখনো কোনো অডিট লগ এন্ট্রি নেই।	No audit log entries yet.
+admin.auditLog.noEntriesMatch	এই ফিল্টারে কোনো এন্ট্রি মেলেনি।	No entries match the selected filters.
+admin.auditLog.pagination.next	পরবর্তী	Next
+admin.auditLog.pagination.pageSize	প্রতি পৃষ্ঠায়	Per page
+admin.auditLog.pagination.prev	পূর্ববর্তী	Previous
+admin.auditLog.pagination.range	{{from}}–{{to}} / {{total}}	{{from}}–{{to}} of {{total}}
+admin.auditLog.subtitle	কে কখন কী অনুমোদন, প্রত্যাখ্যান বা পরিবর্তন করেছেন	Who approved, rejected, or changed what, and when
+admin.auditLog.table.action	কার্যক্রম	Action
+admin.auditLog.table.actor	প্রশাসক	Admin
+admin.auditLog.table.detail	বিস্তারিত	Detail
+admin.auditLog.table.entity	সত্তা	Entity
+admin.auditLog.table.time	সময়	Time
+admin.auditLog.title	অডিট লগ	Audit Log
+admin.configLists.actions.cancel	বাতিল করুন	Cancel
+admin.configLists.actions.editLabel	লেবেল সম্পাদনা করুন	Edit label
+admin.configLists.actions.moveDown	নিচে সরান	Move down
+admin.configLists.actions.moveUp	উপরে সরান	Move up
+admin.configLists.actions.save	সংরক্ষণ করুন	Save
+admin.configLists.activate	সক্রিয় করুন	Activate
+admin.configLists.active	সক্রিয়	Active
+admin.configLists.addItem	নতুন আইটেম যোগ করুন	Add New Item
+admin.configLists.categories.document_type	দলিলের ধরন	Document Types
+admin.configLists.categories.event_category	ইভেন্ট বিভাগ	Event Categories
+admin.configLists.categories.finance_expense_category	ব্যয়ের খাত (ফান্ড)	Fund expense categories
+admin.configLists.categories.finance_income_category	আয়ের খাত (ফান্ড)	Fund income categories
+admin.configLists.categories.notice_category	নোটিশ বিভাগ	Notice Categories
+admin.configLists.categories.payment_account	পেমেন্ট অ্যাকাউন্ট (মান = মাধ্যম, লেবেল = অ্যাকাউন্ট বিবরণ)	Payment accounts (value = method, label = account details)
+admin.configLists.categories.property_type	সম্পত্তির ধরন	Property Types
+admin.configLists.deactivate	নিষ্ক্রিয় করুন	Deactivate
+admin.configLists.errors.loadFailed	কনফিগ তালিকা আইটেম লোড করা যায়নি।	Could not load config list items.
+admin.configLists.errors.saveFailed	পরিবর্তন সংরক্ষণ করা যায়নি।	Could not save the change.
+admin.configLists.form.label	লেবেল (ঐচ্ছিক)	Label (optional)
+admin.configLists.form.submit	আইটেম যোগ করুন	Add Item
+admin.configLists.form.value	মান	Value
+admin.configLists.inactive	নিষ্ক্রিয়	Inactive
+admin.configLists.noItems	এই বিভাগে এখনো কোনো আইটেম নেই।	No items in this category yet.
+admin.configLists.subtitle	নিবন্ধন ফর্ম ও অন্যান্য স্ক্রিনে ব্যবহৃত অপশন তালিকা পরিচালনা করুন	Manage option lists used across the registration form and other screens
+admin.configLists.table.actions	অ্যাকশন	Actions
+admin.configLists.table.label	লেবেল	Label
+admin.configLists.table.status	অবস্থা	Status
+admin.configLists.table.value	মান	Value
+admin.configLists.title	কনফিগ তালিকা	Config Lists
+admin.dashboard.costs.outstanding	সদস্যদের বকেয়া	Outstanding member dues
+admin.dashboard.costs.quarterTotal	এই ত্রৈমাসিকের মোট	This quarter's total
+admin.dashboard.costs.title	এই ত্রৈমাসিকের সোসাইটি খরচ	Society costs this quarter
+admin.dashboard.costs.viewAll	সব খরচ দেখুন	View all costs
+admin.dashboard.detailsLink	বিস্তারিত	Details
+admin.dashboard.errors.loadFailed	আবেদনের তালিকা লোড করা যায়নি।	Could not load application list.
+admin.dashboard.finance.balance	বর্তমান ব্যালেন্স	Current balance
+admin.dashboard.finance.monthNet	এই মাসের নিট	This month's net
+admin.dashboard.finance.pending	অনুমোদনের অপেক্ষায়	Pending approvals
+admin.dashboard.finance.title	ফান্ড স্বচ্ছতা	Fund Transparency
+admin.dashboard.finance.viewAll	সব দেখুন	View all
+admin.dashboard.noPending	কোনো বিচারাধীন আবেদন নেই	No pending applications
+admin.dashboard.pendingTitle	বিচারাধীন আবেদন	Pending Applications
+admin.dashboard.propertiesUnit	টি	
+admin.dashboard.subtitle	নতুন সদস্যপদের আবেদনসমূহ পর্যালোচনা করুন	Review new membership applications
+admin.dashboard.tableHeaders.applicant	আবেদনকারী	Applicant
+admin.dashboard.tableHeaders.mobile	মোবাইল	Mobile
+admin.dashboard.tableHeaders.properties	সম্পত্তি	Properties
+admin.dashboard.tableHeaders.reference	রেফারেন্স	Reference
+admin.dashboard.tableHeaders.submittedDate	জমার তারিখ	Submitted Date
+admin.events.create	নতুন অনুষ্ঠান	New Event
+admin.events.createFirst	আপনার প্রথম অনুষ্ঠান তৈরি করুন	Create your first event
+admin.events.deleteModal.confirmLabel	মুছুন	Delete
+admin.events.deleteModal.messageSuffix	স্থায়ীভাবে মুছে ফেলা হবে।	will be permanently deleted.
+admin.events.deleteModal.title	অনুষ্ঠান মুছুন	Delete event
+admin.events.emptyHelper	প্রকাশিত ও খসড়া অনুষ্ঠান এখানে দেখা যাবে।	Published and draft events will appear here.
+admin.events.errors.deleteFailed	অনুষ্ঠান মুছা যায়নি।	Could not delete the event.
+admin.events.errors.loadFailed	অনুষ্ঠান লোড করা যায়নি।	Could not load events.
+admin.events.errors.saveFailed	অনুষ্ঠান সংরক্ষণ করা যায়নি।	Could not save the event.
+admin.events.filters.all	সব	All
+admin.events.filters.allCategories	সব ক্যাটাগরি	All categories
+admin.events.filters.category	ক্যাটাগরি ফিল্টার	Category filter
+admin.events.filters.draft	খসড়া	Drafts
+admin.events.filters.published	প্রকাশিত	Published
+admin.events.form.category	ক্যাটাগরি	Category
+admin.events.form.create	তৈরি করুন	Create
+admin.events.form.createTitle	নতুন অনুষ্ঠান	New event
+admin.events.form.description	বিবরণ	Description
+admin.events.form.editTitle	অনুষ্ঠান সম্পাদনা	Edit event
+admin.events.form.endAt	শেষ	Ends
+admin.events.form.endBeforeStart	শেষ সময় শুরুর সময়ের পরে হতে হবে।	End must be after the start time.
+admin.events.form.location	স্থান	Location
+admin.events.form.membersOnly	শুধু সদস্যদের জন্য (সর্বসাধারণের তালিকায় দেখা যাবে না)	Members only (hidden from the public feed)
+admin.events.form.noCategory	ক্যাটাগরি নেই	No category
+admin.events.form.published	প্রকাশিত	Published
+admin.events.form.startAt	শুরু	Starts
+admin.events.form.startAtRequired	শুরুর তারিখ ও সময় আবশ্যক।	Start date and time are required.
+admin.events.form.title	শিরোনাম	Title
+admin.events.membersOnlyBadge	শুধু সদস্যদের জন্য	Members only
+admin.events.noItems	এখনো কোনো অনুষ্ঠান নেই।	No events yet.
+admin.events.publish	প্রকাশ করুন	Publish
+admin.events.status.draft	খসড়া	Draft
+admin.events.status.published	প্রকাশিত	Published
+admin.events.subtitle	পরিষদের অনুষ্ঠান তালিকা তৈরি ও প্রকাশ করুন	Schedule the council's programme and publish it
+admin.events.table.category	ক্যাটাগরি	Category
+admin.events.table.location	স্থান	Location
+admin.events.table.status	অবস্থা	Status
+admin.events.table.title	শিরোনাম	Title
+admin.events.table.until	পর্যন্ত	until
+admin.events.table.when	সময়	When
+admin.events.title	অনুষ্ঠান	Events
+admin.events.unpublish	প্রকাশ বন্ধ করুন	Unpublish
+admin.feeSettings.active	সক্রিয়	Active
+admin.feeSettings.addVersion	নতুন ভার্সন যোগ করুন	Add New Version
+admin.feeSettings.calculator.fee	মাসিক ফি	Monthly Fee
+admin.feeSettings.calculator.landSize	জমির আয়তন (ডেসিমেল)	Land Size (decimal)
+admin.feeSettings.calculator.title	ফি ক্যালকুলেটর	Fee Calculator
+admin.feeSettings.confirmMessage	বর্তমান ভার্সন আজ থেকে নিষ্ক্রিয় হবে। নতুন ভার্সন সংরক্ষণ করতে চান?	The current version will be deactivated from today. Save the new version?
+admin.feeSettings.confirmTitle	নতুন ভার্সন নিশ্চিত করুন	Confirm New Version
+admin.feeSettings.errors.loadFailed	ফি সেটিংস লোড করা যায়নি।	Could not load fee settings.
+admin.feeSettings.errors.loadHistoryFailed	ফি সেটিংসের ইতিহাস লোড করা যায়নি।	Could not load fee setting history.
+admin.feeSettings.errors.saveFailed	নতুন ফি সেটিংস ভার্সন সংরক্ষণ করা যায়নি।	Could not save the new fee setting version.
+admin.feeSettings.form.additionalRate	প্রতি অতিরিক্ত ডেসিমেলে হার	Additional Rate per Decimal
+admin.feeSettings.form.additionalRateHint	প্রতিটি অতিরিক্ত ডেসিমেল, অথবা ডেসিমেলের অংশ, সম্পূর্ণ হিসেবে চার্জ করা হয়।	Each additional decimal, or part of a decimal, is charged in full.
+admin.feeSettings.form.baseAmount	বেস পরিমাণ	Base Amount
+admin.feeSettings.form.baseThreshold	বেস থ্রেশহোল্ড (ডেসিমেল)	Base Threshold (decimals)
+admin.feeSettings.form.key	ফি	Fee
+admin.feeSettings.form.startDate	শুরুর তারিখ (ঐচ্ছিক)	Start Date (optional)
+admin.feeSettings.form.startDateHint	খালি রাখলে আজ থেকে কার্যকর	Leave empty to take effect from today
+admin.feeSettings.form.submit	সংরক্ষণ করুন	Save
+admin.feeSettings.form.unit	একক	Unit
+admin.feeSettings.form.value	মান	Value
+admin.feeSettings.hideHistory	ইতিহাস লুকান	Hide History
+admin.feeSettings.inactive	নিষ্ক্রিয়	Inactive
+admin.feeSettings.keys.admission_fee	ভর্তি ফি	Admission Fee
+admin.feeSettings.keys.monthly_subscription	মাসিক চাঁদা হার	Monthly Subscription Rate
+admin.feeSettings.keys.monthly_subscription_additional_rate	মাসিক চাঁদা অতিরিক্ত হার	Monthly Subscription Additional Rate
+admin.feeSettings.keys.monthly_subscription_base_amount	মাসিক চাঁদা বেস পরিমাণ	Monthly Subscription Base Amount
+admin.feeSettings.keys.monthly_subscription_base_threshold	মাসিক চাঁদা বেস থ্রেশহোল্ড	Monthly Subscription Base Threshold
+admin.feeSettings.keys.picnic_additional_head_fee	পিকনিক ফি - অতিরিক্ত প্রধান	Picnic Fee - Additional Head
+admin.feeSettings.keys.picnic_head_fee	পিকনিক ফি - সদস্য প্রধান	Picnic Fee - Member Head
+admin.feeSettings.noSettings	এখনো কোনো ফি সেটিংস কনফিগার করা হয়নি।	No fee settings configured yet.
+admin.feeSettings.picnicNotConfigured	পিকনিক ফি এখনও সম্পূর্ণভাবে নির্ধারিত হয়নি - উভয় পিকনিক রেটের সক্রিয় সংস্করণ না থাকলে সদস্যরা পেমেন্ট করতে পারবেন না।	Picnic fee is not configured yet - members cannot pay until both picnic rates have an active version.
+admin.feeSettings.subtitle	কার্যকর তারিখের পরিসরসহ ফি হারের সংস্করণ পরিচালনা করুন	Manage versioned fee rates with effective date ranges
+admin.feeSettings.table.endDate	শেষের তারিখ	End Date
+admin.feeSettings.table.key	কী	Key
+admin.feeSettings.table.startDate	শুরুর তারিখ	Start Date
+admin.feeSettings.table.status	অবস্থা	Status
+admin.feeSettings.table.unit	একক	Unit
+admin.feeSettings.table.value	মান	Value
+admin.feeSettings.tieredSummary	প্রথম {{threshold}} ডেসিমেল পর্যন্ত {{base}} টাকা + প্রতি অতিরিক্ত ডেসিমেলে {{rate}} টাকা (আংশিক ডেসিমেলও পূর্ণ ধরা হয়)	{{base}} Taka up to {{threshold}} decimal + {{rate}} Taka for each additional decimal (a partial decimal counts as a full one)
+admin.feeSettings.title	ফি সেটিংস	Fee Settings
+admin.feeSettings.units.percent	%	%
+admin.feeSettings.units.taka	টাকা	Taka
+admin.feeSettings.viewHistory	ইতিহাস দেখুন	View History
+admin.financeManagement.actions.approve	অনুমোদন	Approve
+admin.financeManagement.actions.reject	বাতিল	Reject
+admin.financeManagement.actions.reverse	রিভার্সাল	Reverse
+admin.financeManagement.actions.saveDraft	ড্রাফট সেভ	Save draft
+admin.financeManagement.actions.savePending	সেভ ও অনুমোদনে পাঠান	Save & submit
+admin.financeManagement.actions.submit	অনুমোদনে পাঠান	Submit for approval
+admin.financeManagement.create	নতুন লেনদেন	New transaction
+admin.financeManagement.createTitle	নতুন লেনদেন যোগ করুন	Add a transaction
+admin.financeManagement.editTitle	লেনদেন সম্পাদনা	Edit transaction
+admin.financeManagement.errors.actionFailed	কাজটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।	The action failed. Please retry.
+admin.financeManagement.errors.amountRequired	শূন্যের বেশি পরিমাণ দিন।	Enter an amount greater than zero.
+admin.financeManagement.errors.attachmentFailed	সংযুক্তি আপলোড করা যায়নি।	Attachment upload failed.
+admin.financeManagement.errors.categoryAddFailed	নতুন খাত যোগ করা যায়নি।	Could not add the category.
+admin.financeManagement.errors.categoryRequired	খাত নির্বাচন করুন।	Select a category.
+admin.financeManagement.errors.dateRequired	তারিখ দিন।	Pick a date.
+admin.financeManagement.errors.descriptionRequired	বিবরণ দিন।	Enter a description.
+admin.financeManagement.errors.loadFailed	তালিকা লোড করা যায়নি। আবার চেষ্টা করুন।	Could not load the list. Please retry.
+admin.financeManagement.errors.reasonRequired	কারণ লেখা আবশ্যক।	A reason is required.
+admin.financeManagement.errors.saveFailed	সেভ করা যায়নি। আবার চেষ্টা করুন।	Could not save. Please retry.
+admin.financeManagement.filters.allCategories	সব খাত	All categories
+admin.financeManagement.filters.allTypes	সব ধরন	All types
+admin.financeManagement.filters.category	খাত	Category
+admin.financeManagement.filters.reset	রিসেট	Reset
+admin.financeManagement.filters.search	বিবরণ/রেফারেন্স খুঁজুন…	Search description/reference…
+admin.financeManagement.filters.type	ধরন	Type
+admin.financeManagement.form.addCategory	নতুন খাত যোগ করুন (Enter)	Add new category (Enter)
+admin.financeManagement.form.amount	পরিমাণ	Amount
+admin.financeManagement.form.attachment	সংযুক্তি (ছবি/PDF)	Attachment (image/PDF)
+admin.financeManagement.form.category	খাত	Category
+admin.financeManagement.form.categoryNoMatch	মিলে যাওয়া কোনো খাত নেই	No matching category
+admin.financeManagement.form.categorySearch	খাত খুঁজুন বা লিখুন…	Search or type a category…
+admin.financeManagement.form.date	তারিখ	Date
+admin.financeManagement.form.description	বিবরণ	Description
+admin.financeManagement.form.internalNotes	অভ্যন্তরীণ নোট	Internal notes
+admin.financeManagement.form.internalNotesHint	মেম্বাররা এই নোট দেখতে পাবে না।	Members never see these notes.
+admin.financeManagement.form.reference	রেফারেন্স নম্বর	Reference no.
+admin.financeManagement.form.referenceAuto	খালি রাখলে স্বয়ংক্রিয়ভাবে তৈরি হবে	Leave empty to auto-generate
+admin.financeManagement.form.referenceHint	FT-…	FT-…
+admin.financeManagement.form.type	ধরন	Type
+admin.financeManagement.ledger.amount	পরিমাণ	Amount
+admin.financeManagement.ledger.approvedBy	অনুমোদনকারী	Approved by
+admin.financeManagement.ledger.category	খাত	Category
+admin.financeManagement.ledger.count	মোট {{count}}টি লেনদেন	{{count}} transactions
+admin.financeManagement.ledger.createdBy	তৈরি করেছেন	Created by
+admin.financeManagement.ledger.date	তারিখ	Date
+admin.financeManagement.ledger.description	বিবরণ	Description
+admin.financeManagement.ledger.editWindowClosed	অনুমোদনের ৭ দিন পর সরাসরি সম্পাদনা বন্ধ — সংশোধনের জন্য রিভার্সাল তৈরি করুন।	Direct edits close 7 days after approval — create a reversal to correct it.
+admin.financeManagement.ledger.empty	কোনো লেনদেন নেই	No transactions
+admin.financeManagement.ledger.emptyHint	'নতুন লেনদেন' বাটন থেকে প্রথম এন্ট্রি যোগ করুন।	Add the first entry with 'New transaction'.
+admin.financeManagement.ledger.internalNotes	অভ্যন্তরীণ নোট (শুধু কমিটি দেখে)	Internal notes (committee only)
+admin.financeManagement.ledger.linkedPayment	সংযুক্ত পেমেন্ট	Linked payment
+admin.financeManagement.ledger.page	পৃষ্ঠা {{page}} / {{total}}	Page {{page}} of {{total}}
+admin.financeManagement.ledger.reference	রেফারেন্স	Reference
+admin.financeManagement.ledger.rejectionReason	বাতিলের কারণ	Rejection reason
+admin.financeManagement.ledger.reversalOf	রিভার্সাল হয়েছে লেনদেন	Reversal of transaction
+admin.financeManagement.ledger.status	অবস্থা	Status
+admin.financeManagement.ledger.type	ধরন	Type
+admin.financeManagement.ledger.viewAttachment	সংযুক্তি দেখুন	View attachment
+admin.financeManagement.modals.approve.confirm	অনুমোদন করুন	Approve
+admin.financeManagement.modals.approve.title	লেনদেন অনুমোদন	Approve transaction
+admin.financeManagement.modals.approve.twoPerson	যিনি এন্ট্রি তৈরি করেছেন তিনি নিজে অনুমোদন করতে পারবেন না — অন্য কমিটি সদস্য অনুমোদন করবেন।	Two-person control: the creator cannot approve their own entry — another committee member approves.
+admin.financeManagement.modals.delete.confirm	মুছুন	Delete
+admin.financeManagement.modals.delete.reason	মুছে ফেলার কারণ (অডিটে থাকবে)	Reason (kept in the audit log)
+admin.financeManagement.modals.delete.title	লেনদেন মুছুন	Delete transaction
+admin.financeManagement.modals.reject.confirm	বাতিল করুন	Reject
+admin.financeManagement.modals.reject.reason	বাতিলের কারণ	Rejection reason
+admin.financeManagement.modals.reject.title	লেনদেন বাতিল	Reject transaction
+admin.financeManagement.modals.reverse.confirm	রিভার্সাল তৈরি করুন	Create reversal
+admin.financeManagement.modals.reverse.reason	সংশোধনের কারণ	Correction reason
+admin.financeManagement.modals.reverse.title	রিভার্সাল (সংশোধন এন্ট্রি)	Reversal (correction entry)
+admin.financeManagement.notice.all	সর্বমোট	All time
+admin.financeManagement.notice.done	নোটিশ প্রকাশিত হয়েছে ✓	Notice published ✓
+admin.financeManagement.notice.month	এই মাস	This month
+admin.financeManagement.notice.period	রিপোর্টের সময়কাল	Report period
+admin.financeManagement.notice.publish	রিপোর্ট নোটিশ প্রকাশ	Publish report notice
+admin.financeManagement.notice.year	এই বছর	This year
+admin.financeManagement.overview.balance	বর্তমান ব্যালেন্স	Current balance
+admin.financeManagement.overview.monthNet	এই মাসের নিট	This month's net
+admin.financeManagement.overview.noRecent	এখনো কোনো লেনদেন নেই।	No transactions yet.
+admin.financeManagement.overview.pending	অনুমোদনের অপেক্ষায়	Pending approvals
+admin.financeManagement.overview.recent	সর্বশেষ ৫টি লেনদেন	Last 5 transactions
+admin.financeManagement.paymentLink.allSources	সব সোর্স	All sources
+admin.financeManagement.paymentLink.alreadyLinked	বর্তমানে সংযুক্ত: {{source}} #{{id}}	Currently linked: {{source}} #{{id}}
+admin.financeManagement.paymentLink.empty	এই ফিল্টারে লিংক করার মতো কোনো পেমেন্ট নেই।	No unlinked payments match this filter.
+admin.financeManagement.paymentLink.searchPlaceholder	মেম্বারের নাম খুঁজুন…	Search member name…
+admin.financeManagement.paymentLink.title	পেমেন্ট রেকর্ডের সাথে লিংক করুন (ডাবল এন্ট্রি এড়াতে)	Link an existing payment (avoids double counting)
+admin.financeManagement.source.cost_share	খরচের কিস্তি	Cost share
+admin.financeManagement.source.installment	মাসিক চাঁদা	Monthly subscription
+admin.financeManagement.source.picnic_payment	পিকনিক ফি	Picnic fee
+admin.financeManagement.status.all	সব	All
+admin.financeManagement.status.approved	অনুমোদিত	Approved
+admin.financeManagement.status.draft	ড্রাফট	Draft
+admin.financeManagement.status.pending	অপেক্ষমাণ	Pending
+admin.financeManagement.status.rejected	বাতিল	Rejected
+admin.financeManagement.subtitle	ফান্ডের আয়-ব্যয়ের লেনদেন যোগ, সম্পাদনা ও অনুমোদন করুন	Record, edit and approve fund transactions
+admin.financeManagement.title	আর্থিক ব্যবস্থাপনা	Finance Management
+admin.financeManagement.type.expense	ব্যয়	Expense
+admin.financeManagement.type.income	আয়	Income
+admin.installments.errors.loadInstallmentsFailed	কিস্তির তথ্য লোড করা যায়নি।	Could not load installment data.
+admin.installments.errors.loadMembersFailed	সদস্য তালিকা লোড করা যায়নি।	Could not load member list.
+admin.installments.errors.markPaidFailed	কিস্তি পরিশোধিত হিসেবে চিহ্নিত করা যায়নি।	Could not mark installment as paid.
+admin.installments.markPaidButton	পরিশোধিত হিসেবে চিহ্নিত করুন	Mark as Paid
+admin.installments.months.april	এপ্রিল	April
+admin.installments.months.august	আগস্ট	August
+admin.installments.months.december	ডিসেম্বর	December
+admin.installments.months.february	ফেব্রুয়ারি	February
+admin.installments.months.january	জানুয়ারি	January
+admin.installments.months.july	জুলাই	July
+admin.installments.months.june	জুন	June
+admin.installments.months.march	মার্চ	March
+admin.installments.months.may	মে	May
+admin.installments.months.november	নভেম্বর	November
+admin.installments.months.october	অক্টোবর	October
+admin.installments.months.september	সেপ্টেম্বর	September
+admin.installments.noInstallments	এই সদস্যের কোনো কিস্তি নেই।	This member has no installments.
+admin.installments.noMembers	কোনো সদস্য পাওয়া যায়নি।	No members found.
+admin.installments.paid	পরিশোধিত	Paid
+admin.installments.permissionRequired	অনুমতি প্রয়োজন	Permission required
+admin.installments.selectMember	সদস্য নির্বাচন করুন।	Select a member.
+admin.installments.subtitle	সদস্য নির্বাচন করে মাসিক কিস্তির অবস্থা দেখুন ও হালনাগাদ করুন	Select a member to view and update monthly installment status
+admin.installments.title	চাঁদা ব্যবস্থাপনা	Subscription Management
+admin.memberDetail.close	বন্ধ করুন	Close
+admin.memberDetail.docsNone	কোনো ডকুমেন্ট আপলোড করা হয়নি।	No documents uploaded.
+admin.memberDetail.due	বকেয়া	Due
+admin.memberDetail.f.admissionFee	ভর্তি ফি	Admission fee
+admin.memberDetail.f.amount	পরিমাণ	Amount
+admin.memberDetail.f.approvedBy	পর্যালোচনাকারী	Reviewed by
+admin.memberDetail.f.contribution	চাঁদার অবস্থা	Contribution status
+admin.memberDetail.f.created	তৈরি	Created
+admin.memberDetail.f.dag	দাগ নং (সিএস / আরএস)	Dag no. (CS / RS)
+admin.memberDetail.f.date	তারিখ	Date
+admin.memberDetail.f.dob	জন্ম তারিখ	Date of birth
+admin.memberDetail.f.dueTotal	মোট বকেয়া	Due total
+admin.memberDetail.f.email	ইমেইল	Email
+admin.memberDetail.f.extraHeads	অতিরিক্ত জন	Extra heads
+admin.memberDetail.f.fatherOrHusband	পিতা/স্বামীর নাম	Father's/husband's name
+admin.memberDetail.f.gender	লিঙ্গ	Gender
+admin.memberDetail.f.holding	হোল্ডিং নং	Holding no.
+admin.memberDetail.f.joined	আবেদনের তারিখ	Applied on
+admin.memberDetail.f.khatian	খতিয়ান নং	Khatian no.
+admin.memberDetail.f.landSize	জমির পরিমাণ (শতাংশ)	Land size (decimal)
+admin.memberDetail.f.lastModifiedBy	সর্বশেষ পরিবর্তনকারী	Last modified by
+admin.memberDetail.f.memberId	সদস্য আইডি	Member ID
+admin.memberDetail.f.mobile	মোবাইল	Mobile
+admin.memberDetail.f.month	মাস	Month
+admin.memberDetail.f.monthly	মাসিক চাঁদা	Monthly subscription
+admin.memberDetail.f.mother	মাতার নাম	Mother's name
+admin.memberDetail.f.myShare	আমার অংশ (শতাংশ)	My share (decimal)
+admin.memberDetail.f.name	পূর্ণ নাম	Full name
+admin.memberDetail.f.nid	এনআইডি / জন্মনিবন্ধন	NID / birth certificate
+admin.memberDetail.f.nomineeMobile	মোবাইল	Mobile
+admin.memberDetail.f.nomineeRelation	সম্পর্ক	Relation
+admin.memberDetail.f.occupation	পেশা	Occupation
+admin.memberDetail.f.ownership	মালিকানা	Ownership
+admin.memberDetail.f.paidOn	পরিশোধের তারিখ	Paid on
+admin.memberDetail.f.paidTotal	মোট পরিশোধিত	Paid total
+admin.memberDetail.f.paymentMethod	পরিশোধের মাধ্যম	Payment method
+admin.memberDetail.f.permanentAddress	স্থায়ী ঠিকানা	Permanent address
+admin.memberDetail.f.presentAddress	বর্তমান ঠিকানা	Present address
+admin.memberDetail.f.receiptNo	রশিদ নং	Receipt no.
+admin.memberDetail.f.rejectionReason	বাতিলের কারণ	Rejection reason
+admin.memberDetail.f.reviewedAt	পর্যালোচনার তারিখ	Reviewed on
+admin.memberDetail.f.status	অবস্থা	Status
+admin.memberDetail.f.total	মোট	Total
+admin.memberDetail.f.updated	সর্বশেষ হালনাগাদ	Last updated
+admin.memberDetail.f.urgentContact	জরুরি যোগাযোগ	Emergency contact
+admin.memberDetail.fullyPaid	সম্পূর্ণ পরিশোধিত	Fully Paid
+admin.memberDetail.loadFailed	সদস্যের তথ্য লোড করা যায়নি।	Could not load member details.
+admin.memberDetail.memberPhoto	সদস্যের ছবি	Member photo
+admin.memberDetail.monthsOverdue	মাস বকেয়া	months overdue
+admin.memberDetail.noAudit	কোনো অডিট এন্ট্রি নেই।	No audit entries.
+admin.memberDetail.noInstallments	কোনো কিস্তি নেই।	No installments yet.
+admin.memberDetail.noNominees	কোনো মনোনীত ব্যক্তি নেই।	No nominees.
+admin.memberDetail.noPicnic	কোনো পিকনিক পরিশোধ নেই।	No picnic payments.
+admin.memberDetail.noProperties	কোনো সম্পত্তি নেই।	No properties.
+admin.memberDetail.openInstallments	কিস্তি ব্যবস্থাপনা	Manage installments
+admin.memberDetail.paid	পরিশোধিত	Paid
+admin.memberDetail.receiptPhoto	পেমেন্ট রশিদ	Payment receipt
+admin.memberDetail.retry	আবার চেষ্টা করুন	Retry
+admin.memberDetail.sections.audit	অডিট ট্রেইল	Audit trail
+admin.memberDetail.sections.contact	যোগাযোগ	Contact
+admin.memberDetail.sections.documents	ডকুমেন্ট	Documents
+admin.memberDetail.sections.fees	ফি ও চাঁদা	Fees & subscription
+admin.memberDetail.sections.identity	পরিচয়	Identity
+admin.memberDetail.sections.installments	কিস্তি	Installments
+admin.memberDetail.sections.membership	সদস্যপদের অবস্থা	Membership status
+admin.memberDetail.sections.nominees	মনোনীত ব্যক্তি	Nominees
+admin.memberDetail.sections.picnic	পিকনিক পরিশোধ	Picnic payments
+admin.memberDetail.sections.property	সম্পত্তি	Property
+admin.memberDetail.signature	স্বাক্ষর	Signature
+admin.memberDetail.title	সদস্যের বিস্তারিত	Member Details
+admin.membersList.deleteMemberTitle	সদস্য মুছে ফেলুন	Delete member
+admin.membersList.deleteModal.confirmLabel	মুছে ফেলুন	Delete
+admin.membersList.deleteModal.messageSuffix	এর সদস্য রেকর্ড স্থায়ীভাবে মুছে যাবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।	's member record will be permanently deleted. This action cannot be undone.
+admin.membersList.deleteModal.title	রেকর্ড মুছে ফেলুন?	Delete Record?
+admin.membersList.errors.deleteFailed	সদস্য মুছে ফেলা যায়নি।	Could not delete member.
+admin.membersList.errors.loadFailed	সদস্য তালিকা লোড করা যায়নি।	Could not load member list.
+admin.membersList.errors.resetFailed	পাসওয়ার্ড রিসেট করা যায়নি।	Could not reset the password.
+admin.membersList.fullyPaid	সম্পূর্ণ পরিশোধিত	Fully Paid
+admin.membersList.monthsOverdue	মাস বকেয়া	months overdue
+admin.membersList.noMembers	কোনো সদস্য পাওয়া যায়নি।	No members found.
+admin.membersList.resetModal.confirmLabel	রিসেট ও ইমেইল	Reset & Email
+admin.membersList.resetModal.messageSuffix	এর লগইন পাসওয়ার্ড রিসেট করা হবে এবং নতুন পাসওয়ার্ড সদস্যের নিবন্ধিত ইমেইলে পাঠানো হবে।	's login password will be reset, and the new password will be emailed to the member's registered email address.
+admin.membersList.resetModal.successMessage	পাসওয়ার্ড সফলভাবে রিসেট হয়েছে। নতুন পাসওয়ার্ড {{name}}-এর নিবন্ধিত ইমেইলে পাঠানো হয়েছে।	Password reset successfully. A new password has been emailed to {{name}}'s registered email address.
+admin.membersList.resetModal.successNoEmail	পাসওয়ার্ড রিসেট সফল হয়েছে, তবে ইমেইল পাঠানো যায়নি। অনুগ্রহ করে সরাসরি সদস্যকে নতুন পাসওয়ার্ড জানিয়ে দিন।	Password reset successfully, but the email could not be sent. Please share the new password with the member directly.
+admin.membersList.resetModal.title	পাসওয়ার্ড রিসেট করবেন?	Reset Password?
+admin.membersList.resetPasswordTitle	পাসওয়ার্ড রিসেট করে নতুন তথ্য ইমেইল করুন	Reset password and email new credentials
+admin.membersList.subtitle	সদস্যদের তথ্য ও চাঁদার অবস্থা দেখুন	View members' information and subscription status
+admin.membersList.tableHeaders.actions	কার্যক্রম	Actions
+admin.membersList.tableHeaders.contributionStatus	চাঁদার অবস্থা	Contribution Status
+admin.membersList.tableHeaders.memberId	সদস্য আইডি	Member ID
+admin.membersList.tableHeaders.mobile	মোবাইল	Mobile
+admin.membersList.tableHeaders.name	নাম	Name
+admin.membersList.tableHeaders.status	অবস্থা	Status
+admin.membersList.title	সকল সদস্য	All Members
+admin.membersList.viewContributionsTitle	চাঁদার অবস্থা দেখুন	View contribution status
+admin.membersList.viewDetailsTitle	সদস্যের বিস্তারিত দেখুন	View member details
+admin.notices.create	নতুন নোটিশ	New Notice
+admin.notices.createFirst	আপনার প্রথম নোটিশ তৈরি করুন	Create your first notice
+admin.notices.deleteModal.confirmLabel	মুছুন	Delete
+admin.notices.deleteModal.messageSuffix	স্থায়ীভাবে মুছে ফেলা হবে।	will be permanently deleted.
+admin.notices.deleteModal.title	নোটিশ মুছুন	Delete notice
+admin.notices.emptyHelper	প্রকাশিত ও খসড়া নোটিশ এখানে দেখা যাবে।	Published and draft notices will appear here.
+admin.notices.errors.deleteFailed	নোটিশ মুছা যায়নি।	Could not delete the notice.
+admin.notices.errors.loadFailed	নোটিশ লোড করা যায়নি।	Could not load notices.
+admin.notices.errors.saveFailed	নোটিশ সংরক্ষণ করা যায়নি।	Could not save the notice.
+admin.notices.filters.all	সব	All
+admin.notices.filters.allCategories	সব ক্যাটাগরি	All categories
+admin.notices.filters.category	ক্যাটাগরি ফিল্টার	Category filter
+admin.notices.filters.draft	খসড়া	Drafts
+admin.notices.filters.published	প্রকাশিত	Published
+admin.notices.form.body	বিস্তারিত	Body
+admin.notices.form.category	ক্যাটাগরি	Category
+admin.notices.form.create	তৈরি করুন	Create
+admin.notices.form.createTitle	নতুন নোটিশ	New notice
+admin.notices.form.editTitle	নোটিশ সম্পাদনা	Edit notice
+admin.notices.form.membersOnly	শুধু সদস্যদের জন্য (সর্বসাধারণের তালিকায় দেখা যাবে না)	Members only (hidden from the public feed)
+admin.notices.form.noCategory	ক্যাটাগরি নেই	No category
+admin.notices.form.publishAt	প্রকাশের সময়	Publish at
+admin.notices.form.publishAtHint	ঐচ্ছিক। নির্ধারিত সময় না আসা পর্যন্ত সময়নির্ধারিত নোটিশ লুকানো থাকে।	Optional. A scheduled notice stays hidden until this time passes.
+admin.notices.form.publishAtPast	প্রকাশের তারিখ/সময় অতীতে হতে পারবে না।	Publish date/time cannot be in the past.
+admin.notices.form.published	প্রকাশিত	Published
+admin.notices.form.title	শিরোনাম	Title
+admin.notices.membersOnlyBadge	শুধু সদস্যদের জন্য	Members only
+admin.notices.noItems	এখনো কোনো নোটিশ নেই।	No notices yet.
+admin.notices.publish	প্রকাশ করুন	Publish
+admin.notices.status.draft	খসড়া	Draft
+admin.notices.status.published	প্রকাশিত	Published
+admin.notices.status.scheduled	সময়নির্ধারিত	Scheduled
+admin.notices.subtitle	সদস্য ও দর্শকদের জন্য নোটিশ লিখে প্রকাশ করুন	Write and publish bulletins to members and visitors
+admin.notices.table.category	ক্যাটাগরি	Category
+admin.notices.table.publishAt	প্রকাশের সময়	Publish at
+admin.notices.table.status	অবস্থা	Status
+admin.notices.table.title	শিরোনাম	Title
+admin.notices.title	নোটিশ	Notices
+admin.notices.unpublish	প্রকাশ বন্ধ করুন	Unpublish
+admin.paymentVerifications.actionError	কাজটি ব্যর্থ হয়েছে। আবার চেষ্টা করুন।	Action failed. Please try again.
+admin.paymentVerifications.approve	অনুমোদন	Approve
+admin.paymentVerifications.cancel	বাতিল করুন	Cancel
+admin.paymentVerifications.empty	কিছু নেই — সব যাচাই সম্পন্ন।	Nothing here — all caught up.
+admin.paymentVerifications.loadError	পরিশোধ তালিকা লোড করা যায়নি।	Failed to load payments.
+admin.paymentVerifications.method	মাধ্যম	Method
+admin.paymentVerifications.paidOn	পরিশোধের তারিখ	Paid on
+admin.paymentVerifications.reason	সদস্যকে দেখানো কারণ	Reason shown to the member
+admin.paymentVerifications.reasonPlaceholder	যেমন bKash স্টেটমেন্টে ট্রানজেকশন আইডি পাওয়া যায়নি	e.g. Transaction ID not found in bKash statement
+admin.paymentVerifications.reference	ট্রানজেকশন আইডি	Transaction ID
+admin.paymentVerifications.reject	বাতিল	Reject
+admin.paymentVerifications.rejectTitle	পরিশোধ বাতিল	Reject payment
+admin.paymentVerifications.sender	প্রেরক	Paid from
+admin.paymentVerifications.subtitle	সদস্যদের জমা দেওয়া চাঁদা পরিশোধ অ্যাকাউন্ট স্টেটমেন্টের সাথে মিলিয়ে যাচাই করুন।	Verify installment payments submitted by members against your account statement.
+admin.paymentVerifications.title	পেমেন্ট যাচাই	Payment Verifications
+admin.paymentVerifications.viewProof	রসিদ দেখুন	View receipt
+admin.picnicPayments.apply	প্রয়োগ করুন	Apply
+admin.picnicPayments.count	পরিশোধ সংখ্যা	Payments
+admin.picnicPayments.dateColumn	তারিখ	Date
+admin.picnicPayments.dateFrom	থেকে	From
+admin.picnicPayments.dateRange	তারিখের পরিসর	Date Range
+admin.picnicPayments.dateTo	পর্যন্ত	To
+admin.picnicPayments.emptyState	নির্বাচিত ফিল্টারে কোনো পিকনিক পরিশোধ পাওয়া যায়নি।	No picnic payments found for the selected filters.
+admin.picnicPayments.headsColumn	অতিরিক্ত জন	Additional Heads
+admin.picnicPayments.loadError	পিকনিক পরিশোধ লোড করা যায়নি।	Could not load picnic payments.
+admin.picnicPayments.memberColumn	সদস্য	Member
+admin.picnicPayments.memberFilter	সদস্য আইডি (ঐচ্ছিক)	Member ID (optional)
+admin.picnicPayments.methodColumn	পদ্ধতি	Method
+admin.picnicPayments.receiptColumn	রশিদ নম্বর	Receipt No
+admin.picnicPayments.reset	রিসেট	Reset
+admin.picnicPayments.subtitle	ফিল্টার ও মোট সহ সকল সদস্যের পিকনিক পরিশোধ	All members' picnic payments with filters and totals
+admin.picnicPayments.title	পিকনিক পরিশোধ	Picnic Payments
+admin.picnicPayments.totalCollected	মোট আদায়	Total Collected
+admin.picnicPayments.totalColumn	মোট	Total
+admin.propertyRequests.actions.add	সংযোজন	Add
+admin.propertyRequests.actions.delete	মুছে ফেলা	Delete
+admin.propertyRequests.actions.edit	সংশোধন	Edit
+admin.propertyRequests.approveButton	অনুমোদন	Approve
+admin.propertyRequests.approveModal.confirmLabel	অনুমোদন করুন	Approve
+admin.propertyRequests.approveModal.messageSuffix	সদস্যের তথ্যে প্রয়োগ করা হবে।	will be applied to the member's records.
+admin.propertyRequests.approveModal.title	অনুরোধ অনুমোদন	Approve request
+admin.propertyRequests.cancelButton	বাতিল	Cancel
+admin.propertyRequests.cancelModal.confirmLabel	অনুরোধ বাতিল করুন	Cancel request
+admin.propertyRequests.cancelModal.messageSuffix	বাতিল করা হবে।	will be cancelled.
+admin.propertyRequests.cancelModal.placeholder	বাতিলের কারণ লিখুন...	Enter the reason for cancelling...
+admin.propertyRequests.cancelModal.title	অনুরোধ বাতিল	Cancel request
+admin.propertyRequests.cancelReasonLabel	বাতিলের কারণ	Cancel reason
+admin.propertyRequests.deleteRequestNote	সদস্য এই সম্পত্তিটি মুছে ফেলার অনুরোধ করেছেন।	This member requested deletion of this property.
+admin.propertyRequests.errors.approveFailed	অনুরোধ অনুমোদন করা যায়নি।	Could not approve the request.
+admin.propertyRequests.errors.cancelFailed	অনুরোধ বাতিল করা যায়নি।	Could not cancel the request.
+admin.propertyRequests.errors.loadFailed	তালিকা লোড করা যায়নি।	Could not load list.
+admin.propertyRequests.errors.reasonRequired	বাতিল করতে কারণ দিতে হবে।	A reason is required to cancel.
+admin.propertyRequests.noRequests	কোনো সম্পত্তি সংক্রান্ত অনুরোধ পাওয়া যায়নি	No property requests found
+admin.propertyRequests.statusLabels.all	সব	All
+admin.propertyRequests.statusLabels.approved	অনুমোদিত	Approved
+admin.propertyRequests.statusLabels.cancelled	বাতিল	Cancelled
+admin.propertyRequests.statusLabels.pending	অপেক্ষমাণ	Pending
+admin.propertyRequests.subtitle	সদস্যদের সম্পত্তি সংযোজন, সংশোধন বা মুছে ফেলার অনুরোধ পর্যালোচনা করুন	Review member requests to add, edit, or delete properties
+admin.propertyRequests.tableHeaders.action	কার্য	Action
+admin.propertyRequests.tableHeaders.actions	কার্যক্রম	Actions
+admin.propertyRequests.tableHeaders.date	জমাদান	Submitted
+admin.propertyRequests.tableHeaders.member	সদস্য	Member
+admin.propertyRequests.tableHeaders.property	সম্পত্তি	Property
+admin.propertyRequests.tableHeaders.reference	রেফারেন্স	Reference
+admin.propertyRequests.tableHeaders.status	অবস্থা	Status
+admin.propertyRequests.title	সম্পত্তি সংক্রান্ত অনুরোধ	Property Requests
+admin.roadmap.add	নতুন পরিকল্পনা	New item
+admin.roadmap.addHere	যোগ করুন	Add
+admin.roadmap.archive.all	সব পরিকল্পনা আর্কাইভ করে নতুন চক্র শুরু করুন	Archive everything and start a new cycle
+admin.roadmap.archive.button	চক্র আর্কাইভ	Archive cycle
+admin.roadmap.archive.confirm	আর্কাইভ করুন	Archive
+admin.roadmap.archive.cycleSummary	{{total}}টির মধ্যে {{done}}টি সম্পন্ন	{{done}} of {{total}} done
+admin.roadmap.archive.done	{{n}}টি পরিকল্পনা আর্কাইভ করা হয়েছে।	{{n}} items archived.
+admin.roadmap.archive.empty	এখনো কোনো চক্র আর্কাইভ করা হয়নি।	No cycles archived yet.
+admin.roadmap.archive.history	আর্কাইভ করা চক্র	Archived cycles
+admin.roadmap.archive.message	আর্কাইভ করা পরিকল্পনা সদস্যদের পেজ থেকে সরে যাবে, তবে ইতিহাসে সংরক্ষিত থাকবে।	Archived items leave the member page but stay in the history.
+admin.roadmap.archive.onlyDone	শুধু সম্পন্ন পরিকল্পনা আর্কাইভ করুন (বাকিগুলো নতুন চক্রে থাকবে)	Archive completed items only (the rest carry over)
+admin.roadmap.archive.title	পরিকল্পনা চক্র আর্কাইভ করুন	Archive roadmap cycle
+admin.roadmap.delete.title	এই পরিকল্পনাটি মুছবেন?	Delete this roadmap item?
+admin.roadmap.errors.generic	কাজটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।	The action could not be completed. Please try again.
+admin.roadmap.errors.noteTooLong	নোট সর্বোচ্চ ১০০০ অক্ষর হতে পারে।	The note can be at most 1000 characters.
+admin.roadmap.errors.ownerTooLong	দায়িত্বপ্রাপ্তের নাম সর্বোচ্চ ১২০ অক্ষর হতে পারে।	The responsible person can be at most 120 characters.
+admin.roadmap.errors.textRequired	পরিকল্পনার বিবরণ লিখুন।	Describe the plan.
+admin.roadmap.errors.textTooLong	পরিকল্পনার বিবরণ সর্বোচ্চ ৫০০ অক্ষর হতে পারে।	The plan can be at most 500 characters.
+admin.roadmap.errors.timeframe	একটি সময়সীমা নির্বাচন করুন।	Choose a timeframe.
+admin.roadmap.form.createTitle	নতুন পরিকল্পনা যোগ করুন	Add roadmap item
+admin.roadmap.form.editTitle	পরিকল্পনা সম্পাদনা	Edit roadmap item
+admin.roadmap.form.moveHint	সংরক্ষণ করলে পরিকল্পনাটি নির্বাচিত সময়সীমার শেষে চলে যাবে।	On save the item moves to the end of the selected timeframe.
+admin.roadmap.form.note	হালনাগাদ / নোট (ঐচ্ছিক)	Update / note (optional)
+admin.roadmap.form.notePlaceholder	যেমন: বালু ভরাট শুরু হয়েছে, আশা করা হচ্ছে নভেম্বরের মধ্যে শেষ হবে	e.g. Sand filling has started, expected to finish by November
+admin.roadmap.form.notify	সদস্যদের নোটিশ পাঠান	Notify members
+admin.roadmap.form.owner	দায়িত্বপ্রাপ্ত (ঐচ্ছিক)	Responsible (optional)
+admin.roadmap.form.ownerPlaceholder	যেমন: সাধারণ সম্পাদক	e.g. General Secretary
+admin.roadmap.form.status	অবস্থা	Status
+admin.roadmap.form.targetDate	লক্ষ্য তারিখ (ঐচ্ছিক)	Target date (optional)
+admin.roadmap.form.text	পরিকল্পনা	Plan
+admin.roadmap.form.timeframe	সময়সীমা	Timeframe
+admin.roadmap.moveDown	নিচে সরান	Move down
+admin.roadmap.moveUp	উপরে সরান	Move up
+admin.roadmap.notifyOnDone	সম্পন্ন হলে সদস্যদের নোটিশ পাঠান	Notify members when an item is completed
+admin.roadmap.overall	মোট {{total}}টির মধ্যে {{done}}টি সম্পন্ন	{{done}} of {{total}} done
+admin.roadmap.statusAria	অবস্থা পরিবর্তন	Change status
+admin.roadmap.subtitle	স্বল্প, মধ্য ও দীর্ঘমেয়াদি পরিকল্পনা যোগ, সম্পাদনা ও অগ্রগতি হালনাগাদ করুন। প্রতিটি পরিবর্তন অডিট লগে সংরক্ষিত হয়।	Add, edit and update progress on short, mid and long term plans. Every change is recorded in the audit log.
+admin.roadmap.title	পরিকল্পনা ব্যবস্থাপনা	Roadmap Management
+admin.roadmap.viewAsMember	সদস্যদের ভিউ	Member view
+admin.roleManagement.allPermissionsAlways	সকল অনুমতি — সর্বদা	All Permissions — Always
+admin.roleManagement.createAdmin.emailLabel	ইমেইল	Email
+admin.roleManagement.createAdmin.nameLabel	নাম	Name
+admin.roleManagement.createAdmin.namePlaceholder	পূর্ণ নাম	Full name
+admin.roleManagement.createAdmin.passwordLabel	পাসওয়ার্ড	Password
+admin.roleManagement.createAdmin.passwordPlaceholder	পাসওয়ার্ড	Password
+admin.roleManagement.createAdmin.roleLabel	ভূমিকা	Role
+admin.roleManagement.createAdmin.submitButton	প্রশাসক তৈরি করুন	Create Administrator
+admin.roleManagement.createAdmin.subtitle	ইমেইল ও পাসওয়ার্ড দিয়ে একজন নতুন প্রশাসক অ্যাকাউন্ট তৈরি করুন।	Create a new administrator account with an email and password.
+admin.roleManagement.createAdmin.successPrefix	নতুন প্রশাসক তৈরি হয়েছে:	New administrator created:
+admin.roleManagement.createAdmin.title	নতুন প্রশাসক তৈরি করুন	Create New Administrator
+admin.roleManagement.errors.assignRoleFailed	ভূমিকা নির্ধারণ করা যায়নি।	Could not assign role.
+admin.roleManagement.errors.createUserFailed	নতুন প্রশাসক তৈরি করা যায়নি।	Could not create new administrator.
+admin.roleManagement.errors.loadOverridesFailed	স্বতন্ত্র অনুমতি লোড করা যায়নি।	Could not load individual permissions.
+admin.roleManagement.errors.loadPermissionsFailed	অনুমতি তালিকা লোড করা যায়নি।	Could not load permission list.
+admin.roleManagement.errors.loadRolesFailed	ভূমিকা তালিকা লোড করা যায়নি।	Could not load role list.
+admin.roleManagement.errors.loadUsersFailed	ব্যবহারকারী তালিকা লোড করা যায়নি।	Could not load user list.
+admin.roleManagement.errors.saveChangeFailed	পরিবর্তন সংরক্ষণ করা যায়নি।	Could not save the change.
+admin.roleManagement.errors.saveOverridesFailed	স্বতন্ত্র অনুমতি সংরক্ষণ করা যায়নি।	Could not save individual permissions.
+admin.roleManagement.subtitle	প্রতিটি ভূমিকার জন্য অনুমতি নির্ধারণ করুন	Set permissions for each role
+admin.roleManagement.title	ভূমিকা ও অনুমতি ব্যবস্থাপনা	Role & Permission Management
+admin.roleManagement.userOverrides.actionLabel	কার্যক্রম	Action
+admin.roleManagement.userOverrides.applyButton	প্রয়োগ করুন	Apply
+admin.roleManagement.userOverrides.assignRoleLabel	ভূমিকা নির্ধারণ করুন	Assign Role
+admin.roleManagement.userOverrides.grantOption	অতিরিক্ত গ্রান্ট করুন	Grant Extra
+admin.roleManagement.userOverrides.noOverrides	এই ব্যবহারকারীর জন্য কোনো স্বতন্ত্র অনুমতি নেই।	This user has no individual permissions.
+admin.roleManagement.userOverrides.permissionLabel	অনুমতি	Permission
+admin.roleManagement.userOverrides.revokeOption	প্রত্যাহার করুন	Revoke
+admin.roleManagement.userOverrides.saveRoleButton	ভূমিকা সংরক্ষণ করুন	Save Role
+admin.roleManagement.userOverrides.subtitle	একজন নির্দিষ্ট ব্যবহারকারীর জন্য তার ভূমিকার ডিফল্টের বাইরে গিয়ে অতিরিক্ত অনুমতি দিন বা প্রত্যাহার করুন।	Grant or revoke additional permissions for a specific user, outside their role's defaults.
+admin.roleManagement.userOverrides.title	ব্যবহারকারী-ভিত্তিক ওভাররাইড	User-Specific Overrides
+admin.roleManagement.userOverrides.userLabel	ব্যবহারকারী	User
+admin.societyCosts.create	নতুন খরচ	New Cost
+admin.societyCosts.createTitle	খরচ লিপিবদ্ধ করুন	Record a society cost
+admin.societyCosts.delete.message	খরচ ও তার ভাগ মুছে যাবে। এটি ফিরিয়ে আনা যাবে না।	This will delete the cost and its split. This cannot be undone.
+admin.societyCosts.delete.title	খরচ মুছুন	Delete cost
+admin.societyCosts.edit	সম্পাদনা	Edit
+admin.societyCosts.editTitle	খরচ সম্পাদনা	Edit cost
+admin.societyCosts.emptyState	এখনো কোনো খরচ লিপিবদ্ধ হয়নি	No costs recorded yet
+admin.societyCosts.errors.amountRequired	শূন্যের বেশি পরিমাণ লিখুন।	Enter an amount greater than zero.
+admin.societyCosts.errors.categoryAddFailed	ক্যাটাগরি যোগ করা যায়নি।	Could not add the category.
+admin.societyCosts.errors.dateRequired	খরচের তারিখ দিতে হবে।	The incurred date is required.
+admin.societyCosts.errors.deleteFailed	খরচ মুছা যায়নি। এর বিপক্ষে পেমেন্ট রেকর্ড থাকতে পারে।	Could not delete the cost. It may already have payments recorded.
+admin.societyCosts.errors.loadFailed	সোসাইটি খরচ লোড করা যায়নি। আবার চেষ্টা করুন।	Could not load society costs. Please try again.
+admin.societyCosts.errors.paymentFailed	পেমেন্ট রেকর্ড করা যায়নি। আবার চেষ্টা করুন।	Could not record the payment. Please try again.
+admin.societyCosts.errors.receiptUploadFailed	খরচ সেভ হয়েছে, কিন্তু রসিদ আপলোড ব্যর্থ হয়েছে। সম্পাদনা থেকে আবার চেষ্টা করুন।	The cost was saved, but the receipt upload failed. Try uploading it again from Edit.
+admin.societyCosts.errors.saveFailed	খরচ সেভ করা যায়নি। আবার চেষ্টা করুন।	Could not save the cost. Please try again.
+admin.societyCosts.errors.splitFailed	ভাগ সেভ করা যায়নি। আবার চেষ্টা করুন।	Could not save the split. Please try again.
+admin.societyCosts.errors.splitPreviewFailed	ভাগের প্রিভিউ হিসাব করা যায়নি।	Could not compute the split preview.
+admin.societyCosts.errors.titleRequired	শিরোনাম দিতে হবে।	A title is required.
+admin.societyCosts.exportCsv	CSV এক্সপোর্ট	Export CSV
+admin.societyCosts.filters.all	সব	All
+admin.societyCosts.filters.allCategories	সব ক্যাটাগরি	All categories
+admin.societyCosts.filters.allSources	সব	All sources
+admin.societyCosts.filters.billed	বিলিং অবস্থা	Billing status
+admin.societyCosts.filters.billedOnly	সদস্যদের বিল করা	Billed to members
+admin.societyCosts.filters.category	ক্যাটাগরি	Category
+admin.societyCosts.filters.dateRange	তারিখের পরিসর	Date range
+admin.societyCosts.filters.reset	রিসেট	Reset
+admin.societyCosts.filters.search	খুঁজুন	Search
+admin.societyCosts.filters.searchPlaceholder	শিরোনাম দিয়ে খুঁজুন…	Search by title…
+admin.societyCosts.filters.source	পেমেন্ট সোর্স	Payment source
+admin.societyCosts.filters.unbilledOnly	বিল করা হয়নি	Not billed
+admin.societyCosts.form.addCategory	ক্যাটাগরি যোগ + Enter	Add category + Enter
+admin.societyCosts.form.amount	পরিমাণ (৳)	Amount (৳)
+admin.societyCosts.form.category	ক্যাটাগরি	Category
+admin.societyCosts.form.date	খরচের তারিখ	Incurred date
+admin.societyCosts.form.description	বিবরণ	Description
+admin.societyCosts.form.noCategory	ক্যাটাগরি নেই	No category
+admin.societyCosts.form.notes	নোট	Notes
+admin.societyCosts.form.receipt	রসিদ (ছবি/PDF)	Receipt (image/PDF)
+admin.societyCosts.form.source	পরিশোধ সূত্র	Paid from
+admin.societyCosts.form.title	শিরোনাম	Title
+admin.societyCosts.notBilled	বিল করা হয়নি	Not billed
+admin.societyCosts.payment.amount	এখন পরিশোধিত পরিমাণ (৳)	Amount paid now (৳)
+admin.societyCosts.payment.remaining	বাকি	remaining
+admin.societyCosts.payment.title	পেমেন্ট রেকর্ড করুন	Record payment
+admin.societyCosts.recordPayment	পেমেন্ট রেকর্ড করুন	Record payment
+admin.societyCosts.shareStatus.paid	পরিশোধিত	Paid
+admin.societyCosts.shareStatus.partial	আংশিক	Partial
+admin.societyCosts.shareStatus.unpaid	অনাদায়ী	Unpaid
+admin.societyCosts.source.member_billed	সদস্যদের কাছে বিল	Member billed
+admin.societyCosts.source.society_fund	সোসাইটি ফান্ড	Society fund
+admin.societyCosts.split.confirm	ভাগ নিশ্চিত করুন	Confirm split
+admin.societyCosts.split.method	ভাগ করার পদ্ধতি	Split method
+admin.societyCosts.split.mismatchWarning	পরিমাণগুলো খরচের মোটের সাথে মিলছে না। ঠিক করুন, অথবা এভাবেই সেভ করতে ওভাররাইড নিশ্চিত করুন।	The amounts do not add up to the cost total. Adjust them, or confirm the override to save anyway.
+admin.societyCosts.split.noMembers	ভাগ করার মতো কোনো সক্রিয় সদস্য নেই।	No active members to split across.
+admin.societyCosts.split.override	অমিল সত্ত্বেও সেভ করুন	Save anyway with mismatched total
+admin.societyCosts.split.runningTotal	চলতি মোট	Running total
+admin.societyCosts.split.summaryLine	৳{{total}} সক্রিয় সদস্যদের মধ্যে ভাগ হচ্ছে ({{method}})	Splitting ৳{{total}} across active members ({{method}})
+admin.societyCosts.split.title	খরচ ভাগ করুন	Split cost
+admin.societyCosts.splitAction	ভাগ করুন	Split
+admin.societyCosts.splitMethod.by_land_quantity	জমির পরিমাণ অনুযায়ী	By land quantity
+admin.societyCosts.splitMethod.equal	সমান ভাগ	Equal split
+admin.societyCosts.splitMethod.manual	ম্যানুয়াল	Manual
+admin.societyCosts.subtitle	সোসাইটির প্রতিটি খরচ লিপিবদ্ধ করুন, প্রয়োজনে সদস্যদের মধ্যে ভাগ করুন	Record every society expense, optionally split it among members
+admin.societyCosts.summary.outstanding	সদস্যদের বকেয়া	Outstanding member dues
+admin.societyCosts.summary.societyFund	সোসাইটি ফান্ড থেকে	Paid from society fund
+admin.societyCosts.summary.total	মোট খরচ	Total costs
+admin.societyCosts.table.amount	পরিমাণ	Amount
+admin.societyCosts.table.category	ক্যাটাগরি	Category
+admin.societyCosts.table.date	তারিখ	Date
+admin.societyCosts.table.source	সোর্স	Source
+admin.societyCosts.table.split	ভাগ	Split
+admin.societyCosts.table.title	শিরোনাম	Title
+admin.societyCosts.title	সোসাইটি খরচ	Society Costs
+admin.societyCosts.viewReceipt	রসিদ দেখুন	View receipt
+admin.statusLabels.all	সব	All
+admin.statusLabels.approved	অনুমোদিত	Approved
+admin.statusLabels.pending	বিচারাধীন	Pending
+admin.statusLabels.rejected	প্রত্যাখ্যাত	Rejected
+admin.submissionDetail.alsoEmergency	জরুরি যোগাযোগের সাথে একই	Same as emergency contact
+admin.submissionDetail.alsoNominee	মনোনীতও	Also nominee
+admin.submissionDetail.applicableDocs	প্রযোজ্য দলিল	Applicable Documents
+admin.submissionDetail.approveButton	অনুমোদন করুন	Approve
+admin.submissionDetail.approveModal.confirmLabel	নিশ্চিত করুন ও অনুমোদন করুন	Confirm and Approve
+admin.submissionDetail.approveModal.messageSuffix	কে সদস্য হিসেবে অনুমোদন দিলে স্বয়ংক্রিয়ভাবে একটি সদস্য আইডি ও লগইন তথ্য তৈরি হবে।	will be approved as a member; a member ID and login credentials will be created automatically.
+admin.submissionDetail.approveModal.title	আবেদন অনুমোদন করুন	Approve Application
+admin.submissionDetail.attachments	সংযুক্তি	Attachments
+admin.submissionDetail.call	কল করুন	Call
+admin.submissionDetail.collapse	সংকুচিত করুন	Collapse
+admin.submissionDetail.copied	কপি হয়েছে	Copied
+admin.submissionDetail.copyValue	কপি করুন	Copy value
+admin.submissionDetail.currentAddress	বর্তমান ঠিকানা	Current Address
+admin.submissionDetail.decimalUnit	শতাংশ	decimal
+admin.submissionDetail.download	ডাউনলোড	Download
+admin.submissionDetail.errors.approveFailed	অনুমোদন ব্যর্থ হয়েছে।	Approval failed.
+admin.submissionDetail.errors.downloadFailed	ডাউনলব্যর্থ হয়েছে। ফাইলটি সার্ভারে নেই বা নেটওয়ার্কে সমস্যা হয়েছে।	Download failed. The file may be missing on the server.
+admin.submissionDetail.errors.loadFailed	আবেদনের তথ্য পাওয়া যায়নি।	Could not load application details.
+admin.submissionDetail.errors.reasonRequired	বাতিলের কারণ লিখুন।	Please enter a reason for rejection.
+admin.submissionDetail.errors.rejectEmailFailed	প্রত্যাখ্যাত হয়েছে, কিন্তু ইমেইল পাঠানো যায়নি।	Rejected, but the applicant could not be notified by email.
+admin.submissionDetail.errors.rejectFailed	বাতিল করা ব্যর্থ হয়েছে।	Rejection failed.
+admin.submissionDetail.errors.resendFailed	বিজ্ঞপ্তি আবার পাঠানো যায়নি।	Could not resend the notification.
+admin.submissionDetail.errors.uploadFailed	আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।	Upload failed. Please try again.
+admin.submissionDetail.expand	বিস্তারিত	Expand
+admin.submissionDetail.fieldLabels.address	ঠিকানা	Address
+admin.submissionDetail.fieldLabels.area	পরিমাণ	Area
+admin.submissionDetail.fieldLabels.dagNoCs	দাগ নং (সিএস)	Dag No. (CS)
+admin.submissionDetail.fieldLabels.dagNoRs	দাগ নং (আরএস)	Dag No. (RS)
+admin.submissionDetail.fieldLabels.description	বিবরণ	Description
+admin.submissionDetail.fieldLabels.dob	জন্ম তারিখ	Date of Birth
+admin.submissionDetail.fieldLabels.holdingNumber	হোল্ডিং নং	Holding No.
+admin.submissionDetail.fieldLabels.khatianNo	খতিয়ান নং	Khatian No.
+admin.submissionDetail.fieldLabels.landQuantity	মোট জমির পরিমাণ (শতাংশ)	Total Land Quantity (Decimal)
+admin.submissionDetail.fieldLabels.mobile	মোবাইল	Mobile
+admin.submissionDetail.fieldLabels.myShareQuantity	আমার অংশের পরিমাণ (শতাংশ)	My Share Quantity (Decimal)
+admin.submissionDetail.fieldLabels.name	নাম	Name
+admin.submissionDetail.fieldLabels.nid	NID	NID
+admin.submissionDetail.fieldLabels.ownership	মালিকানা	Ownership
+admin.submissionDetail.fieldLabels.percentage	শতাংশ	Percentage
+admin.submissionDetail.fieldLabels.relation	সম্পর্ক	Relation
+admin.submissionDetail.fieldLabels.type	ধরন	Type
+admin.submissionDetail.fieldLabels.value	মান	Value
+admin.submissionDetail.fields.address	ঠিকানা	Address
+admin.submissionDetail.fields.admissionFee	ভর্তি ফি	Admission Fee
+admin.submissionDetail.fields.district	জেলা	District
+admin.submissionDetail.fields.division	বিভাগ	Division
+admin.submissionDetail.fields.dob	জন্ম তারিখ	Date of Birth
+admin.submissionDetail.fields.email	ইমেইল	Email
+admin.submissionDetail.fields.fatherOrHusband	পিতা/স্বামী	Father/Husband
+admin.submissionDetail.fields.gender	লিঙ্গ	Gender
+admin.submissionDetail.fields.house	বাসা/হোল্ডিং নং	House/Holding No.
+admin.submissionDetail.fields.memberPhoto	সদস্যের ছবি	Member Photo
+admin.submissionDetail.fields.memberSignature	সদস্যের স্বাক্ষর	Member Signature
+admin.submissionDetail.fields.mobile	মোবাইল	Mobile
+admin.submissionDetail.fields.mother	মাতা	Mother
+admin.submissionDetail.fields.name	নাম	Name
+admin.submissionDetail.fields.nationality	জাতীয়তা	Nationality
+admin.submissionDetail.fields.occupation	পেশা	Occupation
+admin.submissionDetail.fields.paymentMethod	পেমেন্ট মাধ্যম	Payment Method
+admin.submissionDetail.fields.postOffice	ডাকঘর	Post Office
+admin.submissionDetail.fields.receiptNo	রশিদ নং	Receipt No.
+admin.submissionDetail.fields.receiptPhoto	রশিদের ছবি	Receipt Photo
+admin.submissionDetail.fields.rejectionReason	বাতিলের কারণ	Rejection Reason
+admin.submissionDetail.fields.relation	সম্পর্ক	Relation
+admin.submissionDetail.fields.road	রাস্তা/গ্রাম	Road/Village
+admin.submissionDetail.fields.status	স্ট্যাটাস	Status
+admin.submissionDetail.fields.subscription	চাঁদা	Subscription
+admin.submissionDetail.fields.upazila	উপজেলা/থানা	Upazila/Thana
+admin.submissionDetail.fileMissing	ফাইলটি সার্ভারে পাওয়া যায়নি। অনুগ্রহ করে আবার আপলোড করুন।	The file is missing on the server. Please upload it again.
+admin.submissionDetail.jointOwnerCountLabel	যৌথ মালিকগণের সংখ্যা	Joint Owner Count
+admin.submissionDetail.noApplicableDocs	কোনো দলিল সংযুক্ত নেই।	No documents attached.
+admin.submissionDetail.noAttachment	সংযুক্ত নেই	Not attached
+admin.submissionDetail.noNominees	কোনো মনোনীত ব্যক্তির তথ্য দেওয়া হয়নি।	No nominee information provided.
+admin.submissionDetail.noProperties	কোনো সম্পত্তির তথ্য দেওয়া হয়নি।	No property information provided.
+admin.submissionDetail.nomineeCardTitle	মনোনীত ব্যক্তি	Nominee
+admin.submissionDetail.nomineeCount	মোট {{count}}জন	{{count}} total
+admin.submissionDetail.nominees	মনোনীত ব্যক্তি	Nominees
+admin.submissionDetail.notNotified	আবেদনকারীকে ইমেইলে জানানো হয়নি।	The applicant has not been notified by email.
+admin.submissionDetail.notProvided	দেওয়া হয়নি	Not provided
+admin.submissionDetail.paymentSummary	পেমেন্ট ও স্ট্যাটাস	Payment & Status
+admin.submissionDetail.permanentAddress	স্থায়ী ঠিকানা	Permanent Address
+admin.submissionDetail.personalInfo	ব্যক্তিগত তথ্য	Personal Information
+admin.submissionDetail.properties	সম্পত্তিসমূহ	Properties
+admin.submissionDetail.propertyCardTitle	সম্পত্তি	Property
+admin.submissionDetail.propertyCount	মোট {{count}}টি	{{count}} total
+admin.submissionDetail.rejectButton	বাতিল করুন	Reject
+admin.submissionDetail.rejectModal.confirmLabel	প্রত্যাখ্যান নিশ্চিত করুন	Confirm Rejection
+admin.submissionDetail.rejectModal.messageSuffix	এর আবেদন প্রত্যাখ্যানের কারণ লিখুন। এটি আবেদনকারীকে জানানো হবে।	's application — enter the reason for rejection. This will be shown to the applicant.
+admin.submissionDetail.rejectModal.placeholder	যেমন: প্রয়োজনীয় দলিল সংযুক্ত নেই...	e.g., required documents are missing...
+admin.submissionDetail.rejectModal.title	আবেদন প্রত্যাখ্যান করুন	Reject Application
+admin.submissionDetail.replaceFile	ফাইল পরিবর্তন করুন	Replace file
+admin.submissionDetail.resendButton	আবার পাঠান	Resend notification
+admin.submissionDetail.roleApplicant	আবেদনকারী	Applicant
+admin.submissionDetail.roleColumn	ভূমিকা	Role
+admin.submissionDetail.roleEmergency	জরুরি	Emergency
+admin.submissionDetail.roleNominee	মনোনীত	Nominee
+admin.submissionDetail.shareTotal	মোট শতাংশ: {{value}}%	Total share: {{value}}%
+admin.submissionDetail.shareWarning	মোট শতাংশ {{value}}% — ১০০% হতে হবে	Total share is {{value}}% — must equal 100%
+admin.submissionDetail.sharedMobileWarning	এই নম্বরটি একাধিক সহ-মালিকের দ্বারা ব্যবহৃত হয়েছে	This number is used by multiple co-owners
+admin.submissionDetail.title	আবেদনের বিস্তারিত	Application Details
+admin.submissionDetail.uploadAgain	আবার আপলোড করুন	Upload again
+admin.submissionDetail.uploading	আপলোড হচ্ছে…	Uploading…
+admin.submissionDetail.urgentContact	জরুরি যোগাযোগ	Emergency Contact
+admin.submissionDetail.view	দেখুন	View
+admin.submissionDetail.viewFile	ফাইল দেখুন	View file
+admin.submissionsList.allOption	সব	All
+admin.submissionsList.detailsLink	বিস্তারিত	Details
+admin.submissionsList.errors.loadFailed	তালিকা লোড করা যায়নি।	Could not load list.
+admin.submissionsList.filterLabel	স্ট্যাটাস অনুযায়ী ফিল্টার	Filter by Status
+admin.submissionsList.noSubmissions	কোনো আবেদন পাওয়া যায়নি	No applications found
+admin.submissionsList.subtitle	নতুন সদস্যপদের আবেদন পর্যালোচনা করুন	Review new membership applications
+admin.submissionsList.tableHeaders.date	তারিখ	Date
+admin.submissionsList.tableHeaders.mobile	মোবাইল	Mobile
+admin.submissionsList.tableHeaders.name	নাম	Name
+admin.submissionsList.tableHeaders.reference	রেফারেন্স	Reference
+admin.submissionsList.tableHeaders.status	স্ট্যাটাস	Status
+admin.submissionsList.title	আবেদনসমূহ	Applications
+auth.forgotPassword.backToLogin	লগইনে ফিরে যান	Back to Login
+auth.forgotPassword.errors.requestFailed	রিসেট অনুরোধ পাঠানো যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।	Could not send the reset request. Please try again.
+auth.forgotPassword.identifierLabel	সদস্য আইডি / ইউজারনেম / ইমেইল	Member ID / Username / Email
+auth.forgotPassword.identifierRequiredError	সদস্য আইডি / ইউজারনেম / ইমেইল প্রয়োজন	Member ID / username / email is required
+auth.forgotPassword.sendingButton	পাঠানো হচ্ছে...	Sending...
+auth.forgotPassword.sentMessage	এই তথ্যের সাথে কোনো অ্যাকাউন্ট থাকলে পাসওয়ার্ড রিসেট লিংক নিবন্ধিত ইমেইলে পাঠানো হয়েছে। অনুগ্রহ করে আপনার ইনবক্স (এবং স্প্যাম ফোল্ডার) দেখুন। লিংকটি ৩০ মিনিট পর্যন্ত কার্যকর থাকবে।	If an account exists for that identifier, a password reset link has been sent to its registered email address. Please check your inbox (and spam folder). The link expires in 30 minutes.
+auth.forgotPassword.submitButton	রিসেট লিংক পাঠান	Send Reset Link
+auth.forgotPassword.subtitle	আপনার সদস্য আইডি, ইউজারনেম বা নিবন্ধিত ইমেইল লিখুন — আমরা পাসওয়ার্ড রিসেট লিংক ইমেইলে পাঠিয়ে দেব।	Enter your member ID, username or registered email address and we will email you a password reset link.
+auth.forgotPassword.title	পাসওয়ার্ড ভুলে গেছেন	Forgot Password
+auth.login.backToHome	হোমে ফিরুন	Back to Home
+auth.login.forgotPasswordLink	পাসওয়ার্ড ভুলে গেছেন?	Forgot password?
+auth.login.hidePassword	পাসওয়ার্ড লুকান	Hide password
+auth.login.identifierLabel	ইউজারনেম / ইমেইল / সদস্য আইডি	Username / Email / Member ID
+auth.login.identifierRequiredError	ইউজারনেম / ইমেইল / সদস্য আইডি আবশ্যক	Username / email / member ID is required
+auth.login.loggingInButton	লগইন হচ্ছে...	Logging in...
+auth.login.loginFailedError	লগইন ব্যর্থ হয়েছে। তথ্য সঠিক নয়।	Login failed. Information is incorrect.
+auth.login.logoAlt	উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি লোগো	Uttar Kaundia Abashon Malik Kalyan Society Logo
+auth.login.notAMemberYet	এখনো সদস্য নন?	Not a member yet?
+auth.login.passwordLabel	পাসওয়ার্ড	Password
+auth.login.passwordRequiredError	পাসওয়ার্ড আবশ্যক	Password is required
+auth.login.registerButton	নতুন সদস্য নিবন্ধন করুন	Register as a New Member
+auth.login.showPassword	পাসওয়ার্ড দেখুন	Show password
+auth.login.submitButton	প্রবেশ করুন	Enter
+auth.login.subtitle	সদস্য অথবা প্রশাসক হিসেবে প্রবেশ করুন	Enter as a member or administrator
+auth.login.title	লগইন করুন	Log In
+auth.resetPassword.confirmPasswordLabel	নতুন পাসওয়ার্ড নিশ্চিত করুন	Confirm New Password
+auth.resetPassword.errors.resetFailed	পাসওয়ার্ড রিসেট করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।	Could not reset the password. Please try again.
+auth.resetPassword.invalidTokenError	এই রিসেট লিংকটি সঠিক নয় বা মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে নতুন লিংকের অনুরোধ করুন।	This reset link is invalid or has expired. Please request a new one.
+auth.resetPassword.mismatchError	পাসওয়ার্ড দুটি মিলছে না	Passwords do not match
+auth.resetPassword.missingTokenError	এই রিসেট লিংকটি সঠিক নয়। অনুগ্রহ করে নতুন পাসওয়ার্ড রিসেট ইমেইলের অনুরোধ করুন।	This reset link is invalid. Please request a new password reset email.
+auth.resetPassword.newPasswordLabel	নতুন পাসওয়ার্ড	New Password
+auth.resetPassword.passwordHint	পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে এবং এতে একটি সংখ্যা থাকতে হবে।	Password must be at least 8 characters and include a number.
+auth.resetPassword.passwordRequiredError	পাসওয়ার্ড প্রয়োজন	Password is required
+auth.resetPassword.resettingButton	রিসেট হচ্ছে...	Resetting...
+auth.resetPassword.submitButton	পাসওয়ার্ড রিসেট করুন	Reset Password
+auth.resetPassword.subtitle	আপনার অ্যাকাউন্টের জন্য একটি শক্তিশালী নতুন পাসওয়ার্ড দিন।	Choose a strong new password for your account.
+auth.resetPassword.successMessage	আপনার পাসওয়ার্ড সফলভাবে রিসেট হয়েছে। এখন নতুন পাসওয়ার্ড দিয়ে লগইন করতে পারেন।	Your password has been reset successfully. You can now log in with your new password.
+auth.resetPassword.title	নতুন পাসওয়ার্ড নির্ধারণ করুন	Set a New Password
+auth.resetPassword.weakPasswordError	পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে এবং এতে একটি সংখ্যা থাকতে হবে।	Password must be at least 8 characters and include a number.
+brand.name	উত্তর কাউন্দিয়া সোসাইটি	Uttar Kaundia Society
+brand.org	উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি	Uttar Kaundia Abashon Malik Kalyan Society
+common.cancel	বাতিল	Cancel
+common.close	বন্ধ করুন	Close
+common.confirmModal.cancelButton	বাতিল	Cancel
+common.confirmModal.confirmButton	নিশ্চিত করুন	Confirm
+common.delete	মুছুন	Delete
+common.edit	সম্পাদনা	Edit
+common.loading	লোড হচ্ছে...	Loading...
+common.months.april	এপ্রিল	April
+common.months.august	আগস্ট	August
+common.months.december	ডিসেম্বর	December
+common.months.february	ফেব্রুয়ারি	February
+common.months.january	জানুয়ারি	January
+common.months.july	জুলাই	July
+common.months.june	জুন	June
+common.months.march	মার্চ	March
+common.months.may	মে	May
+common.months.november	নভেম্বর	November
+common.months.october	অক্টোবর	October
+common.months.september	সেপ্টেম্বর	September
+common.retry	আবার চেষ্টা করুন	Retry
+common.save	সংরক্ষণ	Save
+common.select	নির্বাচন করুন	Select
+common.switchToBangla	বাংলায় দেখুন	বাংলায় দেখুন
+common.switchToEnglish	Switch to English	Switch to English
+events.backToList	সব অনুষ্ঠান	All events
+events.detail.endsAt	শেষ	Ends
+events.detail.location	স্থান	Location
+events.detail.startsAt	শুরু	Starts
+events.errors.loadFailed	অনুষ্ঠান লোড করা যায়নি।	Could not load events.
+events.noPast	কোনো অতীত অনুষ্ঠান নেই।	No past events.
+events.noUpcoming	কোনো আসন্ন অনুষ্ঠান নেই।	No upcoming events.
+events.notFound	এই অনুষ্ঠানটি আর পাওয়া যাচ্ছে না।	This event is no longer available.
+events.past	অতীত	Past
+events.subtitle	পরিষদের সভা, কর্মসূচি ও অনুষ্ঠান	Meetings, programmes and gatherings of the council
+events.title	অনুষ্ঠান	Events
+events.upcoming	আসন্ন	Upcoming
+footer.prototypeNotice	© ২০২৬ উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি। নির্মাণে: Anshin Tech।	© 2026 Uttar Kaundia Abashon Malik Kalyan Society. Developed by Anshin Tech.
+footer.publicNotice	এটি একটি সদস্য ব্যবস্থাপনা পোর্টাল। © ২০২৬ উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি। নির্মাণে: Anshin Tech।	This is a member management portal. © 2026 Uttar Kaundia Abashon Malik Kalyan Society. Developed by Anshin Tech.
+forbidden.backToDashboard	ড্যাশবোর্ডে ফিরে যান	Back to Dashboard
+forbidden.message	এই পাতাটি দেখার অনুমতি আপনার নেই।	You don't have permission to view this page.
+forbidden.title	প্রবেশাধিকার নেই	Access Denied
+home.hero.applicationReviewLabel	পর্যালোচনাধীন আবেদন	Pending Applications
+home.hero.applyButton	সদস্যপদের জন্য আবেদন করুন	Apply for Membership
+home.hero.eyebrow	সদস্য ব্যবস্থাপনা পোর্টাল	Member Management Portal
+home.hero.loginButton	ইতিমধ্যে সদস্য? লগইন করুন	Already a member? Log in
+home.hero.memberIdLabel	নিবন্ধিত সদস্য	Registered Members
+home.hero.monthlySubscriptionLabel	মাসিক চাঁদা	Monthly Subscription
+home.hero.statCardTitle	এই মুহূর্তে	Right Now
+home.hero.subtitle	সদস্যপদের আবেদন থেকে শুরু করে মাসিক চাঁদা পরিশোধ পর্যন্ত — পুরো প্রক্রিয়া এখন অনলাইনে। কাগজে আবেদন করার ঝামেলা নেই, অফিসে বারবার যাওয়ার প্রয়োজন নেই।	From membership applications to monthly subscription payments — the whole process is now online. No hassle of paper applications, no need to visit the office repeatedly.
+home.hero.title	উত্তর কাউন্দিয়ার<br />জমির মালিকদের কল্যাণ পরিষদ	Uttar Kaundia<br />Landowners' Welfare Council
+home.steps.applyDesc	ব্যক্তিগত তথ্য, ঠিকানা, জমির বিবরণ ও পেমেন্ট তথ্যসহ ধাপে ধাপে ফর্ম পূরণ করুন।	Fill out the step-by-step form including personal information, address, land details, and payment information.
+home.steps.applyTitle	আবেদন করুন	Apply
+home.steps.memberIdDesc	অনুমোদনের পর স্বয়ংক্রিয়ভাবে সদস্য আইডি তৈরি হয় এবং লগইন তথ্য ইস্যু করা হয়।	After approval, a member ID is automatically generated and login information is issued.
+home.steps.memberIdTitle	সদস্য আইডি ও লগইন	Member ID & Login
+home.steps.reviewDesc	কার্যনির্বাহী কমিটি ও প্রশাসন প্রতিটি আবেদন যাচাই করে অনুমোদন বা প্রত্যাখ্যান করেন।	The executive committee and administration verify each application and approve or reject it.
+home.steps.reviewTitle	কমিটির পর্যালোচনা	Committee Review
+idCard.address	ঠিকানা	Address
+idCard.authority	কর্তৃপক্ষ	Authority
+idCard.back	পিছনের পিঠ	Back
+idCard.backTitle	সদস্য পরিচয়পত্র	Member ID Card
+idCard.button	আইডি কার্ড	ID Card
+idCard.cardTitleEn	Member ID Card	Member ID Card
+idCard.dob	জন্ম তারিখ	Date of Birth
+idCard.download	কার্ড ডাউনলোড (PNG)	Download Card (PNG)
+idCard.downloadError	কার্ড তৈরি করা যায়নি। আবার চেষ্টা করুন।	Could not generate the card. Please try again.
+idCard.emergency	জরুরি যোগাযোগ	Emergency
+idCard.father	পিতা/স্বামী	Father/Husband
+idCard.footer	সদস্য পরিচয়পত্র · ২০২৬	Member ID Card · 2026
+idCard.front	সামনের পিঠ	Front
+idCard.issuedOn	ইস্যুর তারিখ	Issued on
+idCard.loadError	প্রোফাইল তথ্য লোড করা যায়নি।	Could not load profile data.
+idCard.mobile	মোবাইল	Mobile
+idCard.nid	এনআইডি	NID
+idCard.preparing	তৈরি হচ্ছে...	Preparing...
+idCard.receiptNo	রসিদ নম্বর	Receipt No.
+idCard.sectionContact	যোগাযোগ	Contact
+idCard.sectionMembership	সদস্যপদ	Membership
+idCard.sectionPersonal	ব্যক্তিগত তথ্য	Personal
+idCard.societyName	উত্তর কাউন্দিয়া সোসাইটি	Uttar Kaundia Society
+idCard.societyOrg	উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি	Uttar Kaundia Abashon Malik Kalyan Society
+idCard.status.applicant	আবেদনকারী	Applicant
+idCard.status.approved	সদস্য	Member
+idCard.status.pending	অপেক্ষমাণ	Pending
+idCard.status.rejected	বাতিল	Rejected
+idCard.terms	এই কার্ডটি উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটির সম্পত্তি। কর্তৃপক্ষের অনুরোধে কার্ডটি প্রদর্শন করতে হবে এবং সদস্যপদ শেষ হলে ফেরত দিতে হবে। কার্ডটি হারিয়ে গেলে দ্রুত কর্তৃপক্ষকে জানান।	This card is the property of Uttar Kaundia Abashon Malik Kalyan Society. It must be shown on request and returned upon termination of membership. Report loss to the authority immediately.
+idCard.title	সদস্য পরিচয়পত্র	Member ID Card
+idCard.verify	কিউআর কোড দিয়ে যাচাই করা যায়	Verifiable via QR code
+member.changePassword.changeFailedError	পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে।	Failed to change password.
+member.changePassword.confirmPasswordLabel	নতুন পাসওয়ার্ড নিশ্চিত করুন	Confirm New Password
+member.changePassword.currentPasswordLabel	বর্তমান পাসওয়ার্ড	Current Password
+member.changePassword.currentPasswordRequiredError	বর্তমান পাসওয়ার্ড দিন।	Current password is required.
+member.changePassword.newPasswordLabel	নতুন পাসওয়ার্ড	New Password
+member.changePassword.passwordMismatchError	পাসওয়ার্ড মিলছে না।	Passwords do not match.
+member.changePassword.passwordPolicyError	পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে এবং একটি সংখ্যা থাকতে হবে।	Password must be at least 8 characters and include a number.
+member.changePassword.sameAsCurrentError	নতুন পাসওয়ার্ড বর্তমান পাসওয়ার্ড থেকে আলাদা হতে হবে।	New password must be different from the current password.
+member.changePassword.saveButton	পরিবর্তন সংরক্ষণ করুন	Save Change
+member.changePassword.savingButton	সংরক্ষণ হচ্ছে...	Saving...
+member.changePassword.successMessage	পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে।	Password changed successfully.
+member.changePassword.title	পাসওয়ার্ড পরিবর্তন করুন	Change Password
+member.costShares.emptyHint	সদস্যদের মধ্যে ভাগ করা খরচ এখানে দেখা যাবে।	Costs split among members will appear here.
+member.costShares.emptyState	আপনার কোনো বকেয়া নেই	You have no outstanding dues
+member.costShares.loadError	আপনার খরচের ভাগ লোড করা যায়নি। আবার চেষ্টা করুন।	Could not load your cost shares. Please try again.
+member.costShares.status.paid	পরিশোধিত	Paid
+member.costShares.status.partial	আংশিক	Partial
+member.costShares.status.unpaid	অনাদায়ী	Unpaid
+member.costShares.subtitle	সোসাইটির যেসব খরচ আপনার অ্যাকাউন্টে ভাগ হয়েছে	Costs the society split to your account
+member.costShares.table.cost	খরচ	Cost
+member.costShares.table.date	তারিখ	Date
+member.costShares.table.due	দেয়	Due
+member.costShares.table.paid	পরিশোধিত	Paid
+member.costShares.table.status	অবস্থা	Status
+member.costShares.title	খরচের ভাগ	Cost Shares
+member.costShares.totalOutstanding	মোট বকেয়া	Total outstanding
+member.dashboard.dueMonthsLabel	বকেয়া মাস	Due Months
+member.dashboard.loadError	তথ্য লোড করা যায়নি।	Failed to load data.
+member.dashboard.memberIdLabel	সদস্য আইডি	Member ID
+member.dashboard.paidMonthsLabel	পরিশোধিত মাস	Paid Months
+member.dashboard.recentStatusTitle	সাম্প্রতিক চাঁদার অবস্থা	Recent Subscription Status
+member.dashboard.statusDue	বকেয়া	Due
+member.dashboard.statusPaid	পরিশোধিত	Paid
+member.fundTransparency.charts.empty	গ্রাফ দেখানোর মতো পর্যাপ্ত তথ্য এখনো নেই।	Not enough data for a chart yet.
+member.fundTransparency.charts.expenseDonut	ব্যয়ের খাতভিত্তিক চিত্র	Expenses by category
+member.fundTransparency.charts.monthly	মাসিক	Monthly
+member.fundTransparency.charts.trend	আয়-ব্যয়ের প্রবণতা	Income vs expense trend
+member.fundTransparency.charts.yearly	বার্ষিক	Yearly
+member.fundTransparency.currentBalance	বর্তমান ব্যালেন্স	Current Balance
+member.fundTransparency.downloadPdf	রিপোর্ট ডাউনলোড (PDF)	Download report (PDF)
+member.fundTransparency.empty.hint	কমিটি লেনদেন যোগ করে অনুমোদন করলে এখানে সোসাইটির সব আয়-ব্যয় দেখা যাবে।	Once the committee records and approves transactions, all income and expenses will appear here.
+member.fundTransparency.empty.title	এখনো কোনো লেনদেন প্রকাশিত হয়নি	No transactions published yet
+member.fundTransparency.errors.customRange	কাস্টম রেঞ্জের জন্য শুরু ও শেষ তারিখ দুটোই দিন (শুরু তারিখ আগে হতে হবে)।	Pick both start and end dates (start first).
+member.fundTransparency.errors.loadFailed	তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।	Could not load the data. Please retry.
+member.fundTransparency.errors.pdfFailed	রিপোর্ট তৈরি করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।	Could not generate the report. Try again shortly.
+member.fundTransparency.expenseBreakdown	কোন কোন খাতে কত টাকা খরচ হয়েছে	Expenses by category
+member.fundTransparency.expenseBreakdownEmpty	এই সময়কালে কোনো ব্যয় নেই।	No expenses in this period.
+member.fundTransparency.filters.allCategories	সব খাত	All categories
+member.fundTransparency.filters.allTypes	সব ধরন	All types
+member.fundTransparency.filters.amountRange	পরিমাণ রেঞ্জ (৳)	Amount range (৳)
+member.fundTransparency.filters.approvedBy	অনুমোদনকারী	Approved by
+member.fundTransparency.filters.category	খাত	Category
+member.fundTransparency.filters.clearAll	✕ সব মুছুন	✕ Clear all
+member.fundTransparency.filters.dateRange	তারিখ রেঞ্জ	Date range
+member.fundTransparency.filters.max	সর্বোচ্চ	Max
+member.fundTransparency.filters.min	সর্বনিম্ন	Min
+member.fundTransparency.filters.reference	রেফারেন্স নম্বর	Reference no.
+member.fundTransparency.filters.reset	রিসেট	Reset
+member.fundTransparency.filters.search	অনুসন্ধান	Search
+member.fundTransparency.filters.searchPlaceholder	বিবরণ বা রেফারেন্স খুঁজুন…	Search description or reference…
+member.fundTransparency.filters.type	ধরন	Type
+member.fundTransparency.flags.spike	এই সময়ে {{category}} খরচ গত সময়ের চেয়ে {{pct}} বেশি	{{category}} spending is {{pct}} higher than the previous period
+member.fundTransparency.flags.topCategories	সবচেয়ে বেশি খরচ: {{categories}}	Biggest expenses: {{categories}}
+member.fundTransparency.incomeBreakdown	কোন কোন খাত থেকে কত টাকা কালেকশন হয়েছে	Collections by category
+member.fundTransparency.incomeBreakdownEmpty	এই সময়কালে কোনো আয় নেই।	No income in this period.
+member.fundTransparency.lastUpdated	সর্বশেষ আপডেট	Last updated
+member.fundTransparency.ledger.amount	পরিমাণ	Amount
+member.fundTransparency.ledger.approvedBy	অনুমোদনকারী	Approved by
+member.fundTransparency.ledger.category	খাত	Category
+member.fundTransparency.ledger.count	মোট {{count}}টি লেনদেন	{{count}} transactions
+member.fundTransparency.ledger.date	তারিখ	Date
+member.fundTransparency.ledger.description	বিবরণ	Description
+member.fundTransparency.ledger.empty	কোনো লেনদেন পাওয়া যায়নি	No transactions found
+member.fundTransparency.ledger.emptyHint	ফিল্টার পরিবর্তন করে আবার দেখুন।	Try changing the filters.
+member.fundTransparency.ledger.page	পৃষ্ঠা {{page}} / {{total}}	Page {{page}} of {{total}}
+member.fundTransparency.ledger.reference	রেফারেন্স	Reference
+member.fundTransparency.ledger.reversalOf	রিভার্সাল হয়েছে লেনদেন	Reversal of transaction
+member.fundTransparency.ledger.type	ধরন	Type
+member.fundTransparency.ledger.viewAttachment	সংযুক্তি দেখুন	View attachment
+member.fundTransparency.netSaved	নিট জমা	Net Saved
+member.fundTransparency.period.all	সর্বমোট	All time
+member.fundTransparency.period.apply	দেখান	Apply
+member.fundTransparency.period.custom	কাস্টম রেঞ্জ	Custom range
+member.fundTransparency.period.month	এই মাস	This month
+member.fundTransparency.period.year	এই বছর	This year
+member.fundTransparency.preview.missing	সংযুক্তিটি পাওয়া যাচ্ছে না। কমিটিকে জানান।	The attachment is missing. Please notify the committee.
+member.fundTransparency.preview.title	সংযুক্তি প্রিভিউ	Attachment preview
+member.fundTransparency.subtitle	সোসাইটির প্রতিটি আর্থিক লেনদেন সবার জন্য উন্মুক্ত — আয়, ব্যয় ও ব্যালেন্স এক নজরে	Every taka in and out of the society fund — open to every member
+member.fundTransparency.summaryLine	এই সময়ে আয় হয়েছে {{income}} টাকা, ব্যয় হয়েছে {{expense}} টাকা, নিট জমা {{net}} টাকা।	This period: income {{income}}, expense {{expense}}, net {{net}}.
+member.fundTransparency.title	ফান্ড স্বচ্ছতা	Fund Transparency
+member.fundTransparency.topTag	সর্বোচ্চ	Top
+member.fundTransparency.totalExpense	সর্বমোট ব্যয়	Total Expense
+member.fundTransparency.totalIncome	সর্বমোট আয়	Total Income
+member.fundTransparency.type.expense	ব্যয়	Expense
+member.fundTransparency.type.income	আয়	Income
+member.installments.amountColumn	পরিমাণ	Amount
+member.installments.emptyFiltered	এই বছরের কোনো পেমেন্ট পাওয়া যায়নি।	No payments found for this year.
+member.installments.emptyState	কোনো কিস্তি নেই	No installments found
+member.installments.filterAll	সব বছর	All Years
+member.installments.loadError	কিস্তির তালিকা লোড করা যায়নি।	Failed to load installment list.
+member.installments.monthColumn	মাস	Month
+member.installments.paidAtColumn	পরিশোধের তারিখ	Paid On
+member.installments.paymentNotice	চাঁদা পরিশোধ অফিসে সরাসরি (নগদ/বিকাশ/ব্যাংক) করা হয়; প্রশাসন তা এখানে হালনাগাদ করেন।	Subscription payments are made directly at the office (cash/bKash/bank); the administration updates it here.
+member.installments.statusColumn	অবস্থা	Status
+member.installments.statusDue	বকেয়া	Due
+member.installments.statusPaid	পরিশোধিত	Paid
+member.installments.subtitle	আপনার মাসিক চাঁদা পরিশোধের হিসাব এক নজরে।	Your monthly subscription payments at a glance.
+member.installments.summaryDue	মোট বকেয়া	Outstanding
+member.installments.summaryPaid	মোট পরিশোধিত	Total Paid
+member.installments.summaryPayments	পরিশোধিত কিস্তি	Payments Made
+member.installments.title	চাঁদার ইতিহাস	Subscription History
+member.payDues.amount	পরিমাণ	Amount
+member.payDues.back	পেছনে	Back
+member.payDues.bannerTitle	আপনার {{count}} মাসের চাঁদা বকেয়া	You have {{count}} month(s) outstanding
+member.payDues.clearAll	সব বাদ	Clear all
+member.payDues.close	বন্ধ করুন	Close
+member.payDues.continue	পরবর্তী	Continue
+member.payDues.copied	কপি হয়েছে	Copied
+member.payDues.copy	কপি	Copy
+member.payDues.historyTitle	সাম্প্রতিক অনলাইন পরিশোধ	Recent online payments
+member.payDues.iHavePaid	আমি পরিশোধ করেছি	I've paid
+member.payDues.keepReceipt	SMS/রসিদের ট্রানজেকশন আইডি সংরক্ষণ করুন — পরের ধাপে লাগবে।	Keep the transaction ID from your SMS/receipt — you will need it next.
+member.payDues.methodHint	পরিশোধের মাধ্যম বেছে নিন, তারপর এই অ্যাকাউন্টে সঠিক পরিমাণ পাঠান।	Choose how you will pay, then send the exact amount to this account.
+member.payDues.months	মাস	month(s)
+member.payDues.note	মন্তব্য (ঐচ্ছিক)	Note (optional)
+member.payDues.notice	“চাঁদা পরিশোধ” বাটনে অনলাইনে পরিশোধ করুন। কমিটি যাচাই করার পর তা পরিশোধিত হিসেবে দেখাবে।	Pay online with “Pay dues”. Each payment is verified by the committee before it is marked paid.
+member.payDues.oldest	সবচেয়ে পুরনো	Oldest
+member.payDues.paidOn	পরিশোধের তারিখ	Payment date
+member.payDues.payNow	চাঁদা পরিশোধ	Pay dues
+member.payDues.paymentStatus.approved	যাচাইকৃত	Verified
+member.payDues.paymentStatus.pending	যাচাইয়ের অপেক্ষায়	Pending verification
+member.payDues.paymentStatus.rejected	বাতিল	Rejected
+member.payDues.proof	রসিদ / স্ক্রিনশট (ঐচ্ছিক)	Receipt / screenshot (optional)
+member.payDues.proofHint	JPG, PNG বা PDF, সর্বোচ্চ ৫ MB।	JPG, PNG or PDF, up to 5 MB.
+member.payDues.proofSizeError	ফাইল ৫ MB-এর বেশি হতে পারবে না।	File must be 5 MB or smaller.
+member.payDues.proofTypeError	শুধু JPG, PNG বা PDF ফাইল দেওয়া যাবে।	Only JPG, PNG or PDF files are allowed.
+member.payDues.rejectedReason	কারণ	Reason
+member.payDues.selectAll	সব নির্বাচন	Select all
+member.payDues.selectHint	পুরনো বকেয়া আগে থেকেই নির্বাচিত। এখন যে মাস দিচ্ছেন না সেটির টিক তুলে দিন।	Oldest dues are pre-selected. Untick any month you are not paying now.
+member.payDues.sendTo	পাঠাবেন	Send to
+member.payDues.senderAccount	যে নম্বর/অ্যাকাউন্ট থেকে পাঠিয়েছেন	Paid from (your number / account)
+member.payDues.statusPending	যাচাই চলছে	Verifying
+member.payDues.step1	মাস নির্বাচন	Select months
+member.payDues.step2	টাকা পাঠান	Send payment
+member.payDues.step3	নিশ্চিত করুন	Confirm
+member.payDues.submit	যাচাইয়ের জন্য জমা দিন	Submit for verification
+member.payDues.submitError	পরিশোধ জমা দেওয়া যায়নি। আবার চেষ্টা করুন।	Could not submit the payment. Please try again.
+member.payDues.submitted	পরিশোধ জমা হয়েছে! কমিটি শীঘ্রই যাচাই করবে এবং আপনাকে ইমেইলে জানানো হবে।	Payment submitted! The committee will verify it shortly and you will be notified by email.
+member.payDues.submitting	জমা হচ্ছে...	Submitting...
+member.payDues.title	মাসিক চাঁদা পরিশোধ	Pay monthly dues
+member.payDues.totalLabel	{{count}} মাসের মোট	Total for {{count}} month(s)
+member.payDues.transactionRef	ট্রানজেকশন আইডি	Transaction ID
+member.payDues.transactionRefError	সঠিক ট্রানজেকশন আইডি দিন (৪–৬৪ অক্ষর/সংখ্যা)।	Enter a valid transaction ID (4–64 letters/numbers).
+member.payDues.transactionRefPlaceholder	যেমন 9KX7AB12CD	e.g. 9KX7AB12CD
+member.picnic.accessDenied	আপনার পিকনিক পরিশোধে প্রবেশাধিকার নেই।	You do not have access to picnic payments.
+member.picnic.additionalHeads	অতিরিক্ত প্রধান	Additional heads
+member.picnic.additionalHeadsHint	০ থেকে {{max}} (স্ত্রী, সন্তান, অতিথি)	0 to {{max}} (spouse, children, guests)
+member.picnic.additionalHeadsLabel	অতিরিক্ত জনসংখ্যা	Additional Heads
+member.picnic.dateColumn	তারিখ	Date
+member.picnic.dateLabel	পরিশোধের তারিখ	Payment Date
+member.picnic.emptyState	এখনও কোনো পিকনিক পরিশোধ নেই।	No picnic payments yet.
+member.picnic.feeLoadFailed	পিকনিক ফি লোড করা যায়নি।	Picnic fee rates could not be loaded.
+member.picnic.headNameLabel	প্রধান {{n}} নাম	Head {{n}} Name
+member.picnic.headRelationLabel	প্রধান {{n}} সম্পর্ক	Head {{n}} Relation
+member.picnic.headsColumn	অতিরিক্ত জন	Additional Heads
+member.picnic.historyLoadFailed	পরিশোধের ইতিহাস লোড করা যায়নি।	Could not load payment history.
+member.picnic.historyTitle	পরিশোধের ইতিহাস	Payment History
+member.picnic.loadError	পরিশোধের ইতিহাস লোড করা যায়নি।	Could not load payment history.
+member.picnic.memberHead	সদস্য প্রধান	Member head
+member.picnic.methodColumn	পদ্ধতি	Method
+member.picnic.methodLabel	পরিশোধ পদ্ধতি	Payment Method
+member.picnic.methods.Bank Transfer	ব্যাংক ট্রান্সফার	Bank Transfer
+member.picnic.methods.Cash	ক্যাশ	Cash
+member.picnic.methods.Nagad	নগদ	Nagad
+member.picnic.methods.Other	অন্যান্য	Other
+member.picnic.methods.bKash	বিকাশ	bKash
+member.picnic.notConfigured	পিকনিক ফি এখনও নির্ধারণ করা হয়নি। কমিটির সাথে যোগাযোগ করুন।	Picnic fee has not been set up yet. Please contact the committee.
+member.picnic.receiptColumn	রশিদ নম্বর	Receipt No
+member.picnic.receiptNoLabel	রশিদ নম্বর	Receipt No
+member.picnic.relations.child	সন্তান	Child
+member.picnic.relations.guest	অতিথি	Guest
+member.picnic.relations.spouse	স্ত্রী/স্বামী	Spouse
+member.picnic.retry	আবার চেষ্টা করুন	Retry
+member.picnic.saveError	পরিশোধ সংরক্ষণ করা যায়নি।	Could not record the payment.
+member.picnic.saveSuccess	পরিশোধ সংরক্ষিত হয়েছে। মোট: ৳ {{total}}	Payment recorded. Total: ৳ {{total}}
+member.picnic.saving	সংরক্ষণ হচ্ছে…	Saving…
+member.picnic.submit	পরিশোধ নিশ্চিত করুন	Confirm Payment
+member.picnic.subtitle	নিজের আসন এবং স্ত্রী, সন্তান বা অতিথিদের আসনের জন্য পরিশোধ করুন	Pay for your own seat plus seats for spouse, children or guests
+member.picnic.taka	টাকা	Taka
+member.picnic.title	পিকনিক ফি পরিশোধ	Picnic Fee Payment
+member.picnic.total	মোট	Total
+member.picnic.totalColumn	মোট	Total
+member.profile.addressLabel	ঠিকানা	Address
+member.profile.addressTitle	ঠিকানা	Address
+member.profile.admissionFeeLabel	ভর্তি ফি	Admission Fee
+member.profile.cancelButton	বাতিল	Cancel
+member.profile.changePhotoButton	ছবি পরিবর্তন	Change Photo
+member.profile.coOwnerLabel	সহ-মালিক	Co-owner
+member.profile.contactTitle	যোগাযোগ	Contact
+member.profile.currentAddressLabel	বর্তমান	Current
+member.profile.dagNoCsLabel	দাগ নং (সিএস)	Dag No (CS)
+member.profile.dagNoRsLabel	দাগ নং (আরএস)	Dag No (RS)
+member.profile.decimalUnit	শতাংশ	decimal
+member.profile.districtLabel	জেলা	District
+member.profile.divisionLabel	বিভাগ	Division
+member.profile.dobLabel	জন্ম তারিখ	Date of Birth
+member.profile.documentLabel	দলিল	Document
+member.profile.download	ডাউনলোড	Download
+member.profile.downloadFailed	ডাউনলোড করা যায়নি। আবার চেষ্টা করুন।	Download failed. Please try again.
+member.profile.editButton	প্রোফাইল সম্পাদনা	Edit Profile
+member.profile.editTitle	প্রোফাইল সম্পাদনা করুন	Edit Profile
+member.profile.emailLabel	ইমেইল	Email
+member.profile.fatherOrHusbandLabel	পিতা/স্বামী	Father/Husband
+member.profile.fileMissing	ফাইলটি সার্ভারে পাওয়া যায়নি। অনুগ্রহ করে আবার আপলোড করুন।	The file is missing on the server. Please upload it again.
+member.profile.genderLabel	লিঙ্গ	Gender
+member.profile.holdingNumberLabel	হোল্ডিং নম্বর	Holding Number
+member.profile.houseLabel	বাড়ি	House
+member.profile.khatianLabel	খতিয়ান	Khatian
+member.profile.landQuantityLabel	জমির পরিমাণ	Land Quantity
+member.profile.loadError	প্রোফাইল লোড করা যায়নি।	Failed to load profile.
+member.profile.memberIdLabel	সদস্য আইডি	Member ID
+member.profile.mobileLabel	মোবাইল	Mobile
+member.profile.motherLabel	মাতা	Mother
+member.profile.myShareQuantityLabel	আমার অংশ	My Share
+member.profile.nameLabel	নাম	Name
+member.profile.nationalityLabel	জাতীয়তা	Nationality
+member.profile.nidLabel	এনআইডি	NID
+member.profile.noNominees	কোনো নমিনির তথ্য দেওয়া হয়নি।	No nominees provided.
+member.profile.noPropertyInfo	কোনো সম্পত্তির তথ্য দেওয়া হয়নি।	No property information provided.
+member.profile.nomineesTitle	নমিনি	Nominees
+member.profile.occupationLabel	পেশা	Occupation
+member.profile.ownershipLabel	মালিকানা	Ownership
+member.profile.paymentMethodLabel	পেমেন্ট পদ্ধতি	Payment Method
+member.profile.paymentTitle	নিবন্ধন পেমেন্ট	Registration Payment
+member.profile.pendingReviewNotice	সাম্প্রতিক প্রোফাইল হালনাগাদের কারণে আপনার সদস্যপদ বর্তমানে পর্যালোচনাধীন। পর্যালোচনার পর অনুমোদিত অবস্থা পুনরায় কার্যকর হবে।	Your membership is currently under review due to a recent profile update. Approved status will resume once reviewed.
+member.profile.permanentAddressLabel	স্থায়ী	Permanent
+member.profile.personalInfoTitle	ব্যক্তিগত তথ্য	Personal Information
+member.profile.photoLabel	সদস্যের ছবি	Member photo
+member.profile.photoSizeError	ছবির আকার ৩ এমবি-র কম হতে হবে	Photo size must be less than 3 MB
+member.profile.photoTypeError	অনুগ্রহ করে একটি ছবি নির্বাচন করুন (JPG/PNG)	Please select an image file (JPG/PNG)
+member.profile.photoUploadError	ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।	Failed to upload the photo. Please try again.
+member.profile.postOfficeLabel	ডাকঘর	Post Office
+member.profile.propertyItemLabel	সম্পত্তি	Property
+member.profile.propertyTitle	সম্পত্তি	Property
+member.profile.receiptNoLabel	রসিদ নং	Receipt No
+member.profile.receiptPhotoLabel	পেমেন্ট রসিদ	Payment Receipt
+member.profile.relationLabel	সম্পর্ক	Relation
+member.profile.removePhotoButton	সরান	Remove
+member.profile.requeueWarning	এই তথ্য পরিবর্তন করলে আপনার সদস্যপদ ব্যবস্থাপনা কমিটির পর্যালোচনার জন্য পুনরায় পাঠানো হবে।	Changing this information will send your membership back for review by the management committee.
+member.profile.roadLabel	সড়ক	Road
+member.profile.sameAsPermanentAddress	একই — স্থায়ী ঠিকানার অনুরূপ	Same as permanent address
+member.profile.saveButton	পরিবর্তন সংরক্ষণ করুন	Save Changes
+member.profile.saveError	প্রোফাইল পরিবর্তন সংরক্ষণ করা যায়নি।	Failed to save profile changes.
+member.profile.signatureLabel	স্বাক্ষর	Signature
+member.profile.statusApproved	অনুমোদিত	Approved
+member.profile.statusPending	পর্যালোচনাধীন	Under Review
+member.profile.statusRejected	প্রত্যাখ্যাত	Rejected
+member.profile.submissionDateLabel	নিবন্ধনের তারিখ	Registration Date
+member.profile.subscriptionLabel	চাঁদা	Subscription
+member.profile.title	প্রোফাইল	Profile
+member.profile.upazilaLabel	উপজেলা	Upazila
+member.profile.urgentContactTitle	জরুরি যোগাযোগ	Urgent Contact
+member.profile.viewFile	ফাইল দেখুন	View file
+member.profile.villageLabel	গ্রাম	Village
+member.propertyRequests.actions.add	সংযোজন	Add
+member.propertyRequests.actions.delete	মুছে ফেলা	Delete
+member.propertyRequests.actions.edit	সংশোধন	Edit
+member.propertyRequests.addButton	সম্পত্তি যোগ করুন	Add property
+member.propertyRequests.addCoOwnerButton	যৌথ মালিক যোগ করুন	Add co-owner
+member.propertyRequests.addDocButton	নথি যোগ করুন	Add document
+member.propertyRequests.addTitle	সম্পত্তি সংযোজনের অনুরোধ	Request property addition
+member.propertyRequests.backButton	ফিরে যান	Back
+member.propertyRequests.cancelReasonLabel	বাতিলের কারণ	Cancel reason
+member.propertyRequests.coOwnerNamePlaceholder	যৌথ মালিকের নাম	Co-owner name
+member.propertyRequests.coOwnerNameRequired	প্রত্যেক যৌথ মালিকের নাম দিতে হবে।	Each co-owner needs a name.
+member.propertyRequests.coOwnersLabel	যৌথ মালিকগণ	Co-owners
+member.propertyRequests.deleteModal.confirmLabel	অপসারণের অনুরোধ পাঠান	Send removal request
+member.propertyRequests.deleteModal.message	এই সম্পত্তিটি মুছে ফেলার আগে একজন প্রশাসক আপনার অনুরোধটি পর্যালোচনা করবেন।	An admin will review your request to remove this property before it is deleted.
+member.propertyRequests.deleteModal.title	সম্পত্তি অপসারণের অনুরোধ	Request property removal
+member.propertyRequests.docDropped	বাদ দেওয়া হবে	Removed
+member.propertyRequests.docIncomplete	নথির ধরন নির্বাচন করে ফাইল সংযুক্ত করুন।	Select a document type and attach a file.
+member.propertyRequests.docKept	রাখা হবে	Kept
+member.propertyRequests.docsLabel	নথিপত্র	Documents
+member.propertyRequests.documentsSectionTitle	নথিপত্র	Documents
+member.propertyRequests.editTitle	সম্পত্তি সংশোধনের অনুরোধ	Request property edit
+member.propertyRequests.errors.loadFailed	সম্পত্তি সংক্রান্ত অনুরোধ লোড করা যায়নি।	Could not load property requests.
+member.propertyRequests.errors.propertyNotFound	অনুরোধকৃত সম্পত্তিটি পাওয়া যায়নি।	The requested property was not found.
+member.propertyRequests.errors.submitFailed	অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন।	Could not send the request. Please try again.
+member.propertyRequests.errors.withdrawFailed	অনুরোধ প্রত্যাহার করা যায়নি।	Could not withdraw the request.
+member.propertyRequests.existingDocsLabel	বিদ্যমান নথি	Existing documents
+member.propertyRequests.formSubtitle	আপনার পরিবর্তনটি প্রশাসকের পর্যালোচনার জন্য জমা দিন।	Submit your change for admin review.
+member.propertyRequests.listTitle	সম্পত্তি সংক্রান্ত অনুরোধ	Property requests
+member.propertyRequests.newDocsLabel	নতুন নথি যোগ করুন	Add new documents
+member.propertyRequests.noExistingDocs	এই সম্পত্তিতে কোনো বিদ্যমান নথি নেই।	This property has no existing documents.
+member.propertyRequests.noRequests	এখনও কোনো সম্পত্তি সংক্রান্ত অনুরোধ নেই।	No property requests yet.
+member.propertyRequests.pendingPill	অনুরোধ অপেক্ষমাণ	Request pending
+member.propertyRequests.propertySectionTitle	সম্পত্তির তথ্য	Property details
+member.propertyRequests.statusLabels.approved	অনুমোদিত	Approved
+member.propertyRequests.statusLabels.cancelled	বাতিল	Cancelled
+member.propertyRequests.statusLabels.pending	অপেক্ষমাণ	Pending
+member.propertyRequests.submitButton	অনুরোধ পাঠান	Send request
+member.propertyRequests.submittedLabel	জমাদান	Submitted
+member.propertyRequests.successSent	আপনার অনুরোধ পর্যালোচনার জন্য পাঠানো হয়েছে।	Your request has been sent for review.
+member.propertyRequests.withdrawButton	প্রত্যাহার	Withdraw
+member.propertyRequests.withdrawModal.confirmLabel	প্রত্যাহার করুন	Withdraw request
+member.propertyRequests.withdrawModal.message	আপনার অপেক্ষমাণ অনুরোধটি বাতিল হবে। এটি আর ফেরানো যাবে না।	Your pending request will be cancelled. This cannot be undone.
+member.propertyRequests.withdrawModal.title	অনুরোধ প্রত্যাহার	Withdraw request
+member.propertyRequests.withdrawnSuccess	অনুরোধটি প্রত্যাহার করা হয়েছে।	The request has been withdrawn.
+member.roadmap.actions.image	শেয়ার করার জন্য ছবি	Image for sharing
+member.roadmap.actions.pdf	A4 প্রিন্ট / PDF	A4 print / PDF
+member.roadmap.actions.slides	স্লাইড আকারে দেখুন	View as slides
+member.roadmap.completedOn	সম্পন্ন: {{date}}	Completed {{date}}
+member.roadmap.empty	এই সময়সীমায় এখনো কোনো পরিকল্পনা যোগ করা হয়নি।	No plans have been added to this timeframe yet.
+member.roadmap.emptyFiltered	এই ফিল্টারে কোনো পরিকল্পনা নেই।	No items match this filter.
+member.roadmap.exportError	ডাউনলোড তৈরি করা যায়নি। আবার চেষ্টা করুন।	Could not prepare the download. Please try again.
+member.roadmap.filter.all	সব	All
+member.roadmap.filter.done	সম্পন্ন	Done
+member.roadmap.filter.in_progress	চলমান	In progress
+member.roadmap.filter.planned	পরিকল্পিত	Planned
+member.roadmap.filterAria	অবস্থা অনুযায়ী ফিল্টার	Filter by status
+member.roadmap.focusNow	এখন যেদিকে মনোযোগ	Current focus
+member.roadmap.itemCount	{{n}}টি পরিকল্পনা	{{n}} items
+member.roadmap.lastUpdated	সর্বশেষ আপডেট: {{date}}	Last updated: {{date}}
+member.roadmap.loadError	পরিকল্পনা লোড করা যায়নি। আবার চেষ্টা করুন।	Could not load the roadmap. Please try again.
+member.roadmap.overallAria	সার্বিক অগ্রগতি {{pct}} শতাংশ	Overall progress {{pct}} percent
+member.roadmap.overallProgress	সার্বিক অগ্রগতি	Overall progress
+member.roadmap.progressLabel	{{name}}: {{done}}/{{total}} সম্পন্ন — {{pct}}%	{{name}}: {{done}}/{{total}} done — {{pct}}%
+member.roadmap.progressShort	{{done}}/{{total}} সম্পন্ন — {{pct}}%	{{done}}/{{total}} done — {{pct}}%
+member.roadmap.slides.hint	← → কী অথবা সোয়াইপ করে স্লাইড বদলান · Esc চাপলে বন্ধ হবে	Use ← → keys or swipe to move · Esc to close
+member.roadmap.slides.next	পরের স্লাইড	Next slide
+member.roadmap.slides.prev	আগের স্লাইড	Previous slide
+member.roadmap.status.done	সম্পন্ন	Done
+member.roadmap.status.in_progress	চলমান	In progress
+member.roadmap.status.planned	পরিকল্পিত	Planned
+member.roadmap.stepperAria	পরিকল্পনার সময়রেখা	Roadmap timeline
+member.roadmap.subtitle	আমরা কোথায় আছি, কোথায় যাচ্ছি এবং কীভাবে যাচ্ছি।	Where we are, where we are going, and how we get there.
+member.roadmap.target	লক্ষ্য: {{date}}	Target: {{date}}
+member.roadmap.title	আমাদের পরিকল্পনা	Our Roadmap
+member.roadmap.weAreHere	আমরা এখানে	We are here
+member.roadmap.whereSummary	মোট {{total}}টি পরিকল্পনার মধ্যে {{done}}টি সম্পন্ন হয়েছে।	{{done}} of {{total}} planned items are done.
+member.roadmap.whereTitle	আমরা এখন কোথায় আছি	Where we are now
+nav.admin	প্রশাসক	Admin
+nav.auditLog	অডিট লগ	Audit Log
+nav.changePassword	পাসওয়ার্ড পরিবর্তন	Change Password
+nav.changeTheme	থিম পরিবর্তন	Change theme
+nav.closeMenu	মেনু বন্ধ করুন	Close menu
+nav.configLists	কনফিগ তালিকা	Config Lists
+nav.costShares	খরচের ভাগ	Cost Shares
+nav.darkTheme	গাঢ় থিম	Dark theme
+nav.dashboard	ড্যাশবোর্ড	Dashboard
+nav.events	অনুষ্ঠান	Events
+nav.eventsManagement	অনুষ্ঠান ব্যবস্থাপনা	Manage Events
+nav.feeSettings	ফি সেটিংস	Fee Settings
+nav.financeManagement	আর্থিক ব্যবস্থাপনা	Finance Management
+nav.fundTransparency	ফান্ড স্বচ্ছতা	Fund Transparency
+nav.installments	কিস্তি	Installments
+nav.installmentsManagement	চাঁদা ব্যবস্থাপনা	Installments Management
+nav.lightTheme	হালকা থিম	Light theme
+nav.login	লগইন	Login
+nav.logout	বের হোন	Logout
+nav.membersList	সদস্য তালিকা	Members List
+nav.moreOptions	আরও বিকল্প	More options
+nav.notices	নোটিশ	Notices
+nav.noticesManagement	নোটিশ ব্যবস্থাপনা	Manage Notices
+nav.openMenu	মেনু খুলুন	Open menu
+nav.paymentVerifications	পেমেন্ট যাচাই	Payment Verifications
+nav.picnicPayment	পিকনিক ফি	Picnic Fee
+nav.picnicPayments	পিকনিক পরিশোধ	Picnic Payments
+nav.profile	প্রোফাইল	Profile
+nav.propertyRequests	সম্পত্তি সংক্রান্ত অনুরোধ	Property Requests
+nav.register	আবেদন করুন	Register
+nav.resolutionBook	রেজোলিউশন বুক	Resolution Book
+nav.roadmap	আমাদের পরিকল্পনা	Our Roadmap
+nav.roadmapManagement	পরিকল্পনা ব্যবস্থাপনা	Roadmap Management
+nav.rolesPermissions	ভূমিকা ও অনুমতি	Roles & Permissions
+nav.societyCosts	সোসাইটি খরচ	Society Costs
+nav.submissions	সাবমিশন	Submissions
+notices.backToList	সব নোটিশ	All notices
+notices.empty	এখনো কোনো নোটিশ প্রকাশ করা হয়নি।	No notices have been published yet.
+notices.errors.loadFailed	নোটিশ লোড করা যায়নি।	Could not load notices.
+notices.notFound	এই নোটিশটি আর পাওয়া যাচ্ছে না।	This notice is no longer available.
+notices.subtitle	উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটির ঘোষণা	Announcements from the Uttar Kaundia Abashon Malik Kalyan Society
+notices.title	নোটিশ	Notices
+passwordField.hide	পাসওয়ার্ড লুকান	Hide password
+passwordField.show	পাসওয়ার্ড দেখুন	Show password
+rb.actions.addMeeting	নতুন সভা	New Meeting
+rb.actions.edit	সম্পাদনা	Edit
+rb.actions.pdf	পিডিএফ ডাউনলোড	Download PDF
+rb.attendance.absent	অনুপস্থিত	Absent
+rb.attendance.present	উপস্থিত	Present
+rb.detail.agenda	আলোচ্যসূচি	Agenda
+rb.detail.attendanceTitle	উপস্থিতি	Attendance
+rb.detail.back	রেজোলিউশন বুক	Resolution Book
+rb.detail.chair	সভাপতি	Chair
+rb.detail.createdBy	রেকর্ড করেছেন {{name}}	Recorded by {{name}}
+rb.detail.lastUpdated	সর্বশেষ হালনাগাদ {{date}}	last updated {{date}}
+rb.detail.nextMeeting	পরবর্তী সভা	Next meeting
+rb.detail.noAttendance	উপস্থিতি রেকর্ড করা হয়নি।	Attendance has not been recorded.
+rb.detail.noResolutions	কোনো সিদ্ধান্ত রেকর্ড করা হয়নি।	No resolutions recorded.
+rb.detail.noSummary	কোনো সারসংক্ষেপ লেখা হয়নি।	No summary recorded.
+rb.detail.notSet	নির্ধারিত নয়	Not set
+rb.detail.resolutionNo	সিদ্ধান্ত-{{no}}	Resolution-{{no}}
+rb.detail.resolutionStatus	সিদ্ধান্তের অবস্থা	Resolution status
+rb.detail.status	অবস্থা	Status
+rb.detail.summary	আলোচনার সারসংক্ষেপ	Summary of discussion
+rb.detail.votesAria	পক্ষে {{for}}, বিপক্ষে {{against}}, নিরপেক্ষ {{neutral}}	For {{for}}, against {{against}}, neutral {{neutral}}
+rb.exportError	পিডিএফ তৈরি করা যায়নি। আবার চেষ্টা করুন।	Could not generate the PDF. Please try again.
+rb.filters.allStatuses	সব অবস্থা	All statuses
+rb.filters.allTypes	সব ধরন	All types
+rb.filters.apply	খুঁজুন	Search
+rb.filters.clear	মুছুন	Clear
+rb.filters.dateFrom	তারিখ থেকে	Date from
+rb.filters.dateTo	তারিখ পর্যন্ত	Date to
+rb.filters.search	খুঁজুন	Search
+rb.filters.searchPlaceholder	সভা নম্বর, বিষয় বা সভাপতি দিয়ে খুঁজুন…	Search by meeting no, subject or chairperson…
+rb.filters.status	অবস্থা	Status
+rb.filters.type	সভার ধরন	Meeting type
+rb.form.addResolution	সিদ্ধান্ত যোগ করুন	Add resolution
+rb.form.agenda	আলোচ্যসূচি	Agenda
+rb.form.agendaSummary	আলোচ্যসূচি ও সারসংক্ষেপ	Agenda & summary
+rb.form.assignee	দায়িত্বে (ঐচ্ছিক)	Assigned to (optional)
+rb.form.assigneePlaceholder	কেউ নয়	No one
+rb.form.attachments	রেকর্ডিং ও সংযুক্তি (ঐচ্ছিক)	Recordings & attachments (optional)
+rb.form.attendance	উপস্থিতি	Attendance
+rb.form.attendancePlaceholder	সদস্য নির্বাচন করুন…	Select members…
+rb.form.autoNo	স্বয়ংক্রিয়ভাবে প্রস্তাবিত	auto-suggested
+rb.form.chairperson	সভাপতি	Chairperson
+rb.form.chairpersonPlaceholder	সদস্য নির্বাচন করুন…	Select a member…
+rb.form.date	তারিখ	Date
+rb.form.decision	সিদ্ধান্ত	Decision
+rb.form.dropzone	ফাইল যোগ করতে চাপ দিন — ভিডিও, অডিও, ছবি বা চ্যাট লগ	Tap to add files — video, audio, photo or chat log
+rb.form.dropzoneHint	প্রতি ফাইল সর্বোচ্চ 100 MB	Maximum 100 MB per file
+rb.form.dueDate	শেষ তারিখ (ঐচ্ছিক)	Due date (optional)
+rb.form.duplicateNo	এই সভা নম্বরটি ইতিমধ্যে ব্যবহৃত। অন্য নম্বর দিন।	This meeting number is already in use. Please choose another.
+rb.form.editTitle	সভা সম্পাদনা	Edit Meeting
+rb.form.fileTooLarge	একটি ফাইল 100 MB সীমা ছাড়িয়ে গেছে।	A file exceeds the 100 MB limit.
+rb.form.markAllPresent	সবাই উপস্থিত	Mark all present
+rb.form.meetingInfo	সভার তথ্য	Meeting information
+rb.form.meetingNo	সভা নম্বর	Meeting no
+rb.form.nextMeeting	পরবর্তী সভার তারিখ (ঐচ্ছিক)	Next meeting date (optional)
+rb.form.notify	সদস্যদের জন্য নোটিশ প্রকাশ করুন	Publish a notice for members
+rb.form.presentCount	{{present}}/{{total}} উপস্থিত	{{present}}/{{total}} present
+rb.form.removeFile	বাদ দিন	Remove
+rb.form.removeResolution	বাদ দিন	Remove
+rb.form.resolutions	গৃহীত সিদ্ধান্ত	Resolutions
+rb.form.save	পরিবর্তন সংরক্ষণ করুন	Save changes
+rb.form.status	অবস্থা	Status
+rb.form.submit	সভার রেকর্ড সংরক্ষণ করুন	Save meeting record
+rb.form.submitError	সভার রেকর্ড সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।	Could not save the meeting. Please try again.
+rb.form.subtitle	সভা, উপস্থিতি ও সিদ্ধান্ত একসাথে এক বার জমা দিলেই সংরক্ষিত হবে।	Meeting, attendance and resolutions are saved together in one submission.
+rb.form.summary	আলোচনার সারসংক্ষেপ	Summary of discussion
+rb.form.task	কাজ (ঐচ্ছিক)	Task (optional)
+rb.form.time	সময়	Time
+rb.form.title	নতুন সভার রেকর্ড	New Meeting Record
+rb.form.type	সভার ধরন	Meeting type
+rb.form.votesExceed	মোট ভোট উপস্থিত সদস্য সংখ্যার বেশি হতে পারে না।	Total votes cannot exceed the number of members present.
+rb.form.votesExceedInline	একটি সিদ্ধান্তের মোট ভোট উপস্থিত সদস্য সংখ্যা ({{present}}) এর বেশি হতে পারে না।	Total votes of a resolution cannot exceed members present ({{present}}).
+rb.list.attendance	{{present}}/{{total}} উপস্থিত	{{present}}/{{total}} present
+rb.list.empty	এখনো কোনো সভার রেকর্ড নেই।	No meeting records yet.
+rb.list.emptyFiltered	আপনার খোঁজার সাথে মেলে এমন কোনো সভা পাওয়া যায়নি।	No meetings matched your search.
+rb.list.resolutions	{{count}} টি সিদ্ধান্ত	{{count}} resolutions
+rb.list.title	সাম্প্রতিক সভা	Recent meetings
+rb.loadError	তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।	Could not load data. Please try again.
+rb.nav.next	পরবর্তী	Next
+rb.nav.previous	পূর্ববর্তী	Previous
+rb.recordings.download	ডাউনলোড	Download
+rb.recordings.downloadError	ডাউনলোড ব্যর্থ হয়েছে।	Download failed.
+rb.recordings.empty	এখনো কোনো রেকর্ডিং বা সংযুক্তি নেই।	No recordings or attachments yet.
+rb.recordings.title	রেকর্ডিং ও সংযুক্তি	Recordings & attachments
+rb.recordings.upload	ফাইল আপলোড	Upload file
+rb.recordings.uploadError	আপলোড ব্যর্থ হয়েছে। ফাইলের ধরন ও আকার দেখুন।	Upload failed. Check the file type and size.
+rb.resolution.done	সম্পন্ন	Done
+rb.resolution.in_progress	চলমান	In Progress
+rb.resolution.pending	অপেক্ষমাণ	Pending
+rb.status.cancelled	বাতিল	Cancelled
+rb.status.completed	সম্পন্ন	Completed
+rb.status.scheduled	নির্ধারিত	Scheduled
+rb.subtitle	সভার রেকর্ড, সিদ্ধান্ত ও উপস্থিতি — সব এক জায়গায়	Meeting records, decisions and attendance — all in one place
+rb.summary.avgAttendance	গড় উপস্থিতি	Average attendance
+rb.summary.openActions	অসম্পন্ন কাজ	Pending action items
+rb.summary.thisYear	এই বছরের সভা	Meetings this year
+rb.summary.title	সারসংক্ষেপ	Summary
+rb.summary.totalMeetings	মোট সভা	Total meetings
+rb.tabs.attendance	উপস্থিতি	Attendance
+rb.tabs.overview	সংক্ষিপ্ত বিবরণ	Overview
+rb.tabs.recordings	রেকর্ডিং	Recordings
+rb.tabs.resolutions	সিদ্ধান্ত	Resolutions
+rb.title	রেজোলিউশন বুক	Resolution Book
+rb.type.offline	অফলাইন	Offline
+rb.type.online	অনলাইন	Online
+rb.upcoming.label	পরবর্তী সভা	Next meeting
+rb.vote.against	বিপক্ষে	Against
+rb.vote.for	পক্ষে	For
+rb.vote.neutral	নিরপেক্ষ	Neutral
+registration.addressInfo.currentAddressTitle	বর্তমান ঠিকানা	Current Address
+registration.addressInfo.districtLabel	জেলা	District
+registration.addressInfo.districtRequired	জেলা আবশ্যক	District is required
+registration.addressInfo.divisionLabel	বিভাগ	Division
+registration.addressInfo.divisionRequired	বিভাগ আবশ্যক	Division is required
+registration.addressInfo.houseLabel	বাসা/হোল্ডিং নং	House/Holding No.
+registration.addressInfo.houseRequired	বাসা/হোল্ডিং নং আবশ্যক	House/Holding No. is required
+registration.addressInfo.permanentAddressTitle	স্থায়ী ঠিকানা	Permanent Address
+registration.addressInfo.postOfficeLabel	ডাকঘর	Post Office
+registration.addressInfo.postOfficeRequired	ডাকঘর আবশ্যক	Post office is required
+registration.addressInfo.roadLabel	রাস্তা/গ্রাম	Road/Village
+registration.addressInfo.roadRequired	রাস্তা/গ্রাম আবশ্যক	Road/Village is required
+registration.addressInfo.sameAsCurrentLabel	বর্তমান ঠিকানার সাথে একই	Same as current address
+registration.addressInfo.selectPlaceholder	নির্বাচন করুন	Select
+registration.addressInfo.upazilaLabel	উপজেলা/থানা	Upazila/Thana
+registration.addressInfo.upazilaRequired	উপজেলা/থানা আবশ্যক	Upazila/Thana is required
+registration.confirmation.applicantLabel	আবেদনকারী:	Applicant:
+registration.confirmation.message	আপনার আবেদন সফলভাবে জমা হয়েছে। অনুগ্রহ করে যাচাই ও অনুমোদনের জন্য অপেক্ষা করুন।	Your application has been submitted successfully. Please wait for verification and approval.
+registration.confirmation.newFormButton	নতুন ফর্ম পূরণ করুন	Fill Out a New Form
+registration.confirmation.okButton	ঠিক আছে	OK
+registration.confirmation.referenceLabel	আবেদন নং:	Application no:
+registration.confirmation.title	সাবমিট সফল হয়েছে!	Submission Successful!
+registration.declaration.consentLabel	আমি সকল শর্তাবলীতে সম্মতি প্রদান করছি।	I agree to all the terms and conditions.
+registration.declaration.consentRequired	অঙ্গীকারনামায় সম্মতি প্রদান আবশ্যক	Consent to the declaration is required
+registration.declaration.text	আমি অঙ্গীকার করছি যে, উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটির গঠনতন্ত্র, নিয়ম-শৃঙ্খলা ও বিধি সংক্রান্ত সিদ্ধান্তসমূহ মেনে চলবো এবং সংগঠনের উদ্দেশ্য ও স্বার্থবিরোধী কোনো কর্মকাণ্ডে অংশগ্রহণ করবো না। সংগঠনের সিদ্ধান্তসমূহে সদস্যদের অধিকার, সম্পত্তির নিরাপত্তা, পারস্পরিক সহযোগিতা, সামাজিক কল্যাণ ও এলাকার উন্নয়নে দায়িত্বশীলভাবে সহযোগিতা করবো। উপরোক্ত তথ্যসমূহ আমার জ্ঞান ও বিশ্বাস অনুযায়ী সঠিক।	I pledge to abide by the constitution, rules, discipline, and decisions of the Uttar Kaundia Abashon Malik Kalyan Society, and I will not participate in any activity contrary to the organization's purpose and interests. I will responsibly cooperate with the organization's decisions regarding members' rights, property security, mutual cooperation, social welfare, and local development. The above information is correct to the best of my knowledge and belief.
+registration.declaration.title	অঙ্গীকারনামা	Declaration
+registration.draft.discardDraft	বাতিল করে নতুন করে শুরু করুন	Discard and start fresh
+registration.draft.draftRestoredToast	আপনার আগের অসম্পূর্ণ ফর্ম পুনরুদ্ধার করা হয়েছে	Your previous incomplete form was restored
+registration.draft.draftSaved	খসড়া সংরক্ষিত	Draft saved
+registration.draft.reattachFilesNotice	পুনরুদ্ধার করা ফর্মে সংযুক্ত ফাইলগুলো আবার সংযুক্ত করুন	Please re-attach any files from the restored draft
+registration.header.formBadge	সদস্য নিবন্ধন ও মালিকানা তথ্য ফরম	Member Registration & Ownership Information Form
+registration.header.loginLink	লগইন	Login
+registration.header.logoAlt	সংগঠনের লোগো	Organization logo
+registration.header.orgLocation	উত্তর কাউন্দিয়া, সাভার, ঢাকা। | স্থাপিত : ২০২৬ ইং	Uttar Kaundia, Savar, Dhaka. | Established: 2026
+registration.header.orgName	উত্তর কাউন্দিয়া আবাসন মালিক কল্যাণ সোসাইটি	Uttar Kaundia Abashon Malik Kalyan Society
+registration.header.orgSubtitle	(সকল জমি, বাড়ি ও ফ্ল্যাট মালিকদের ঐক্যবদ্ধ অরাজনৈতিক আবাসন সংগঠন)	(A united non-political housing organization for all land, house, and flat owners)
+registration.header.stepperAriaLabel	নিবন্ধন ধাপসমূহ	Registration steps
+registration.header.submissionDateLabel	নিবন্ধনের তারিখ	Registration Date
+registration.memberInfo.clearPhotoButton	মুছুন	Remove
+registration.memberInfo.dobLabel	জন্ম তারিখ	Date of Birth
+registration.memberInfo.dobRequired	জন্ম তারিখ আবশ্যক	Date of birth is required
+registration.memberInfo.emailInvalid	ই-মেইল সঠিক নয়	Email is invalid
+registration.memberInfo.emailLabel	ই-মেইল	Email
+registration.memberInfo.emailRequired	ই-মেইল আবশ্যক	Email is required
+registration.memberInfo.fatherOrHusbandLabel	পিতা/স্বামী	Father/Husband
+registration.memberInfo.fatherOrHusbandRequired	পিতা/স্বামী আবশ্যক	Father/Husband is required
+registration.memberInfo.fullNameLabel	পূর্ণ নাম	Full Name
+registration.memberInfo.fullNameRequired	পূর্ণ নাম আবশ্যক	Full name is required
+registration.memberInfo.genderFemale	মহিলা	Female
+registration.memberInfo.genderLabel	লিঙ্গ	Gender
+registration.memberInfo.genderMale	পুরুষ	Male
+registration.memberInfo.genderRequired	লিঙ্গ নির্বাচন করুন	Please select gender
+registration.memberInfo.memberPhotoRequired	সদস্যের ছবি আবশ্যক	Member's photo is required
+registration.memberInfo.mobileInvalid	মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)	Mobile number is invalid (01XXXXXXXXX)
+registration.memberInfo.mobileLabel	মোবাইল (WhatsApp)	Mobile (WhatsApp)
+registration.memberInfo.mobileRequired	মোবাইল আবশ্যক	Mobile is required
+registration.memberInfo.motherLabel	মাতা	Mother
+registration.memberInfo.motherRequired	মাতা আবশ্যক	Mother's name is required
+registration.memberInfo.nationalityLabel	জাতীয়তা	Nationality
+registration.memberInfo.nidInvalid	NID নম্বর ১০-১৭ সংখ্যার হতে হবে	NID number must be 10-17 digits
+registration.memberInfo.nidLabel	NID নং	NID No.
+registration.memberInfo.nidPlaceholder	১০-১৭ সংখ্যা	10-17 digits
+registration.memberInfo.nidRequired	NID নম্বর আবশ্যক	NID number is required
+registration.memberInfo.occupationLabel	পেশা	Occupation
+registration.memberInfo.photoAlt	সদস্যের ছবি	Member's photo
+registration.memberInfo.photoPlaceholder	সদস্যের ছবি	Member's photo
+registration.memberInfo.photoSizeError	ছবির সাইজ ৩ এমবি-এর কম হতে হবে	Photo size must be less than 3 MB
+registration.memberInfo.photoTypeError	ছবির ফাইল নির্বাচন করুন (JPG/PNG)	Please select an image file (JPG/PNG)
+registration.nav.next	পরবর্তী	Next
+registration.nav.previous	পূর্ববর্তী	Previous
+registration.nav.submit	ফর্ম সাবমিট করুন	Submit Form
+registration.nav.submitting	সাবমিট হচ্ছে...	Submitting...
+registration.nominee.addMore	আরও মনোনীত ব্যক্তি যোগ করুন	Add another nominee
+registration.nominee.additionalNomineesTitle	অতিরিক্ত মনোনীত ব্যক্তি	Additional Nominees
+registration.nominee.addressLabel	ঠিকানা	Address
+registration.nominee.mobileInvalid	মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)	Mobile number is invalid (01XXXXXXXXX)
+registration.nominee.mobileLabel	মোবাইল	Mobile
+registration.nominee.mobileRequired	মোবাইল আবশ্যক	Mobile is required
+registration.nominee.nameLabel	নাম	Name
+registration.nominee.nameRequired	নাম আবশ্যক	Name is required
+registration.nominee.nomineeNumberTitle	মনোনীত ব্যক্তি {{number}}	Nominee {{number}}
+registration.nominee.relationLabel	পিতা/স্বামী / সম্পর্ক	Father/Husband / Relation
+registration.nominee.relationShortLabel	সম্পর্ক	Relation
+registration.nominee.remove	মুছুন	Remove
+registration.nominee.sameAsUrgentContactLabel	জরুরি যোগাযোগের তথ্য থেকে একই তথ্য ব্যবহার করুন	Use the same information as urgent contact
+registration.payment.accountNameLabel	হিসাবের নাম	Account Name
+registration.payment.accountNumberLabel	হিসাব নং	Account Number
+registration.payment.admissionFeeHint	বর্তমান ভর্তি ফি — সংগঠন কর্তৃক নির্ধারিত, এখানে পরিবর্তনযোগ্য নয়	Current admission fee — set by the organization, not editable here
+registration.payment.admissionFeeLabel	ভর্তি ফি (টাকা)	Admission Fee (Taka)
+registration.payment.admissionFeeLoadFailed	বর্তমান ভর্তি ফি লোড করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।	Could not load the current admission fee. Please retry.
+registration.payment.admissionFeeLoading	বর্তমান ভর্তি ফি লোড হচ্ছে…	Loading current admission fee…
+registration.payment.admissionFeeRequired	ভর্তি ফি আবশ্যক	Admission fee is required
+registration.payment.admissionFeeRetry	পুনরায় চেষ্টা	Retry
+registration.payment.attachReceipt	রসিদের ছবি সংযুক্ত করুন	Attach receipt image
+registration.payment.bankNameLabel	ব্যাংক	Bank
+registration.payment.branchLabel	শাখা	Branch
+registration.payment.fileSizeError	ফাইলের সাইজ সর্বোচ্চ {{maxMb}} এমবি হতে হবে	File size must not exceed {{maxMb}} MB
+registration.payment.fileTypeError	শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য	Only JPG, PNG, or PDF files are accepted
+registration.payment.maxFileSizeHint	সর্বোচ্চ {{maxMb}} এমবি (JPG/PNG/PDF)	Max {{maxMb}} MB (JPG/PNG/PDF)
+registration.payment.methodLabel	মাধ্যম	Method
+registration.payment.mfsNumberLabel	MFS নম্বর	MFS Number
+registration.payment.paymentMethodRequired	পেমেন্ট মাধ্যম আবশ্যক	Payment method is required
+registration.payment.receiptImageLabel	মানি রসিদের ছবি	Money Receipt Image
+registration.payment.receiptNoLabel	রসিদ নং/Transaction ID	Receipt No./Transaction ID
+registration.payment.removeFile	মুছুন	Remove
+registration.payment.routingNumberLabel	রাউটিং নং	Routing Number
+registration.payment.subscriptionBaseSummary	ভিত্তি: {{amount}} টাকা	Base: {{amount}} Tk
+registration.payment.subscriptionExtraSummary	+ অতিরিক্ত {{extra}}টি শতাংশ (আংশিক শতাংশও পূর্ণ ধরা হয়) = {{amount}} টাকা	+ extra {{extra}} decimal(s) (a partial decimal counts as a full one) = {{amount}} Tk
+registration.payment.subscriptionHint	সংগঠন কর্তৃক নির্ধারিত, এখানে পরিবর্তনযোগ্য নয়	Set by the organization, not editable here
+registration.payment.subscriptionLabel	চাঁদা (টাকা)	Subscription (Taka)
+registration.payment.subscriptionLoadFailed	চাঁদার পরিমাণ হিসাব করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।	Could not calculate the subscription amount. Please retry.
+registration.payment.subscriptionLoading	চাঁদার পরিমাণ হিসাব করা হচ্ছে…	Calculating the subscription amount…
+registration.payment.subscriptionRequired	চাঁদা আবশ্যক	Subscription is required
+registration.payment.subscriptionRetry	পুনরায় চেষ্টা	Retry
+registration.payment.totalAmountSummary	= মোট {{amount}}৳	= Total {{amount}} Tk
+registration.property.applicableDocsLabel	প্রযোজ্য কাগজ	Applicable Documents
+registration.property.applicableDocsRequired	প্রযোজ্য কাগজ নির্বাচন আবশ্যক	Please select applicable documents
+registration.property.attachFileButton	ফাইল সংযুক্ত করুন	Attach file
+registration.property.countLabel	সম্পত্তির সংখ্যা	Number of Properties
+registration.property.countSelectPlaceholder	নির্বাচন করুন	Select
+registration.property.dagCsLabel	সিএস দাগ নং	CS Dag No.
+registration.property.dagNoCsRequired	CS দাগ নং আবশ্যক	CS dag no. is required
+registration.property.dagNoLabel	দাগ নং	Dag No.
+registration.property.dagNoRsRequired	RS দাগ নং আবশ্যক	RS dag no. is required
+registration.property.dagRsLabel	আরএস দাগ নং	RS Dag No.
+registration.property.docFileMissing	এই কাগজের ফাইল সংযুক্ত করা আবশ্যক	A file must be attached for this document
+registration.property.docFileSizeError	ফাইলের সাইজ সর্বোচ্চ {{maxMb}} এমবি হতে হবে	File size must not exceed {{maxMb}} MB
+registration.property.docFileTypeError	শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য	Only JPG, PNG, or PDF files are accepted
+registration.property.holdingNumberLabel	হোল্ডিং নম্বর	Holding Number
+registration.property.itemTitle	সম্পত্তি	Property
+registration.property.jointOwnerCountLabel	যৌথ মালিকগণের সংখ্যা	Joint Owner Count
+registration.property.jointOwnerCountRequired	যৌথ মালিকগণের সংখ্যা আবশ্যক	Joint owner count is required
+registration.property.khatianNoLabel	খতিয়ান নং	Khatian No.
+registration.property.khatianNoRequired	খতিয়ান নং আবশ্যক	Khatian No. is required
+registration.property.landQuantityInvalid	মোট জমির পরিমাণ শূন্যের চেয়ে বেশি হতে হবে	Total land quantity must be greater than zero
+registration.property.landQuantityLabel	মোট জমির পরিমাণ (শতাংশ):	Total Land Quantity (Decimal):
+registration.property.landQuantityPlaceholder	যেমন: ২.৫	e.g., 2.5
+registration.property.landQuantityRequired	মোট জমির পরিমাণ আবশ্যক	Total land quantity is required
+registration.property.maxFileSizeNote	সর্বোচ্চ {{maxMb}} এমবি (JPG/PNG/PDF)	Max {{maxMb}} MB (JPG/PNG/PDF)
+registration.property.myShareQuantityExceedsTotal	আমার অংশের পরিমাণ মোট জমির পরিমাণের চেয়ে বেশি হতে পারবে না	My share quantity cannot exceed total land quantity
+registration.property.myShareQuantityInvalid	আমার অংশের পরিমাণ শূন্যের চেয়ে বেশি হতে হবে	My share quantity must be greater than zero
+registration.property.myShareQuantityLabel	আমার অংশের পরিমাণ (শতাংশ):	My Share Quantity (Decimal):
+registration.property.myShareQuantityPlaceholder	যেমন: ১.২৫	e.g., 1.25
+registration.property.myShareQuantityRequired	আমার অংশের পরিমাণ আবশ্যক	My share quantity is required
+registration.property.ownershipLabel	মালিকানা	Ownership
+registration.property.ownershipRequired	মালিকানা আবশ্যক	Ownership is required
+registration.property.removeFileButton	মুছুন	Remove
+registration.property.typeLabel	সম্পত্তির ধরন	Property Type
+registration.property.typeOtherPlaceholder	বিস্তারিত লিখুন	Enter details
+registration.property.typeRequired	সম্পত্তির ধরন আবশ্যক	Property type is required
+registration.review.declarationAccepted	সম্মতি প্রদান করা হয়েছে	Consent has been given
+registration.review.declarationNotAccepted	সম্মতি প্রদান করা হয়নি	Consent has not been given
+registration.review.declarationTitle	অঙ্গীকার	Declaration
+registration.review.edit	সম্পাদনা করুন	Edit
+registration.review.emailLabel	ই-মেইল	Email
+registration.review.fatherOrHusbandLabel	পিতা/স্বামী	Father/Husband
+registration.review.intro	সাবমিট করার আগে নিচের তথ্যগুলো যাচাই করে নিন।	Please verify the information below before submitting.
+registration.review.memberInfoTitle	সদস্যের তথ্য	Member Information
+registration.review.methodLabel	মাধ্যম	Method
+registration.review.mobileLabel	মোবাইল	Mobile
+registration.review.nameLabel	নাম	Name
+registration.review.nomineeCountLabel	নমিনি সংখ্যা	Number of nominees
+registration.review.nomineeCountSummary	{{count}} জন	{{count}}
+registration.review.paymentInfoTitle	পেমেন্ট তথ্য	Payment Information
+registration.review.propertyInfoTitle	সম্পত্তির তথ্য	Property Information
+registration.review.subscriptionLabel	চাঁদা	Subscription
+registration.review.totalPropertiesSummary	মোট সম্পত্তি: {{count}} টি	Total properties: {{count}}
+registration.review.urgentContactAndNomineeTitle	জরুরি যোগাযোগ ও নমিনি	Urgent Contact & Nominee
+registration.review.urgentContactLabel	জরুরি যোগাযোগ	Urgent Contact
+registration.stepShortLabels.memberInfo	সদস্য	Member
+registration.stepShortLabels.nominee	নমিনি	Nominee
+registration.stepShortLabels.payment	পেমেন্ট	Payment
+registration.stepShortLabels.property	সম্পত্তি	Property
+registration.stepShortLabels.review	পর্যালোচনা	Review
+registration.stepShortLabels.signature	স্বাক্ষর	Signature
+registration.stepTitles.addressInfo	২. ঠিকানার তথ্য	2. Address Information
+registration.stepTitles.contactAndNominee	জরুরি যোগাযোগ ও নমিনি	Urgent Contact & Nominee
+registration.stepTitles.declarationAndSignature	অঙ্গীকার ও স্বাক্ষর	Declaration & Signature
+registration.stepTitles.memberInfo	১. সদস্যের ব্যক্তিগত তথ্য	1. Member's Personal Information
+registration.stepTitles.nominee	৫. নমিনি	5. Nominee
+registration.stepTitles.payment	পেমেন্টের তথ্য	Payment Information
+registration.stepTitles.property	৩. আবাসন / সম্পত্তির মালিকানা তথ্য	3. Housing / Property Ownership Information
+registration.stepTitles.review	পর্যালোচনা	Review
+registration.stepTitles.urgentContact	৪. জরুরি যোগাযোগ	4. Urgent Contact
+registration.submit.duplicateApproved	আপনি ইতিমধ্যে সদস্য হিসেবে নিবন্ধিত। অনুগ্রহ করে লগইন করুন।	You are already registered as a member. Please login.
+registration.submit.duplicateGeneric	এই তথ্য দিয়ে একটি আবেদন ইতিমধ্যে বিদ্যমান।	An application with this information already exists.
+registration.submit.duplicatePending	আপনার আবেদনটি অপেক্ষমাণ। অনুগ্রহ করে নিশ্চিতকরণের জন্য অপেক্ষা করুন।	Your application is pending. Please wait for confirmation.
+registration.submit.duplicateTitle	আবেদন ইতিমধ্যে বিদ্যমান	Application Already Exists
+registration.submit.errorCode	কোড {{status}}	code {{status}}
+registration.submit.feeNotConfigured	ভর্তি ফি এখনো নির্ধারণ করা হয়নি। অনুগ্রহ করে অফিসে যোগাযোগ করুন।	Admission fee has not been set yet. Please contact the office.
+registration.submit.fields.admission_fee	ভর্তি ফি	Admission fee
+registration.submit.fields.current_address	বর্তমান ঠিকানা	Current address
+registration.submit.fields.dob	জন্ম তারিখ	Date of birth
+registration.submit.fields.email	ইমেইল	Email
+registration.submit.fields.father_or_husband	পিতা/স্বামীর নাম	Father/Husband
+registration.submit.fields.full_name	পূর্ণ নাম	Full name
+registration.submit.fields.gender	লিঙ্গ	Gender
+registration.submit.fields.member_signature	সদস্যের স্বাক্ষর	Member signature
+registration.submit.fields.mobile	মোবাইল	Mobile
+registration.submit.fields.mother	মাতার নাম	Mother's name
+registration.submit.fields.nationality	জাতীয়তা	Nationality
+registration.submit.fields.nid	জাতীয় পরিচয়পত্র নম্বর	NID number
+registration.submit.fields.nominees	নমিনি	Nominee
+registration.submit.fields.occupation	পেশা	Occupation
+registration.submit.fields.payment_method	পরিশোধের মাধ্যম	Payment method
+registration.submit.fields.permanent_address	স্থায়ী ঠিকানা	Permanent address
+registration.submit.fields.properties	সম্পত্তি	Property
+registration.submit.fields.receipt_no	রসিদ নম্বর	Receipt no
+registration.submit.fields.submission_date	নিবন্ধনের তারিখ	Registration date
+registration.submit.fields.subscription	মাসিক চাঁদা	Subscription
+registration.submit.fields.urgent_contact_address	জরুরি যোগাযোগের ঠিকানা	Urgent contact address
+registration.submit.fields.urgent_contact_mobile	জরুরি যোগাযোগের মোবাইল	Urgent contact mobile
+registration.submit.fields.urgent_contact_name	জরুরি যোগাযোগের নাম	Urgent contact name
+registration.submit.fields.urgent_contact_relation	জরুরি যোগাযোগের সম্পর্ক	Urgent contact relation
+registration.submit.fileTooLarge	আপলোড করা ছবি বা ফাইল খুব বড়। ছোট ফাইল দিন (সর্বোচ্চ ১০ MB)।	An uploaded photo or file is too large. Please use a smaller file (max 10 MB).
+registration.submit.genericError	সাবমিটে সমস্যা হয়েছে	There was a problem submitting
+registration.submit.invalidData	কিছু তথ্য বা আপলোড করা ফাইল সঠিক নয়। যাচাই করে আবার চেষ্টা করুন।	Some information or uploaded files are invalid. Please check and try again.
+registration.submit.invalidShareQuantity	জমির অংশের পরিমাণ সঠিক নয়। সম্পত্তির ধাপটি যাচাই করুন।	Land share quantity is invalid. Please check the property step.
+registration.submit.networkError	নেটওয়ার্কে সমস্যা। অনুগ্রহ করে আবার চেষ্টা করুন।	Network issue. Please try again.
+registration.submit.reasons.invalid	তথ্যটি সঠিক নয়	the value is invalid
+registration.submit.reasons.required	এই তথ্যটি আবশ্যক	this field is required
+registration.submit.serverError	সার্ভারে সমস্যা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।	Server problem. Please try again in a few minutes.
+registration.urgentContact.addressLabel	ঠিকানা	Address
+registration.urgentContact.mobileInvalid	মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)	Mobile number is invalid (01XXXXXXXXX)
+registration.urgentContact.mobileLabel	মোবাইল	Mobile
+registration.urgentContact.mobileRequired	মোবাইল আবশ্যক	Mobile is required
+registration.urgentContact.nameLabel	নাম	Name
+registration.urgentContact.nameRequired	নাম আবশ্যক	Name is required
+registration.urgentContact.relationLabel	সম্পর্ক	Relation
+registration.validation.applicableDocsRequired	প্রযোজ্য কাগজ নির্বাচন আবশ্যক	Please select applicable documents
+registration.validation.currentAddressLabel	বর্তমান ঠিকানা	Current Address
+registration.validation.dobRequired	জন্ম তারিখ আবশ্যক	Date of birth is required
+registration.validation.docFileRequired	"{{docType}}" এর জন্য ফাইল সংযুক্ত করা আবশ্যক	A file must be attached for "{{docType}}"
+registration.validation.emailInvalid	ই-মেইল সঠিক নয়	Email is invalid
+registration.validation.fatherOrHusbandRequired	পিতা/স্বামী আবশ্যক	Father/Husband is required
+registration.validation.fullNameRequired	পূর্ণ নাম আবশ্যক	Full name is required
+registration.validation.genderRequired	লিঙ্গ নির্বাচন করুন	Please select gender
+registration.validation.jointOwnerCountRequired	যৌথ মালিকগণের সংখ্যা আবশ্যক	Joint owner count is required
+registration.validation.landQuantityInvalid	মোট জমির পরিমাণ শূন্যের চেয়ে বেশি হতে হবে	Total land quantity must be greater than zero
+registration.validation.landQuantityRequired	মোট জমির পরিমাণ আবশ্যক	Total land quantity is required
+registration.validation.mobileInvalid	মোবাইল নম্বর সঠিক নয় (01XXXXXXXXX)	Mobile number is invalid (01XXXXXXXXX)
+registration.validation.mobileRequired	মোবাইল আবশ্যক	Mobile is required
+registration.validation.motherRequired	মাতা আবশ্যক	Mother's name is required
+registration.validation.myShareQuantityExceedsTotal	আমার অংশের পরিমাণ মোট জমির পরিমাণের চেয়ে বেশি হতে পারবে না	My share quantity cannot exceed total land quantity
+registration.validation.myShareQuantityInvalid	আমার অংশের পরিমাণ শূন্যের চেয়ে বেশি হতে হবে	My share quantity must be greater than zero
+registration.validation.myShareQuantityRequired	আমার অংশের পরিমাণ আবশ্যক	My share quantity is required
+registration.validation.nameRequired	নাম আবশ্যক	Name is required
+registration.validation.nidInvalid	NID নম্বর ১০-১৭ সংখ্যার হতে হবে	NID number must be 10-17 digits
+registration.validation.nomineeLabel	মনোনীত ব্যক্তি #{{number}}	Nominee #{{number}}
+registration.validation.ownershipRequired	মালিকানা আবশ্যক	Ownership is required
+registration.validation.permanentAddressLabel	স্থায়ী ঠিকানা	Permanent Address
+registration.validation.propertyCountRequired	সম্পত্তির সংখ্যা নির্বাচন করুন	Please select the number of properties
+registration.validation.propertyLabel	সম্পত্তি #{{number}}	Property #{{number}}
+registration.validation.propertyTypeRequired	সম্পত্তির ধরন আবশ্যক	Property type is required
+registration.validation.urgentContactLabel	জরুরি যোগাযোগ	Urgent Contact
+welcome	স্বাগতম, {{name}}	Welcome, {{name}}
