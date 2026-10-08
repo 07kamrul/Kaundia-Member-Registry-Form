@@ -854,15 +854,18 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
   }) async {
     final amount = num.tryParse(amountController.text);
     final errors = <String>[];
-    if (dateController.text.isEmpty)
+    if (dateController.text.isEmpty) {
       errors.add(loc.adminFinanceManagementErrorsDateRequired);
-    if (amount == null || amount <= 0)
+    }
+    if (amount == null || amount <= 0) {
       errors.add(loc.adminFinanceManagementErrorsAmountRequired);
+    }
     if (descriptionController.text.trim().isEmpty) {
       errors.add(loc.adminFinanceManagementErrorsDescriptionRequired);
     }
-    if (categoryId == null)
+    if (categoryId == null) {
       errors.add(loc.adminFinanceManagementErrorsCategoryRequired);
+    }
     if (errors.isNotEmpty) {
       showAppToast(sheetContext, errors.first, error: true);
       return;

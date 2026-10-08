@@ -164,8 +164,9 @@ class MembersListPage extends StatelessWidget {
                                   loc.adminMembersListDeleteModalConfirmLabel,
                               destructive: true,
                             );
-                            if (confirmed && context.mounted)
+                            if (confirmed && context.mounted) {
                               await cubit.delete(m.id);
+                            }
                           },
                   ),
                 ],

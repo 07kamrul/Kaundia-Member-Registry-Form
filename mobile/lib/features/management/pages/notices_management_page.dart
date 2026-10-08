@@ -376,8 +376,9 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                           publishAt: publishAt,
                         ),
                       );
-                      if (sheetContext.mounted)
+                      if (sheetContext.mounted) {
                         Navigator.of(sheetContext).pop(ok);
+                      }
                     },
                   ),
                 ),

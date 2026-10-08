@@ -380,7 +380,9 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                         : loc.commonSave,
                     onPressed: () async {
                       if (titleController.text.trim().isEmpty ||
-                          startDate.isEmpty) return;
+                          startDate.isEmpty) {
+                        return;
+                      }
                       final startAt = isoFromParts(startDate, startTime);
                       final endAt = endDate.isEmpty
                           ? null
@@ -402,8 +404,9 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                           isMembersOnly: membersOnly,
                         ),
                       );
-                      if (sheetContext.mounted)
+                      if (sheetContext.mounted) {
                         Navigator.of(sheetContext).pop(ok);
+                      }
                     },
                   ),
                 ),

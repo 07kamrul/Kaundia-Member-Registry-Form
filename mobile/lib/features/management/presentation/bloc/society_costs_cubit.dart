@@ -312,8 +312,9 @@ class SocietyCostsCubit extends Cubit<SocietyCostsState> {
 
   bool get manualMismatch {
     final cost = state.splitCost;
-    if (state.splitMethod != CostSplitMethod.manual || cost == null)
+    if (state.splitMethod != CostSplitMethod.manual || cost == null) {
       return false;
+    }
     return (manualTotal - cost.totalAmount).abs() >= 0.005;
   }
 

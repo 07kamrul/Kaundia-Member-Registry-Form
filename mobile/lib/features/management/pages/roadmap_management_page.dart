@@ -228,8 +228,9 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                         message: item.text,
                         destructive: true,
                       );
-                      if (confirmed && context.mounted)
+                      if (confirmed && context.mounted) {
                         await cubit.deleteItem(item);
+                      }
                     },
             ),
           ],
@@ -367,8 +368,9 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                             owner: ownerController.text.trim(),
                             note: noteController.text.trim(),
                           );
-                    if (sheetContext.mounted && ok)
+                    if (sheetContext.mounted && ok) {
                       Navigator.of(sheetContext).pop();
+                    }
                   },
                 ),
               ),

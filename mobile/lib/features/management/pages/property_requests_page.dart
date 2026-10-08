@@ -283,8 +283,9 @@ class PropertyRequestsPage extends StatelessWidget {
                               confirmLabel: loc
                                   .adminPropertyRequestsApproveModalConfirmLabel,
                             );
-                            if (confirmed && context.mounted)
+                            if (confirmed && context.mounted) {
                               await cubit.approve(r);
+                            }
                           },
                   ),
                 ],

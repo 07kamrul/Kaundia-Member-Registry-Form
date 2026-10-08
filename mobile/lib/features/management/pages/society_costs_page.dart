@@ -556,8 +556,9 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                               : notesController.text.trim(),
                         ),
                       );
-                      if (sheetContext.mounted)
+                      if (sheetContext.mounted) {
                         Navigator.of(sheetContext).pop(ok);
+                      }
                     },
                   ),
                 ),
@@ -778,8 +779,9 @@ class _SocietyCostsPageState extends State<SocietyCostsPage> {
                         ? null
                         : receiptController.text.trim(),
                   );
-                  if (sheetContext.mounted && ok)
+                  if (sheetContext.mounted && ok) {
                     Navigator.of(sheetContext).pop();
+                  }
                 },
               ),
             ),
