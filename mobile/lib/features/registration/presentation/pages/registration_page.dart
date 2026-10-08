@@ -13,8 +13,6 @@ import '../../data/registration_draft_service.dart';
 import '../../data/registration_repository.dart';
 import '../../domain/submission_error_mapper.dart';
 import '../bloc/registration_bloc.dart';
-import '../bloc/registration_event.dart';
-import '../bloc/registration_state.dart';
 import '../widgets/contact_step.dart';
 import '../widgets/declaration_step.dart';
 import '../widgets/member_info_step.dart';

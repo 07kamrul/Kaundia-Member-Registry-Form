@@ -11,8 +11,6 @@ import 'package:kaundia_app/features/registration/data/registration_repository.d
 import 'package:kaundia_app/features/registration/domain/registration_form.dart';
 import 'package:kaundia_app/features/registration/domain/submission_error_mapper.dart';
 import 'package:kaundia_app/features/registration/presentation/bloc/registration_bloc.dart';
-import 'package:kaundia_app/features/registration/presentation/bloc/registration_event.dart';
-import 'package:kaundia_app/features/registration/presentation/bloc/registration_state.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockRegistrationRepository extends Mock implements RegistrationRepository {}

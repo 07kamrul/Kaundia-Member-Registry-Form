@@ -6,31 +6,8 @@ import '../../../core/di/injector.dart';
 import '../../../core/storage/app_preferences.dart';
 import '../../../l10n/app_localizations.dart';
 
-sealed class SettingsEvent {}
-
-final class SettingsThemeChanged extends SettingsEvent {
-  SettingsThemeChanged(this.mode);
-  final String mode; // system | light | dark
-}
-
-final class SettingsLanguageChanged extends SettingsEvent {
-  SettingsLanguageChanged(this.code); // bn | en
-  final String code;
-}
-
-class SettingsState {
-  SettingsState({required this.themeMode, required this.languageCode});
-  final String themeMode;
-  final String languageCode;
-
-  ThemeMode get materialThemeMode => switch (themeMode) {
-        'light' => ThemeMode.light,
-        'dark' => ThemeMode.dark,
-        _ => ThemeMode.system,
-      };
-
-  Locale get locale => Locale(languageCode);
-}
+part 'settings_event.dart';
+part 'settings_state.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   SettingsBloc()

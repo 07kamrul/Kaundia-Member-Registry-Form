@@ -8,7 +8,7 @@ import '../../../core/network/api_client.dart';
 import 'data/content_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
-import 'bloc/content_bloc.dart';
+import 'bloc/notices_bloc.dart';
 
 /// Port of Angular `notice-detail-page.component.*`: there is no single-row
 /// public endpoint, so the detail view reads the same list feed and picks its

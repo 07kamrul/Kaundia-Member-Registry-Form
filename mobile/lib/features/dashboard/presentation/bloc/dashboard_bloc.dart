@@ -7,64 +7,8 @@ import '../../../../core/network/api_exception.dart';
 import '../../data/public_stats_repository.dart';
 import '../../domain/entity/public_stats.dart';
 
-// ---------------------------------------------------------------------------
-// Events
-// ---------------------------------------------------------------------------
-
-sealed class DashboardEvent extends Equatable {
-  const DashboardEvent();
-  @override
-  List<Object?> get props => const [];
-}
-
-/// Load the dashboard (public stats +, when authenticated, the member's own
-/// submission status). Dispatched on first build and on pull-to-refresh.
-final class DashboardStarted extends DashboardEvent {
-  const DashboardStarted({this.forceRefresh = false});
-  final bool forceRefresh;
-  @override
-  List<Object?> get props => [forceRefresh];
-}
-
-// ---------------------------------------------------------------------------
-// States
-// ---------------------------------------------------------------------------
-
-sealed class DashboardState extends Equatable {
-  const DashboardState();
-  @override
-  List<Object?> get props => const [];
-}
-
-class DashboardInitial extends DashboardState {
-  const DashboardInitial();
-}
-
-class DashboardLoading extends DashboardState {
-  const DashboardLoading();
-}
-
-class DashboardLoaded extends DashboardState {
-  const DashboardLoaded({required this.stats, this.ownStatus, this.reloading = false});
-
-  final PublicStats stats;
-
-  /// Null for unauthenticated visitors.
-  final OwnStatus? ownStatus;
-
-  /// True while a pull-to-refresh reload is in flight over existing content.
-  final bool reloading;
-
-  @override
-  List<Object?> get props => [stats, ownStatus, reloading];
-}
-
-class DashboardFailure extends DashboardState {
-  const DashboardFailure({required this.error});
-  final ApiException error;
-  @override
-  List<Object?> get props => [error];
-}
+part 'dashboard_event.dart';
+part 'dashboard_state.dart';
 
 // ---------------------------------------------------------------------------
 // Bloc

@@ -10,7 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/resolution_book_repository.dart';
 import '../domain/resolution_book_entities.dart';
-import '../presentation/bloc/resolution_book_bloc.dart';
+import '../presentation/bloc/resolution_book_detail_bloc.dart';
 
 /// Port of Angular MeetingDetailComponent: overview / attendance / resolutions
 /// / recordings tabs, minutes PDF export, and (with manage_resolution_book)
@@ -25,9 +25,9 @@ class ResolutionBookDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ResolutionBookDetailCubit(
+      create: (_) => ResolutionBookDetailBloc(
         repository: ResolutionBookRepository(apiClient: sl<ApiClient>()),
-      )..load(id ?? ''),
+      )..add(ResolutionBookDetailLoadRequested(id ?? '')),
       child: const _DetailView(),
     );
   }
@@ -49,21 +49,21 @@ class _DetailViewState extends State<_DetailView> {
     final canManage =
         sl<SessionManager>().session?.can(AppPermissions.resolutionBookManage) ?? false;
     return Scaffold(
-      body: BlocConsumer<ResolutionBookDetailCubit, ResolutionBookDetailState>(
+      body: BlocConsumer<ResolutionBookDetailBloc, ResolutionBookDetailState>(
         listener: (context, state) {
           final path = state.pdfSavedPath;
           if (path != null) {
             OpenFilex.open(path);
-            context.read<ResolutionBookDetailCubit>().clearPdfSavedPath();
+            context.read<ResolutionBookDetailBloc>().add(const ResolutionBookDetailPdfSavedPathCleared());
           }
         },
         builder: (context, state) {
-          final cubit = context.read<ResolutionBookDetailCubit>();
+          final bloc = context.read<ResolutionBookDetailBloc>();
           if (state.status == ResolutionBookStatus.loading) {
             return const SkeletonLoader(lines: 8);
           }
           if (state.error || state.meeting == null) {
-            return InlineError(message: loc.rbLoadError, onRetry: () => cubit.load(''));
+            return InlineError(message: loc.rbLoadError, onRetry: () => bloc.add(const ResolutionBookDetailLoadRequested('')));
           }
           final meeting = state.meeting!;
           return ListView(
@@ -105,7 +105,7 @@ class _DetailViewState extends State<_DetailView> {
                           : loc.rbTypeOffline,
                     ),
                     OutlinedButton.icon(
-                      onPressed: state.pdfDownloading ? null : cubit.downloadPdf,
+                      onPressed: state.pdfDownloading ? null : () => bloc.add(const ResolutionBookDetailPdfDownloadRequested()),
                       icon: state.pdfDownloading
                           ? const SizedBox(
                               width: 14, height: 14,
@@ -117,7 +117,7 @@ class _DetailViewState extends State<_DetailView> {
                 ),
               ),
               if (state.exportError)
-                InlineError(message: loc.rbExportError, onRetry: cubit.downloadPdf),
+                InlineError(message: loc.rbExportError, onRetry: () => bloc.add(const ResolutionBookDetailPdfDownloadRequested())),
               AppCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,7 +202,7 @@ class _DetailViewState extends State<_DetailView> {
                                   '${r.task != null ? '\n${r.task}' : ''}',
                                 ),
                                 trailing: canManage
-                                    ? _statusDropdown(context, cubit, state, r)
+                                    ? _statusDropdown(context, bloc, state, r)
                                     : StatusBadge(
                                         kind: switch (r.status) {
                                           ResolutionStatus.done => StatusKind.approved,
@@ -242,7 +242,7 @@ class _DetailViewState extends State<_DetailView> {
 
   Widget _statusDropdown(
     BuildContext context,
-    ResolutionBookDetailCubit cubit,
+    ResolutionBookDetailBloc bloc,
     ResolutionBookDetailState state,
     Resolution r,
   ) {
@@ -258,7 +258,7 @@ class _DetailViewState extends State<_DetailView> {
       onChanged: saving
           ? null
           : (next) {
-              if (next != null) cubit.setResolutionStatus(r.id, next);
+              if (next != null) bloc.add(ResolutionBookDetailResolutionStatusChanged(r.id, next));
             },
     );
   }

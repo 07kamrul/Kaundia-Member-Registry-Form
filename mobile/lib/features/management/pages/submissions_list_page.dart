@@ -28,7 +28,7 @@ class SubmissionsListPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => SubmissionsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
-        ..load(),
+        ..add(const SubmissionsLoadRequested()),
       child: BlocBuilder<SubmissionsBloc, SubmissionsState>(
           builder: (context, state) {
         final bloc = context.read<SubmissionsBloc>();
@@ -60,7 +60,8 @@ class SubmissionsListPage extends StatelessWidget {
                       child: Text(statusLabel(loc, s)),
                     ),
                 ],
-                onChanged: bloc.setFilter,
+                onChanged: (filter) =>
+                    bloc.add(SubmissionsFilterChanged(filter)),
               ),
             ),
             if (state.loading)

@@ -6,79 +6,8 @@ import '../../../core/auth/session.dart';
 import '../../../core/di/injector.dart';
 import '../../../core/network/api_exception.dart';
 
-sealed class AuthEvent extends Equatable {
-  const AuthEvent();
-  @override
-  List<Object?> get props => const [];
-}
-
-final class AuthLoginRequested extends AuthEvent {
-  const AuthLoginRequested({required this.identifier, required this.password, this.returnUrl});
-  final String identifier;
-  final String password;
-  final String? returnUrl;
-  @override
-  List<Object?> get props => [identifier, password, returnUrl];
-}
-
-final class AuthForgotPasswordRequested extends AuthEvent {
-  const AuthForgotPasswordRequested(this.identifier);
-  final String identifier;
-  @override
-  List<Object?> get props => [identifier];
-}
-
-final class AuthResetPasswordRequested extends AuthEvent {
-  const AuthResetPasswordRequested({required this.token, required this.newPassword});
-  final String token;
-  final String newPassword;
-  @override
-  List<Object?> get props => [token, newPassword];
-}
-
-final class AuthLogoutRequested extends AuthEvent {
-  const AuthLogoutRequested();
-}
-
-final class AuthSessionRestored extends AuthEvent {
-  const AuthSessionRestored(this.session);
-  final Session session;
-  @override
-  List<Object?> get props => [session];
-}
-
-sealed class AuthState extends Equatable {
-  const AuthState();
-  @override
-  List<Object?> get props => const [];
-}
-
-class AuthInitial extends AuthState {
-  const AuthInitial();
-}
-
-class AuthLoading extends AuthState {
-  const AuthLoading();
-}
-
-class AuthSuccess extends AuthState {
-  const AuthSuccess({required this.session, this.mustChangePassword = false});
-  final Session session;
-  final bool mustChangePassword;
-  @override
-  List<Object?> get props => [session, mustChangePassword];
-}
-
-class AuthActionSucceeded extends AuthState {
-  const AuthActionSucceeded();
-}
-
-class AuthFailure extends AuthState {
-  const AuthFailure({required this.error});
-  final ApiException error;
-  @override
-  List<Object?> get props => [error];
-}
+part 'auth_event.dart';
+part 'auth_state.dart';
 
 /// AuthBloc holds the resolved session after login; permission checks read
 /// from state.session.

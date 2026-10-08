@@ -3,7 +3,8 @@ import 'package:kaundia_app/core/network/api_client.dart';
 import 'package:kaundia_app/core/network/api_exception.dart';
 import 'package:kaundia_app/features/management/data/admin_repository.dart';
 import 'package:kaundia_app/features/management/domain/finance_entities.dart';
-import 'package:kaundia_app/features/management/presentation/bloc/society_costs_cubit.dart';
+import 'package:kaundia_app/features/management/presentation/bloc/bloc_actions.dart';
+import 'package:kaundia_app/features/management/presentation/bloc/society_costs_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockApiClient extends Mock implements ApiClient {}
@@ -22,7 +23,14 @@ SocietyCost _cost(int id, {CostSplit? split}) => SocietyCost(
 void main() {
   late _MockApiClient api;
   late SocietyCostRepository costRepository;
-  late SocietyCostsCubit cubit;
+  late SocietyCostsBloc bloc;
+
+  /// Lets queued events and their mocked async work run to completion.
+  Future<void> settle() async {
+    for (var i = 0; i < 3; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
 
   setUpAll(() {
     registerFallbackValue(const ApiException(type: ApiExceptionType.network));
@@ -34,52 +42,62 @@ void main() {
     final adminRepository = AdminRepository(apiClient: api);
     when(() => api.getUri('/admin/config-lists', query: any(named: 'query')))
         .thenAnswer((_) async => []);
-    cubit = SocietyCostsCubit(
+    bloc = SocietyCostsBloc(
       adminRepository: adminRepository,
       costRepository: costRepository,
     );
   });
 
+  tearDown(() => bloc.close());
+
   group('split preview (dry_run)', () {
-    test('equal-method preview seeds manual amounts and returns no rows', () async {
+    test('equal-method preview seeds manual amounts and returns no rows',
+        () async {
       when(() => api.post('/admin/society-costs/3/split', any()))
           .thenAnswer((_) async => [
                 {'member_id': 1, 'member_name': 'এক', 'amount_due': '500'},
                 {'member_id': 2, 'member_name': 'দুই', 'amount_due': '500'},
               ]);
-      await cubit.openSplit(_cost(3));
+      bloc.add(SocietySplitOpened(cost: _cost(3)));
+      await settle();
 
-      expect(cubit.state.splitCost, isNotNull);
-      expect(cubit.state.splitMethod, CostSplitMethod.equal);
-      expect(cubit.state.splitPreview, isEmpty);
-      expect(cubit.state.manualAmounts.map((m) => m.memberName), ['এক', 'দুই']);
+      expect(bloc.state.splitCost, isNotNull);
+      expect(bloc.state.splitMethod, CostSplitMethod.equal);
+      expect(bloc.state.splitPreview, isEmpty);
+      expect(bloc.state.manualAmounts.map((m) => m.memberName), ['এক', 'দুই']);
 
-      final body = verify(() => api.post('/admin/society-costs/3/split', captureAny(named: 'any')))
-          .captured
-          .last as Map<String, dynamic>;
+      final body =
+          verify(() => api.post('/admin/society-costs/3/split', captureAny()))
+              .captured
+              .last as Map<String, dynamic>;
       expect(body['split_method'], 'equal');
       expect(body['dry_run'], true);
     });
 
-    test('manual-method preview with amounts posts manual_shares with dry_run', () async {
+    test('manual-method preview with amounts posts manual_shares with dry_run',
+        () async {
       when(() => api.post('/admin/society-costs/3/split', any()))
           .thenAnswer((_) async => [
                 {'member_id': 1, 'member_name': 'এক', 'amount_due': '500'},
                 {'member_id': 2, 'member_name': 'দুই', 'amount_due': '500'},
               ]);
-      await cubit.openSplit(_cost(3));
-      await cubit.setSplitMethod(CostSplitMethod.manual);
-      cubit.setManualAmount(1, 600);
-      cubit.setManualAmount(2, 400);
-      await cubit.refreshSplitPreview();
+      bloc.add(SocietySplitOpened(cost: _cost(3)));
+      await settle();
+      bloc.add(const SocietySplitMethodChanged(method: CostSplitMethod.manual));
+      await settle();
+      bloc.add(const SocietyManualAmountChanged(memberId: 1, amount: 600));
+      bloc.add(const SocietyManualAmountChanged(memberId: 2, amount: 400));
+      bloc.add(const SocietySplitPreviewRefreshed());
+      await settle();
 
-      expect(cubit.manualTotal, 1000);
-      expect(cubit.manualMismatch, isFalse);
+      expect(bloc.manualTotal, 1000);
+      expect(bloc.manualMismatch, isFalse);
 
-      final bodies = verify(() => api.post('/admin/society-costs/3/split', captureAny(named: 'any')))
-          .captured
-          .cast<Map<String, dynamic>>()
-          .toList();
+      final bodies =
+          verify(() => api.post('/admin/society-costs/3/split', captureAny()))
+              .captured
+              .cast<Map<String, dynamic>>()
+              .toList();
       final last = bodies.last;
       expect(last['split_method'], 'manual');
       expect(last['dry_run'], true);
@@ -95,25 +113,30 @@ void main() {
                 {'member_id': 1, 'member_name': 'এক', 'amount_due': '500'},
                 {'member_id': 2, 'member_name': 'দুই', 'amount_due': '500'},
               ]);
-      await cubit.openSplit(_cost(3));
-      await cubit.setSplitMethod(CostSplitMethod.manual);
-      cubit.setManualAmount(1, 600);
-      cubit.setManualAmount(2, 300);
-      expect(cubit.manualTotal, 900);
-      expect(cubit.manualMismatch, isTrue);
+      bloc.add(SocietySplitOpened(cost: _cost(3)));
+      await settle();
+      bloc.add(const SocietySplitMethodChanged(method: CostSplitMethod.manual));
+      await settle();
+      bloc.add(const SocietyManualAmountChanged(memberId: 1, amount: 600));
+      bloc.add(const SocietyManualAmountChanged(memberId: 2, amount: 300));
+      await settle();
+      expect(bloc.manualTotal, 900);
+      expect(bloc.manualMismatch, isTrue);
     });
 
     test('preview failure exposes splitError', () async {
       when(() => api.post('/admin/society-costs/3/split', any()))
           .thenThrow(const ApiException(type: ApiExceptionType.network));
-      await cubit.openSplit(_cost(3));
-      expect(cubit.state.splitError, isNotNull);
-      expect(cubit.state.splitLoading, isFalse);
+      bloc.add(SocietySplitOpened(cost: _cost(3)));
+      await settle();
+      expect(bloc.state.splitError, isNotNull);
+      expect(bloc.state.splitLoading, isFalse);
     });
 
-    test('confirmSplit saves without dry_run and refreshes', () async {
+    test('SocietySplitConfirmed saves without dry_run and refreshes', () async {
       var call = 0;
-      when(() => api.post('/admin/society-costs/3/split', any())).thenAnswer((_) async {
+      when(() => api.post('/admin/society-costs/3/split', any()))
+          .thenAnswer((_) async {
         call += 1;
         if (call == 1) {
           return [
@@ -148,31 +171,37 @@ void main() {
       });
       when(() => api.getUri('/admin/society-costs', query: any(named: 'query')))
           .thenAnswer((_) async => []);
-      when(() => api.getUri('/admin/society-costs/summary', query: any(named: 'query')))
-          .thenAnswer((_) async => {
-                'total_amount': '0',
-                'society_fund_total': '0',
-                'member_billed_total': '0',
-                'outstanding_total': '0',
-                'collected_total': '0',
-                'by_category': [],
-              });
+      when(() =>
+          api.getUri('/admin/society-costs/summary',
+              query: any(named: 'query'))).thenAnswer((_) async => {
+            'total_amount': '0',
+            'society_fund_total': '0',
+            'member_billed_total': '0',
+            'outstanding_total': '0',
+            'collected_total': '0',
+            'by_category': [],
+          });
 
-      await cubit.openSplit(_cost(3));
-      final ok = await cubit.confirmSplit();
+      bloc.add(SocietySplitOpened(cost: _cost(3)));
+      await settle();
+      final ok = await dispatchForBool(
+          bloc, (c) => SocietySplitConfirmed(completer: c));
 
       expect(ok, isTrue);
-      final bodies = verify(() => api.post('/admin/society-costs/3/split', captureAny(named: 'any')))
-          .captured
-          .cast<Map<String, dynamic>>()
-          .toList();
+      final bodies =
+          verify(() => api.post('/admin/society-costs/3/split', captureAny()))
+              .captured
+              .cast<Map<String, dynamic>>()
+              .toList();
       expect(bodies.last.containsKey('dry_run'), isFalse);
       expect(bodies.last['split_method'], 'equal');
-      verify(() => api.getUri('/admin/society-costs', query: any(named: 'query'))).called(1);
+      verify(() =>
+              api.getUri('/admin/society-costs', query: any(named: 'query')))
+          .called(1);
     });
   });
 
-  group('recordSharePayment', () {
+  group('SocietySharePaymentRecorded', () {
     test('PATCHes amount_paid as due+additional', () async {
       when(() => api.patch('/admin/cost-split-shares/9', any()))
           .thenAnswer((_) async => {
@@ -193,12 +222,21 @@ void main() {
         amountPaid: 400,
         status: ShareStatus.partial,
       );
-      final ok = await cubit.recordSharePayment(share, additionalAmount: 600, receiptNo: 'R-1');
+      final ok = await dispatchForBool(
+        bloc,
+        (c) => SocietySharePaymentRecorded(
+          share: share,
+          additionalAmount: 600,
+          receiptNo: 'R-1',
+          completer: c,
+        ),
+      );
 
       expect(ok, isTrue);
-      final body = verify(() => api.patch('/admin/cost-split-shares/9', captureAny(named: 'any')))
-          .captured
-          .single as Map<String, dynamic>;
+      final body =
+          verify(() => api.patch('/admin/cost-split-shares/9', captureAny()))
+              .captured
+              .single as Map<String, dynamic>;
       expect(body['amount_paid'], 1000);
       expect(body['receipt_no'], 'R-1');
     });

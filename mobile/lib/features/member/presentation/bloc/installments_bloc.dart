@@ -12,151 +12,8 @@ import '../../data/payment_repository.dart';
 import '../../domain/member_entities.dart';
 import '../../domain/payment_entities.dart';
 
-// Events -------------------------------------------------------------------
-
-sealed class InstallmentsEvent extends Equatable {
-  const InstallmentsEvent();
-
-  @override
-  List<Object?> get props => const [];
-}
-
-class InstallmentsLoaded extends InstallmentsEvent {
-  const InstallmentsLoaded({this.openPayDialog = false});
-
-  final bool openPayDialog;
-}
-
-class InstallmentsYearFilterChanged extends InstallmentsEvent {
-  const InstallmentsYearFilterChanged(this.year);
-
-  /// null = 'all'.
-  final int? year;
-
-  @override
-  List<Object?> get props => [year];
-}
-
-class PayDuesDialogOpened extends InstallmentsEvent {
-  const PayDuesDialogOpened();
-}
-
-class PayDuesDialogClosed extends InstallmentsEvent {
-  const PayDuesDialogClosed();
-}
-
-class InstallmentPaymentSubmitted extends InstallmentsEvent {
-  const InstallmentPaymentSubmitted({required this.submission, this.proofPath});
-
-  final PaymentSubmission submission;
-
-  /// Local proof file path; validated + attached as multipart `proof`.
-  final String? proofPath;
-
-  @override
-  List<Object?> get props => [submission, proofPath];
-}
-
-class InstallmentsMessageCleared extends InstallmentsEvent {
-  const InstallmentsMessageCleared();
-}
-
-// State --------------------------------------------------------------------
-
-enum InstallmentsStatus { loading, loaded, failure }
-
-class InstallmentsState extends Equatable {
-  const InstallmentsState({
-    this.status = InstallmentsStatus.loading,
-    this.installments = const [],
-    this.error = false,
-    this.selectedYear,
-    this.payable,
-    this.payDialogOpen = false,
-    this.submitting = false,
-    this.submitError,
-    this.successMessage = false,
-  });
-
-  final InstallmentsStatus status;
-  final List<MemberInstallment> installments;
-  final bool error;
-  final int? selectedYear;
-  final PayableSummary? payable;
-  final bool payDialogOpen;
-  final bool submitting;
-  final String? submitError;
-
-  /// True right after a successful submission (banner in the page).
-  final bool successMessage;
-
-  List<int> get years =>
-      {...installments.map((i) => i.year)}.toList()..sort((a, b) => b - a);
-
-  List<MemberInstallment> get filtered => selectedYear == null
-      ? installments
-      : installments.where((i) => i.year == selectedYear).toList();
-
-  /// Newest first (mirrors the Angular sort).
-  List<MemberInstallment> get sorted {
-    final list = [...filtered]
-      ..sort((a, b) => b.year != a.year ? b.year - a.year : b.month - a.month);
-    return list;
-  }
-
-  num get paidTotal =>
-      filtered.where((i) => i.isPaid).fold<num>(0, (s, i) => s + i.amount);
-  num get dueTotal =>
-      filtered.where((i) => !i.isPaid).fold<num>(0, (s, i) => s + i.amount);
-  int get paidCount => filtered.where((i) => i.isPaid).length;
-
-  bool isPending(String id) =>
-      payable?.pendingInstallmentIds.contains(id) ?? false;
-
-  int get payableCount {
-    final pending = payable?.pendingInstallmentIds ?? const <String>{};
-    return (payable?.due ?? const []).where((i) => !pending.contains(i.id)).length;
-  }
-
-  bool get canPay =>
-      payable != null && payable!.accounts.isNotEmpty && payableCount > 0;
-
-  InstallmentsState copyWith({
-    InstallmentsStatus? status,
-    List<MemberInstallment>? installments,
-    bool clearError = false,
-    bool? error,
-    int? selectedYear,
-    bool clearSelectedYear = false,
-    PayableSummary? payable,
-    bool clearPayable = false,
-    bool? payDialogOpen,
-    bool? submitting,
-    String? submitError,
-    bool clearSubmitError = false,
-    bool? successMessage,
-    bool clearSuccessMessage = false,
-  }) {
-    return InstallmentsState(
-      status: status ?? this.status,
-      installments: installments ?? this.installments,
-      error: clearError ? false : (error ?? this.error),
-      selectedYear: clearSelectedYear ? null : (selectedYear ?? this.selectedYear),
-      payable: clearPayable ? null : (payable ?? this.payable),
-      payDialogOpen: payDialogOpen ?? this.payDialogOpen,
-      submitting: submitting ?? this.submitting,
-      submitError: clearSubmitError ? null : (submitError ?? this.submitError),
-      successMessage:
-          clearSuccessMessage ? false : (successMessage ?? this.successMessage),
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-        status, installments, error, selectedYear, payable, payDialogOpen,
-        submitting, submitError, successMessage,
-      ];
-}
+part 'installments_event.dart';
+part 'installments_state.dart';
 
 class InstallmentsBloc extends Bloc<InstallmentsEvent, InstallmentsState> {
   InstallmentsBloc({
@@ -208,8 +65,9 @@ class InstallmentsBloc extends Bloc<InstallmentsEvent, InstallmentsState> {
   }) async {
     try {
       final payable = await _paymentRepository.getPayable();
-      final count =
-          payable.due.where((i) => !payable.pendingInstallmentIds.contains(i.id)).length;
+      final count = payable.due
+          .where((i) => !payable.pendingInstallmentIds.contains(i.id))
+          .length;
       emit(state.copyWith(
         payable: payable,
         payDialogOpen: openDialog && payable.accounts.isNotEmpty && count > 0,
@@ -251,7 +109,8 @@ class InstallmentsBloc extends Bloc<InstallmentsEvent, InstallmentsState> {
       ProofFile? proof;
       final path = event.proofPath;
       if (path != null) {
-        final fileName = path.split(Platform.pathSeparator).last.split('/').last;
+        final fileName =
+            path.split(Platform.pathSeparator).last.split('/').last;
         final prepared = await prepareAnyFile(path, fileName);
         proof = ProofFile(
           bytes: await File(prepared.path).readAsBytes(),

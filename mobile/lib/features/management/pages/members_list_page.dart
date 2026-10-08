@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
+import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/members_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'submissions_list_page.dart';
@@ -133,7 +134,10 @@ class MembersListPage extends StatelessWidget {
                                   loc.adminMembersListResetModalConfirmLabel,
                             );
                             if (confirmed && context.mounted) {
-                              final sent = bloc.add(MemberPasswordResetRequested( m.id));
+                              final sent = await dispatchForBool(
+                                  bloc,
+                                  (c) => MemberPasswordResetRequested(m.id,
+                                      completer: c));
                               if (context.mounted) {
                                 showAppToast(
                                   context,
@@ -165,7 +169,8 @@ class MembersListPage extends StatelessWidget {
                               destructive: true,
                             );
                             if (confirmed && context.mounted) {
-                              bloc.add(MemberDeleted(memberId: txn: m.id));
+                              await dispatchForBool(bloc,
+                                  (c) => MemberDeleted(m.id, completer: c));
                             }
                           },
                   ),

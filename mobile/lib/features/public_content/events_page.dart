@@ -8,7 +8,7 @@ import '../../../core/network/api_client.dart';
 import 'data/content_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
-import 'bloc/content_bloc.dart';
+import 'bloc/events_bloc.dart';
 import 'domain/content_entities.dart';
 
 /// Port of Angular `events-page.component.*`: upcoming + past sections split

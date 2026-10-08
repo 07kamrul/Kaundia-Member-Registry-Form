@@ -6,7 +6,6 @@ import '../../../../shared/widgets/widgets.dart';
 import '../../domain/registration_form.dart';
 import '../../../../core/enums/enums.dart';
 import '../bloc/registration_bloc.dart';
-import '../bloc/registration_event.dart';
 import 'registration_inputs.dart';
 
 /// Step 6: read-only summary of every section with per-section edit buttons

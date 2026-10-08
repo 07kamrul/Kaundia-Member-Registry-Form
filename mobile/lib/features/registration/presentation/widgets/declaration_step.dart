@@ -11,7 +11,6 @@ import '../../../../shared/widgets/widgets.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/registration_validators.dart';
 import '../bloc/registration_bloc.dart';
-import '../bloc/registration_event.dart';
 import 'registration_inputs.dart';
 import 'registration_l10n.dart';
 

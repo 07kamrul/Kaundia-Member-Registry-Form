@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
+import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/config_lists_bloc.dart';
 
 /// Config list management (Angular config-lists): category tabs, add item,
@@ -57,7 +58,7 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
     return BlocProvider(
       create: (_) => ConfigListsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
-        ..load(),
+        ..add(const ConfigListsLoadRequested()),
       child: BlocConsumer<ConfigListsBloc, ConfigListsState>(
         listener: (context, state) {
           if (state.saveError != null) {
@@ -88,8 +89,8 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                       label: Text(_categoryLabel(loc, configCategories[index])),
                       selected:
                           state.selectedCategory == configCategories[index],
-                      onSelected: (_) =>
-                          bloc.add(ConfigListsCategorySelected(configCategories[index])),
+                      onSelected: (_) => bloc.add(
+                          ConfigListsCategorySelected(configCategories[index])),
                     ),
                   ),
                 ),
@@ -123,7 +124,14 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                         label: loc.adminConfigListsFormSubmit,
                         onPressed: canManage
                             ? () async {
-                                bloc.add(ConfigListItemAddRequested(_valueController.text, _labelController.text));
+                                await dispatchForBool(
+                                  bloc,
+                                  (c) => ConfigListItemAddRequested(
+                                    _valueController.text,
+                                    _labelController.text,
+                                    c,
+                                  ),
+                                );
                                 _valueController.clear();
                                 _labelController.clear();
                               }
@@ -151,13 +159,8 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
     );
   }
 
-  Widget _row(
-      BuildContext context,
-      AppLocalizations loc,
-      ConfigListsBloc bloc,
-      ConfigListsState state,
-      ConfigListItem item,
-      bool canManage) {
+  Widget _row(BuildContext context, AppLocalizations loc, ConfigListsBloc bloc,
+      ConfigListsState state, ConfigListItem item, bool canManage) {
     final busy = state.busyId == item.id;
     final editing = state.editingId == item.id;
     final index = state.items.indexOf(item);
@@ -200,18 +203,22 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                       enabled: !busy,
                       decoration:
                           const InputDecoration(border: OutlineInputBorder()),
-                      onFieldSubmitted: (v) => bloc.add(ConfigListItemLabelSaveRequested(item, v)),
+                      onFieldSubmitted: (v) =>
+                          bloc.add(ConfigListItemLabelSaveRequested(item, v)),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.check),
                     onPressed: busy
                         ? null
-                        : () => bloc.add(ConfigListItemLabelSaveRequested(item, _editController.text)),
+                        : () => bloc.add(ConfigListItemLabelSaveRequested(
+                            item, _editController.text)),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: busy ? null : () => bloc.add(const ConfigListItemEditCancelled()),
+                    onPressed: busy
+                        ? null
+                        : () => bloc.add(const ConfigListItemEditCancelled()),
                   ),
                 ],
               )
@@ -247,15 +254,19 @@ class _ConfigListsPageState extends State<ConfigListsPage> {
                 IconButton(
                   tooltip: loc.adminConfigListsActionsMoveDown,
                   icon: const Icon(Icons.arrow_downward),
-                  onPressed:
-                      canManage && !busy && index < state.items.length - 1
-                          ? () => bloc.add(ConfigListItemMoveRequested(index, 1))
-                          : null,
+                  onPressed: canManage &&
+                          !busy &&
+                          index < state.items.length - 1
+                      ? () => bloc.add(ConfigListItemMoveRequested(index, 1))
+                      : null,
                 ),
                 if (canManage)
                   Switch(
                     value: item.isActive,
-                    onChanged: busy ? null : (_) => bloc.add(ConfigListItemToggleActiveRequested(item)),
+                    onChanged: busy
+                        ? null
+                        : (_) =>
+                            bloc.add(ConfigListItemToggleActiveRequested(item)),
                   ),
               ],
             ),

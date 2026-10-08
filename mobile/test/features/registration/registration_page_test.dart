@@ -4,8 +4,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaundia_app/features/registration/data/registration_draft_service.dart';
 import 'package:kaundia_app/features/registration/presentation/bloc/registration_bloc.dart';
-import 'package:kaundia_app/features/registration/presentation/bloc/registration_event.dart';
-import 'package:kaundia_app/features/registration/presentation/bloc/registration_state.dart';
 import 'package:kaundia_app/features/registration/presentation/widgets/payment_step.dart';
 import 'package:kaundia_app/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';

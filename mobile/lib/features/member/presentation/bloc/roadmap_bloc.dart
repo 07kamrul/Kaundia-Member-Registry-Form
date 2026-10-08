@@ -8,124 +8,17 @@ import '../../../../shared/utils/download_utils.dart';
 import '../../data/roadmap_repository.dart';
 import '../../domain/roadmap_entities.dart';
 
-// ---------------------------------------------------------------------------
-// Events
-// ---------------------------------------------------------------------------
-
-sealed class RoadmapEvent extends Equatable {
-  const RoadmapEvent();
-  @override
-  List<Object?> get props => const [];
-}
-
-final class RoadmapLoadRequested extends RoadmapEvent {
-  const RoadmapLoadRequested();
-}
-
-final class RoadmapFilterChanged extends RoadmapEvent {
-  const RoadmapFilterChanged(this.filter);
-  final RoadmapStatusFilter filter;
-  @override
-  List<Object?> get props => [filter];
-}
-
-final class RoadmapPdfDownloadRequested extends RoadmapEvent {
-  const RoadmapPdfDownloadRequested();
-}
-
-final class RoadmapPdfSavedPathCleared extends RoadmapEvent {
-  const RoadmapPdfSavedPathCleared();
-}
-
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
-enum RoadmapStatusFilter { all, inProgress, done, planned }
-
-enum RoadmapPageStatus { loading, loaded, failure }
-
-class RoadmapState extends Equatable {
-  const RoadmapState({
-    this.status = RoadmapPageStatus.loading,
-    this.roadmap,
-    this.error = false,
-    this.filter = RoadmapStatusFilter.all,
-    this.pdfDownloading = false,
-    this.exportError = false,
-    this.pdfSavedPath,
-  });
-
-  final RoadmapPageStatus status;
-  final Roadmap? roadmap;
-  final bool error;
-  final RoadmapStatusFilter filter;
-  final bool pdfDownloading;
-  final bool exportError;
-  final String? pdfSavedPath;
-
-  int get currentIndex {
-    final data = roadmap;
-    return data == null ? 0 : currentTimeframeIndex(data);
-  }
-
-  int filterCount(RoadmapStatusFilter f) {
-    final totals = roadmap?.totals;
-    if (totals == null) return 0;
-    return switch (f) {
-      RoadmapStatusFilter.all => totals.total,
-      RoadmapStatusFilter.done => totals.done,
-      RoadmapStatusFilter.inProgress => totals.inProgress,
-      RoadmapStatusFilter.planned => totals.planned,
-    };
-  }
-
-  bool itemMatches(RoadmapStatus status) => switch (filter) {
-        RoadmapStatusFilter.all => true,
-        RoadmapStatusFilter.inProgress => status == RoadmapStatus.inProgress,
-        RoadmapStatusFilter.done => status == RoadmapStatus.done,
-        RoadmapStatusFilter.planned => status == RoadmapStatus.planned,
-      };
-
-  RoadmapState copyWith({
-    RoadmapPageStatus? status,
-    Roadmap? roadmap,
-    bool clearError = false,
-    bool? error,
-    RoadmapStatusFilter? filter,
-    bool? pdfDownloading,
-    bool clearExportError = false,
-    bool? exportError,
-    String? pdfSavedPath,
-    bool clearPdfSavedPath = false,
-  }) {
-    return RoadmapState(
-      status: status ?? this.status,
-      roadmap: roadmap ?? this.roadmap,
-      error: clearError ? false : (error ?? this.error),
-      filter: filter ?? this.filter,
-      pdfDownloading: pdfDownloading ?? this.pdfDownloading,
-      exportError: clearExportError ? false : (exportError ?? this.exportError),
-      pdfSavedPath: clearPdfSavedPath ? null : (pdfSavedPath ?? this.pdfSavedPath),
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-        status, roadmap, error, filter, pdfDownloading, exportError, pdfSavedPath,
-      ];
-}
-
-// ---------------------------------------------------------------------------
-// Bloc
-// ---------------------------------------------------------------------------
+part 'roadmap_event.dart';
+part 'roadmap_state.dart';
 
 class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
   RoadmapBloc({RoadmapRepository? repository})
-      : _repository = repository ?? RoadmapRepository(apiClient: sl<ApiClient>()),
+      : _repository =
+            repository ?? RoadmapRepository(apiClient: sl<ApiClient>()),
         super(const RoadmapState()) {
     on<RoadmapLoadRequested>(_onLoad);
-    on<RoadmapFilterChanged>((e, emit) => emit(state.copyWith(filter: e.filter)));
+    on<RoadmapFilterChanged>(
+        (e, emit) => emit(state.copyWith(filter: e.filter)));
     on<RoadmapPdfDownloadRequested>(_onDownloadPdf);
     on<RoadmapPdfSavedPathCleared>(
       (_, emit) => emit(state.copyWith(clearPdfSavedPath: true)),
@@ -141,7 +34,10 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
     emit(state.copyWith(status: RoadmapPageStatus.loading, clearError: true));
     try {
       final roadmap = await _repository.getRoadmap();
-      emit(state.copyWith(status: RoadmapPageStatus.loaded, roadmap: roadmap, clearError: true));
+      emit(state.copyWith(
+          status: RoadmapPageStatus.loaded,
+          roadmap: roadmap,
+          clearError: true));
     } on ApiException {
       emit(state.copyWith(status: RoadmapPageStatus.failure, error: true));
     }
@@ -152,7 +48,8 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
     Emitter<RoadmapState> emit,
   ) async {
     if (state.pdfDownloading) return;
-    emit(state.copyWith(pdfDownloading: true, clearExportError: true, clearPdfSavedPath: true));
+    emit(state.copyWith(
+        pdfDownloading: true, clearExportError: true, clearPdfSavedPath: true));
     try {
       final bytes = await _repository.downloadPdf();
       final file = await saveDownload(bytes, 'roadmap.pdf');

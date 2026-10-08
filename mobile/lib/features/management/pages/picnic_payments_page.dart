@@ -7,7 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/installments_mgmt_bloc.dart';
+import '../presentation/bloc/picnic_payments_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// Picnic payments management (Angular picnic-payments): member/date filters,
@@ -26,7 +26,7 @@ class PicnicPaymentsPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => PicnicPaymentsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
-        ..load(),
+        ..add(const PicnicPaymentsLoadRequested()),
       child: BlocBuilder<PicnicPaymentsBloc, PicnicPaymentsState>(
           builder: (context, state) {
         final bloc = context.read<PicnicPaymentsBloc>();
@@ -48,7 +48,8 @@ class PicnicPaymentsPage extends StatelessWidget {
                       labelText: loc.adminPicnicPaymentsMemberFilter,
                       border: const OutlineInputBorder(),
                     ),
-                    onFieldSubmitted: bloc.setMemberFilter,
+                    onFieldSubmitted: (raw) =>
+                        bloc.add(PicnicPaymentsMemberFilterChanged(raw: raw)),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -81,7 +82,8 @@ class PicnicPaymentsPage extends StatelessWidget {
                         child: AppButton(
                           label: loc.adminPicnicPaymentsApply,
                           onPressed: () {
-                            bloc.add(PicnicPaymentsMemberFilterChanged(raw: memberController.text));
+                            bloc.add(PicnicPaymentsMemberFilterChanged(
+                                raw: memberController.text));
                           },
                         ),
                       ),
@@ -92,7 +94,7 @@ class PicnicPaymentsPage extends StatelessWidget {
                           variant: AppButtonVariant.secondary,
                           onPressed: () {
                             memberController.clear();
-                            bloc.add(PicnicPaymentsFiltersReset());
+                            bloc.add(const PicnicPaymentsFiltersReset());
                           },
                         ),
                       ),

@@ -7,199 +7,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/admin_repository.dart';
 import '../../domain/finance_entities.dart';
 
+part 'roadmap_event.dart';
+part 'roadmap_state.dart';
+
 const roadmapTextMax = 500;
+
 const roadmapOwnerMax = 120;
+
 const roadmapNoteMax = 1000;
-
-class RoadmapState extends Equatable {
-  const RoadmapState({
-    this.roadmap,
-    this.loading = true,
-    this.loadError,
-    this.busyItemId,
-    this.actionError,
-    this.history,
-    this.archiveCount,
-  });
-
-  final Roadmap? roadmap;
-  final bool loading;
-  final Object? loadError;
-
-  /// Item currently being mutated (status/reorder/delete).
-  final int? busyItemId;
-  final Object? actionError;
-
-  /// Archived cycles (lazy-loaded).
-  final List<RoadmapArchivedCycle>? history;
-
-  /// Set after a successful archive with the number of archived items.
-  final int? archiveCount;
-
-  RoadmapState copyWith({
-    Roadmap? Function()? roadmap,
-    bool? loading,
-    Object? Function()? loadError,
-    int? Function()? busyItemId,
-    Object? Function()? actionError,
-    List<RoadmapArchivedCycle>? history,
-    int? Function()? archiveCount,
-  }) =>
-      RoadmapState(
-        roadmap: roadmap == null ? this.roadmap : roadmap(),
-        loading: loading ?? this.loading,
-        loadError: loadError == null ? this.loadError : loadError(),
-        busyItemId: busyItemId == null ? this.busyItemId : busyItemId(),
-        actionError: actionError == null ? this.actionError : actionError(),
-        history: history ?? this.history,
-        archiveCount:
-            archiveCount == null ? this.archiveCount : archiveCount(),
-      );
-
-
-  @override
-  List<Object?> get props => [
-        roadmap,
-        loading,
-        loadError,
-        busyItemId,
-        actionError,
-        history,
-        archiveCount,
-      ];
-}
-
-// ---------------------------------------------------------------------------
-// Events
-// ---------------------------------------------------------------------------
-
-sealed class RoadmapEvent extends Equatable {
-  const RoadmapEvent();
-  @override
-  List<Object?> get props => const [];
-}
-
-final class RoadmapLoadRequested extends RoadmapEvent {
-  const RoadmapLoadRequested();
-
-  @override
-  List<Object?> get props => const [];
-}
-
-final class RoadmapHistoryLoadRequested extends RoadmapEvent {
-  const RoadmapHistoryLoadRequested();
-
-  @override
-  List<Object?> get props => const [];
-}
-
-final class RoadmapStatusSet extends RoadmapEvent {
-  const RoadmapStatusSet({
-    required this.item,
-    required this.status,
-    this.notify = true,
-    this.completer,
-  });
-
-  final RoadmapItem item;
-  final RoadmapStatus status;
-  final bool notify;
-  final Completer<bool>? completer;
-
-  @override
-  List<Object?> get props => [item, status, notify];
-}
-
-final class RoadmapItemDeleted extends RoadmapEvent {
-  const RoadmapItemDeleted({
-    required this.item,
-    this.completer,
-  });
-
-  final RoadmapItem item;
-  final Completer<bool>? completer;
-
-  @override
-  List<Object?> get props => [item];
-}
-
-final class RoadmapItemsReordered extends RoadmapEvent {
-  const RoadmapItemsReordered({
-    required this.timeframe,
-    required this.index,
-    required this.delta,
-    this.completer,
-  });
-
-  final RoadmapTimeframe timeframe;
-  final int index;
-  final int delta;
-  final Completer<bool>? completer;
-
-  @override
-  List<Object?> get props => [timeframe, index, delta];
-}
-
-final class RoadmapItemCreated extends RoadmapEvent {
-  const RoadmapItemCreated({
-    required this.timeframeId,
-    required this.text,
-    this.status = RoadmapStatus.planned,
-    this.targetDate,
-    this.owner,
-    this.note,
-    this.notify = true,
-    this.completer,
-  });
-
-  final int timeframeId;
-  final String text;
-  final RoadmapStatus status;
-  final String? targetDate;
-  final String? owner;
-  final String? note;
-  final bool notify;
-  final Completer<bool>? completer;
-
-  @override
-  List<Object?> get props => [timeframeId, text, status, targetDate, owner, note, notify];
-}
-
-final class RoadmapItemUpdated extends RoadmapEvent {
-  const RoadmapItemUpdated({
-    required this.item,
-    required this.text,
-    this.timeframeId,
-    this.targetDate,
-    this.owner,
-    this.note,
-    this.completer,
-  });
-
-  final RoadmapItem item;
-  final String text;
-  final int? timeframeId;
-  final String? targetDate;
-  final String? owner;
-  final String? note;
-  final Completer<bool>? completer;
-
-  @override
-  List<Object?> get props => [item, text, timeframeId, targetDate, owner, note];
-}
-
-final class RoadmapArchived extends RoadmapEvent {
-  const RoadmapArchived({
-    required this.onlyDone,
-    this.completer,
-  });
-
-  final bool onlyDone;
-  final Completer<bool>? completer;
-
-  @override
-  List<Object?> get props => [onlyDone];
-}
 
 class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
   RoadmapBloc({required RoadmapRepository repository})
@@ -220,11 +35,23 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
       e.completer?.complete(result);
     });
     on<RoadmapItemCreated>((e, emit) async {
-      final result = await createItem(timeframeId: e.timeframeId, text: e.text, status: e.status, targetDate: e.targetDate, owner: e.owner, note: e.note, notify: e.notify);
+      final result = await createItem(
+          timeframeId: e.timeframeId,
+          text: e.text,
+          status: e.status,
+          targetDate: e.targetDate,
+          owner: e.owner,
+          note: e.note,
+          notify: e.notify);
       e.completer?.complete(result);
     });
     on<RoadmapItemUpdated>((e, emit) async {
-      final result = await updateItem(e.item, text: e.text, timeframeId: e.timeframeId, targetDate: e.targetDate, owner: e.owner, note: e.note);
+      final result = await updateItem(e.item,
+          text: e.text,
+          timeframeId: e.timeframeId,
+          targetDate: e.targetDate,
+          owner: e.owner,
+          note: e.note);
       e.completer?.complete(result);
     });
     on<RoadmapArchived>((e, emit) async {

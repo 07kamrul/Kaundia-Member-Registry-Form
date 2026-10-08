@@ -60,7 +60,11 @@ void main() {
             'ownership': 'যৌথ',
             'joint_owner_count': 4,
             'applicable_docs': [
-              {'id': 8, 'doc_type': 'খাজনা রশিদ', 'file_path': 'uploads/docs/kh.pdf'},
+              {
+                'id': 8,
+                'doc_type': 'খাজনা রশিদ',
+                'file_path': 'uploads/docs/kh.pdf'
+              },
             ],
           },
         ],
@@ -187,7 +191,8 @@ void main() {
       expect(m.dueInstallments, 2);
     });
 
-    test('maps member profile with fee summary, installments, picnic, audit', () {
+    test('maps member profile with fee summary, installments, picnic, audit',
+        () {
       final base = <String, dynamic>{
         'id': 9,
         'member_id': 'KND-0009',
@@ -219,7 +224,14 @@ void main() {
           'paid_total': 500,
         },
         'installments': [
-          {'id': 21, 'year': 2026, 'month': 1, 'amount': 100, 'status': 'paid', 'paid_at': '2026-01-31'},
+          {
+            'id': 21,
+            'year': 2026,
+            'month': 1,
+            'amount': 100,
+            'status': 'paid',
+            'paid_at': '2026-01-31'
+          },
         ],
         'picnic_payments': [
           {

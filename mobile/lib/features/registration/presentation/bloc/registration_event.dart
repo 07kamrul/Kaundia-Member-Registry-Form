@@ -1,8 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-import '../../../../core/enums/enums.dart';
-import '../../domain/registration_form.dart' show Gender, PaymentMethod;
-import '../../domain/registration_validators.dart' show AddressField;
+part of 'registration_bloc.dart';
 
 sealed class RegistrationEvent extends Equatable {
   const RegistrationEvent();

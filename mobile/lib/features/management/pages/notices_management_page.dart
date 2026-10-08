@@ -8,7 +8,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/content_bloc.dart';
+import '../presentation/bloc/bloc_actions.dart';
+import '../presentation/bloc/notices_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
 /// ISO instant -> local "yyyy-MM-ddTHH:mm" (Angular toDatetimeLocal).
@@ -49,7 +50,7 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
     return BlocProvider(
       create: (_) =>
           NoticesBloc(repository: AdminRepository(apiClient: sl<ApiClient>()))
-            ..init(),
+            ..add(const NoticesInitRequested()),
       child: BlocConsumer<NoticesBloc, ContentListState<Notice>>(
         listener: (context, state) {
           if (state.saveError != null) {
@@ -81,7 +82,8 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       : state.publishedFilter == true
                           ? 1
                           : 2,
-                  onChanged: bloc.add(NoticesStatusFilterChanged(,
+                  onChanged: (index) =>
+                      bloc.add(NoticesStatusFilterChanged(index)),
                 ),
               ),
               Padding(
@@ -101,7 +103,8 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       DropdownMenuItem<String?>(
                           value: c.id, child: Text(c.label)),
                   ],
-                  onChanged: bloc.setCategoryFilter,
+                  onChanged: (categoryId) =>
+                      bloc.add(NoticesCategoryFilterChanged(categoryId)),
                 ),
               ),
               Padding(
@@ -139,8 +142,8 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
     return loc.adminNoticesStatusPublished;
   }
 
-  Widget _row(BuildContext context, AppLocalizations loc, NoticesBloc bloc,
-      Notice n) {
+  Widget _row(
+      BuildContext context, AppLocalizations loc, NoticesBloc bloc, Notice n) {
     final category = _categoryLabel(context, n.categoryId);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -212,7 +215,9 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       message: loc.adminNoticesDeleteModalMessageSuffix,
                       destructive: true,
                     );
-                    if (confirmed && context.mounted) bloc.add(NoticeDeleteRequested(n));
+                    if (confirmed && context.mounted) {
+                      bloc.add(NoticeDeleteRequested(n));
+                    }
                   },
                 ),
               ],
@@ -365,14 +370,20 @@ class _NoticesManagementPageState extends State<NoticesManagementPage> {
                       final publishAt = publishDate.isEmpty
                           ? null
                           : isoFromParts(publishDate, publishTime);
-                      final ok = bloc.add(NoticeSaveRequested(editingId: editing?.id, payload: NoticeInput(
-                          title: titleController.text.trim(),
-                          body: bodyController.text.trim(),
-                          categoryId: categoryId.isEmpty ? null : categoryId,
-                          isPublished: published,
-                          isMembersOnly: membersOnly,
-                          publishAt: publishAt,
-                        )));
+                      final ok = await dispatchForBool(
+                          bloc,
+                          (c) => NoticeSaveRequested(
+                              completer: c,
+                              editingId: editing?.id,
+                              payload: NoticeInput(
+                                title: titleController.text.trim(),
+                                body: bodyController.text.trim(),
+                                categoryId:
+                                    categoryId.isEmpty ? null : categoryId,
+                                isPublished: published,
+                                isMembersOnly: membersOnly,
+                                publishAt: publishAt,
+                              )));
                       if (sheetContext.mounted) {
                         Navigator.of(sheetContext).pop(ok);
                       }

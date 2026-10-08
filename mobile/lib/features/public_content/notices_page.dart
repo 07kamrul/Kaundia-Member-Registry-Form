@@ -8,7 +8,7 @@ import '../../../core/network/api_client.dart';
 import 'data/content_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
-import 'bloc/content_bloc.dart';
+import 'bloc/notices_bloc.dart';
 
 /// Port of Angular `notices-page.component.*`: published notices feed with
 /// loading skeleton, empty state and error-with-retry. Category chips are

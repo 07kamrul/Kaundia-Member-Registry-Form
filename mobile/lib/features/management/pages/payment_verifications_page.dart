@@ -5,12 +5,10 @@ import '../../../core/di/injector.dart';
 import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
-import '../presentation/bloc/finance_bloc.dart';
-import '../presentation/bloc/bloc_actions.dart';
+import '../presentation/bloc/payment_verifications_bloc.dart';
 
 import '../data/admin_repository.dart';
 import '../domain/finance_entities.dart';
-import '../presentation/bloc/finance_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'installments_management_page.dart' show monthLabelOf;
 
@@ -36,7 +34,7 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
     return BlocProvider(
       create: (_) => PaymentVerificationsBloc(
         repository: InstallmentPaymentRepository(apiClient: sl<ApiClient>()),
-      )..load(),
+      )..add(const PaymentVerificationsLoadRequested()),
       child: BlocConsumer<PaymentVerificationsBloc, PaymentVerificationsState>(
         listener: (context, state) {
           if (state.error != null) {
@@ -64,7 +62,9 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
                     'approved' => 1,
                     _ => 2,
                   },
-                  onChanged: (index) => bloc.add(PaymentVerificationsStatusFilterChanged(status: switch (index) {
+                  onChanged: (index) =>
+                      bloc.add(PaymentVerificationsStatusFilterChanged(
+                          status: switch (index) {
                     0 => 'pending',
                     1 => 'approved',
                     _ => 'rejected',
@@ -168,7 +168,10 @@ class _PaymentVerificationsPageState extends State<PaymentVerificationsPage> {
                   AppButton(
                     label: loc.adminPaymentVerificationsApprove,
                     icon: Icons.check,
-                    onPressed: busy ? null : () => bloc.add(PaymentVerificationsApproved(payment: p)),
+                    onPressed: busy
+                        ? null
+                        : () =>
+                            bloc.add(PaymentVerificationsApproved(payment: p)),
                   ),
                 ],
               ],

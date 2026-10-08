@@ -51,7 +51,7 @@ class _InstallmentsManagementPageState
     return BlocProvider(
       create: (_) => InstallmentsMgmtBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
-        ..loadMembers(),
+        ..add(const InstallmentsMembersLoadRequested()),
       child: BlocConsumer<InstallmentsMgmtBloc, InstallmentsMgmtState>(
         listener: (context, state) {
           if (state.error != null) {
@@ -87,7 +87,8 @@ class _InstallmentsManagementPageState
                         child: ChoiceChip(
                           label: Text(m.fullName),
                           selected: active,
-                          onSelected: (_) => bloc.add(InstallmentsMemberSelected(memberId: m.id)),
+                          onSelected: (_) => bloc
+                              .add(InstallmentsMemberSelected(memberId: m.id)),
                         ),
                       );
                     },
@@ -115,7 +116,8 @@ class _InstallmentsManagementPageState
                           loc: loc,
                           canManage: canManage,
                           busy: state.markingId == i.id,
-                          onMarkPaid: () => bloc.add(InstallmentMarkPaid(installment: i)),
+                          onMarkPaid: () =>
+                              bloc.add(InstallmentMarkPaid(installment: i)),
                         ),
                     ],
                   ),

@@ -1,10 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-import '../../data/fee_repository.dart';
-import '../../data/geo_repository.dart';
-import '../../domain/registration_form.dart';
-import '../../domain/registration_validators.dart';
-import '../../domain/submission_error_mapper.dart';
+part of 'registration_bloc.dart';
 
 enum RegistrationStatus { loading, ready }
 

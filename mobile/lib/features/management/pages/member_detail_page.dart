@@ -9,7 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/members_bloc.dart';
+import '../presentation/bloc/member_detail_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'submissions_list_page.dart';
 
@@ -77,7 +77,8 @@ class _MemberDetailView extends StatelessWidget {
       if (state.loading) return const SkeletonLoader(lines: 8);
       if (state.error != null) {
         return InlineError(
-            message: loc.adminMemberDetailLoadFailed, onRetry: () => bloc.add(const MemberDetailLoadRequested()));
+            message: loc.adminMemberDetailLoadFailed,
+            onRetry: () => bloc.add(const MemberDetailLoadRequested()));
       }
       final p = state.profile;
       if (p == null) return EmptyState(message: loc.commonNoData);

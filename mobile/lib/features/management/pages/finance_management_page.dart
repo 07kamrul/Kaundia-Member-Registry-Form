@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/finance_entities.dart';
+import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/finance_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
@@ -42,7 +43,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
       create: (_) => FinanceBloc(
         adminRepository: AdminRepository(apiClient: sl<ApiClient>()),
         financeRepository: FinanceRepository(apiClient: sl<ApiClient>()),
-      )..init(),
+      )..add(const FinanceInitRequested()),
       child: BlocConsumer<FinanceBloc, FinanceState>(
         listener: (context, state) {
           if (state.actionError != null) {
@@ -150,7 +151,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           child: Text(loc.adminFinanceManagementStatusRejected),
                         ),
                       ],
-                      onChanged: (v) => bloc.add(FinanceFiltersChanged(statusFilter: v)),
+                      onChanged: (v) =>
+                          bloc.add(FinanceFiltersChanged(statusFilter: v)),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<FinanceType?>(
@@ -174,7 +176,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           child: Text(loc.adminFinanceManagementTypeExpense),
                         ),
                       ],
-                      onChanged: (v) => bloc.add(FinanceFiltersChanged(typeFilter: v)),
+                      onChanged: (v) =>
+                          bloc.add(FinanceFiltersChanged(typeFilter: v)),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -195,7 +198,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                             value: state.dateTo,
                             onChanged: (v) {
                               bloc.add(FinanceDateRangeChanged(to: v));
-                              bloc.add(FinanceRefreshRequested());
+                              bloc.add(const FinanceRefreshRequested());
                             },
                           ),
                         ),
@@ -208,7 +211,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         labelText: loc.adminFinanceManagementFiltersSearch,
                         border: const OutlineInputBorder(),
                       ),
-                      onFieldSubmitted: (v) => bloc.add(FinanceFiltersChanged(search: v)),
+                      onFieldSubmitted: (v) =>
+                          bloc.add(FinanceFiltersChanged(search: v)),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -226,7 +230,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                             variant: AppButtonVariant.secondary,
                             onPressed: () {
                               _searchController.clear();
-                              bloc.add(FinanceFiltersReset());
+                              bloc.add(const FinanceFiltersReset());
                             },
                           ),
                         ),
@@ -248,7 +252,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         variant: AppButtonVariant.secondary,
                         onPressed: state.busy
                             ? null
-                            : () => bloc.add(FinanceReportNoticePublished()),
+                            : () =>
+                                bloc.add(const FinanceReportNoticePublished()),
                       ),
                     ),
                   ],
@@ -277,8 +282,9 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.chevron_left),
-                      onPressed:
-                          state.page > 1 ? () => bloc.add(FinancePageChanged(delta: -1)) : null,
+                      onPressed: state.page > 1
+                          ? () => bloc.add(FinancePageChanged(delta: -1))
+                          : null,
                     ),
                     Text(loc.adminFinanceManagementLedgerPage(
                         state.page, bloc.totalPages)),
@@ -299,8 +305,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
     );
   }
 
-  Widget _txnCard(BuildContext context, AppLocalizations loc,
-      FinanceBloc bloc, FinanceTransaction txn) {
+  Widget _txnCard(BuildContext context, AppLocalizations loc, FinanceBloc bloc,
+      FinanceTransaction txn) {
     final expanded = bloc.state.expandedId == txn.id;
     final sign = txn.type == FinanceType.income ? '+' : '−';
     return Card(
@@ -422,7 +428,10 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                                     .adminFinanceManagementModalsApproveConfirm,
                               );
                               if (confirmed && context.mounted) {
-                                await bloc.approve(txn);
+                                await dispatchForBool(
+                                    bloc,
+                                    (c) => FinanceApproved(
+                                        txn: txn, completer: c));
                               }
                             },
                     ),
@@ -527,9 +536,12 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
       return;
     }
     final ok = switch (action) {
-      _FinanceAction.reject => await bloc.reject(txn, reason),
-      _FinanceAction.reverse => bloc.add(FinanceReversed(txn: txn, reason: reason)),
-      _FinanceAction.delete => bloc.add(FinanceDeleted(txn: txn, reason: reason)),
+      _FinanceAction.reject => await dispatchForBool(
+          bloc, (c) => FinanceRejected(txn: txn, reason: reason, completer: c)),
+      _FinanceAction.reverse => await dispatchForBool(
+          bloc, (c) => FinanceReversed(txn: txn, reason: reason, completer: c)),
+      _FinanceAction.delete => await dispatchForBool(
+          bloc, (c) => FinanceDeleted(txn: txn, reason: reason, completer: c)),
     };
     if (ok && context.mounted) showAppToast(context, loc.commonSave);
   }
@@ -708,7 +720,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                         onChanged: (v) {
                           setSheetState(() => linkPayment = v ?? false);
                           if (linkPayment) {
-                            bloc.add(FinanceUnlinkedPaymentsRequested());
+                            bloc.add(const FinanceUnlinkedPaymentsRequested());
                           }
                         },
                       ),
@@ -744,7 +756,8 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                           ],
                           onChanged: (v) {
                             setSheetState(() => sourceFilter = v);
-                            bloc.add(FinanceUnlinkedPaymentsRequested(sourceType: v));
+                            bloc.add(FinanceUnlinkedPaymentsRequested(
+                                sourceType: v));
                           },
                         ),
                         if (bloc.state.unlinkedLoading)
@@ -759,8 +772,7 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
                                 loc.adminFinanceManagementPaymentLinkEmpty),
                           )
                         else
-                          for (final payment
-                              in bloc.state.unlinkedPayments)
+                          for (final payment in bloc.state.unlinkedPayments)
                             ListTile(
                               dense: true,
                               leading: Icon(selectedPayment == payment
@@ -870,32 +882,40 @@ class _FinanceManagementPageState extends State<FinanceManagementPage> {
       showAppToast(sheetContext, errors.first, error: true);
       return;
     }
-    final ok = bloc.add(FinanceTransactionSaved(editingId: editing?.id, attachmentPath: attachmentPath, input: FinanceTransactionInput(
-        txnDate: dateController.text,
-        type: type,
-        categoryId: categoryId!,
-        amount: amount!,
-        description: descriptionController.text.trim(),
-        referenceNo: referenceController.text.trim().isEmpty
-            ? null
-            : referenceController.text.trim(),
-        internalNotes: notesController.text.trim().isEmpty
-            ? null
-            : notesController.text.trim(),
-        status: editing == null
-            ? (saveAsPending ? FinanceStatus.pending : FinanceStatus.draft)
-            : null,
-        linkedPaymentType: editing == null &&
-                type == FinanceType.income &&
-                selectedPayment != null
-            ? selectedPayment.sourceType
-            : null,
-        linkedPaymentId: editing == null &&
-                type == FinanceType.income &&
-                selectedPayment != null
-            ? selectedPayment.sourceId
-            : null,
-      )));
+    final ok = await dispatchForBool(
+        bloc,
+        (c) => FinanceTransactionSaved(
+            completer: c,
+            editingId: editing?.id,
+            attachmentPath: attachmentPath,
+            input: FinanceTransactionInput(
+              txnDate: dateController.text,
+              type: type,
+              categoryId: categoryId!,
+              amount: amount!,
+              description: descriptionController.text.trim(),
+              referenceNo: referenceController.text.trim().isEmpty
+                  ? null
+                  : referenceController.text.trim(),
+              internalNotes: notesController.text.trim().isEmpty
+                  ? null
+                  : notesController.text.trim(),
+              status: editing == null
+                  ? (saveAsPending
+                      ? FinanceStatus.pending
+                      : FinanceStatus.draft)
+                  : null,
+              linkedPaymentType: editing == null &&
+                      type == FinanceType.income &&
+                      selectedPayment != null
+                  ? selectedPayment.sourceType
+                  : null,
+              linkedPaymentId: editing == null &&
+                      type == FinanceType.income &&
+                      selectedPayment != null
+                  ? selectedPayment.sourceId
+                  : null,
+            )));
     if (sheetContext.mounted && ok) Navigator.of(sheetContext).pop();
   }
 }

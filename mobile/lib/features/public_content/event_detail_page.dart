@@ -8,7 +8,7 @@ import '../../../core/network/api_client.dart';
 import 'data/content_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
-import 'bloc/content_bloc.dart';
+import 'bloc/events_bloc.dart';
 
 /// Port of Angular `event-detail-page.component.*`: no single-row public read,
 /// so the detail view picks its row out of the events feed. Shows a "past"

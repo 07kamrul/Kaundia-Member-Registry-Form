@@ -5,48 +5,8 @@ import '../../../core/di/injector.dart';
 import '../../dashboard/data/public_stats_repository.dart';
 import '../../dashboard/domain/entity/public_stats.dart';
 
-// ---------------------------------------------------------------------------
-// Events
-// ---------------------------------------------------------------------------
-
-sealed class StatsEvent extends Equatable {
-  const StatsEvent();
-  @override
-  List<Object?> get props => const [];
-}
-
-final class StatsLoadRequested extends StatsEvent {
-  const StatsLoadRequested();
-}
-
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
-sealed class StatsState extends Equatable {
-  const StatsState();
-  @override
-  List<Object?> get props => const [];
-}
-
-class StatsInitial extends StatsState {
-  const StatsInitial();
-}
-
-class StatsLoading extends StatsState {
-  const StatsLoading();
-}
-
-class StatsLoaded extends StatsState {
-  const StatsLoaded({required this.stats});
-  final PublicStats stats;
-  @override
-  List<Object?> get props => [stats];
-}
-
-class StatsFailure extends StatsState {
-  const StatsFailure();
-}
+part 'stats_event.dart';
+part 'stats_state.dart';
 
 /// Landing stats: on error the card falls back to zeros (Angular behaviour).
 class StatsBloc extends Bloc<StatsEvent, StatsState> {

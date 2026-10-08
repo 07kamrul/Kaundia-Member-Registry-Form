@@ -7,8 +7,6 @@ import '../../../../shared/widgets/widgets.dart';
 import '../../domain/registration_form.dart';
 import '../../domain/registration_validators.dart';
 import '../bloc/registration_bloc.dart';
-import '../bloc/registration_event.dart';
-import '../bloc/registration_state.dart';
 import 'registration_inputs.dart';
 import 'registration_l10n.dart';
 

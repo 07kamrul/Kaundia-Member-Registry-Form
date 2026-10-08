@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
 
@@ -16,8 +17,9 @@ import '../../data/registration_repository.dart';
 import '../../domain/registration_form.dart';
 import '../../domain/registration_validators.dart';
 import '../../domain/submission_error_mapper.dart';
-import 'registration_event.dart';
-import 'registration_state.dart';
+
+part 'registration_event.dart';
+part 'registration_state.dart';
 
 const _autosaveDebounce = Duration(milliseconds: 400);
 const _quoteDebounce = Duration(milliseconds: 400);

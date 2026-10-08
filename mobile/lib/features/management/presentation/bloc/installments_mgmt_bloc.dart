@@ -7,107 +7,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/admin_repository.dart';
 import '../../domain/admin_entities.dart';
 
+part 'installments_mgmt_event.dart';
+part 'installments_mgmt_state.dart';
+
 // ----- Installments management (member picker + month cards) -----
 
 // Sentinel used by copyWith to distinguish 'not passed' from 'set to null'.
 // ignore: unused_element
 T _same<T>() => throw UnsupportedError('sentinel');
 
-class InstallmentsMgmtState extends Equatable {
-  const InstallmentsMgmtState({
-    this.members = const [],
-    this.loadingMembers = true,
-    this.selectedMemberId,
-    this.installments = const [],
-    this.loadingInstallments = false,
-    this.markingId,
-    this.error,
-  });
-
-  final List<Member> members;
-  final bool loadingMembers;
-  final String? selectedMemberId;
-  final List<Installment> installments;
-  final bool loadingInstallments;
-
-  /// Installment currently being marked paid.
-  final String? markingId;
-  final Object? error;
-
-  InstallmentsMgmtState copyWith({
-    List<Member>? members,
-    bool? loadingMembers,
-    String? Function() selectedMemberId = _same,
-    List<Installment>? installments,
-    bool? loadingInstallments,
-    String? Function() markingId = _same,
-    Object? Function()? error,
-  }) =>
-      InstallmentsMgmtState(
-        members: members ?? this.members,
-        loadingMembers: loadingMembers ?? this.loadingMembers,
-        selectedMemberId: selectedMemberId == _same
-            ? this.selectedMemberId
-            : selectedMemberId(),
-        installments: installments ?? this.installments,
-        loadingInstallments: loadingInstallments ?? this.loadingInstallments,
-        markingId: markingId == _same ? this.markingId : markingId(),
-        error: error == null ? this.error : error(),
-      );
-
-
-  @override
-  List<Object?> get props => [
-        members,
-        loadingMembers,
-        selectedMemberId,
-        installments,
-        loadingInstallments,
-        markingId,
-        error,
-      ];
-}
-
-// ---------------------------------------------------------------------------
-// Events
-// ---------------------------------------------------------------------------
-
-sealed class InstallmentsMgmtEvent extends Equatable {
-  const InstallmentsMgmtEvent();
-  @override
-  List<Object?> get props => const [];
-}
-
-final class InstallmentsMembersLoadRequested extends InstallmentsMgmtEvent {
-  const InstallmentsMembersLoadRequested();
-
-  @override
-  List<Object?> get props => const [];
-}
-
-final class InstallmentsMemberSelected extends InstallmentsMgmtEvent {
-  const InstallmentsMemberSelected({
-    required this.memberId,
-  });
-
-  final String memberId;
-
-  @override
-  List<Object?> get props => [memberId];
-}
-
-final class InstallmentMarkPaid extends InstallmentsMgmtEvent {
-  const InstallmentMarkPaid({
-    required this.installment,
-  });
-
-  final Installment installment;
-
-  @override
-  List<Object?> get props => [installment];
-}
-
-class InstallmentsMgmtBloc extends Bloc<InstallmentsMgmtEvent, InstallmentsMgmtState> {
+class InstallmentsMgmtBloc
+    extends Bloc<InstallmentsMgmtEvent, InstallmentsMgmtState> {
   InstallmentsMgmtBloc({required AdminRepository repository})
       : _repository = repository,
         super(const InstallmentsMgmtState()) {
@@ -171,109 +81,5 @@ class InstallmentsMgmtBloc extends Bloc<InstallmentsMgmtEvent, InstallmentsMgmtS
     } catch (e) {
       emit(state.copyWith(markingId: () => null, error: () => e));
     }
-  }
-}
-
-// ----- Picnic payments (filters + summary) -----
-
-class PicnicPaymentsState extends Equatable {
-  const PicnicPaymentsState({
-    this.memberFilter,
-    this.dateFrom = '',
-    this.dateTo = '',
-    this.items = const [],
-    this.totalCollected = 0,
-    this.count = 0,
-    this.loading = false,
-    this.error,
-  });
-
-  final int? memberFilter;
-  final String dateFrom;
-  final String dateTo;
-  final List<AdminPicnicPayment> items;
-  final num totalCollected;
-  final int count;
-  final bool loading;
-  final Object? error;
-
-  PicnicPaymentsState copyWith({
-    bool? loading,
-    Object? Function()? error,
-  }) =>
-      PicnicPaymentsState(
-        memberFilter: memberFilter,
-        dateFrom: dateFrom,
-        dateTo: dateTo,
-        items: items,
-        totalCollected: totalCollected,
-        count: count,
-        loading: loading ?? this.loading,
-        error: error == null ? this.error : error(),
-      );
-
-
-  @override
-  List<Object?> get props => [
-        memberFilter,
-        dateFrom,
-        dateTo,
-        items,
-        totalCollected,
-        count,
-        loading,
-        error,
-      ];
-}
-
-class PicnicPaymentsCubit extends Cubit<PicnicPaymentsState> {
-  PicnicPaymentsCubit({required AdminRepository repository})
-      : _repository = repository,
-        super(const PicnicPaymentsState(loading: true));
-
-  final AdminRepository _repository;
-
-  Future<void> load() async {
-    emit(state.copyWith(loading: true, error: () => null));
-    try {
-      final page = await _repository.getPicnicPayments(
-        memberId: state.memberFilter,
-        dateFrom: state.dateFrom.isEmpty ? null : state.dateFrom,
-        dateTo: state.dateTo.isEmpty ? null : state.dateTo,
-      );
-      emit(PicnicPaymentsState(
-        memberFilter: state.memberFilter,
-        dateFrom: state.dateFrom,
-        dateTo: state.dateTo,
-        items: page.items,
-        totalCollected: page.totalCollected,
-        count: page.count,
-        loading: false,
-      ));
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: () => e));
-    }
-  }
-
-  void setMemberFilter(String? raw) {
-    emit(PicnicPaymentsState(
-      memberFilter: raw == null || raw.isEmpty ? null : int.tryParse(raw),
-      dateFrom: state.dateFrom,
-      dateTo: state.dateTo,
-    ));
-    load();
-  }
-
-  void setDateRange({String? from, String? to}) {
-    emit(PicnicPaymentsState(
-      memberFilter: state.memberFilter,
-      dateFrom: from ?? state.dateFrom,
-      dateTo: to ?? state.dateTo,
-    ));
-  }
-
-  void resetFilters() {
-    emit(const PicnicPaymentsState());
-    load();
   }
 }

@@ -3,12 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kaundia_app/core/network/api_exception.dart';
 import 'package:kaundia_app/features/management/data/admin_repository.dart';
 import 'package:kaundia_app/features/management/domain/admin_entities.dart';
-import 'package:kaundia_app/features/management/presentation/bloc/config_lists_cubit.dart';
+import 'package:kaundia_app/features/management/presentation/bloc/config_lists_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockAdminRepository extends Mock implements AdminRepository {}
 
-ConfigListItem _item(String id, {bool active = true, String label = 'লেবেল', int order = 0}) =>
+ConfigListItem _item(String id,
+        {bool active = true, String label = 'লেবেল', int order = 0}) =>
     ConfigListItem(
       id: id,
       category: 'property_type',
@@ -27,20 +28,22 @@ void main() {
         .thenAnswer((_) async => []);
   });
 
-  group('ConfigListsCubit', () {
-    test('selectCategory reloads the items for that category', () async {
+  group('ConfigListsBloc', () {
+    test('ConfigListsCategorySelected reloads the items for that category',
+        () async {
       when(() => repository.listConfigListItems('document_type'))
           .thenAnswer((_) async => [_item('1')]);
-      final cubit = ConfigListsCubit(repository: repository);
-      cubit.selectCategory('document_type');
-      await Future<void>.delayed(Duration.zero);
-      expect(cubit.state.selectedCategory, 'document_type');
-      expect(cubit.state.items.single.id, '1');
-      verify(() => repository.listConfigListItems(category: 'document_type')).called(1);
+      final bloc = ConfigListsBloc(repository: repository);
+      bloc.add(const ConfigListsCategorySelected('document_type'));
+      await bloc.stream.firstWhere((s) => !s.loading && s.items.isNotEmpty);
+      expect(bloc.state.selectedCategory, 'document_type');
+      expect(bloc.state.items.single.id, '1');
+      verify(() => repository.listConfigListItems('document_type')).called(1);
+      await bloc.close();
     });
 
-    blocTest<ConfigListsCubit, ConfigListsState>(
-      'toggleActive flips the flag via PATCH and replaces the item',
+    blocTest<ConfigListsBloc, ConfigListsState>(
+      'ConfigListItemToggleActiveRequested flips the flag via PATCH and replaces the item',
       build: () {
         when(() => repository.updateConfigListItem(
               any(),
@@ -50,17 +53,19 @@ void main() {
             )).thenAnswer((_) async => _item('1', active: false));
         when(() => repository.listConfigListItems(any()))
             .thenAnswer((_) async => [_item('1')]);
-        return ConfigListsCubit(repository: repository)..load();
+        return ConfigListsBloc(repository: repository);
       },
-      seed: () => ConfigListsState(
+      seed: () => ConfigListsData(
         items: [_item('1', active: true)],
         loading: false,
       ),
-      act: (cubit) => cubit.toggleActive(_item('1', active: true)),
+      act: (bloc) => bloc
+          .add(ConfigListItemToggleActiveRequested(_item('1', active: true))),
       expect: () => [
-        predicate<ConfigListsState>((s) => s.busyId == '1' && s.items.single.isActive),
-        predicate<ConfigListsState>((s) =>
-            s.busyId == null && !s.items.single.isActive),
+        predicate<ConfigListsState>(
+            (s) => s.busyId == '1' && s.items.single.isActive),
+        predicate<ConfigListsState>(
+            (s) => s.busyId == null && !s.items.single.isActive),
       ],
       verify: (_) {
         verify(() => repository.updateConfigListItem(
@@ -72,8 +77,8 @@ void main() {
       },
     );
 
-    blocTest<ConfigListsCubit, ConfigListsState>(
-      'toggleActive failure keeps item and sets error',
+    blocTest<ConfigListsBloc, ConfigListsState>(
+      'ConfigListItemToggleActiveRequested failure keeps item and sets error',
       build: () {
         when(() => repository.updateConfigListItem(
               any(),
@@ -81,55 +86,61 @@ void main() {
               sortOrder: any(named: 'sortOrder'),
               isActive: any(named: 'isActive'),
             )).thenThrow(const ApiException(type: ApiExceptionType.network));
-        return ConfigListsCubit(repository: repository);
+        return ConfigListsBloc(repository: repository);
       },
-      seed: () => ConfigListsState(items: [_item('1')], loading: false),
-      act: (cubit) => cubit.toggleActive(_item('1')),
+      seed: () => ConfigListsData(items: [_item('1')], loading: false),
+      act: (bloc) => bloc.add(ConfigListItemToggleActiveRequested(_item('1'))),
       expect: () => [
         predicate<ConfigListsState>((s) => s.busyId == '1'),
         predicate<ConfigListsState>((s) => s.busyId == null && s.error != null),
       ],
     );
 
-    blocTest<ConfigListsCubit, ConfigListsState>(
+    blocTest<ConfigListsBloc, ConfigListsState>(
       'inline label edit saves trimmed label and clears editing state',
       build: () {
         when(() => repository.updateConfigListItem(any(), label: 'নতুন'))
             .thenAnswer((_) async => _item('1', label: 'নতুন'));
-        return ConfigListsCubit(repository: repository);
+        return ConfigListsBloc(repository: repository);
       },
-      seed: () => ConfigListsState(
+      seed: () => ConfigListsData(
         items: [_item('1', label: 'পুরনো')],
         loading: false,
         editingId: '1',
       ),
-      act: (cubit) => cubit.saveLabel(_item('1', label: 'পুরনো'), ' নতুন '),
+      act: (bloc) => bloc.add(ConfigListItemLabelSaveRequested(
+          _item('1', label: 'পুরনো'), ' নতুন ')),
       expect: () => [
         predicate<ConfigListsState>((s) => s.busyId == '1'),
         predicate<ConfigListsState>((s) =>
-            s.busyId == null && s.editingId == null && s.items.single.label == 'নতুন'),
+            s.busyId == null &&
+            s.editingId == null &&
+            s.items.single.label == 'নতুন'),
       ],
     );
 
-    blocTest<ConfigListsCubit, ConfigListsState>(
+    blocTest<ConfigListsBloc, ConfigListsState>(
       'inline label edit with unchanged label just cancels editing',
-      build: () => ConfigListsCubit(repository: repository),
-      seed: () => ConfigListsState(
+      build: () => ConfigListsBloc(repository: repository),
+      seed: () => ConfigListsData(
         items: [_item('1', label: 'একই')],
         loading: false,
         editingId: '1',
       ),
-      act: (cubit) => cubit.saveLabel(_item('1', label: 'একই'), 'একই'),
+      act: (bloc) => bloc.add(
+          ConfigListItemLabelSaveRequested(_item('1', label: 'একই'), 'একই')),
       expect: () => [
-        predicate<ConfigListsState>((s) => s.editingId == null && s.busyId == null),
+        predicate<ConfigListsState>(
+            (s) => s.editingId == null && s.busyId == null),
       ],
       verify: (_) {
-        verifyNever(() => repository.updateConfigListItem(any(), label: any(named: 'label')));
+        verifyNever(() =>
+            repository.updateConfigListItem(any(), label: any(named: 'label')));
       },
     );
 
-    blocTest<ConfigListsCubit, ConfigListsState>(
-      'addItem falls back to the value when the label is empty',
+    blocTest<ConfigListsBloc, ConfigListsState>(
+      'ConfigListItemAddRequested falls back to the value when the label is empty',
       build: () {
         when(() => repository.createConfigListItem(
               category: any(named: 'category'),
@@ -137,9 +148,10 @@ void main() {
               label: any(named: 'label'),
               sortOrder: any(named: 'sortOrder'),
             )).thenAnswer((_) async => _item('9'));
-        return ConfigListsCubit(repository: repository);
+        return ConfigListsBloc(repository: repository);
       },
-      act: (cubit) => cubit.addItem('  নতুন ভ্যালু  ', '  '),
+      act: (bloc) =>
+          bloc.add(const ConfigListItemAddRequested('  নতুন ভ্যালু  ', '  ')),
       verify: (_) {
         verify(() => repository.createConfigListItem(
               category: 'property_type',

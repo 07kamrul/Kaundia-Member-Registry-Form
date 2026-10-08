@@ -6,6 +6,7 @@ import '../../../core/network/api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
+import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/fee_settings_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
@@ -58,7 +59,7 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
     return BlocProvider(
       create: (_) => FeeSettingsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
-        ..loadActive(),
+        ..add(const FeeSettingsLoadRequested()),
       child: BlocConsumer<FeeSettingsBloc, FeeSettingsState>(
         listener: (context, state) {
           if (state.saveError != null) {
@@ -120,8 +121,8 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                       tooltip: state.expandedKey == monthlySubscriptionGroupKey
                           ? loc.adminFeeSettingsHideHistory
                           : loc.adminFeeSettingsViewHistory,
-                      onPressed: () =>
-                          bloc.add(FeeSettingsHistoryToggled(monthlySubscriptionGroupKey)),
+                      onPressed: () => bloc.add(FeeSettingsHistoryToggled(
+                          monthlySubscriptionGroupKey)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +146,8 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                       tooltip: state.expandedKey == row.key
                           ? loc.adminFeeSettingsHideHistory
                           : loc.adminFeeSettingsViewHistory,
-                      onPressed: () => bloc.add(FeeSettingsHistoryToggled(row.key)),
+                      onPressed: () =>
+                          bloc.add(FeeSettingsHistoryToggled(row.key)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,11 +302,30 @@ class _FeeSettingsPageState extends State<FeeSettingsPage> {
                       if (!confirmed || !context.mounted) return;
                       final bloc = context.read<FeeSettingsBloc>();
                       final ok = isTiered
-                          ? bloc.add(FeeSettingTieredVersionCreateRequested(baseAmount:
-                                  num.tryParse(_baseController.text) ?? 0, additionalRate:
-                                  num.tryParse(_rateController.text) ?? 0, baseThreshold:
-                                  num.tryParse(_thresholdController.text) ?? 0, unit: _unit.isEmpty ? null : _unit, startDate: _startDate.isEmpty ? null : _startDate))
-                          : bloc.add(FeeSettingVersionCreateRequested(key: _draftKey, value: num.tryParse(_valueController.text) ?? 0, unit: _unit.isEmpty ? null : _unit, startDate: _startDate.isEmpty ? null : _startDate));
+                          ? await dispatchForBool(
+                              bloc,
+                              (c) => FeeSettingTieredVersionCreateRequested(
+                                  completer: c,
+                                  baseAmount:
+                                      num.tryParse(_baseController.text) ?? 0,
+                                  additionalRate:
+                                      num.tryParse(_rateController.text) ?? 0,
+                                  baseThreshold:
+                                      num.tryParse(_thresholdController.text) ??
+                                          0,
+                                  unit: _unit.isEmpty ? null : _unit,
+                                  startDate:
+                                      _startDate.isEmpty ? null : _startDate))
+                          : await dispatchForBool(
+                              bloc,
+                              (c) => FeeSettingVersionCreateRequested(
+                                  completer: c,
+                                  key: _draftKey,
+                                  value:
+                                      num.tryParse(_valueController.text) ?? 0,
+                                  unit: _unit.isEmpty ? null : _unit,
+                                  startDate:
+                                      _startDate.isEmpty ? null : _startDate));
                       if (ok && mounted) {
                         setState(() {
                           _draftKey = '';

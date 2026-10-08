@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/finance_entities.dart';
+import '../presentation/bloc/bloc_actions.dart';
 import '../presentation/bloc/roadmap_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 
@@ -29,9 +30,9 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => RoadmapBloc(
-          repository: RoadmapRepository(apiClient: sl<ApiClient>()))
-        ..load(),
+      create: (_) =>
+          RoadmapBloc(repository: RoadmapRepository(apiClient: sl<ApiClient>()))
+            ..add(const RoadmapLoadRequested()),
       child: BlocConsumer<RoadmapBloc, RoadmapState>(
         listener: (context, state) {
           if (state.actionError != null) {
@@ -55,7 +56,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                 const SkeletonLoader(lines: 6)
               else if (state.loadError != null)
                 InlineError(
-                    message: loc.adminRoadmapErrorsGeneric, onRetry: () => bloc.add(const ConfigListsLoadRequested()))
+                    message: loc.adminRoadmapErrorsGeneric,
+                    onRetry: () => bloc.add(const RoadmapLoadRequested()))
               else if (roadmap == null)
                 EmptyState(message: loc.commonNoData)
               else ...[
@@ -84,20 +86,18 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                       AppButton(
                         label: loc.adminRoadmapAdd,
                         icon: Icons.add,
-                        onPressed: () =>
-                            _openForm(context, loc, bloc, roadmap),
+                        onPressed: () => _openForm(context, loc, bloc, roadmap),
                       ),
                       AppButton(
                         label: loc.adminRoadmapArchiveButton,
                         variant: AppButtonVariant.secondary,
-                        onPressed: () =>
-                            _openArchiveDialog(context, loc, bloc),
+                        onPressed: () => _openArchiveDialog(context, loc, bloc),
                       ),
                       AppButton(
                         label: loc.adminRoadmapArchiveHistory,
                         variant: AppButtonVariant.ghost,
                         onPressed: () {
-                          bloc.add(RoadmapHistoryLoadRequested());
+                          bloc.add(const RoadmapHistoryLoadRequested());
                           _openHistorySheet(context, loc, bloc);
                         },
                       ),
@@ -147,14 +147,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
         _ => '—',
       };
 
-  Widget _itemTile(
-      BuildContext context,
-      AppLocalizations loc,
-      RoadmapBloc bloc,
-      Roadmap roadmap,
-      RoadmapTimeframe tf,
-      RoadmapItem item,
-      int index) {
+  Widget _itemTile(BuildContext context, AppLocalizations loc, RoadmapBloc bloc,
+      Roadmap roadmap, RoadmapTimeframe tf, RoadmapItem item, int index) {
     final busy =
         bloc.state.busyItemId == item.id || bloc.state.busyItemId == -1;
     return Column(
@@ -185,8 +179,8 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                   selected: item.status == status,
                   onSelected: busy || item.status == status
                       ? null
-                      : (_) =>
-                          bloc.add(RoadmapStatusSet(item: item, status: status, notify: _notifyOnDone)),
+                      : (_) => bloc.add(RoadmapStatusSet(
+                          item: item, status: status, notify: _notifyOnDone)),
                 ),
               ),
           ],
@@ -199,22 +193,23 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
               icon: const Icon(Icons.arrow_upward, size: 18),
               onPressed: busy || index == 0
                   ? null
-                  : () => bloc.add(RoadmapItemsReordered(timeframe: tf, index: index, delta: -1)),
+                  : () => bloc.add(RoadmapItemsReordered(
+                      timeframe: tf, index: index, delta: -1)),
             ),
             IconButton(
               tooltip: loc.adminRoadmapMoveDown,
               icon: const Icon(Icons.arrow_downward, size: 18),
               onPressed: busy || index == tf.items.length - 1
                   ? null
-                  : () => bloc.add(RoadmapItemsReordered(timeframe: tf, index: index, delta: 1)),
+                  : () => bloc.add(RoadmapItemsReordered(
+                      timeframe: tf, index: index, delta: 1)),
             ),
             IconButton(
               tooltip: loc.commonEdit,
               icon: const Icon(Icons.edit_outlined, size: 18),
               onPressed: busy
                   ? null
-                  : () =>
-                      _openForm(context, loc, bloc, roadmap, editing: item),
+                  : () => _openForm(context, loc, bloc, roadmap, editing: item),
             ),
             IconButton(
               tooltip: loc.commonDelete,
@@ -351,8 +346,28 @@ class _RoadmapManagementPageState extends State<RoadmapManagementPage> {
                       return;
                     }
                     final ok = editing == null
-                        ? bloc.add(RoadmapItemCreated(timeframeId: timeframeId, text: text, status: status, targetDate: targetDate.isEmpty ? null : targetDate, owner: ownerController.text.trim(), note: noteController.text.trim(), notify: _notifyOnDone))
-                        : bloc.add(RoadmapItemUpdated(item: editing, text: text, timeframeId: timeframeId, targetDate: targetDate, owner: ownerController.text.trim(), note: noteController.text.trim()));
+                        ? await dispatchForBool(
+                            bloc,
+                            (c) => RoadmapItemCreated(
+                                completer: c,
+                                timeframeId: timeframeId,
+                                text: text,
+                                status: status,
+                                targetDate:
+                                    targetDate.isEmpty ? null : targetDate,
+                                owner: ownerController.text.trim(),
+                                note: noteController.text.trim(),
+                                notify: _notifyOnDone))
+                        : await dispatchForBool(
+                            bloc,
+                            (c) => RoadmapItemUpdated(
+                                completer: c,
+                                item: editing,
+                                text: text,
+                                timeframeId: timeframeId,
+                                targetDate: targetDate,
+                                owner: ownerController.text.trim(),
+                                note: noteController.text.trim()));
                     if (sheetContext.mounted && ok) {
                       Navigator.of(sheetContext).pop();
                     }

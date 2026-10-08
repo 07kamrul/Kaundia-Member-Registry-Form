@@ -12,190 +12,14 @@ import '../../../../shared/utils/file_utils.dart';
 import '../../data/member_repository.dart';
 import '../../domain/member_entities.dart';
 
-// ---------------------------------------------------------------------------
-// Events
-// ---------------------------------------------------------------------------
-
-sealed class ProfileEvent extends Equatable {
-  const ProfileEvent();
-
-  @override
-  List<Object?> get props => const [];
-}
-
-class ProfileLoaded extends ProfileEvent {
-  const ProfileLoaded();
-}
-
-class ProfileEditStarted extends ProfileEvent {
-  const ProfileEditStarted();
-}
-
-class ProfileEditCancelled extends ProfileEvent {
-  const ProfileEditCancelled();
-}
-
-class ProfileDraftChanged extends ProfileEvent {
-  const ProfileDraftChanged(this.draft);
-
-  final MemberProfileUpdate draft;
-
-  @override
-  List<Object?> get props => [draft];
-}
-
-class ProfileSaved extends ProfileEvent {
-  const ProfileSaved({required this.update, this.photoPath});
-
-  final MemberProfileUpdate update;
-
-  /// Locally picked photo path (compress + upload on save, Angular idiom).
-  final String? photoPath;
-
-  @override
-  List<Object?> get props => [update, photoPath];
-}
-
-class ProfilePhotoRemoved extends ProfileEvent {
-  const ProfilePhotoRemoved();
-}
-
-class ProfileRequestsLoaded extends ProfileEvent {
-  const ProfileRequestsLoaded();
-}
-
-class ProfileRequestWithdrawn extends ProfileEvent {
-  const ProfileRequestWithdrawn(this.requestId);
-
-  final String requestId;
-
-  @override
-  List<Object?> get props => [requestId];
-}
-
-class ProfileRequestDeleteSubmitted extends ProfileEvent {
-  const ProfileRequestDeleteSubmitted(this.propertyId);
-
-  final String propertyId;
-
-  @override
-  List<Object?> get props => [propertyId];
-}
-
-class ProfileMessageCleared extends ProfileEvent {
-  const ProfileMessageCleared();
-}
-
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
-enum ProfileStatus { loading, loaded, failure }
-
-class ProfileState extends Equatable {
-  const ProfileState({
-    this.status = ProfileStatus.loading,
-    this.profile,
-    this.error,
-    this.editing = false,
-    this.draft = const MemberProfileUpdate(),
-    this.willRequeue = false,
-    this.saving = false,
-    this.saveError,
-    this.photoPickedPath,
-    this.photoInputError,
-    this.photoUploadError,
-    this.requests = const [],
-    this.requestsLoading = false,
-    this.requestsError,
-    this.requestSuccess,
-    this.requestActionError,
-  });
-
-  final ProfileStatus status;
-  final MemberProfile? profile;
-  final String? error;
-  final bool editing;
-  final MemberProfileUpdate draft;
-
-  /// True when the current draft's core-field edits will re-queue the approved
-  /// profile for review (mirrors Angular willRequeue).
-  final bool willRequeue;
-  final bool saving;
-  final String? saveError;
-  final String? photoPickedPath;
-  final String? photoInputError;
-  final String? photoUploadError;
-  final List<MemberPropertyRequest> requests;
-  final bool requestsLoading;
-  final String? requestsError;
-  final String? requestSuccess;
-  final String? requestActionError;
-
-  bool hasPendingRequest(String propertyId) => requests.any(
-        (r) => r.status == PropertyRequestStatus.pending && r.propertyId == propertyId,
-      );
-
-  ProfileState copyWith({
-    ProfileStatus? status,
-    MemberProfile? profile,
-    String? error,
-    bool clearError = false,
-    bool? editing,
-    MemberProfileUpdate? draft,
-    bool? willRequeue,
-    bool? saving,
-    String? saveError,
-    bool clearSaveError = false,
-    String? photoPickedPath,
-    bool clearPhotoPicked = false,
-    String? photoInputError,
-    bool clearPhotoInputError = false,
-    String? photoUploadError,
-    bool clearPhotoUploadError = false,
-    List<MemberPropertyRequest>? requests,
-    bool? requestsLoading,
-    String? requestsError,
-    bool clearRequestsError = false,
-    String? requestSuccess,
-    bool clearRequestSuccess = false,
-    String? requestActionError,
-    bool clearRequestActionError = false,
-  }) {
-    return ProfileState(
-      status: status ?? this.status,
-      profile: profile ?? this.profile,
-      error: clearError ? null : (error ?? this.error),
-      editing: editing ?? this.editing,
-      draft: draft ?? this.draft,
-      willRequeue: willRequeue ?? this.willRequeue,
-      saving: saving ?? this.saving,
-      saveError: clearSaveError ? null : (saveError ?? this.saveError),
-      photoPickedPath: clearPhotoPicked ? null : (photoPickedPath ?? this.photoPickedPath),
-      photoInputError: clearPhotoInputError ? null : (photoInputError ?? this.photoInputError),
-      photoUploadError: clearPhotoUploadError ? null : (photoUploadError ?? this.photoUploadError),
-      requests: requests ?? this.requests,
-      requestsLoading: requestsLoading ?? this.requestsLoading,
-      requestsError: clearRequestsError ? null : (requestsError ?? this.requestsError),
-      requestSuccess: clearRequestSuccess ? null : (requestSuccess ?? this.requestSuccess),
-      requestActionError:
-          clearRequestActionError ? null : (requestActionError ?? this.requestActionError),
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-        status, profile, error, editing, draft, willRequeue, saving, saveError,
-        photoPickedPath, photoInputError, photoUploadError, requests,
-        requestsLoading, requestsError, requestSuccess, requestActionError,
-      ];
-}
+part 'profile_event.dart';
+part 'profile_state.dart';
 
 /// Bloc for the member profile page (view + edit + property requests).
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc({MemberRepository? repository})
-      : _repository = repository ??
-            MemberRepository(apiClient: sl<ApiClient>()),
+      : _repository =
+            repository ?? MemberRepository(apiClient: sl<ApiClient>()),
         super(const ProfileState()) {
     on<ProfileLoaded>(_onLoaded);
     on<ProfileEditStarted>(_onEditStarted);
@@ -218,7 +42,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(state.copyWith(status: ProfileStatus.loading, clearError: true));
     try {
       final profile = await _repository.getProfile();
-      emit(state.copyWith(status: ProfileStatus.loaded, profile: profile, clearError: true));
+      emit(state.copyWith(
+          status: ProfileStatus.loaded, profile: profile, clearError: true));
       add(const ProfileRequestsLoaded());
     } on ApiException {
       emit(state.copyWith(status: ProfileStatus.failure, error: 'loadError'));
@@ -303,7 +128,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileSaved event,
     Emitter<ProfileState> emit,
   ) async {
-    emit(state.copyWith(saving: true, clearSaveError: true, clearPhotoUploadError: true));
+    emit(state.copyWith(
+        saving: true, clearSaveError: true, clearPhotoUploadError: true));
     try {
       var profile = state.profile;
       // Photo upload goes first: on failure the text edits stay in draft.
@@ -350,7 +176,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final fieldErrors = e.fieldErrors.values.toList();
       emit(state.copyWith(
         saving: false,
-        saveError: e.isValidation && fieldErrors.isNotEmpty ? fieldErrors.first : 'saveError',
+        saveError: e.isValidation && fieldErrors.isNotEmpty
+            ? fieldErrors.first
+            : 'saveError',
       ));
     }
   }
@@ -369,7 +197,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(state.copyWith(requestsLoading: true, clearRequestsError: true));
     try {
       final requests = await _repository.getPropertyRequests();
-      emit(state.copyWith(requests: requests, requestsLoading: false, clearRequestsError: true));
+      emit(state.copyWith(
+          requests: requests,
+          requestsLoading: false,
+          clearRequestsError: true));
     } on ApiException {
       emit(state.copyWith(requestsLoading: false, requestsError: 'loadFailed'));
     }
@@ -386,8 +217,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       add(const ProfileRequestsLoaded());
     } on ApiException catch (e) {
       emit(state.copyWith(
-        requestActionError:
-            e.isBusiness ? e.businessMessage : 'withdrawFailed',
+        requestActionError: e.isBusiness ? e.businessMessage : 'withdrawFailed',
       ));
     }
   }
@@ -420,6 +250,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileMessageCleared event,
     Emitter<ProfileState> emit,
   ) {
-    emit(state.copyWith(clearRequestSuccess: true, clearRequestActionError: true));
+    emit(state.copyWith(
+        clearRequestSuccess: true, clearRequestActionError: true));
   }
 }

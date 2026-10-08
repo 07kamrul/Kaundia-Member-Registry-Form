@@ -7,7 +7,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../data/admin_repository.dart';
 import '../domain/admin_entities.dart';
-import '../presentation/bloc/content_bloc.dart';
+import '../presentation/bloc/bloc_actions.dart';
+import '../presentation/bloc/events_bloc.dart';
 import '../presentation/widgets/management_widgets.dart';
 import 'notices_management_page.dart' show datetimeParts, isoFromParts;
 
@@ -32,7 +33,7 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
     return BlocProvider(
       create: (_) =>
           EventsBloc(repository: AdminRepository(apiClient: sl<ApiClient>()))
-            ..init(),
+            ..add(const EventsInitRequested()),
       child: BlocConsumer<EventsBloc, ContentListState<EventItem>>(
         listener: (context, state) {
           if (state.saveError != null) {
@@ -62,7 +63,8 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       : state.publishedFilter == true
                           ? 1
                           : 2,
-                  onChanged: bloc.add(EventsStatusFilterChanged(,
+                  onChanged: (index) =>
+                      bloc.add(EventsStatusFilterChanged(index)),
                 ),
               ),
               Padding(
@@ -82,7 +84,8 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       DropdownMenuItem<String?>(
                           value: c.id, child: Text(c.label)),
                   ],
-                  onChanged: bloc.setCategoryFilter,
+                  onChanged: (categoryId) =>
+                      bloc.add(EventsCategoryFilterChanged(categoryId)),
                 ),
               ),
               Padding(
@@ -197,7 +200,9 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       message: loc.adminEventsDeleteModalMessageSuffix,
                       destructive: true,
                     );
-                    if (confirmed && context.mounted) bloc.add(EventDeleteRequested(e));
+                    if (confirmed && context.mounted) {
+                      bloc.add(EventDeleteRequested(e));
+                    }
                   },
                 ),
               ],
@@ -387,20 +392,27 @@ class _EventsManagementPageState extends State<EventsManagementPage> {
                       final endAt = endDate.isEmpty
                           ? null
                           : isoFromParts(endDate, endTime);
-                      final ok = bloc.add(EventSaveRequested(editingId: editing?.id, payload: EventInput(
-                          title: titleController.text.trim(),
-                          description: descriptionController.text.trim().isEmpty
-                              ? null
-                              : descriptionController.text.trim(),
-                          location: locationController.text.trim().isEmpty
-                              ? null
-                              : locationController.text.trim(),
-                          categoryId: categoryId.isEmpty ? null : categoryId,
-                          startAt: startAt,
-                          endAt: endAt,
-                          isPublished: published,
-                          isMembersOnly: membersOnly,
-                        )));
+                      final ok = await dispatchForBool(
+                          bloc,
+                          (c) => EventSaveRequested(
+                              completer: c,
+                              editingId: editing?.id,
+                              payload: EventInput(
+                                title: titleController.text.trim(),
+                                description:
+                                    descriptionController.text.trim().isEmpty
+                                        ? null
+                                        : descriptionController.text.trim(),
+                                location: locationController.text.trim().isEmpty
+                                    ? null
+                                    : locationController.text.trim(),
+                                categoryId:
+                                    categoryId.isEmpty ? null : categoryId,
+                                startAt: startAt,
+                                endAt: endAt,
+                                isPublished: published,
+                                isMembersOnly: membersOnly,
+                              )));
                       if (sheetContext.mounted) {
                         Navigator.of(sheetContext).pop(ok);
                       }

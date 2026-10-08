@@ -29,7 +29,7 @@ class PropertyRequestsPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => PropertyRequestsBloc(
           repository: AdminRepository(apiClient: sl<ApiClient>()))
-        ..load(),
+        ..add(const PropertyRequestsLoadRequested()),
       child: BlocConsumer<PropertyRequestsBloc, PropertyRequestsState>(
         listener: (context, state) {
           if (state.actionError != null) {
@@ -84,7 +84,9 @@ class PropertyRequestsPage extends StatelessWidget {
                     ),
                   ],
                   onChanged: (v) {
-                    if (v != null) bloc.add(PropertyRequestsStatusFilterChanged(status: v));
+                    if (v != null) {
+                      bloc.add(PropertyRequestsStatusFilterChanged(status: v));
+                    }
                   },
                 ),
               ),

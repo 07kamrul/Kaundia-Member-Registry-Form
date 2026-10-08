@@ -5,7 +5,6 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/widgets.dart';
 import '../../domain/registration_validators.dart';
 import '../bloc/registration_bloc.dart';
-import '../bloc/registration_event.dart';
 import 'registration_inputs.dart';
 import 'registration_l10n.dart';
 

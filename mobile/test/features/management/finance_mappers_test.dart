@@ -143,7 +143,13 @@ void main() {
     test('roadmap with timeframes and items', () {
       final r = Map<String, dynamic>.from({
         'last_updated': '2026-01-01T00:00:00Z',
-        'totals': {'total': 2, 'done': 1, 'in_progress': 1, 'planned': 0, 'percent': 50},
+        'totals': {
+          'total': 2,
+          'done': 1,
+          'in_progress': 1,
+          'planned': 0,
+          'percent': 50
+        },
         'timeframes': [
           {
             'id': 1,

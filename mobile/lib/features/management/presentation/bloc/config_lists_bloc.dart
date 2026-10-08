@@ -7,6 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/admin_repository.dart';
 import '../../domain/admin_entities.dart';
 
+part 'config_lists_event.dart';
+part 'config_lists_state.dart';
+
 const configCategories = [
   'property_type',
   'document_type',
@@ -16,138 +19,6 @@ const configCategories = [
   'finance_expense_category',
   'payment_account',
 ];
-
-sealed class ConfigListsEvent extends Equatable {
-  const ConfigListsEvent();
-
-  @override
-  List<Object?> get props => const [];
-}
-
-final class ConfigListsLoadRequested extends ConfigListsEvent {
-  const ConfigListsLoadRequested();
-}
-
-final class ConfigListsCategorySelected extends ConfigListsEvent {
-  const ConfigListsCategorySelected(this.category);
-
-  final String category;
-
-  @override
-  List<Object?> get props => [category];
-}
-
-final class ConfigListItemAddRequested extends ConfigListsEvent {
-  const ConfigListItemAddRequested(this.value, this.label, [this.completer]);
-
-  final String value;
-  final String label;
-
-  /// Optional result channel: true when the item was added.
-  final Completer<bool>? completer;
-
-  @override
-  List<Object?> get props => [value, label];
-}
-
-final class ConfigListItemToggleActiveRequested extends ConfigListsEvent {
-  const ConfigListItemToggleActiveRequested(this.item);
-
-  final ConfigListItem item;
-
-  @override
-  List<Object?> get props => [item];
-}
-
-final class ConfigListItemEditStarted extends ConfigListsEvent {
-  const ConfigListItemEditStarted(this.item);
-
-  final ConfigListItem item;
-
-  @override
-  List<Object?> get props => [item];
-}
-
-final class ConfigListItemEditCancelled extends ConfigListsEvent {
-  const ConfigListItemEditCancelled();
-}
-
-final class ConfigListItemLabelSaveRequested extends ConfigListsEvent {
-  const ConfigListItemLabelSaveRequested(this.item, this.label);
-
-  final ConfigListItem item;
-  final String label;
-
-  @override
-  List<Object?> get props => [item, label];
-}
-
-final class ConfigListItemMoveRequested extends ConfigListsEvent {
-  const ConfigListItemMoveRequested(this.index, this.direction);
-
-  final int index;
-  final int direction;
-
-  @override
-  List<Object?> get props => [index, direction];
-}
-
-class ConfigListsState extends Equatable {
-  const ConfigListsState({
-    this.selectedCategory = 'property_type',
-    this.items = const [],
-    this.loading = false,
-    this.error,
-    this.busyId,
-    this.editingId,
-    this.saveError,
-  });
-
-  final String selectedCategory;
-  final List<ConfigListItem> items;
-  final bool loading;
-  final Object? error;
-
-  /// Item being toggled/saved/moved.
-  final String? busyId;
-  final String? editingId;
-  final Object? saveError;
-
-  ConfigListsState copyWith({
-    String? selectedCategory,
-    List<ConfigListItem>? items,
-    bool? loading,
-    Object? Function()? error,
-    String? Function()? busyId,
-    String? Function()? editingId,
-    Object? Function()? saveError,
-  }) =>
-      ConfigListsState(
-        selectedCategory: selectedCategory ?? this.selectedCategory,
-        items: items ?? this.items,
-        loading: loading ?? this.loading,
-        error: error == null ? this.error : error(),
-        busyId: busyId == null ? this.busyId : busyId(),
-        editingId: editingId == null ? this.editingId : editingId(),
-        saveError: saveError == null ? this.saveError : saveError(),
-      );
-
-  @override
-  List<Object?> get props =>
-      [selectedCategory, items, loading, error, busyId, editingId, saveError];
-}
-
-final class ConfigListsData extends ConfigListsState {
-  const ConfigListsData({
-    super.selectedCategory,
-    super.items,
-    super.loading,
-    super.error,
-    super.busyId,
-    super.editingId,
-    super.saveError,
-  });
-}
 
 class ConfigListsBloc extends Bloc<ConfigListsEvent, ConfigListsState> {
   ConfigListsBloc({required AdminRepository repository})
@@ -179,10 +50,12 @@ class ConfigListsBloc extends Bloc<ConfigListsEvent, ConfigListsState> {
         emit(_d.copyWith(saveError: () => e));
       }
     });
-    on<ConfigListItemToggleActiveRequested>((event, emit) => _toggle(event.item, emit));
+    on<ConfigListItemToggleActiveRequested>(
+        (event, emit) => _toggle(event.item, emit));
     on<ConfigListItemEditStarted>(
         (event, emit) => emit(_d.copyWith(editingId: () => event.item.id)));
-    on<ConfigListItemEditCancelled>((event, emit) => emit(_d.copyWith(editingId: () => null)));
+    on<ConfigListItemEditCancelled>(
+        (event, emit) => emit(_d.copyWith(editingId: () => null)));
     on<ConfigListItemLabelSaveRequested>(
         (event, emit) => _saveLabel(event.item, event.label, emit));
     on<ConfigListItemMoveRequested>(
@@ -191,23 +64,27 @@ class ConfigListsBloc extends Bloc<ConfigListsEvent, ConfigListsState> {
 
   final AdminRepository _repository;
 
-  ConfigListsData get _d =>
-      state is ConfigListsData ? state as ConfigListsData : const ConfigListsData();
+  /// Current state; copyWith returns the base state type, so never
+  /// downcast here (that would silently reset to defaults).
+  ConfigListsState get _d => state;
 
   Future<void> _load(Emitter<ConfigListsState> emit) async {
     emit(_d.copyWith(loading: true, error: () => null));
     try {
-      final items = await _repository.listConfigListItems(state.selectedCategory);
+      final items =
+          await _repository.listConfigListItems(state.selectedCategory);
       emit(_d.copyWith(items: items, loading: false));
     } catch (e) {
       emit(_d.copyWith(loading: false, error: () => e));
     }
   }
 
-  Future<void> _toggle(ConfigListItem item, Emitter<ConfigListsState> emit) async {
+  Future<void> _toggle(
+      ConfigListItem item, Emitter<ConfigListsState> emit) async {
     emit(_d.copyWith(busyId: () => item.id, error: () => null));
     try {
-      final updated = await _repository.updateConfigListItem(item.id, isActive: !item.isActive);
+      final updated = await _repository.updateConfigListItem(item.id,
+          isActive: !item.isActive);
       emit(_d.copyWith(busyId: () => null, items: _replace(updated)));
     } catch (e) {
       emit(_d.copyWith(busyId: () => null, error: () => e));
@@ -223,7 +100,8 @@ class ConfigListsBloc extends Bloc<ConfigListsEvent, ConfigListsState> {
     }
     emit(_d.copyWith(busyId: () => item.id, error: () => null));
     try {
-      final updated = await _repository.updateConfigListItem(item.id, label: trimmed);
+      final updated =
+          await _repository.updateConfigListItem(item.id, label: trimmed);
       emit(_d.copyWith(
           busyId: () => null, editingId: () => null, items: _replace(updated)));
     } catch (e) {
@@ -231,15 +109,18 @@ class ConfigListsBloc extends Bloc<ConfigListsEvent, ConfigListsState> {
     }
   }
 
-  Future<void> _move(int index, int direction, Emitter<ConfigListsState> emit) async {
+  Future<void> _move(
+      int index, int direction, Emitter<ConfigListsState> emit) async {
     final target = index + direction;
     if (target < 0 || target >= state.items.length) return;
     final current = state.items[index];
     final neighbor = state.items[target];
     emit(_d.copyWith(busyId: () => current.id, error: () => null));
     try {
-      await _repository.updateConfigListItem(current.id, sortOrder: neighbor.sortOrder);
-      await _repository.updateConfigListItem(neighbor.id, sortOrder: current.sortOrder);
+      await _repository.updateConfigListItem(current.id,
+          sortOrder: neighbor.sortOrder);
+      await _repository.updateConfigListItem(neighbor.id,
+          sortOrder: current.sortOrder);
       emit(_d.copyWith(
         busyId: () => null,
         items: List<ConfigListItem>.from(state.items)
@@ -253,6 +134,7 @@ class ConfigListsBloc extends Bloc<ConfigListsEvent, ConfigListsState> {
   }
 
   List<ConfigListItem> _replace(ConfigListItem updated) => [
-        for (final i in state.items) if (i.id == updated.id) updated else i,
+        for (final i in state.items)
+          if (i.id == updated.id) updated else i,
       ];
 }
