@@ -62,6 +62,20 @@ export const DOCUMENT_OPTIONS: string[] = [
 
 export const PROPERTY_TYPES: string[] = ['জমি', 'বাড়ি', 'ফ্ল্যাট', 'প্লট', 'অন্যান্য'];
 export const OWNERSHIP_TYPES: string[] = ['একক', 'যৌথ'];
+
+// Stored values are Bangla; these map each to a label key under
+// registration.property.typeOptions / .ownershipOptions for display.
+export const PROPERTY_TYPE_LABEL_KEYS: Record<string, string> = {
+  জমি: 'land',
+  বাড়ি: 'house',
+  ফ্ল্যাট: 'flat',
+  প্লট: 'plot',
+  অন্যান্য: 'other',
+};
+export const OWNERSHIP_LABEL_KEYS: Record<string, string> = {
+  একক: 'single',
+  যৌথ: 'joint',
+};
 export const PAYMENT_METHODS: string[] = ['ক্যাশ', 'ব্যাংক', 'MFS (বিকাশ/নগদ/রকেট)', 'অন্যান্য'];
 
 export const ORG_BANK_INFO = {

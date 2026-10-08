@@ -1800,7 +1800,18 @@
       "docFileTypeError": "Only JPG, PNG, or PDF files are accepted",
       "docFileSizeError": "File size must not exceed {{maxMb}} MB",
       "dagCsLabel": "CS Dag No.",
-      "dagRsLabel": "RS Dag No."
+      "dagRsLabel": "RS Dag No.",
+      "typeOptions": {
+        "land": "Land",
+        "house": "House",
+        "flat": "Flat",
+        "plot": "Plot",
+        "other": "Other"
+      },
+      "ownershipOptions": {
+        "single": "Single",
+        "joint": "Joint"
+      }
     },
     "urgentContact": {
       "nameLabel": "Name",

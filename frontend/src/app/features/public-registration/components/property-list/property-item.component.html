@@ -7,7 +7,7 @@
       @for (t of propertyTypes; track t) {
         <label class="checkbox-item">
           <input type="checkbox" [checked]="isTypeChecked(t)" (change)="toggleType(t)" />
-          {{ t }}
+          {{ typeLabel(t) }}
         </label>
       }
       @if (isTypeChecked('অন্যান্য')) {
@@ -90,7 +90,7 @@
             (change)="setOwnership(t)"
             name="ownership_{{ index }}"
           />
-          {{ t }}
+          {{ ownershipLabel(t) }}
         </label>
       }
     </div>

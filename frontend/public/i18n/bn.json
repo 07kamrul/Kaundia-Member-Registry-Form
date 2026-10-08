@@ -1800,7 +1800,18 @@
       "docFileTypeError": "শুধুমাত্র JPG, PNG বা PDF ফাইল গ্রহণযোগ্য",
       "docFileSizeError": "ফাইলের সাইজ সর্বোচ্চ {{maxMb}} এমবি হতে হবে",
       "dagCsLabel": "সিএস দাগ নং",
-      "dagRsLabel": "আরএস দাগ নং"
+      "dagRsLabel": "আরএস দাগ নং",
+      "typeOptions": {
+        "land": "জমি",
+        "house": "বাড়ি",
+        "flat": "ফ্ল্যাট",
+        "plot": "প্লট",
+        "other": "অন্যান্য"
+      },
+      "ownershipOptions": {
+        "single": "একক",
+        "joint": "যৌথ"
+      }
     },
     "urgentContact": {
       "nameLabel": "নাম",

@@ -37,7 +37,7 @@
           @for (t of propertyTypes; track t) {
             <label class="checkbox-item">
               <input type="checkbox" [checked]="isTypeChecked(t)" (change)="toggleType(t)" />
-              {{ t }}
+              {{ typeLabel(t) }}
             </label>
           }
         </div>
@@ -123,7 +123,7 @@
           @for (t of ownershipTypes; track t) {
             <label class="radio-item">
               <input type="radio" [value]="t" name="pr-ownership" [(ngModel)]="ownership" />
-              {{ t }}
+              {{ ownershipLabel(t) }}
             </label>
           }
         </div>

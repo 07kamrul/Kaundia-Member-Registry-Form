@@ -14,7 +14,9 @@ import {
   ALLOWED_DOC_MIME_TYPES,
   DOCUMENT_OPTIONS,
   MAX_DOC_FILE_BYTES,
+  OWNERSHIP_LABEL_KEYS,
   OWNERSHIP_TYPES,
+  PROPERTY_TYPE_LABEL_KEYS,
   PROPERTY_TYPES,
 } from '../../../../core/models/registration.model';
 import { ConfigListService } from '../../../../core/services/config-list.service';
@@ -40,6 +42,17 @@ export class PropertyItemComponent implements OnInit {
   // (falls back to these same defaults if that request fails).
   propertyTypes: string[] = PROPERTY_TYPES;
   readonly ownershipTypes = OWNERSHIP_TYPES;
+
+  typeLabel(t: string): string {
+    const key = PROPERTY_TYPE_LABEL_KEYS[t];
+    return key ? this.translate.instant(`registration.property.typeOptions.${key}`) : t;
+  }
+
+  ownershipLabel(t: string): string {
+    const key = OWNERSHIP_LABEL_KEYS[t];
+    return key ? this.translate.instant(`registration.property.ownershipOptions.${key}`) : t;
+  }
+
   documentOptions: string[] = DOCUMENT_OPTIONS;
   readonly maxDocFileMb = MAX_DOC_FILE_BYTES / (1024 * 1024);
   docFileErrors: Record<string, string> = {};

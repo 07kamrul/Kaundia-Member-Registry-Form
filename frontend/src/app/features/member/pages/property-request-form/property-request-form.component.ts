@@ -11,7 +11,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   ALLOWED_DOC_MIME_TYPES,
   DOCUMENT_OPTIONS,
+  OWNERSHIP_LABEL_KEYS,
   OWNERSHIP_TYPES,
+  PROPERTY_TYPE_LABEL_KEYS,
   PROPERTY_TYPES,
 } from '../../../../core/models/registration.model';
 import {
@@ -62,6 +64,17 @@ export class PropertyRequestFormComponent implements OnInit {
 
   propertyTypes: string[] = PROPERTY_TYPES;
   readonly ownershipTypes = OWNERSHIP_TYPES;
+
+  typeLabel(t: string): string {
+    const key = PROPERTY_TYPE_LABEL_KEYS[t];
+    return key ? this.translate.instant(`registration.property.typeOptions.${key}`) : t;
+  }
+
+  ownershipLabel(t: string): string {
+    const key = OWNERSHIP_LABEL_KEYS[t];
+    return key ? this.translate.instant(`registration.property.ownershipOptions.${key}`) : t;
+  }
+
   readonly documentOptions = DOCUMENT_OPTIONS;
   readonly maxDocFileMb = MAX_DOC_FILE_BYTES / (1024 * 1024);
 
