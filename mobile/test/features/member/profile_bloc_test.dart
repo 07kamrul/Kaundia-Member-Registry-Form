@@ -26,6 +26,10 @@ MemberProfile _profile({String status = 'approved'}) => MemberProfile(
 void main() {
   late _MockRepo repo;
 
+  setUpAll(() {
+    registerFallbackValue(const MemberProfileUpdate());
+  });
+
   setUp(() {
     repo = _MockRepo();
     when(() => repo.getPropertyRequests()).thenAnswer((_) async => []);

@@ -351,8 +351,11 @@ class MemberProfileUpdate {
       'currentDistrict': currentDistrict,
       'currentDivision': currentDivision,
     };
-    for (final field in coreFields) {
-      if ((values[field] ?? '') != (cur(field) ?? '')) return true;
+    // Only fields present in the draft are compared (mirrors Angular, where
+    // the payload only carries edited entries).
+    for (final entry in values.entries) {
+      if (entry.value == null) continue;
+      if (entry.value != cur(entry.key)) return true;
     }
     return false;
   }

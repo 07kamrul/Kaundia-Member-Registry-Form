@@ -75,6 +75,18 @@ RegistrationForm validForm({int properties = 1}) => RegistrationForm(
       ],
     );
 
+/// State where all client-side step validations pass.
+RegistrationState submitReadyState() => RegistrationState(
+      status: RegistrationStatus.ready,
+      form: validForm().copyWith(declarationAccepted: true),
+      feeStatus: FeeStatus.loaded,
+      admissionFee: 500,
+      quoteStatus: QuoteStatus.loaded,
+      quote: const SubscriptionQuote(
+        base: 100, extraUnits: 0, extraRate: 0, extraAmount: 0, total: 120, unit: 'শতাংশ',
+      ),
+    );
+
 void main() {
   late MockRegistrationRepository submitRepo;
   late MockFeeRepository feeRepo;
@@ -84,6 +96,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(RegistrationStarted());
+    registerFallbackValue(RegistrationForm());
   });
 
   setUp(() {
@@ -168,12 +181,7 @@ void main() {
           .thenAnswer((_) async => const SubmissionResult(id: '42'));
       bloc.add(SubmitRequested());
     },
-    seed: () => RegistrationState(
-      status: RegistrationStatus.ready,
-      form: validForm(),
-      feeStatus: FeeStatus.loaded,
-      admissionFee: 500,
-    ),
+    seed: submitReadyState,
     expect: () => [
       predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.submitting),
       predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.success && s.successId == '42'),
@@ -211,12 +219,7 @@ void main() {
       ));
       bloc.add(SubmitRequested());
     },
-    seed: () => RegistrationState(
-      status: RegistrationStatus.ready,
-      form: validForm(),
-      feeStatus: FeeStatus.loaded,
-      admissionFee: 500,
-    ),
+    seed: submitReadyState,
     expect: () => [
       predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.submitting),
       predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.failure && s.currentStep == 2 && s.submitErrors.isNotEmpty),
@@ -234,12 +237,7 @@ void main() {
           .thenThrow(const ApiException(type: ApiExceptionType.network));
       bloc.add(SubmitRequested());
     },
-    seed: () => RegistrationState(
-      status: RegistrationStatus.ready,
-      form: validForm(),
-      feeStatus: FeeStatus.loaded,
-      admissionFee: 500,
-    ),
+    seed: submitReadyState,
     expect: () => [
       predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.submitting),
       predicate<RegistrationState>((s) =>
