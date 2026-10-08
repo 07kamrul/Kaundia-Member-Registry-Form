@@ -1,4 +1,3 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -18,43 +17,43 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
       : _admin = adminRepository,
         _costs = costRepository,
         super(const SocietyCostsState()) {
-    on<SocietyInitRequested>((e, emit) => init());
-    on<SocietyCategoriesLoadRequested>((e, emit) => loadCategories());
-    on<SocietyRefreshRequested>((e, emit) => refresh());
-    on<SocietyFiltersChanged>((e, emit) => setFilters(
+    on<SocietyInitRequested>((e, emit) => _init(emit));
+    on<SocietyCategoriesLoadRequested>((e, emit) => _loadCategories(emit));
+    on<SocietyRefreshRequested>((e, emit) => _refresh(emit));
+    on<SocietyFiltersChanged>((e, emit) => _setFilters(emit,
         categoryFilter: e.categoryFilter,
         dateFrom: e.dateFrom,
         dateTo: e.dateTo,
         sourceFilter: e.sourceFilter,
         billedFilter: e.billedFilter,
         search: e.search));
-    on<SocietyFiltersReset>((e, emit) => resetFilters());
-    on<SocietyRowToggled>((e, emit) => toggleExpanded(e.id));
+    on<SocietyFiltersReset>((e, emit) => _resetFilters(emit));
+    on<SocietyRowToggled>((e, emit) => _toggleExpanded(e.id, emit));
     on<SocietyCategoryAdded>((e, emit) async {
-      final result = await addCategory(e.label);
+      final result = await _addCategory(e.label, emit);
       e.completer?.complete(result);
     });
     on<SocietyCostSaved>((e, emit) async {
-      final result = await saveCost(
+      final result = await _saveCost(emit,
           input: e.input, editingId: e.editingId, receiptPath: e.receiptPath);
       e.completer?.complete(result);
     });
     on<SocietyCostDeleted>((e, emit) async {
-      final result = await deleteCost(e.cost);
+      final result = await _deleteCost(e.cost, emit);
       e.completer?.complete(result);
     });
-    on<SocietySplitOpened>((e, emit) => openSplit(e.cost));
-    on<SocietySplitClosed>((e, emit) => closeSplit());
-    on<SocietySplitMethodChanged>((e, emit) => setSplitMethod(e.method));
+    on<SocietySplitOpened>((e, emit) => _openSplit(e.cost, emit));
+    on<SocietySplitClosed>((e, emit) => _closeSplit(emit));
+    on<SocietySplitMethodChanged>((e, emit) => _setSplitMethod(e.method, emit));
     on<SocietyManualAmountChanged>(
-        (e, emit) => setManualAmount(e.memberId, e.amount));
-    on<SocietySplitPreviewRefreshed>((e, emit) => refreshSplitPreview());
+        (e, emit) => _setManualAmount(e.memberId, e.amount, emit));
+    on<SocietySplitPreviewRefreshed>((e, emit) => _refreshSplitPreview(emit));
     on<SocietySplitConfirmed>((e, emit) async {
-      final result = await confirmSplit(allowMismatch: e.allowMismatch);
+      final result = await _confirmSplit(emit, allowMismatch: e.allowMismatch);
       e.completer?.complete(result);
     });
     on<SocietySharePaymentRecorded>((e, emit) async {
-      final result = await recordSharePayment(e.share,
+      final result = await _recordSharePayment(e.share, emit,
           additionalAmount: e.additionalAmount, receiptNo: e.receiptNo);
       e.completer?.complete(result);
     });
@@ -63,12 +62,11 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
   final AdminRepository _admin;
   final SocietyCostRepository _costs;
 
-  Future<void> init() async {
-    loadCategories();
-    refresh();
+  Future<void> _init(Emitter<SocietyCostsState> emit) async {
+    await Future.wait([_loadCategories(emit), _refresh(emit)]);
   }
 
-  Future<void> loadCategories() async {
+  Future<void> _loadCategories(Emitter<SocietyCostsState> emit) async {
     try {
       final items = await _admin.listConfigListItems('cost_category');
       emit(state.copyWith(categories: items.where((i) => i.isActive).toList()));
@@ -77,7 +75,7 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> _refresh(Emitter<SocietyCostsState> emit) async {
     emit(state.copyWith(loading: true, error: () => null));
     try {
       final costs = await _costs.listCosts(
@@ -105,14 +103,15 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
     }
   }
 
-  void setFilters({
+  Future<void> _setFilters(
+    Emitter<SocietyCostsState> emit, {
     String? categoryFilter,
     String? dateFrom,
     String? dateTo,
     CostPaymentSource? sourceFilter,
     bool? billedFilter,
     String? search,
-  }) {
+  }) async {
     emit(state.copyWith(
       categoryFilter: () => categoryFilter,
       dateFrom: dateFrom ?? state.dateFrom,
@@ -121,10 +120,10 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
       billedFilter: () => billedFilter,
       search: search ?? state.search,
     ));
-    refresh();
+    await _refresh(emit);
   }
 
-  void resetFilters() {
+  Future<void> _resetFilters(Emitter<SocietyCostsState> emit) async {
     emit(state.copyWith(
       categoryFilter: () => null,
       sourceFilter: () => null,
@@ -133,14 +132,15 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
       dateTo: '',
       search: '',
     ));
-    refresh();
+    await _refresh(emit);
   }
 
-  void toggleExpanded(int id) => emit(
+  void _toggleExpanded(int id, Emitter<SocietyCostsState> emit) => emit(
       state.copyWith(expandedId: () => state.expandedId == id ? null : id));
 
   /// Adds a cost_category config item from the form, returns its id.
-  Future<String?> addCategory(String label) async {
+  Future<String?> _addCategory(
+      String label, Emitter<SocietyCostsState> emit) async {
     final trimmed = label.trim();
     if (trimmed.isEmpty) return null;
     try {
@@ -154,7 +154,7 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
     }
   }
 
-  Future<bool> saveCost(
+  Future<bool> _saveCost(Emitter<SocietyCostsState> emit,
       {required SocietyCostInput input,
       int? editingId,
       String? receiptPath}) async {
@@ -167,7 +167,7 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
         await _costs.uploadReceipt(cost.id, receiptPath);
       }
       emit(state.copyWith(busy: false));
-      await refresh();
+      await _refresh(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busy: false, actionError: () => e));
@@ -175,12 +175,13 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
     }
   }
 
-  Future<bool> deleteCost(SocietyCost cost) async {
+  Future<bool> _deleteCost(
+      SocietyCost cost, Emitter<SocietyCostsState> emit) async {
     emit(state.copyWith(busy: true, actionError: () => null));
     try {
       await _costs.deleteCost(cost.id);
       emit(state.copyWith(busy: false));
-      await refresh();
+      await _refresh(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busy: false, actionError: () => e));
@@ -190,7 +191,8 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
 
   // ----- Split flow -----
 
-  Future<void> openSplit(SocietyCost cost) async {
+  Future<void> _openSplit(
+      SocietyCost cost, Emitter<SocietyCostsState> emit) async {
     emit(state.copyWith(
       splitCost: () => cost,
       splitMethod: cost.split?.splitMethod ?? CostSplitMethod.equal,
@@ -198,17 +200,20 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
       manualAmounts: const [],
       splitError: () => null,
     ));
-    await refreshSplitPreview();
+    await _refreshSplitPreview(emit);
   }
 
-  void closeSplit() => emit(state.copyWith(splitCost: () => null));
+  void _closeSplit(Emitter<SocietyCostsState> emit) =>
+      emit(state.copyWith(splitCost: () => null));
 
-  Future<void> setSplitMethod(CostSplitMethod method) async {
+  Future<void> _setSplitMethod(
+      CostSplitMethod method, Emitter<SocietyCostsState> emit) async {
     emit(state.copyWith(splitMethod: method));
-    await refreshSplitPreview();
+    await _refreshSplitPreview(emit);
   }
 
-  void setManualAmount(int memberId, num? amount) {
+  void _setManualAmount(
+      int memberId, num? amount, Emitter<SocietyCostsState> emit) {
     emit(state.copyWith(manualAmounts: [
       for (final m in state.manualAmounts)
         if (m.memberId == memberId)
@@ -231,7 +236,7 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
   }
 
   /// dry_run preview; seeds manual entries when switching to manual.
-  Future<void> refreshSplitPreview() async {
+  Future<void> _refreshSplitPreview(Emitter<SocietyCostsState> emit) async {
     final cost = state.splitCost;
     if (cost == null) return;
     emit(state.copyWith(splitLoading: true, splitError: () => null));
@@ -278,7 +283,8 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
   }
 
   /// Confirms (saves) the split. Returns success.
-  Future<bool> confirmSplit({bool allowMismatch = false}) async {
+  Future<bool> _confirmSplit(Emitter<SocietyCostsState> emit,
+      {bool allowMismatch = false}) async {
     final cost = state.splitCost;
     if (cost == null) return false;
     emit(state.copyWith(busy: true, splitError: () => null));
@@ -293,7 +299,7 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
         allowMismatch: allowMismatch,
       );
       emit(state.copyWith(busy: false, splitCost: () => null));
-      await refresh();
+      await _refresh(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busy: false, splitError: () => e));
@@ -303,7 +309,8 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
 
   // ----- Share payment -----
 
-  Future<bool> recordSharePayment(CostSplitShare share,
+  Future<bool> _recordSharePayment(
+      CostSplitShare share, Emitter<SocietyCostsState> emit,
       {required num additionalAmount, String? receiptNo}) async {
     emit(state.copyWith(busy: true, actionError: () => null));
     try {
@@ -313,7 +320,7 @@ class SocietyCostsBloc extends Bloc<SocietyCostsEvent, SocietyCostsState> {
         receiptNo: receiptNo,
       );
       emit(state.copyWith(busy: false));
-      await refresh();
+      await _refresh(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busy: false, actionError: () => e));

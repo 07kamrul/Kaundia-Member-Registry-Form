@@ -1,4 +1,3 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -20,22 +19,22 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
   RoadmapBloc({required RoadmapRepository repository})
       : _repository = repository,
         super(const RoadmapState()) {
-    on<RoadmapLoadRequested>((e, emit) => load());
-    on<RoadmapHistoryLoadRequested>((e, emit) => loadHistory());
+    on<RoadmapLoadRequested>((e, emit) => _load(emit));
+    on<RoadmapHistoryLoadRequested>((e, emit) => _loadHistory(emit));
     on<RoadmapStatusSet>((e, emit) async {
-      final result = await setStatus(e.item, e.status, notify: e.notify);
+      final result = await _setStatus(e.item, e.status, emit, notify: e.notify);
       e.completer?.complete(result);
     });
     on<RoadmapItemDeleted>((e, emit) async {
-      final result = await deleteItem(e.item);
+      final result = await _deleteItem(e.item, emit);
       e.completer?.complete(result);
     });
     on<RoadmapItemsReordered>((e, emit) async {
-      final result = await reorder(e.timeframe, e.index, e.delta);
+      final result = await _reorder(e.timeframe, e.index, e.delta, emit);
       e.completer?.complete(result);
     });
     on<RoadmapItemCreated>((e, emit) async {
-      final result = await createItem(
+      final result = await _createItem(emit,
           timeframeId: e.timeframeId,
           text: e.text,
           status: e.status,
@@ -46,7 +45,7 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
       e.completer?.complete(result);
     });
     on<RoadmapItemUpdated>((e, emit) async {
-      final result = await updateItem(e.item,
+      final result = await _updateItem(e.item, emit,
           text: e.text,
           timeframeId: e.timeframeId,
           targetDate: e.targetDate,
@@ -55,14 +54,14 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
       e.completer?.complete(result);
     });
     on<RoadmapArchived>((e, emit) async {
-      final result = await archive(onlyDone: e.onlyDone);
+      final result = await _archive(emit, onlyDone: e.onlyDone);
       e.completer?.complete(result);
     });
   }
 
   final RoadmapRepository _repository;
 
-  Future<void> load() async {
+  Future<void> _load(Emitter<RoadmapState> emit) async {
     emit(state.copyWith(loading: true, loadError: () => null));
     try {
       final roadmap = await _repository.getRoadmap();
@@ -72,7 +71,11 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
     }
   }
 
-  Future<bool> _mutate(int itemId, Future<Roadmap> Function() run) async {
+  Future<bool> _mutate(
+    int itemId,
+    Future<Roadmap> Function() run,
+    Emitter<RoadmapState> emit,
+  ) async {
     emit(state.copyWith(busyItemId: () => itemId, actionError: () => null));
     try {
       final roadmap = await run();
@@ -84,25 +87,35 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
     }
   }
 
-  Future<bool> setStatus(RoadmapItem item, RoadmapStatus status,
-          {bool notify = true}) =>
+  Future<bool> _setStatus(
+    RoadmapItem item,
+    RoadmapStatus status,
+    Emitter<RoadmapState> emit, {
+    bool notify = true,
+  }) =>
       _mutate(item.id,
-          () => _repository.setStatus(item.id, status, notify: notify));
+          () => _repository.setStatus(item.id, status, notify: notify), emit);
 
-  Future<bool> deleteItem(RoadmapItem item) =>
-      _mutate(item.id, () => _repository.deleteItem(item.id));
+  Future<bool> _deleteItem(RoadmapItem item, Emitter<RoadmapState> emit) =>
+      _mutate(item.id, () => _repository.deleteItem(item.id), emit);
 
-  Future<bool> reorder(RoadmapTimeframe timeframe, int index, int delta) async {
+  Future<bool> _reorder(
+    RoadmapTimeframe timeframe,
+    int index,
+    int delta,
+    Emitter<RoadmapState> emit,
+  ) async {
     final target = index + delta;
     if (target < 0 || target >= timeframe.items.length) return false;
     final ids = [for (final i in timeframe.items) i.id];
     final moved = ids[index];
     ids[index] = ids[target];
     ids[target] = moved;
-    return _mutate(moved, () => _repository.reorder(timeframe.id, ids));
+    return _mutate(moved, () => _repository.reorder(timeframe.id, ids), emit);
   }
 
-  Future<bool> createItem({
+  Future<bool> _createItem(
+    Emitter<RoadmapState> emit, {
     required int timeframeId,
     required String text,
     RoadmapStatus status = RoadmapStatus.planned,
@@ -130,8 +143,9 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
     }
   }
 
-  Future<bool> updateItem(
-    RoadmapItem item, {
+  Future<bool> _updateItem(
+    RoadmapItem item,
+    Emitter<RoadmapState> emit, {
     required String text,
     int? timeframeId,
     String? targetDate,
@@ -156,13 +170,16 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
     }
   }
 
-  Future<bool> archive({required bool onlyDone}) async {
+  Future<bool> _archive(
+    Emitter<RoadmapState> emit, {
+    required bool onlyDone,
+  }) async {
     emit(state.copyWith(actionError: () => null, busyItemId: () => -1));
     try {
       final archived = await _repository.archive(onlyDone: onlyDone);
       emit(state.copyWith(
           busyItemId: () => null, archiveCount: () => archived, history: null));
-      await load();
+      await _load(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busyItemId: () => null, actionError: () => e));
@@ -170,7 +187,7 @@ class RoadmapBloc extends Bloc<RoadmapEvent, RoadmapState> {
     }
   }
 
-  Future<void> loadHistory() async {
+  Future<void> _loadHistory(Emitter<RoadmapState> emit) async {
     if (state.history != null) return;
     try {
       final cycles = await _repository.getArchive();

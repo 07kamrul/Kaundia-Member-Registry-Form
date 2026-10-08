@@ -1,4 +1,3 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -15,22 +14,21 @@ class PropertyRequestsBloc
   PropertyRequestsBloc({required AdminRepository repository})
       : _repository = repository,
         super(const PropertyRequestsState()) {
-    on<PropertyRequestsLoadRequested>((e, emit) => load());
-    on<PropertyRequestsStatusFilterChanged>(
-        (e, emit) => setStatusFilter(e.status));
+    on<PropertyRequestsLoadRequested>((e, emit) => _load(emit));
+    on<PropertyRequestsStatusFilterChanged>(_onStatusFilterChanged);
     on<PropertyRequestApproved>((e, emit) async {
-      final result = await approve(e.request);
+      final result = await _approve(e.request, emit);
       e.completer?.complete(result);
     });
     on<PropertyRequestCancelled>((e, emit) async {
-      final result = await cancel(e.request, e.reason);
+      final result = await _cancel(e.request, e.reason, emit);
       e.completer?.complete(result);
     });
   }
 
   final AdminRepository _repository;
 
-  Future<void> load() async {
+  Future<void> _load(Emitter<PropertyRequestsState> emit) async {
     emit(state.copyWith(loading: true, error: () => null));
     try {
       final items =
@@ -41,17 +39,23 @@ class PropertyRequestsBloc
     }
   }
 
-  void setStatusFilter(PropertyRequestStatus status) {
-    emit(PropertyRequestsState(statusFilter: status));
-    load();
+  Future<void> _onStatusFilterChanged(
+    PropertyRequestsStatusFilterChanged event,
+    Emitter<PropertyRequestsState> emit,
+  ) async {
+    emit(PropertyRequestsState(statusFilter: event.status));
+    await _load(emit);
   }
 
-  Future<bool> approve(MemberPropertyRequest request) async {
+  Future<bool> _approve(
+    MemberPropertyRequest request,
+    Emitter<PropertyRequestsState> emit,
+  ) async {
     emit(state.copyWith(busyId: () => request.id, actionError: () => null));
     try {
       await _repository.approvePropertyRequest(request.id);
       emit(state.copyWith(busyId: () => null));
-      await load();
+      await _load(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busyId: () => null, actionError: () => e));
@@ -59,7 +63,11 @@ class PropertyRequestsBloc
     }
   }
 
-  Future<bool> cancel(MemberPropertyRequest request, String reason) async {
+  Future<bool> _cancel(
+    MemberPropertyRequest request,
+    String reason,
+    Emitter<PropertyRequestsState> emit,
+  ) async {
     if (reason.trim().isEmpty) {
       emit(state.copyWith(actionError: () => 'reasonRequired'));
       return false;
@@ -68,7 +76,7 @@ class PropertyRequestsBloc
     try {
       await _repository.cancelPropertyRequest(request.id, reason.trim());
       emit(state.copyWith(busyId: () => null));
-      await load();
+      await _load(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busyId: () => null, actionError: () => e));

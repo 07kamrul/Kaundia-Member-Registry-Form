@@ -1,4 +1,3 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -21,9 +20,10 @@ class InstallmentsMgmtBloc
   InstallmentsMgmtBloc({required AdminRepository repository})
       : _repository = repository,
         super(const InstallmentsMgmtState()) {
-    on<InstallmentsMembersLoadRequested>((e, emit) => loadMembers());
-    on<InstallmentsMemberSelected>((e, emit) => selectMember(e.memberId));
-    on<InstallmentMarkPaid>((e, emit) => markPaid(e.installment));
+    on<InstallmentsMembersLoadRequested>(_onMembersLoadRequested);
+    on<InstallmentsMemberSelected>(
+        (e, emit) => _selectMember(e.memberId, emit));
+    on<InstallmentMarkPaid>(_onMarkPaid);
   }
 
   final AdminRepository _repository;
@@ -37,7 +37,10 @@ class InstallmentsMgmtBloc
     return null;
   }
 
-  Future<void> loadMembers() async {
+  Future<void> _onMembersLoadRequested(
+    InstallmentsMembersLoadRequested event,
+    Emitter<InstallmentsMgmtState> emit,
+  ) async {
     emit(state.copyWith(loadingMembers: true, error: () => null));
     try {
       final members = (await _repository.listMembers())
@@ -45,14 +48,17 @@ class InstallmentsMgmtBloc
           .toList();
       emit(state.copyWith(members: members, loadingMembers: false));
       if (members.isNotEmpty) {
-        await selectMember(members.first.id);
+        await _selectMember(members.first.id, emit);
       }
     } catch (e) {
       emit(state.copyWith(loadingMembers: false, error: () => e));
     }
   }
 
-  Future<void> selectMember(String memberId) async {
+  Future<void> _selectMember(
+    String memberId,
+    Emitter<InstallmentsMgmtState> emit,
+  ) async {
     emit(state.copyWith(
       selectedMemberId: () => memberId,
       loadingInstallments: true,
@@ -68,7 +74,11 @@ class InstallmentsMgmtBloc
     }
   }
 
-  Future<void> markPaid(Installment installment) async {
+  Future<void> _onMarkPaid(
+    InstallmentMarkPaid event,
+    Emitter<InstallmentsMgmtState> emit,
+  ) async {
+    final installment = event.installment;
     emit(state.copyWith(markingId: () => installment.id, error: () => null));
     try {
       final updated =

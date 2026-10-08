@@ -1,4 +1,3 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -17,54 +16,56 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
   })  : _admin = adminRepository,
         _finance = financeRepository,
         super(const FinanceState()) {
-    on<FinanceInitRequested>((e, emit) => init());
-    on<FinanceCategoriesLoadRequested>((e, emit) => loadCategories());
-    on<FinanceOverviewLoadRequested>((e, emit) => loadOverview());
-    on<FinanceRefreshRequested>((e, emit) => refresh());
-    on<FinanceFiltersChanged>((e, emit) => setFilters(
-        statusFilter: e.statusFilter,
-        typeFilter: e.typeFilter,
-        search: e.search));
-    on<FinanceDateRangeChanged>(
-        (e, emit) => setDateRange(from: e.from, to: e.to));
-    on<FinanceFiltersReset>((e, emit) => resetFilters());
-    on<FinancePageChanged>((e, emit) => changePage(e.delta));
-    on<FinanceRowToggled>((e, emit) => toggleExpanded(e.id));
+    on<FinanceInitRequested>(_onInit);
+    on<FinanceCategoriesLoadRequested>((e, emit) => _loadCategories(emit));
+    on<FinanceOverviewLoadRequested>((e, emit) => _loadOverview(emit));
+    on<FinanceRefreshRequested>((e, emit) => _refresh(emit));
+    on<FinanceFiltersChanged>(_onFiltersChanged);
+    on<FinanceDateRangeChanged>(_onDateRangeChanged);
+    on<FinanceFiltersReset>(_onFiltersReset);
+    on<FinancePageChanged>(_onPageChanged);
+    on<FinanceRowToggled>(_onRowToggled);
     on<FinanceTransactionSaved>((e, emit) async {
-      final result = await saveTransaction(
-          input: e.input,
-          editingId: e.editingId,
-          attachmentPath: e.attachmentPath);
+      final result = await _saveTransaction(
+        emit,
+        input: e.input,
+        editingId: e.editingId,
+        attachmentPath: e.attachmentPath,
+      );
       e.completer?.complete(result);
     });
     on<FinanceDraftSubmitted>((e, emit) async {
-      final result = await submitDraft(e.txn);
+      final result =
+          await _action(() => _finance.submitTransaction(e.txn.id), emit);
       e.completer?.complete(result);
     });
     on<FinanceApproved>((e, emit) async {
-      final result = await approve(e.txn);
+      final result =
+          await _action(() => _finance.approveTransaction(e.txn.id), emit);
       e.completer?.complete(result);
     });
     on<FinanceRejected>((e, emit) async {
-      final result = await reject(e.txn, e.reason);
+      final result = await _action(
+          () => _finance.rejectTransaction(e.txn.id, e.reason), emit);
       e.completer?.complete(result);
     });
     on<FinanceReversed>((e, emit) async {
-      final result = await reverse(e.txn, e.reason);
+      final result = await _action(
+          () => _finance.reverseTransaction(e.txn.id, e.reason), emit);
       e.completer?.complete(result);
     });
     on<FinanceDeleted>((e, emit) async {
-      final result = await delete(e.txn, e.reason);
+      final result = await _action(
+          () => _finance.deleteTransaction(e.txn.id, e.reason), emit);
       e.completer?.complete(result);
     });
-    on<FinanceUnlinkedPaymentsRequested>((e, emit) =>
-        loadUnlinkedPayments(sourceType: e.sourceType, search: e.search));
+    on<FinanceUnlinkedPaymentsRequested>(_onUnlinkedPaymentsRequested);
     on<FinanceCategoryAdded>((e, emit) async {
-      final result = await addCategory(e.label);
+      final result = await _addCategory(e.label, emit);
       e.completer?.complete(result);
     });
     on<FinanceReportNoticePublished>((e, emit) async {
-      final result = await publishReportNotice(period: e.period);
+      final result = await _publishReportNotice(emit, period: e.period);
       e.completer?.complete(result);
     });
   }
@@ -72,13 +73,19 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
   final AdminRepository _admin;
   final FinanceRepository _finance;
 
-  Future<void> init() async {
-    loadCategories();
-    refresh();
-    loadOverview();
+  /// Loads categories, ledger and overview concurrently.
+  Future<void> _onInit(
+    FinanceInitRequested event,
+    Emitter<FinanceState> emit,
+  ) async {
+    await Future.wait([
+      _loadCategories(emit),
+      _refresh(emit),
+      _loadOverview(emit),
+    ]);
   }
 
-  Future<void> loadCategories() async {
+  Future<void> _loadCategories(Emitter<FinanceState> emit) async {
     try {
       final categories = await _finance.categories();
       emit(state.copyWith(categories: categories));
@@ -87,7 +94,7 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
     }
   }
 
-  Future<void> loadOverview() async {
+  Future<void> _loadOverview(Emitter<FinanceState> emit) async {
     try {
       final overview = await _finance.overview();
       emit(state.copyWith(overview: () => overview));
@@ -96,7 +103,7 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> _refresh(Emitter<FinanceState> emit) async {
     emit(state.copyWith(loading: true, error: () => null));
     try {
       final ledger = await _finance.adminTransactions(
@@ -114,23 +121,33 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
     }
   }
 
-  void setFilters(
-      {FinanceStatus? statusFilter, FinanceType? typeFilter, String? search}) {
+  Future<void> _onFiltersChanged(
+    FinanceFiltersChanged event,
+    Emitter<FinanceState> emit,
+  ) async {
     emit(state.copyWith(
-      statusFilter: () => statusFilter,
-      typeFilter: () => typeFilter,
-      search: search ?? state.search,
+      statusFilter: () => event.statusFilter,
+      typeFilter: () => event.typeFilter,
+      search: event.search ?? state.search,
       page: 1,
     ));
-    refresh();
+    await _refresh(emit);
   }
 
-  void setDateRange({String? from, String? to}) {
+  void _onDateRangeChanged(
+    FinanceDateRangeChanged event,
+    Emitter<FinanceState> emit,
+  ) {
     emit(state.copyWith(
-        dateFrom: from ?? state.dateFrom, dateTo: to ?? state.dateTo, page: 1));
+        dateFrom: event.from ?? state.dateFrom,
+        dateTo: event.to ?? state.dateTo,
+        page: 1));
   }
 
-  void resetFilters() {
+  Future<void> _onFiltersReset(
+    FinanceFiltersReset event,
+    Emitter<FinanceState> emit,
+  ) async {
     emit(state.copyWith(
       statusFilter: () => null,
       typeFilter: () => null,
@@ -139,7 +156,7 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
       search: '',
       page: 1,
     ));
-    refresh();
+    await _refresh(emit);
   }
 
   int get totalPages {
@@ -147,19 +164,24 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
     return total == 0 ? 1 : (total / FinanceState.pageSize).ceil();
   }
 
-  void changePage(int delta) {
-    final next = state.page + delta;
+  Future<void> _onPageChanged(
+    FinancePageChanged event,
+    Emitter<FinanceState> emit,
+  ) async {
+    final next = state.page + event.delta;
     if (next < 1 || next > totalPages) return;
     emit(state.copyWith(page: next));
-    refresh();
+    await _refresh(emit);
   }
 
-  void toggleExpanded(int id) => emit(
-      state.copyWith(expandedId: () => state.expandedId == id ? null : id));
+  void _onRowToggled(FinanceRowToggled event, Emitter<FinanceState> emit) =>
+      emit(state.copyWith(
+          expandedId: () => state.expandedId == event.id ? null : event.id));
 
   /// Creates (editingId == null) or updates a transaction, then uploads an
   /// optional attachment. Returns success.
-  Future<bool> saveTransaction({
+  Future<bool> _saveTransaction(
+    Emitter<FinanceState> emit, {
     required FinanceTransactionInput input,
     int? editingId,
     String? attachmentPath,
@@ -173,8 +195,8 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
         await _finance.uploadAttachment(txn.id, attachmentPath);
       }
       emit(state.copyWith(busy: false));
-      await refresh();
-      await loadOverview();
+      await _refresh(emit);
+      await _loadOverview(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busy: false, actionError: () => e));
@@ -182,28 +204,16 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
     }
   }
 
-  Future<bool> submitDraft(FinanceTransaction txn) =>
-      _action(() => _finance.submitTransaction(txn.id));
-
-  Future<bool> approve(FinanceTransaction txn) =>
-      _action(() => _finance.approveTransaction(txn.id));
-
-  Future<bool> reject(FinanceTransaction txn, String reason) =>
-      _action(() => _finance.rejectTransaction(txn.id, reason));
-
-  Future<bool> reverse(FinanceTransaction txn, String reason) =>
-      _action(() => _finance.reverseTransaction(txn.id, reason));
-
-  Future<bool> delete(FinanceTransaction txn, String reason) =>
-      _action(() => _finance.deleteTransaction(txn.id, reason));
-
-  Future<bool> _action(Future<Object?> Function() run) async {
+  Future<bool> _action(
+    Future<Object?> Function() run,
+    Emitter<FinanceState> emit,
+  ) async {
     emit(state.copyWith(busy: true, actionError: () => null));
     try {
       await run();
       emit(state.copyWith(busy: false));
-      await refresh();
-      await loadOverview();
+      await _refresh(emit);
+      await _loadOverview(emit);
       return true;
     } catch (e) {
       emit(state.copyWith(busy: false, actionError: () => e));
@@ -211,12 +221,14 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
     }
   }
 
-  Future<void> loadUnlinkedPayments(
-      {PaymentSourceType? sourceType, String? search}) async {
+  Future<void> _onUnlinkedPaymentsRequested(
+    FinanceUnlinkedPaymentsRequested event,
+    Emitter<FinanceState> emit,
+  ) async {
     emit(state.copyWith(unlinkedLoading: true));
     try {
       final payments = await _finance.unlinkedPayments(
-          sourceType: sourceType, search: search);
+          sourceType: event.sourceType, search: event.search);
       emit(state.copyWith(unlinkedPayments: payments, unlinkedLoading: false));
     } catch (_) {
       emit(state.copyWith(unlinkedPayments: const [], unlinkedLoading: false));
@@ -224,7 +236,10 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
   }
 
   /// Adds a finance_*_category config item and returns the new category.
-  Future<FinanceCategory?> addCategory(String label) async {
+  Future<FinanceCategory?> _addCategory(
+    String label,
+    Emitter<FinanceState> emit,
+  ) async {
     final trimmed = label.trim();
     if (trimmed.isEmpty) return null;
     final listKey = state.typeFilter == FinanceType.expense
@@ -249,8 +264,10 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
     }
   }
 
-  Future<bool> publishReportNotice(
-      {FinancePeriod period = FinancePeriod.month}) async {
+  Future<bool> _publishReportNotice(
+    Emitter<FinanceState> emit, {
+    FinancePeriod period = FinancePeriod.month,
+  }) async {
     emit(
         state.copyWith(busy: true, actionError: () => null, noticeDone: false));
     try {
