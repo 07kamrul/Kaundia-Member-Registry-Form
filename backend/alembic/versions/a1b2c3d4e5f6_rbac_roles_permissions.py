@@ -117,7 +117,12 @@ def upgrade() -> None:
     )
     op.create_index('ix_user_permission_overrides_user_id', 'user_permission_overrides', ['user_id'])
 
-    op.add_column('admin_users', sa.Column('role_id', sa.Integer(), sa.ForeignKey('roles.id', ondelete='SET NULL'), nullable=True))
+    # SQLite cannot ALTER of constraints (FK) in place; only attach the FK on
+    # PostgreSQL. SQLite keeps a plain integer column (dev database).
+    if op.get_bind().dialect.name == 'postgresql':
+        op.add_column('admin_users', sa.Column('role_id', sa.Integer(), sa.ForeignKey('roles.id', ondelete='SET NULL'), nullable=True))
+    else:
+        op.add_column('admin_users', sa.Column('role_id', sa.Integer(), nullable=True))
 
     roles_table = sa.table(
         'roles', sa.column('id', sa.Integer), sa.column('name', sa.String), sa.column('description', sa.String)

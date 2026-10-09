@@ -12,6 +12,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from app.api.routes import (
     admin,
     auth,
+    fee_payments,
     finance,
     installment_payments,
     member,
@@ -121,6 +122,7 @@ app.include_router(finance.router, prefix=api_router_prefix)
 app.include_router(roadmap.router, prefix=api_router_prefix)
 app.include_router(resolution_book.router, prefix=api_router_prefix)
 app.include_router(installment_payments.router, prefix=api_router_prefix)
+app.include_router(fee_payments.router, prefix=api_router_prefix)
 
 app.mount("/uploads", UploadStaticFiles(), name="uploads")
 

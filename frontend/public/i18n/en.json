@@ -207,7 +207,9 @@
     "roadmap": "Our Roadmap",
     "roadmapManagement": "Roadmap Management",
     "paymentVerifications": "Payment Verifications",
-    "neighbours": "Neighbours"
+    "neighbours": "Neighbours",
+    "fees": "Fees",
+    "feesManagement": "Fee Payments"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -723,6 +725,75 @@
       "approvedOnly": "Only approved members can view neighbour information.",
       "searchPlaceholder": "Search by name or dag number",
       "noSearchResults": "No owners match your search."
+    },
+    "fees": {
+      "title": "Fees",
+      "subtitle": "Pay your installment, picnic, extra and other society fees - all in one place.",
+      "retry": "Retry",
+      "accessDenied": "You do not have permission to record fee payments.",
+      "typesLoadFailed": "Could not load the fee types. Please try again.",
+      "historyLoadFailed": "Could not load your payment history. Please try again.",
+      "submitFailed": "Could not record the payment. Please try again.",
+      "success": "Your payment has been recorded successfully.",
+      "chooseTitle": "Choose a fee",
+      "formTitle": "Pay {{fee}}",
+      "suggested": "Suggested",
+      "amountLabel": "Amount (৳)",
+      "amountPlaceholder": "Enter amount",
+      "amountHint": "Suggested amount: ৳ {{amount}} (you may adjust it)",
+      "dateLabel": "Payment date",
+      "methodLabel": "Payment method",
+      "receiptNoLabel": "Receipt / transaction no.",
+      "noteLabel": "Note (optional)",
+      "saving": "Recording...",
+      "submit": "Record payment",
+      "historyTitle": "Payment history",
+      "feeColumn": "Fee",
+      "amountColumn": "Amount",
+      "dateColumn": "Date",
+      "methodColumn": "Method",
+      "receiptColumn": "Receipt no.",
+      "noteColumn": "Note",
+      "emptyState": "No fee payments recorded yet.",
+      "summary": {
+        "totalPaid": "Total paid",
+        "thisYear": "This year",
+        "count": "Payments",
+        "lastPayment": "Last payment"
+      },
+      "types": {
+        "installment": {
+          "label": "Installment fee",
+          "desc": "Monthly subscription / installment dues"
+        },
+        "picnic": {
+          "label": "Picnic fee",
+          "desc": "Annual picnic participation fee"
+        },
+        "maintenance": {
+          "label": "Maintenance fee",
+          "desc": "Upkeep of common property and roads"
+        },
+        "development": {
+          "label": "Development fee",
+          "desc": "Special development project contributions"
+        },
+        "donation": {
+          "label": "Donation",
+          "desc": "Voluntary contribution to the society fund"
+        },
+        "extra": {
+          "label": "Extra fee",
+          "desc": "Any other one-off fee or charge"
+        }
+      },
+      "methods": {
+        "Cash": "Cash",
+        "bKash": "bKash",
+        "Nagad": "Nagad",
+        "Bank Transfer": "Bank Transfer",
+        "Other": "Other"
+      }
     }
   },
   "auth": {
@@ -1738,6 +1809,26 @@
       "cancel": "Cancel",
       "loadError": "Failed to load payments.",
       "actionError": "Action failed. Please try again."
+    },
+    "feesManagement": {
+      "title": "Fee Payments",
+      "subtitle": "All member-recorded fee payments (installment, picnic, extra and more) in one ledger.",
+      "loadError": "Could not load fee payments. Please try again.",
+      "feeTypeFilter": "Fee type",
+      "allTypes": "All fee types",
+      "dateRange": "Date range",
+      "apply": "Apply",
+      "reset": "Reset",
+      "totalCollected": "Total collected",
+      "count": "Payments",
+      "memberColumn": "Member",
+      "feeColumn": "Fee",
+      "dateColumn": "Date",
+      "amountColumn": "Amount",
+      "methodColumn": "Method",
+      "receiptColumn": "Receipt no.",
+      "noteColumn": "Note",
+      "emptyState": "No fee payments found for this filter."
     }
   },
   "registration": {

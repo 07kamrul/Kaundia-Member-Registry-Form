@@ -21,12 +21,14 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.add_column('members', sa.Column('gender', sa.String(length=16), nullable=True))
     op.execute("UPDATE members SET gender = 'পুরুষ' WHERE gender IS NULL")
-    op.alter_column('members', 'gender', nullable=False)
-    op.drop_column('members', 'whatsapp')
+    # batch_alter_table: SQLite cannot ALTER COLUMN in place
+    with op.batch_alter_table('members') as batch_op:
+        batch_op.alter_column('gender', existing_type=sa.String(length=16), nullable=False)
+        batch_op.drop_column('whatsapp')
 
 
 def downgrade() -> None:
-    op.add_column('members', sa.Column('whatsapp', sa.String(length=32), nullable=True))
-    op.execute("UPDATE members SET whatsapp = mobile WHERE whatsapp IS NULL")
-    op.alter_column('members', 'whatsapp', nullable=False)
-    op.drop_column('members', 'gender')
+    with op.batch_alter_table('members') as batch_op:
+        batch_op.add_column(sa.Column('whatsapp', sa.String(length=32), nullable=False,
+                                      server_default=sa.schema.DefaultClause('')))
+        batch_op.drop_column('members', 'gender')

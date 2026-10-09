@@ -134,6 +134,16 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'fees',
+            // Member payers only: fee managers configure rates in Fee
+            // Settings and never pay as members (backend 403s them too).
+            canActivate: [roleGuard(MEMBER_PAYMENT_ROLES)],
+            loadComponent: () =>
+              import('./features/member/pages/fees/fees.component').then(
+                (m) => m.FeesComponent,
+              ),
+          },
+          {
             path: 'cost-shares',
             loadComponent: () =>
               import('./features/member/pages/cost-shares/cost-shares.component').then(
@@ -261,6 +271,14 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/management/pages/installments-management/installments-management.component').then(
                 (m) => m.InstallmentsManagementComponent,
+              ),
+          },
+          {
+            path: 'fees-management',
+            canActivate: [permissionGuard(['member.view_all'])],
+            loadComponent: () =>
+              import('./features/management/pages/fees-management/fees-management.component').then(
+                (m) => m.FeesManagementComponent,
               ),
           },
           {

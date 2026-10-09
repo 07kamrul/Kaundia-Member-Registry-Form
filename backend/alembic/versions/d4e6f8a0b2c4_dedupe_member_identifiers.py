@@ -38,18 +38,32 @@ _NOT_REJECTED = "status <> 'REJECTED'::member_status"
 
 def upgrade() -> None:
     conn = op.get_bind()
+    is_sqlite = conn.dialect.name == 'sqlite'
 
     # Normalize stored values the same way app/services/normalization.py
     # does, so the columns match what the duplicate-check query compares
-    # against going forward.
-    conn.execute(sa.text(r"UPDATE members SET nid = regexp_replace(nid, '\D', '', 'g')"))
-    conn.execute(sa.text(r"UPDATE members SET mobile = regexp_replace(mobile, '\D', '', 'g')"))
+    # against going forward. SQLite has no regexp_replace, so digit
+    # stripping is done row-by-row in Python there.
+    if is_sqlite:
+        rows = conn.execute(sa.text("SELECT id, nid, mobile FROM members")).fetchall()
+        for row_id, nid, mobile in rows:
+            digits = lambda value: ''.join(ch for ch in str(value or '') if ch.isdigit())
+            conn.execute(
+                sa.text("UPDATE members SET nid = :nid, mobile = :mobile WHERE id = :id"),
+                {"nid": digits(nid), "mobile": digits(mobile), "id": row_id},
+            )
+    else:
+        conn.execute(sa.text(r"UPDATE members SET nid = regexp_replace(nid, '\D', '', 'g')"))
+        conn.execute(sa.text(r"UPDATE members SET mobile = regexp_replace(mobile, '\D', '', 'g')"))
     conn.execute(sa.text("UPDATE members SET email = lower(trim(email))"))
+
+    # SQLite keeps status as VARCHAR, so no enum label/cast is needed.
+    not_rejected = "status <> 'rejected'" if is_sqlite else _NOT_REJECTED
 
     for _name, column in _INDEXES:
         collisions = conn.execute(sa.text(
             f"SELECT {column}, count(*) FROM members "
-            f"WHERE {_NOT_REJECTED} GROUP BY {column} HAVING count(*) > 1"
+            f"WHERE {not_rejected} GROUP BY {column} HAVING count(*) > 1"
         )).fetchall()
         if collisions:
             raise RuntimeError(

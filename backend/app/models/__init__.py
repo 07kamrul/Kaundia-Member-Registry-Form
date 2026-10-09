@@ -11,6 +11,7 @@ from app.models.config_list_item import ConfigListItem
 from app.models.event import Event
 from app.models.notice import Notice
 from app.models.picnic_payment import PicnicPayment
+from app.models.fee_payment import FeePayment
 from app.models.member_id_sequence import MemberIdSequence
 from app.models.password_reset import PasswordResetToken
 from app.models.property_change_request import PropertyChangeRequest
@@ -27,6 +28,7 @@ from app.models.resolution_book import (
 
 __all__ = [
     "Meeting",
+    "FeePayment",
     "MeetingAttendance",
     "MeetingRecording",
     "Resolution",

@@ -555,6 +555,37 @@ export class AdminService {
     );
   }
 
+
+  getFeePayments(filters: {
+    memberId?: number;
+    feeType?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }): Observable<FeePaymentsPage> {
+    const params: Record<string, string> = {};
+    if (filters.memberId != null) params['member_id'] = String(filters.memberId);
+    if (filters.feeType) params['fee_type'] = filters.feeType;
+    if (filters.dateFrom) params['date_from'] = filters.dateFrom;
+    if (filters.dateTo) params['date_to'] = filters.dateTo;
+    return this.http.get<FeePaymentsPageApiModel>(`${this.base}/fee-payments`, { params }).pipe(
+      map((page) => ({
+        totalCollected: page.total_collected,
+        count: page.count,
+        items: page.items.map((row) => ({
+          id: row.id,
+          memberId: row.member_id,
+          memberName: row.member_name,
+          feeType: row.fee_type,
+          amount: Number(row.amount),
+          paymentDate: row.payment_date,
+          receiptNo: row.receipt_no,
+          paymentMethod: row.payment_method,
+          note: row.note,
+        })),
+      })),
+    );
+  }
+
   getActiveFeeSettings(): Observable<FeeSetting[]> {
     return this.http
       .get<FeeSettingApiModel[]>(`${this.base}/fee-settings`)
@@ -734,6 +765,40 @@ export interface AdminPicnicPayment {
 
 export interface PicnicPaymentsPage {
   items: AdminPicnicPayment[];
+  totalCollected: number;
+  count: number;
+}
+
+interface FeePaymentsPageApiModel {
+  items: {
+    id: number;
+    member_id: number;
+    member_name: string | null;
+    fee_type: string;
+    amount: string | number;
+    payment_date: string;
+    receipt_no: string | null;
+    payment_method: string | null;
+    note: string | null;
+  }[];
+  total_collected: number;
+  count: number;
+}
+
+export interface AdminFeePayment {
+  id: number;
+  memberId: number;
+  memberName: string | null;
+  feeType: string;
+  amount: number;
+  paymentDate: string;
+  receiptNo: string | null;
+  paymentMethod: string | null;
+  note: string | null;
+}
+
+export interface FeePaymentsPage {
+  items: AdminFeePayment[];
   totalCollected: number;
   count: number;
 }

@@ -54,6 +54,13 @@ const NAV_ITEMS: NavItem[] = [
     requiredRoles: MEMBER_PAYMENT_ROLES,
   },
   {
+    labelKey: 'nav.fees',
+    route: '/fees',
+    icon: 'coin',
+    requiredPermission: ['profile.view_own'],
+    requiredRoles: MEMBER_PAYMENT_ROLES,
+  },
+  {
     labelKey: 'nav.costShares',
     route: '/cost-shares',
     icon: 'coin',
@@ -130,6 +137,12 @@ const NAV_ITEMS: NavItem[] = [
   {
     labelKey: 'nav.installmentsManagement',
     route: '/installments-management',
+    icon: 'coin',
+    requiredPermission: ['member.view_all'],
+  },
+  {
+    labelKey: 'nav.feesManagement',
+    route: '/fees-management',
     icon: 'coin',
     requiredPermission: ['member.view_all'],
   },
