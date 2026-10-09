@@ -157,9 +157,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.requestsError = this.translate.instant(
-          'member.propertyRequests.errors.loadFailed',
-        );
+        this.requestsError = this.translate.instant('member.propertyRequests.errors.loadFailed');
         this.requestsLoading = false;
         this.cdr.markForCheck();
       },
@@ -192,9 +190,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   hasPendingRequest(propertyId: number): boolean {
-    return this.requests.some(
-      (r) => r.status === 'pending' && r.propertyId === propertyId,
-    );
+    return this.requests.some((r) => r.status === 'pending' && r.propertyId === propertyId);
   }
 
   requestDelete(property: MemberProperty): void {
@@ -258,9 +254,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       next: () => {
         this.withdrawSubmitting = false;
         this.showWithdrawModal = false;
-        this.requestSuccess = this.translate.instant(
-          'member.propertyRequests.withdrawnSuccess',
-        );
+        this.requestSuccess = this.translate.instant('member.propertyRequests.withdrawnSuccess');
         this.loadRequests();
       },
       error: (err) => {
@@ -333,7 +327,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.startPreview({
       url: doc.fileUrl,
       title: doc.docType,
-      isImage: /\.(png|jpe?g|gif|webp|svg|avif)(\?|$)/i.test(doc.fileUrl) || /^data:image\//i.test(doc.fileUrl),
+      isImage:
+        /\.(png|jpe?g|gif|webp|svg|avif)(\?|$)/i.test(doc.fileUrl) ||
+        /^data:image\//i.test(doc.fileUrl),
       filename: this.attachmentFilename(doc.docType, doc.fileUrl),
     });
   }
@@ -368,7 +364,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
    * exists shows the app's error UI instead of the backend's raw JSON inside
    * an iframe.
    */
-  private startPreview(target: { url: string; title: string; isImage: boolean; filename: string }): void {
+  private startPreview(target: {
+    url: string;
+    title: string;
+    isImage: boolean;
+    filename: string;
+  }): void {
     this.resetPreview();
     const requestId = this.previewRequestId;
     this.previewTarget = { url: target.url, filename: target.filename };

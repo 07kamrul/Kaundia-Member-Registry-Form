@@ -1,11 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import {
-  AuthService,
-  MEMBER_PAYMENT_ROLES,
-  type UserRole,
-} from '../../core/services/auth.service';
+import { AuthService, MEMBER_PAYMENT_ROLES, type UserRole } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { LanguageService } from '../../core/services/language.service';
 import { MemberService } from '../../core/services/member.service';
@@ -38,7 +34,12 @@ const NAV_ITEMS: NavItem[] = [
     // member.view_all - the nav shows the item when either key is held.
     requiredPermission: ['profile.view_own', 'member.view_all'],
   },
-  { labelKey: 'nav.profile', route: '/profile', icon: 'user', requiredPermission: ['profile.view_own'] },
+  {
+    labelKey: 'nav.profile',
+    route: '/profile',
+    icon: 'user',
+    requiredPermission: ['profile.view_own'],
+  },
   {
     labelKey: 'nav.installments',
     route: '/installments',
@@ -83,7 +84,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'map',
     openAccess: true,
   },
-  { labelKey: 'nav.changePassword', route: '/change-password', icon: 'lock', requiredPermission: ['profile.view_own'] },
+  {
+    labelKey: 'nav.changePassword',
+    route: '/change-password',
+    icon: 'lock',
+    requiredPermission: ['profile.view_own'],
+  },
   // Published notices/events - the same public pages logged-out visitors read.
   {
     labelKey: 'nav.notices',
@@ -192,7 +198,14 @@ const NAV_ITEMS: NavItem[] = [
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, IconComponent, TranslatePipe, IdCardModalComponent],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    IconComponent,
+    TranslatePipe,
+    IdCardModalComponent,
+  ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
   host: { '(document:keydown.escape)': 'closeUserMenu()' },

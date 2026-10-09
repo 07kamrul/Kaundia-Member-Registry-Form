@@ -162,6 +162,23 @@
   color: var(--gray-700);
 }
 
+/* Tablet: the seven columns do not fit beside two side-by-side action buttons
+   (the global card layout only starts at 640px), so tighten the cells and
+   stack Call / WhatsApp instead of letting the last one scroll out of view. */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .neighbour-table {
+    th,
+    td {
+      padding: 0.6rem 0.5rem;
+    }
+
+    tbody td:last-child .row-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+}
+
 @media (max-width: 640px) {
   .neighbour-group {
     padding: 0.75rem;

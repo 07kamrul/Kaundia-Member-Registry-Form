@@ -27,13 +27,19 @@ function setup(updateProfile = vi.fn((p: object) => of({ ...PROFILE, ...p } as M
       provideTranslateService(),
       {
         provide: MemberService,
-        useValue: { getProfile: () => of(PROFILE), getPropertyRequests: () => of([]), updateProfile },
+        useValue: {
+          getProfile: () => of(PROFILE),
+          getPropertyRequests: () => of([]),
+          updateProfile,
+        },
       },
     ],
   });
   const fixture = TestBed.createComponent(ProfileComponent);
   fixture.detectChanges();
-  const toggle = fixture.nativeElement.querySelector('.neighbour-directory-pref input[type="checkbox"]') as HTMLInputElement;
+  const toggle = fixture.nativeElement.querySelector(
+    '.neighbour-directory-pref input[type="checkbox"]',
+  ) as HTMLInputElement;
   return { fixture, toggle, updateProfile };
 }
 

@@ -6,8 +6,27 @@ import { of, throwError } from 'rxjs';
 import { MemberService } from '../../../../core/services/member.service';
 import { ChangePasswordComponent } from './change-password.component';
 
+class MemoryStorage {
+  private readonly entries = new Map<string, string>();
+  get length(): number { return this.entries.size; }
+  clear(): void { this.entries.clear(); }
+  getItem(key: string): string | null { return this.entries.get(key) ?? null; }
+  key(index: number): string | null { return [...this.entries.keys()][index] ?? null; }
+  removeItem(key: string): void { this.entries.delete(key); }
+  setItem(key: string, value: string): void { this.entries.set(key, String(value)); }
+}
+
 describe('ChangePasswordComponent', () => {
   const changePassword = vi.fn();
+
+  // The component builds the real AuthService, which reads localStorage at
+  // construction; give this spec its own store instead of relying on another
+  // spec having installed one first.
+  beforeEach(() => {
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: new MemoryStorage(), configurable: true, writable: true,
+    });
+  });
 
   function setup() {
     changePassword.mockReset();

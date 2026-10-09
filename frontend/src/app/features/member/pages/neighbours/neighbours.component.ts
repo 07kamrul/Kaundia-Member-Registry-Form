@@ -51,6 +51,13 @@ export interface NeighbourGroupView {
   rows: NeighbourRow[];
 }
 
+const BANGLA_DIGITS = '০১২৩৪৫৬৭৮৯';
+
+/** Replaces Bangla digits with their ASCII equivalents; other characters are kept. */
+export function toAsciiDigits(text: string): string {
+  return text.replace(/[০-৯]/g, (digit) => String(BANGLA_DIGITS.indexOf(digit)));
+}
+
 function errorCode(error: HttpErrorResponse): string | null {
   const body: unknown = error.error;
   if (typeof body !== 'object' || body === null) return null;
@@ -64,7 +71,8 @@ function errorCode(error: HttpErrorResponse): string | null {
 export function neighbourErrorKey(error: unknown): string {
   if (!(error instanceof HttpErrorResponse)) return ERROR_KEYS.loadError;
   const code = errorCode(error);
-  if (error.status === HTTP_FORBIDDEN && code === APPROVED_ONLY_CODE) return ERROR_KEYS.approvedOnly;
+  if (error.status === HTTP_FORBIDDEN && code === APPROVED_ONLY_CODE)
+    return ERROR_KEYS.approvedOnly;
   if (error.status === HTTP_TOO_MANY_REQUESTS || code === RATE_LIMITED_CODE) {
     return ERROR_KEYS.rateLimited;
   }
@@ -158,6 +166,8 @@ export class NeighboursComponent implements OnInit {
 
   digits(value: string | number | null): string {
     if (value === null || value === '') return EMPTY_VALUE;
-    return localizeDigits(value, this.lang());
+    // Stored values mix Bangla and ASCII digits ("৮৩০", "830/1"); normalise
+    // first so the whole page shows one digit set for the active language.
+    return localizeDigits(toAsciiDigits(String(value)), this.lang());
   }
 }

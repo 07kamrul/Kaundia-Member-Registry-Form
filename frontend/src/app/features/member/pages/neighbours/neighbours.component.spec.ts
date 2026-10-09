@@ -1,17 +1,22 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideTranslateService } from '@ngx-translate/core';
-import { of, throwError } from 'rxjs';
+import { of, throwError, type Observable } from 'rxjs';
 import { vi } from 'vitest';
+import { LanguageService } from '../../../../core/services/language.service';
 import { MemberService } from '../../../../core/services/member.service';
 import {
   toNeighbourDirectory,
   type NeighbourDirectory,
   type NeighbourOwnerApiModel,
 } from '../../../../core/models/neighbour.model';
-import { NeighboursComponent, neighbourErrorKey } from './neighbours.component';
+import { NeighboursComponent, neighbourErrorKey, toAsciiDigits } from './neighbours.component';
 
-function owner(name: string, position: string, mobile: string | null = '01712345678'): NeighbourOwnerApiModel {
+function owner(
+  name: string,
+  position: string,
+  mobile: string | null = '01712345678',
+): NeighbourOwnerApiModel {
   return {
     owner_name: name,
     mobile,
@@ -36,7 +41,10 @@ const DIRECTORY: NeighbourDirectory = toNeighbourDirectory({
 });
 
 function httpError(status: number, code?: string): HttpErrorResponse {
-  return new HttpErrorResponse({ status, error: code ? { detail: { code, message: 'raw' } } : 'x' });
+  return new HttpErrorResponse({
+    status,
+    error: code ? { detail: { code, message: 'raw' } } : 'x',
+  });
 }
 
 function setup(getNeighbours = vi.fn((_type?: string) => of(DIRECTORY))) {
@@ -84,13 +92,19 @@ describe('NeighboursComponent', () => {
   it('shows private text and no buttons for a hidden contact', () => {
     const { el } = setup();
     const hidden = el.querySelectorAll('.neighbour-table tbody tr')[2];
-    expect(hidden.querySelector('.contact-hidden')!.textContent).toContain('member.neighbours.contactHidden');
+    expect(hidden.querySelector('.contact-hidden')!.textContent).toContain(
+      'member.neighbours.contactHidden',
+    );
     expect(hidden.querySelector('a')).toBeNull();
   });
 
   it('shows the no-properties empty state', () => {
-    const { el } = setup(vi.fn(() => of({ dagType: 'rs', plotLimit: 5, properties: [] } as NeighbourDirectory)));
-    expect(el.querySelector('.no-properties')!.textContent).toContain('member.neighbours.noProperties');
+    const { el } = setup(
+      vi.fn(() => of({ dagType: 'rs', plotLimit: 5, properties: [] } as NeighbourDirectory)),
+    );
+    expect(el.querySelector('.no-properties')!.textContent).toContain(
+      'member.neighbours.noProperties',
+    );
   });
 
   it('shows per-group empty and no-dag hints', () => {
@@ -98,8 +112,22 @@ describe('NeighboursComponent', () => {
       dag_type: 'cs',
       plot_limit: 5,
       properties: [
-        { own: { property_id: 1, rs_dag: '830', cs_dag: null, land_quantity: null, dag_number: null }, same_dag_owners: [], neighbours: [] },
-        { own: { property_id: 2, rs_dag: null, cs_dag: '7', land_quantity: null, dag_number: 7 }, same_dag_owners: [], neighbours: [] },
+        {
+          own: {
+            property_id: 1,
+            rs_dag: '830',
+            cs_dag: null,
+            land_quantity: null,
+            dag_number: null,
+          },
+          same_dag_owners: [],
+          neighbours: [],
+        },
+        {
+          own: { property_id: 2, rs_dag: null, cs_dag: '7', land_quantity: null, dag_number: 7 },
+          same_dag_owners: [],
+          neighbours: [],
+        },
       ],
     });
     const { el } = setup(vi.fn(() => of(data)));
@@ -118,13 +146,34 @@ describe('NeighboursComponent', () => {
     expect(box.textContent).not.toContain('raw');
   });
 
+  it('normalises Bangla digits to ASCII and keeps other characters', () => {
+    expect(toAsciiDigits('৮৩০/১')).toBe('830/1');
+    expect(toAsciiDigits('830/1')).toBe('830/1');
+    expect(toAsciiDigits('দাগ ৫')).toBe('দাগ 5');
+  });
+
+  it('shows one digit set per language whatever digits the stored value uses', () => {
+    const { fixture } = setup();
+    const component = fixture.componentInstance;
+
+    TestBed.inject(LanguageService).setLang('bn');
+    expect(component.digits('830/1')).toBe('৮৩০/১');
+    expect(component.digits('৮৩০/১')).toBe('৮৩০/১');
+
+    TestBed.inject(LanguageService).setLang('en');
+    expect(component.digits('830/1')).toBe('830/1');
+    expect(component.digits('৮৩০/১')).toBe('830/1');
+  });
+
   it('treats a 403 without the approved-only code as a load error', () => {
     expect(neighbourErrorKey(httpError(403))).toBe('member.neighbours.loadError');
     expect(neighbourErrorKey(new Error('x'))).toBe('member.neighbours.loadError');
   });
 
   it('retries after an error', () => {
-    const getNeighbours = vi.fn((_type?: string) => throwError(() => httpError(500)));
+    const getNeighbours = vi.fn<(type?: string) => Observable<NeighbourDirectory>>(() =>
+      throwError(() => httpError(500)),
+    );
     const { fixture, el } = setup(getNeighbours);
     getNeighbours.mockImplementation(() => of(DIRECTORY));
     (el.querySelector('.retry-btn') as HTMLButtonElement).click();

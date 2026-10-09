@@ -112,16 +112,16 @@ export const routes: Routes = [
           {
             path: 'property-requests/new',
             loadComponent: () =>
-              import(
-                './features/member/pages/property-request-form/property-request-form.component'
-              ).then((m) => m.PropertyRequestFormComponent),
+              import('./features/member/pages/property-request-form/property-request-form.component').then(
+                (m) => m.PropertyRequestFormComponent,
+              ),
           },
           {
             path: 'property-requests/:propertyId/edit',
             loadComponent: () =>
-              import(
-                './features/member/pages/property-request-form/property-request-form.component'
-              ).then((m) => m.PropertyRequestFormComponent),
+              import('./features/member/pages/property-request-form/property-request-form.component').then(
+                (m) => m.PropertyRequestFormComponent,
+              ),
           },
           {
             path: 'picnic-payment',
@@ -129,9 +129,9 @@ export const routes: Routes = [
             // redirected to Fee Settings, never shown the payment form.
             canActivate: [roleGuard(MEMBER_PAYMENT_ROLES)],
             loadComponent: () =>
-              import(
-                './features/member/pages/picnic-payment/picnic-payment.component'
-              ).then((m) => m.PicnicPaymentComponent),
+              import('./features/member/pages/picnic-payment/picnic-payment.component').then(
+                (m) => m.PicnicPaymentComponent,
+              ),
           },
           {
             path: 'cost-shares',
@@ -179,7 +179,9 @@ export const routes: Routes = [
       {
         path: 'roadmap',
         loadComponent: () =>
-          import('./features/member/pages/roadmap/roadmap.component').then((m) => m.RoadmapComponent),
+          import('./features/member/pages/roadmap/roadmap.component').then(
+            (m) => m.RoadmapComponent,
+          ),
       },
       // Resolution book - readable by every authenticated account; the
       // add/edit routes are separately committee-gated (the server
@@ -241,9 +243,9 @@ export const routes: Routes = [
             path: 'property-requests',
             canActivate: [permissionGuard(['property.review'])],
             loadComponent: () =>
-              import(
-                './features/management/pages/property-requests/property-requests.component'
-              ).then((m) => m.PropertyRequestsComponent),
+              import('./features/management/pages/property-requests/property-requests.component').then(
+                (m) => m.PropertyRequestsComponent,
+              ),
           },
           {
             path: 'members',
@@ -257,17 +259,17 @@ export const routes: Routes = [
             path: 'installments-management',
             canActivate: [permissionGuard(['member.view_all'])],
             loadComponent: () =>
-              import(
-                './features/management/pages/installments-management/installments-management.component'
-              ).then((m) => m.InstallmentsManagementComponent),
+              import('./features/management/pages/installments-management/installments-management.component').then(
+                (m) => m.InstallmentsManagementComponent,
+              ),
           },
           {
             path: 'picnic-payments',
             canActivate: [permissionGuard(['member.view_all'])],
             loadComponent: () =>
-              import(
-                './features/management/pages/picnic-payments/picnic-payments.component'
-              ).then((m) => m.PicnicPaymentsComponent),
+              import('./features/management/pages/picnic-payments/picnic-payments.component').then(
+                (m) => m.PicnicPaymentsComponent,
+              ),
           },
           {
             path: 'fee-settings',
@@ -281,33 +283,33 @@ export const routes: Routes = [
             path: 'society-costs',
             canActivate: [permissionGuard(['manage_costs'])],
             loadComponent: () =>
-              import(
-                './features/management/pages/society-costs/society-costs.component'
-              ).then((m) => m.SocietyCostsComponent),
+              import('./features/management/pages/society-costs/society-costs.component').then(
+                (m) => m.SocietyCostsComponent,
+              ),
           },
           {
             path: 'finance-management',
             canActivate: [permissionGuard(['manage_finance'])],
             loadComponent: () =>
-              import(
-                './features/management/pages/finance-management/finance-management.component'
-              ).then((m) => m.FinanceManagementComponent),
+              import('./features/management/pages/finance-management/finance-management.component').then(
+                (m) => m.FinanceManagementComponent,
+              ),
           },
           {
             path: 'payment-verifications',
             canActivate: [permissionGuard(['manage_finance'])],
             loadComponent: () =>
-              import(
-                './features/management/pages/payment-verifications/payment-verifications.component'
-              ).then((m) => m.PaymentVerificationsComponent),
+              import('./features/management/pages/payment-verifications/payment-verifications.component').then(
+                (m) => m.PaymentVerificationsComponent,
+              ),
           },
           {
             path: 'roadmap-management',
             canActivate: [permissionGuard(['manage_roadmap'])],
             loadComponent: () =>
-              import(
-                './features/management/pages/roadmap-management/roadmap-management.component'
-              ).then((m) => m.RoadmapManagementComponent),
+              import('./features/management/pages/roadmap-management/roadmap-management.component').then(
+                (m) => m.RoadmapManagementComponent,
+              ),
           },
           {
             path: 'config-lists',
