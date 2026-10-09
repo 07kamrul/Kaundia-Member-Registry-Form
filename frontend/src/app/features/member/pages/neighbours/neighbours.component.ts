@@ -92,6 +92,25 @@ export function toGroupView(group: NeighbourGroup): NeighbourGroupView {
   };
 }
 
+function matchesQuery(owner: NeighbourOwner, query: string): boolean {
+  const haystack = [
+    owner.ownerName,
+    owner.mobile,
+    owner.rsDag,
+    owner.csDag,
+    owner.landQuantity,
+  ]
+    .filter((value): value is string => value !== null && value !== '')
+    .map((value) => toAsciiDigits(value).toLowerCase());
+  return haystack.some((value) => value.includes(query));
+}
+
+/** Up to two leading initials for the avatar; empty when there is no name. */
+export function ownerInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).slice(0, 2);
+  return parts.map((part) => Array.from(part)[0] ?? '').join('').toUpperCase();
+}
+
 @Component({
   selector: 'app-member-neighbours',
   standalone: true,
@@ -115,6 +134,18 @@ export class NeighboursComponent implements OnInit {
   /** Last known plot limit - kept while a dag-type switch reloads. */
   readonly plotLimit = signal<number | null>(null);
   readonly groups = computed(() => (this.directory()?.properties ?? []).map(toGroupView));
+  /** Client-side filter across owner name, mobile and dag numbers. */
+  readonly search = signal('');
+  readonly filteredGroups = computed(() => {
+    const query = toAsciiDigits(this.search().trim()).toLowerCase();
+    if (!query) return this.groups();
+    return this.groups()
+      .map((group) => ({
+        ...group,
+        rows: group.rows.filter((row) => matchesQuery(row.owner, query)),
+      }))
+      .filter((group) => group.rows.length > 0 || !group.hasDag);
+  });
 
   private request: Subscription | null = null;
 
@@ -162,6 +193,10 @@ export class NeighboursComponent implements OnInit {
 
   isNumericQuantity(quantity: string): boolean {
     return NUMERIC_QUANTITY.test(quantity);
+  }
+
+  ownerInitials(name: string): string {
+    return ownerInitials(name);
   }
 
   digits(value: string | number | null): string {

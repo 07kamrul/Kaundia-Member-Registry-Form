@@ -67,7 +67,7 @@ describe('NeighboursComponent', () => {
 
   it('renders same-dag owners before neighbours with position badges', () => {
     const { el } = setup();
-    const rows = Array.from(el.querySelectorAll('.neighbour-table tbody tr'));
+    const rows = Array.from(el.querySelectorAll('.owner-card'));
     expect(rows.map((r) => r.querySelector('.owner-name')?.textContent?.trim())).toEqual([
       'Same Owner',
       'Adjacent Owner',
@@ -81,7 +81,7 @@ describe('NeighboursComponent', () => {
 
   it('builds Call and WhatsApp links', () => {
     const { el } = setup();
-    const first = el.querySelector('.neighbour-table tbody tr')!;
+    const first = el.querySelector('.owner-card')!;
     expect(first.querySelector('a.call-link')!.getAttribute('href')).toBe('tel:+8801712345678');
     const wa = first.querySelector('a.whatsapp-link')!;
     expect(wa.getAttribute('href')).toBe('https://wa.me/8801712345678');
@@ -91,7 +91,7 @@ describe('NeighboursComponent', () => {
 
   it('shows private text and no buttons for a hidden contact', () => {
     const { el } = setup();
-    const hidden = el.querySelectorAll('.neighbour-table tbody tr')[2];
+    const hidden = el.querySelectorAll('.owner-card')[2];
     expect(hidden.querySelector('.contact-hidden')!.textContent).toContain(
       'member.neighbours.contactHidden',
     );
@@ -179,7 +179,7 @@ describe('NeighboursComponent', () => {
     (el.querySelector('.retry-btn') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(getNeighbours).toHaveBeenCalledTimes(2);
-    expect(el.querySelector('.neighbour-table')).not.toBeNull();
+    expect(el.querySelector('.owner-grid')).not.toBeNull();
   });
 
   it('switching to CS re-requests with cs', () => {

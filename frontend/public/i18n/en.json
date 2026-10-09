@@ -720,7 +720,9 @@
       "noDag": "This property has no {{type}} number — try the other dag type.",
       "loadError": "Could not load neighbour information.",
       "rateLimited": "Too many lookups. Please try again in a little while.",
-      "approvedOnly": "Only approved members can view neighbour information."
+      "approvedOnly": "Only approved members can view neighbour information.",
+      "searchPlaceholder": "Search by name or dag number",
+      "noSearchResults": "No owners match your search."
     }
   },
   "auth": {
