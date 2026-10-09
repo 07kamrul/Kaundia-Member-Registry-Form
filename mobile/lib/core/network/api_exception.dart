@@ -7,10 +7,15 @@ class ApiException implements Exception {
     this.fieldErrors = const {},
     this.statusCode,
     this.businessMessage,
+    this.errorCode,
   });
 
   final ApiExceptionType type;
   final String? message;
+
+  /// Machine-readable code from a structured FastAPI `detail`
+  /// (`{"detail": {"code": "...", "message": "..."}}`); null otherwise.
+  final String? errorCode;
 
   /// 422-style errors: raw (snake_case) field name -> localized message key/raw text.
   final Map<String, String> fieldErrors;
@@ -40,6 +45,7 @@ class ApiException implements Exception {
         statusCode: code,
         fieldErrors: _extractFieldErrors(data),
         message: _extractDetail(data),
+        errorCode: _extractCode(data),
       );
     }
     if (code == 401) {
@@ -47,6 +53,7 @@ class ApiException implements Exception {
         type: ApiExceptionType.unauthorized,
         statusCode: code,
         message: _extractDetail(data),
+        errorCode: _extractCode(data),
       );
     }
     if (code == 400) {
@@ -54,13 +61,24 @@ class ApiException implements Exception {
         type: ApiExceptionType.business,
         statusCode: code,
         businessMessage: _extractDetail(data),
+        errorCode: _extractCode(data),
       );
     }
     return ApiException(
       type: ApiExceptionType.server,
       statusCode: code,
       message: _extractDetail(data),
+      errorCode: _extractCode(data),
     );
+  }
+
+  /// `{"detail": {"code": "SOME_CODE", ...}}` -> "SOME_CODE".
+  static String? _extractCode(dynamic data) {
+    if (data is! Map) return null;
+    final detail = data['detail'];
+    if (detail is! Map) return null;
+    final code = detail['code'];
+    return code is String && code.isNotEmpty ? code : null;
   }
 
   static String? _extractDetail(dynamic data) {

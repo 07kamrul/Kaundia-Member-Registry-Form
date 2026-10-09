@@ -3,6 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type { Installment } from '../models/admin.model';
+import {
+  toNeighbourDirectory,
+  type NeighbourDagType,
+  type NeighbourDirectory,
+  type NeighbourDirectoryApiModel,
+} from '../models/neighbour.model';
 import { toFileUrl } from './admin.service';
 
 export interface MemberCoOwner {
@@ -104,6 +110,8 @@ export interface MemberProfile {
   submissionDate?: string;
   memberPhotoUrl?: string;
   receiptPhotoUrl?: string;
+  /** Neighbour-directory contact visibility (a preference - never re-queues review). */
+  showInNeighbourDirectory: boolean;
   properties: MemberProperty[];
   nominees: MemberNominee[];
 }
@@ -145,6 +153,7 @@ interface MemberProfileApiModel {
   submission_date?: string;
   member_photo_path?: string | null;
   receipt_photo_path?: string | null;
+  show_in_neighbour_directory?: boolean | null;
   properties: PropertyApiModel[];
   nominees: NomineeApiModel[];
 }
@@ -224,6 +233,8 @@ function toMemberProfile(api: MemberProfileApiModel): MemberProfile {
     submissionDate: api.submission_date,
     memberPhotoUrl: toFileUrl(api.member_photo_path ?? null),
     receiptPhotoUrl: toFileUrl(api.receipt_photo_path ?? null),
+    // Absent on older servers: the backend default is "shown".
+    showInNeighbourDirectory: api.show_in_neighbour_directory ?? true,
     properties: (api.properties ?? []).map(toProperty),
     nominees: (api.nominees ?? []).map(toNominee),
   };
@@ -361,6 +372,8 @@ export interface MemberProfileUpdatePayload {
   urgentContactRelation?: string;
   urgentContactMobile?: string;
   urgentContactAddress?: string;
+  /** Non-core preference: applied immediately, never triggers re-review. */
+  showInNeighbourDirectory?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -391,8 +404,8 @@ export class MemberService {
   }
 
   updateProfile(payload: MemberProfileUpdatePayload): Observable<MemberProfile> {
-    const body: Record<string, string> = {};
-    for (const [key, value] of Object.entries(payload)) {
+    const body: Record<string, string | boolean> = {};
+    for (const [key, value] of Object.entries(payload) as [string, string | boolean | undefined][]) {
       if (value === undefined) continue;
       const snakeKey = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
       body[snakeKey] = value;
@@ -411,6 +424,18 @@ export class MemberService {
     return this.http
       .post<MemberProfileApiModel>(`${this.base}/me/photo`, form)
       .pipe(map(toMemberProfile));
+  }
+
+  /**
+   * Owners on the member's own dag(s) and the nearest neighbouring dags.
+   * `dag_type` is sent only when given; otherwise the server picks the type
+   * the member's plots carry and echoes it back.
+   */
+  getNeighbours(dagType?: NeighbourDagType): Observable<NeighbourDirectory> {
+    const options = dagType ? { params: { dag_type: dagType } } : {};
+    return this.http
+      .get<NeighbourDirectoryApiModel>(`${this.base}/neighbours`, options)
+      .pipe(map((api) => toNeighbourDirectory(api, dagType)));
   }
 
   getPropertyRequests(): Observable<MemberPropertyRequest[]> {

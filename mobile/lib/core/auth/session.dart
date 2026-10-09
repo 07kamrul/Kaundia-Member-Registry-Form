@@ -52,6 +52,7 @@ class AppPermissions {
   static const users = 'manage_users';
   static const auditLog = 'view_audit_log';
   static const resolutionBookManage = 'manage_resolution_book';
+  static const neighbourView = 'neighbour.view';
 
   static const superAdminArea = <String>[roles, users];
   static const managementArea = <String>[

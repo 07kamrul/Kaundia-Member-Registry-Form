@@ -58,6 +58,16 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'coin',
     requiredPermission: ['profile.view_own'],
   },
+  {
+    labelKey: 'nav.neighbours',
+    route: '/neighbours',
+    icon: 'pin',
+    requiredPermission: ['neighbour.view'],
+    // Account-type check, not a permission one: /api/member/neighbours only
+    // accepts member tokens, and Super Admin's full catalog includes
+    // neighbour.view without owning any plots.
+    requiredRoles: ['member'],
+  },
   // Fund transparency: every authenticated account (members and committee
   // alike) can read the society's approved ledger.
   {

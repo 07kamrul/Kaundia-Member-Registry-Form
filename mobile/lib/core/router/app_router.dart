@@ -31,6 +31,7 @@ import '../../features/member/pages/resolution_book_detail_page.dart';
 import '../../features/member/pages/resolution_book_form_page.dart';
 import '../../features/member/pages/resolution_book_page.dart';
 import '../../features/member/pages/roadmap_page.dart';
+import '../../features/neighbours/presentation/pages/neighbours_page.dart';
 import '../../features/public_content/event_detail_page.dart';
 import '../../features/public_content/events_page.dart';
 import '../../features/public_content/notice_detail_page.dart';
@@ -71,6 +72,7 @@ GoRouter buildRouter() {
           GoRoute(path: '/profile', builder: (_, __) => const ProfilePage()),
           GoRoute(path: '/installments', builder: (_, __) => const InstallmentsPage()),
           GoRoute(path: '/cost-shares', builder: (_, __) => const CostSharesPage()),
+          GoRoute(path: '/neighbours', builder: (_, __) => const NeighboursPage()),
           GoRoute(path: '/change-password', builder: (_, __) => const ChangePasswordPage()),
           GoRoute(path: '/fund-transparency', builder: (_, __) => const FundTransparencyPage()),
           GoRoute(path: '/roadmap', builder: (_, __) => const RoadmapPage()),

@@ -206,7 +206,8 @@
     "resolutionBook": "Resolution Book",
     "roadmap": "Our Roadmap",
     "roadmapManagement": "Roadmap Management",
-    "paymentVerifications": "Payment Verifications"
+    "paymentVerifications": "Payment Verifications",
+    "neighbours": "Neighbours"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -344,7 +345,11 @@
       "removePhotoButton": "Remove",
       "photoTypeError": "Please select an image file (JPG/PNG)",
       "photoSizeError": "Photo size must be less than 3 MB",
-      "photoUploadError": "Failed to upload the photo. Please try again."
+      "photoUploadError": "Failed to upload the photo. Please try again.",
+      "neighbourDirectory": {
+        "label": "Show my mobile number to neighbours",
+        "hint": "When off, neighbours see only your name, land quantity and dags."
+      }
     },
     "installments": {
       "title": "Subscription History",
@@ -678,6 +683,44 @@
         "approved": "Verified",
         "rejected": "Rejected"
       }
+    },
+    "neighbours": {
+      "title": "Neighbour plot owners",
+      "subtitle": "Reach the owners on your dag and the {{count}} nearest dags",
+      "privacyNote": "This information is only for contacting your neighbours — please don't share it.",
+      "dagType": {
+        "label": "Dag type",
+        "rs": "RS dag",
+        "cs": "CS dag"
+      },
+      "ownDag": "Your dag",
+      "table": {
+        "ownerName": "Owner name",
+        "mobile": "Mobile number",
+        "landQuantity": "Land quantity",
+        "rsDag": "RS dag",
+        "csDag": "CS dag",
+        "position": "Position",
+        "contact": "Contact"
+      },
+      "position": {
+        "same_dag": "On your dag",
+        "adjacent": "Adjacent dag",
+        "near": "Nearby dag"
+      },
+      "landUnit": "{{value}} decimal",
+      "call": "Call",
+      "callAria": "Call {{name}}",
+      "whatsapp": "WhatsApp",
+      "whatsappAria": "Message {{name}} on WhatsApp",
+      "contactHidden": "Number kept private",
+      "emptyState": "No registered members were found around your dag",
+      "emptyHint": "Neighbours will appear here as more members register.",
+      "noProperties": "No property is recorded on your profile.",
+      "noDag": "This property has no {{type}} number — try the other dag type.",
+      "loadError": "Could not load neighbour information.",
+      "rateLimited": "Too many lookups. Please try again in a little while.",
+      "approvedOnly": "Only approved members can view neighbour information."
     }
   },
   "auth": {

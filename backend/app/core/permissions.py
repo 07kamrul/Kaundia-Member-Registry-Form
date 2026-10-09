@@ -11,9 +11,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.deps import get_current_admin
+from app.core.deps import get_current_admin, get_current_member
 from app.db.session import get_db
 from app.models.admin import AdminRole, AdminUser
+from app.models.member import Member
 from app.models.rbac import Permission, Role, UserPermissionOverride
 
 # Effective permissions change only when an admin edits a role or a user's
@@ -97,6 +98,9 @@ PERMISSION_CATALOG: tuple[PermissionDef, ...] = (
     # Profile (member self-service)
     PermissionDef("profile.view_own", "profile", "view_own", "View own profile"),
     PermissionDef("profile.edit_own", "profile", "edit_own", "Edit own profile"),
+    PermissionDef(
+        "neighbour.view", "neighbour", "view", "View owners of own and nearest neighbouring plots"
+    ),
 )
 
 PERMISSION_KEYS: frozenset[str] = frozenset(p.key for p in PERMISSION_CATALOG)
@@ -146,8 +150,11 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "event.view",
         "complaint.create",
         "request.create",
+        "neighbour.view",
     ),
 }
+
+MEMBER_ROLE = "member"
 
 
 def is_super_admin(admin: AdminUser) -> bool:
@@ -221,5 +228,23 @@ def require_permission(permission_key: str):
                 detail=f"Missing required permission: {permission_key}",
             )
         return admin
+
+    return _dependency
+
+
+def require_member_permission(permission_key: str):
+    """Dependency factory: gate a member-token route by permission key.
+
+    Member tokens carry the static member permission set (the same list the
+    login response hands the client), so removing a key from that set closes
+    the route as well as hiding its navigation entry."""
+
+    async def _dependency(member: Member = Depends(get_current_member)) -> Member:
+        if permission_key not in ROLE_DEFAULT_PERMISSIONS[MEMBER_ROLE]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Missing required permission: {permission_key}",
+            )
+        return member
 
     return _dependency

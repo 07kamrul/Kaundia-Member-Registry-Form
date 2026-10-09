@@ -5481,4 +5481,129 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get adminFinanceManagementFiltersApply => 'প্রয়োগ করুন';
+
+  @override
+  String get navNeighbours => 'প্রতিবেশী তথ্য';
+
+  @override
+  String get memberNeighboursTitle => 'প্রতিবেশী তথ্য';
+
+  @override
+  String memberNeighboursSubtitle(Object count) {
+    return 'আপনার দাগ ও আশেপাশের নিকটতম $countটি দাগের মালিকদের সাথে সহজে যোগাযোগ করুন';
+  }
+
+  @override
+  String get memberNeighboursPrivacyNote =>
+      'এই তথ্য শুধুমাত্র প্রতিবেশীদের সাথে যোগাযোগের জন্য — অন্য কারো সাথে শেয়ার করবেন না।';
+
+  @override
+  String get memberNeighboursDagTypeLabel => 'দাগের ধরন';
+
+  @override
+  String get memberNeighboursDagTypeRs => 'আরএস দাগ';
+
+  @override
+  String get memberNeighboursDagTypeCs => 'সিএস দাগ';
+
+  @override
+  String get memberNeighboursOwnDag => 'আপনার দাগ';
+
+  @override
+  String get memberNeighboursTableOwnerName => 'মালিকের নাম';
+
+  @override
+  String get memberNeighboursTableMobile => 'মোবাইল নম্বর';
+
+  @override
+  String get memberNeighboursTableLandQuantity => 'জমির পরিমাণ';
+
+  @override
+  String get memberNeighboursTableRsDag => 'আরএস দাগ';
+
+  @override
+  String get memberNeighboursTableCsDag => 'সিএস দাগ';
+
+  @override
+  String get memberNeighboursTablePosition => 'অবস্থান';
+
+  @override
+  String get memberNeighboursTableContact => 'যোগাযোগ';
+
+  @override
+  String get memberNeighboursPositionSameDag => 'আপনার দাগে';
+
+  @override
+  String get memberNeighboursPositionAdjacent => 'পাশের দাগ';
+
+  @override
+  String get memberNeighboursPositionNear => 'কাছাকাছি দাগ';
+
+  @override
+  String memberNeighboursLandUnit(Object value) {
+    return '$value শতাংশ';
+  }
+
+  @override
+  String get memberNeighboursCall => 'কল';
+
+  @override
+  String memberNeighboursCallAria(Object name) {
+    return '$name-কে কল করুন';
+  }
+
+  @override
+  String get memberNeighboursWhatsapp => 'হোয়াটসঅ্যাপ';
+
+  @override
+  String memberNeighboursWhatsappAria(Object name) {
+    return '$name-কে হোয়াটসঅ্যাপে বার্তা পাঠান';
+  }
+
+  @override
+  String get memberNeighboursContactHidden => 'নম্বর গোপন রাখা হয়েছে';
+
+  @override
+  String get memberNeighboursEmptyState =>
+      'আপনার দাগের আশেপাশে কোনো নিবন্ধিত সদস্য পাওয়া যায়নি';
+
+  @override
+  String get memberNeighboursEmptyHint =>
+      'নতুন সদস্য যুক্ত হলে এখানে দেখা যাবে।';
+
+  @override
+  String get memberNeighboursNoProperties =>
+      'আপনার প্রোফাইলে কোনো সম্পত্তি যুক্ত নেই।';
+
+  @override
+  String memberNeighboursNoDag(Object type) {
+    return 'এই সম্পত্তিতে $type নম্বর নেই — অন্য দাগের ধরন বেছে নিন।';
+  }
+
+  @override
+  String get memberNeighboursLoadError => 'প্রতিবেশী তথ্য লোড করা যায়নি।';
+
+  @override
+  String get memberNeighboursRateLimited =>
+      'অনেকবার খোঁজা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।';
+
+  @override
+  String get memberNeighboursApprovedOnly =>
+      'শুধুমাত্র অনুমোদিত সদস্যরা প্রতিবেশী তথ্য দেখতে পারেন।';
+
+  @override
+  String get memberNeighboursDialerUnavailable =>
+      'এই ডিভাইসে কল করা যাচ্ছে না।';
+
+  @override
+  String get memberNeighboursWhatsappUnavailable =>
+      'হোয়াটসঅ্যাপ খোলা যাচ্ছে না।';
+
+  @override
+  String get memberProfileNeighbourDirectoryLabel =>
+      'প্রতিবেশী তথ্যে আমার মোবাইল নম্বর দেখান';
+
+  @override
+  String get memberProfileNeighbourDirectoryHint =>
+      'বন্ধ করলে প্রতিবেশীরা শুধু আপনার নাম, জমির পরিমাণ ও দাগ দেখবেন।';
 }

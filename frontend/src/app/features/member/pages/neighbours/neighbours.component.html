@@ -1,0 +1,204 @@
+<ng-template #landQuantity let-qty>
+  @if (qty) {
+    @if (isNumericQuantity(qty)) {
+      {{ 'member.neighbours.landUnit' | translate: { value: digits(qty) } }}
+    } @else {
+      {{ digits(qty) }}
+    }
+  } @else {
+    —
+  }
+</ng-template>
+
+<div class="neighbours-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'member.neighbours.title' | translate }}</h1>
+      @if (plotLimit() !== null) {
+        <p class="page-subtitle">
+          {{ 'member.neighbours.subtitle' | translate: { count: digits(plotLimit()) } }}
+        </p>
+      }
+    </div>
+    <div class="dag-toggle-field">
+      <span class="dag-toggle-label" id="neighbour-dag-type-label">
+        {{ 'member.neighbours.dagType.label' | translate }}
+      </span>
+      <div class="dag-toggle" role="group" aria-labelledby="neighbour-dag-type-label">
+        @for (type of dagTypes; track type) {
+          <button
+            type="button"
+            class="dag-toggle-btn"
+            [class.dag-toggle-active]="dagType() === type"
+            [attr.aria-pressed]="dagType() === type"
+            [disabled]="loading()"
+            (click)="selectDagType(type)"
+          >
+            {{ 'member.neighbours.dagType.' + type | translate }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <p class="privacy-note" role="note">
+    <app-icon name="shield" [size]="16" />
+    <span>{{ 'member.neighbours.privacyNote' | translate }}</span>
+  </p>
+
+  @if (loading()) {
+    <p class="sr-only" role="status">{{ 'common.loading' | translate }}</p>
+    <div class="neighbour-skeletons" aria-hidden="true">
+      @for (i of skeletonGroups; track i) {
+        <div class="card neighbour-skeleton">
+          <div class="skeleton-line skeleton-lg"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+        </div>
+      }
+    </div>
+  } @else if (errorKey(); as key) {
+    <div class="error-box" role="alert">
+      <p class="error-text">{{ key | translate }}</p>
+      <button type="button" class="btn btn-secondary btn-sm retry-btn" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (directory(); as data) {
+    @for (view of groups(); track view.own.propertyId) {
+      <section class="card neighbour-group" [attr.aria-labelledby]="'neighbour-group-' + view.own.propertyId">
+        <header class="group-head">
+          <h2 class="group-title" [id]="'neighbour-group-' + view.own.propertyId">
+            {{ 'member.neighbours.ownDag' | translate }}: {{ digits(ownDag(view.own, data.dagType)) }}
+            @if (view.own.landQuantity) {
+              <span class="group-land">
+                ·
+                <ng-container
+                  *ngTemplateOutlet="landQuantity; context: { $implicit: view.own.landQuantity }"
+                />
+              </span>
+            }
+          </h2>
+          @if (ownDag(view.own, otherDagType(data.dagType)); as otherDag) {
+            <p class="group-sub">
+              {{ 'member.neighbours.dagType.' + otherDagType(data.dagType) | translate }}:
+              {{ digits(otherDag) }}
+            </p>
+          }
+        </header>
+
+        @if (!view.hasDag) {
+          <div class="empty-state group-empty no-dag">
+            <app-icon class="empty-icon" name="map" [size]="30" />
+            <p class="empty-title">
+              {{
+                'member.neighbours.noDag'
+                  | translate: { type: ('member.neighbours.dagType.' + data.dagType | translate) }
+              }}
+            </p>
+            @if (ownDag(view.own, otherDagType(data.dagType))) {
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                (click)="selectDagType(otherDagType(data.dagType))"
+              >
+                {{ 'member.neighbours.dagType.' + otherDagType(data.dagType) | translate }}
+              </button>
+            }
+          </div>
+        } @else if (!view.rows.length) {
+          <div class="empty-state group-empty no-owners">
+            <app-icon class="empty-icon" name="users" [size]="30" />
+            <p class="empty-title">{{ 'member.neighbours.emptyState' | translate }}</p>
+            <p class="empty-hint">{{ 'member.neighbours.emptyHint' | translate }}</p>
+          </div>
+        } @else {
+          <div class="data-table-wrap">
+            <table class="data-table data-table-cards neighbour-table">
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'member.neighbours.table.ownerName' | translate }}</th>
+                  <th scope="col">{{ 'member.neighbours.table.mobile' | translate }}</th>
+                  <th scope="col">{{ 'member.neighbours.table.landQuantity' | translate }}</th>
+                  <th scope="col">{{ 'member.neighbours.table.rsDag' | translate }}</th>
+                  <th scope="col">{{ 'member.neighbours.table.csDag' | translate }}</th>
+                  <th scope="col">{{ 'member.neighbours.table.position' | translate }}</th>
+                  <th scope="col">{{ 'member.neighbours.table.contact' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of view.rows; track $index) {
+                  <tr>
+                    <td [attr.data-label]="'member.neighbours.table.ownerName' | translate">
+                      <span class="owner-name">{{ row.owner.ownerName || '—' }}</span>
+                    </td>
+                    <td [attr.data-label]="'member.neighbours.table.mobile' | translate">
+                      @if (row.owner.contactHidden) {
+                        <span class="muted-text contact-hidden">
+                          {{ 'member.neighbours.contactHidden' | translate }}
+                        </span>
+                      } @else {
+                        <span class="mobile-text">{{ digits(row.owner.mobile) }}</span>
+                      }
+                    </td>
+                    <td [attr.data-label]="'member.neighbours.table.landQuantity' | translate">
+                      <ng-container
+                        *ngTemplateOutlet="landQuantity; context: { $implicit: row.owner.landQuantity }"
+                      />
+                    </td>
+                    <td [attr.data-label]="'member.neighbours.table.rsDag' | translate">
+                      {{ digits(row.owner.rsDag) }}
+                    </td>
+                    <td [attr.data-label]="'member.neighbours.table.csDag' | translate">
+                      {{ digits(row.owner.csDag) }}
+                    </td>
+                    <td [attr.data-label]="'member.neighbours.table.position' | translate">
+                      <span [class]="'status-badge position-badge position-' + row.owner.positionLabel">
+                        {{ 'member.neighbours.position.' + row.owner.positionLabel | translate }}
+                      </span>
+                    </td>
+                    <td [attr.data-label]="'member.neighbours.table.contact' | translate">
+                      @if (row.telHref || row.whatsAppHref) {
+                        <div class="row-actions">
+                          @if (row.telHref; as href) {
+                            <a
+                              class="btn btn-secondary btn-sm btn-icon call-link"
+                              [href]="href"
+                              [attr.aria-label]="'member.neighbours.callAria' | translate: { name: row.owner.ownerName }"
+                            >
+                              <app-icon name="phone" [size]="14" />
+                              {{ 'member.neighbours.call' | translate }}
+                            </a>
+                          }
+                          @if (row.whatsAppHref; as href) {
+                            <a
+                              class="btn btn-secondary btn-sm whatsapp-link"
+                              [href]="href"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              [attr.aria-label]="'member.neighbours.whatsappAria' | translate: { name: row.owner.ownerName }"
+                            >
+                              {{ 'member.neighbours.whatsapp' | translate }}
+                            </a>
+                          }
+                        </div>
+                      } @else {
+                        <span class="muted-text">—</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    } @empty {
+      <div class="card empty-state no-properties">
+        <app-icon class="empty-icon" name="doc" [size]="30" />
+        <p class="empty-title">{{ 'member.neighbours.noProperties' | translate }}</p>
+      </div>
+    }
+  }
+</div>

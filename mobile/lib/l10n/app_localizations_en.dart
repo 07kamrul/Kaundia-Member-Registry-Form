@@ -5492,4 +5492,130 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminFinanceManagementFiltersApply => 'Apply';
+
+  @override
+  String get navNeighbours => 'Neighbours';
+
+  @override
+  String get memberNeighboursTitle => 'Neighbour plot owners';
+
+  @override
+  String memberNeighboursSubtitle(Object count) {
+    return 'Reach the owners on your dag and the $count nearest dags';
+  }
+
+  @override
+  String get memberNeighboursPrivacyNote =>
+      'This information is only for contacting your neighbours — please don\'t share it.';
+
+  @override
+  String get memberNeighboursDagTypeLabel => 'Dag type';
+
+  @override
+  String get memberNeighboursDagTypeRs => 'RS dag';
+
+  @override
+  String get memberNeighboursDagTypeCs => 'CS dag';
+
+  @override
+  String get memberNeighboursOwnDag => 'Your dag';
+
+  @override
+  String get memberNeighboursTableOwnerName => 'Owner name';
+
+  @override
+  String get memberNeighboursTableMobile => 'Mobile number';
+
+  @override
+  String get memberNeighboursTableLandQuantity => 'Land quantity';
+
+  @override
+  String get memberNeighboursTableRsDag => 'RS dag';
+
+  @override
+  String get memberNeighboursTableCsDag => 'CS dag';
+
+  @override
+  String get memberNeighboursTablePosition => 'Position';
+
+  @override
+  String get memberNeighboursTableContact => 'Contact';
+
+  @override
+  String get memberNeighboursPositionSameDag => 'On your dag';
+
+  @override
+  String get memberNeighboursPositionAdjacent => 'Adjacent dag';
+
+  @override
+  String get memberNeighboursPositionNear => 'Nearby dag';
+
+  @override
+  String memberNeighboursLandUnit(Object value) {
+    return '$value decimal';
+  }
+
+  @override
+  String get memberNeighboursCall => 'Call';
+
+  @override
+  String memberNeighboursCallAria(Object name) {
+    return 'Call $name';
+  }
+
+  @override
+  String get memberNeighboursWhatsapp => 'WhatsApp';
+
+  @override
+  String memberNeighboursWhatsappAria(Object name) {
+    return 'Message $name on WhatsApp';
+  }
+
+  @override
+  String get memberNeighboursContactHidden => 'Number kept private';
+
+  @override
+  String get memberNeighboursEmptyState =>
+      'No registered members were found around your dag';
+
+  @override
+  String get memberNeighboursEmptyHint =>
+      'Neighbours will appear here as more members register.';
+
+  @override
+  String get memberNeighboursNoProperties =>
+      'No property is recorded on your profile.';
+
+  @override
+  String memberNeighboursNoDag(Object type) {
+    return 'This property has no $type number — try the other dag type.';
+  }
+
+  @override
+  String get memberNeighboursLoadError =>
+      'Could not load neighbour information.';
+
+  @override
+  String get memberNeighboursRateLimited =>
+      'Too many lookups. Please try again in a little while.';
+
+  @override
+  String get memberNeighboursApprovedOnly =>
+      'Only approved members can view neighbour information.';
+
+  @override
+  String get memberNeighboursDialerUnavailable =>
+      'Calling isn\'t available on this device.';
+
+  @override
+  String get memberNeighboursWhatsappUnavailable =>
+      'WhatsApp couldn\'t be opened.';
+
+  @override
+  String get memberProfileNeighbourDirectoryLabel =>
+      'Show my mobile number to neighbours';
+
+  @override
+  String get memberProfileNeighbourDirectoryHint =>
+      'When off, neighbours see only your name, land quantity and dags.';
 }

@@ -83,6 +83,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       urgentContactRelation: p.urgentContactRelation,
       urgentContactMobile: p.urgentContactMobile,
       urgentContactAddress: p.urgentContactAddress,
+      showInNeighbourDirectory: p.showInNeighbourDirectory,
     );
     emit(state.copyWith(
       editing: true,

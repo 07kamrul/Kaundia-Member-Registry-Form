@@ -56,6 +56,15 @@ class Settings(BaseSettings):
     # member notice, so notable money movement is always announced.
     finance_notice_threshold: float = Field(default=50000, validation_alias="FINANCE_NOTICE_THRESHOLD")
 
+    # Neighbour directory: how many nearest distinct dags are listed around
+    # each of a member's own dags, and the per-member lookup rate limit that
+    # guards the directory against scraping.
+    neighbour_plot_limit: int = Field(default=5, ge=1, le=50, validation_alias="NEIGHBOUR_PLOT_LIMIT")
+    neighbour_lookup_rate_limit: int = Field(default=30, ge=1, validation_alias="NEIGHBOUR_LOOKUP_RATE_LIMIT")
+    neighbour_lookup_rate_window_seconds: int = Field(
+        default=600, ge=1, validation_alias="NEIGHBOUR_LOOKUP_RATE_WINDOW_SECONDS"
+    )
+
     @model_validator(mode="after")
     def _reject_insecure_secret_in_production(self) -> "Settings":
         if self.app_env == "production" and self.jwt_secret_key == _INSECURE_JWT_DEFAULT:

@@ -2144,5 +2144,75 @@
   "adminPropertyRequestsPayloadCoOwners": "Co-owners",
   "adminPropertyRequestsPayloadDocs": "Documents",
   "adminSocietyCostsSummaryMemberBilled": "Member billed",
-  "adminFinanceManagementFiltersApply": "Apply"
+  "adminFinanceManagementFiltersApply": "Apply",
+  "navNeighbours": "Neighbours",
+  "memberNeighboursTitle": "Neighbour plot owners",
+  "memberNeighboursSubtitle": "Reach the owners on your dag and the {count} nearest dags",
+  "@memberNeighboursSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "memberNeighboursPrivacyNote": "This information is only for contacting your neighbours — please don't share it.",
+  "memberNeighboursDagTypeLabel": "Dag type",
+  "memberNeighboursDagTypeRs": "RS dag",
+  "memberNeighboursDagTypeCs": "CS dag",
+  "memberNeighboursOwnDag": "Your dag",
+  "memberNeighboursTableOwnerName": "Owner name",
+  "memberNeighboursTableMobile": "Mobile number",
+  "memberNeighboursTableLandQuantity": "Land quantity",
+  "memberNeighboursTableRsDag": "RS dag",
+  "memberNeighboursTableCsDag": "CS dag",
+  "memberNeighboursTablePosition": "Position",
+  "memberNeighboursTableContact": "Contact",
+  "memberNeighboursPositionSameDag": "On your dag",
+  "memberNeighboursPositionAdjacent": "Adjacent dag",
+  "memberNeighboursPositionNear": "Nearby dag",
+  "memberNeighboursLandUnit": "{value} decimal",
+  "@memberNeighboursLandUnit": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "memberNeighboursCall": "Call",
+  "memberNeighboursCallAria": "Call {name}",
+  "@memberNeighboursCallAria": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "memberNeighboursWhatsapp": "WhatsApp",
+  "memberNeighboursWhatsappAria": "Message {name} on WhatsApp",
+  "@memberNeighboursWhatsappAria": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "memberNeighboursContactHidden": "Number kept private",
+  "memberNeighboursEmptyState": "No registered members were found around your dag",
+  "memberNeighboursEmptyHint": "Neighbours will appear here as more members register.",
+  "memberNeighboursNoProperties": "No property is recorded on your profile.",
+  "memberNeighboursNoDag": "This property has no {type} number — try the other dag type.",
+  "@memberNeighboursNoDag": {
+    "placeholders": {
+      "type": {
+        "type": "Object"
+      }
+    }
+  },
+  "memberNeighboursLoadError": "Could not load neighbour information.",
+  "memberNeighboursRateLimited": "Too many lookups. Please try again in a little while.",
+  "memberNeighboursApprovedOnly": "Only approved members can view neighbour information.",
+  "memberNeighboursDialerUnavailable": "Calling isn't available on this device.",
+  "memberNeighboursWhatsappUnavailable": "WhatsApp couldn't be opened.",
+  "memberProfileNeighbourDirectoryLabel": "Show my mobile number to neighbours",
+  "memberProfileNeighbourDirectoryHint": "When off, neighbours see only your name, land quantity and dags."
 }

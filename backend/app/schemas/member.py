@@ -46,7 +46,19 @@ class MemberProfileUpdate(BaseModel):
     urgent_contact_mobile: str | None = None
     urgent_contact_address: str | None = None
 
+    # Neighbour-directory contact visibility - a preference, applied immediately.
+    show_in_neighbour_directory: bool | None = None
+
     _validate_phones = field_validator("mobile", "urgent_contact_mobile")(validate_phone)
+
+    @field_validator("show_in_neighbour_directory")
+    @classmethod
+    def _reject_null_directory_flag(cls, value: bool | None) -> bool:
+        # Omit the field to leave it unchanged; an explicit null would write
+        # NULL into a NOT NULL column.
+        if value is None:
+            raise ValueError("show_in_neighbour_directory must be true or false")
+        return value
 
 
 class ApplicableDocOut(BaseModel):
@@ -138,6 +150,7 @@ class MemberDetail(MemberSummary):
     submission_date: str
     member_photo_path: str | None = None
     receipt_photo_path: str | None = None
+    show_in_neighbour_directory: bool = True
     reviewed_at: datetime | None = None
     rejection_reason: str | None = None
     notification_status: str | None = None

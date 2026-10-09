@@ -10189,6 +10189,216 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'প্রয়োগ করুন'**
   String get adminFinanceManagementFiltersApply;
+
+  /// No description provided for @navNeighbours.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্রতিবেশী তথ্য'**
+  String get navNeighbours;
+
+  /// No description provided for @memberNeighboursTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্রতিবেশী তথ্য'**
+  String get memberNeighboursTitle;
+
+  /// No description provided for @memberNeighboursSubtitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনার দাগ ও আশেপাশের নিকটতম {count}টি দাগের মালিকদের সাথে সহজে যোগাযোগ করুন'**
+  String memberNeighboursSubtitle(Object count);
+
+  /// No description provided for @memberNeighboursPrivacyNote.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই তথ্য শুধুমাত্র প্রতিবেশীদের সাথে যোগাযোগের জন্য — অন্য কারো সাথে শেয়ার করবেন না।'**
+  String get memberNeighboursPrivacyNote;
+
+  /// No description provided for @memberNeighboursDagTypeLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'দাগের ধরন'**
+  String get memberNeighboursDagTypeLabel;
+
+  /// No description provided for @memberNeighboursDagTypeRs.
+  ///
+  /// In bn, this message translates to:
+  /// **'আরএস দাগ'**
+  String get memberNeighboursDagTypeRs;
+
+  /// No description provided for @memberNeighboursDagTypeCs.
+  ///
+  /// In bn, this message translates to:
+  /// **'সিএস দাগ'**
+  String get memberNeighboursDagTypeCs;
+
+  /// No description provided for @memberNeighboursOwnDag.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনার দাগ'**
+  String get memberNeighboursOwnDag;
+
+  /// No description provided for @memberNeighboursTableOwnerName.
+  ///
+  /// In bn, this message translates to:
+  /// **'মালিকের নাম'**
+  String get memberNeighboursTableOwnerName;
+
+  /// No description provided for @memberNeighboursTableMobile.
+  ///
+  /// In bn, this message translates to:
+  /// **'মোবাইল নম্বর'**
+  String get memberNeighboursTableMobile;
+
+  /// No description provided for @memberNeighboursTableLandQuantity.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমির পরিমাণ'**
+  String get memberNeighboursTableLandQuantity;
+
+  /// No description provided for @memberNeighboursTableRsDag.
+  ///
+  /// In bn, this message translates to:
+  /// **'আরএস দাগ'**
+  String get memberNeighboursTableRsDag;
+
+  /// No description provided for @memberNeighboursTableCsDag.
+  ///
+  /// In bn, this message translates to:
+  /// **'সিএস দাগ'**
+  String get memberNeighboursTableCsDag;
+
+  /// No description provided for @memberNeighboursTablePosition.
+  ///
+  /// In bn, this message translates to:
+  /// **'অবস্থান'**
+  String get memberNeighboursTablePosition;
+
+  /// No description provided for @memberNeighboursTableContact.
+  ///
+  /// In bn, this message translates to:
+  /// **'যোগাযোগ'**
+  String get memberNeighboursTableContact;
+
+  /// No description provided for @memberNeighboursPositionSameDag.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনার দাগে'**
+  String get memberNeighboursPositionSameDag;
+
+  /// No description provided for @memberNeighboursPositionAdjacent.
+  ///
+  /// In bn, this message translates to:
+  /// **'পাশের দাগ'**
+  String get memberNeighboursPositionAdjacent;
+
+  /// No description provided for @memberNeighboursPositionNear.
+  ///
+  /// In bn, this message translates to:
+  /// **'কাছাকাছি দাগ'**
+  String get memberNeighboursPositionNear;
+
+  /// No description provided for @memberNeighboursLandUnit.
+  ///
+  /// In bn, this message translates to:
+  /// **'{value} শতাংশ'**
+  String memberNeighboursLandUnit(Object value);
+
+  /// No description provided for @memberNeighboursCall.
+  ///
+  /// In bn, this message translates to:
+  /// **'কল'**
+  String get memberNeighboursCall;
+
+  /// No description provided for @memberNeighboursCallAria.
+  ///
+  /// In bn, this message translates to:
+  /// **'{name}-কে কল করুন'**
+  String memberNeighboursCallAria(Object name);
+
+  /// No description provided for @memberNeighboursWhatsapp.
+  ///
+  /// In bn, this message translates to:
+  /// **'হোয়াটসঅ্যাপ'**
+  String get memberNeighboursWhatsapp;
+
+  /// No description provided for @memberNeighboursWhatsappAria.
+  ///
+  /// In bn, this message translates to:
+  /// **'{name}-কে হোয়াটসঅ্যাপে বার্তা পাঠান'**
+  String memberNeighboursWhatsappAria(Object name);
+
+  /// No description provided for @memberNeighboursContactHidden.
+  ///
+  /// In bn, this message translates to:
+  /// **'নম্বর গোপন রাখা হয়েছে'**
+  String get memberNeighboursContactHidden;
+
+  /// No description provided for @memberNeighboursEmptyState.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনার দাগের আশেপাশে কোনো নিবন্ধিত সদস্য পাওয়া যায়নি'**
+  String get memberNeighboursEmptyState;
+
+  /// No description provided for @memberNeighboursEmptyHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'নতুন সদস্য যুক্ত হলে এখানে দেখা যাবে।'**
+  String get memberNeighboursEmptyHint;
+
+  /// No description provided for @memberNeighboursNoProperties.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনার প্রোফাইলে কোনো সম্পত্তি যুক্ত নেই।'**
+  String get memberNeighboursNoProperties;
+
+  /// No description provided for @memberNeighboursNoDag.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই সম্পত্তিতে {type} নম্বর নেই — অন্য দাগের ধরন বেছে নিন।'**
+  String memberNeighboursNoDag(Object type);
+
+  /// No description provided for @memberNeighboursLoadError.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্রতিবেশী তথ্য লোড করা যায়নি।'**
+  String get memberNeighboursLoadError;
+
+  /// No description provided for @memberNeighboursRateLimited.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনেকবার খোঁজা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।'**
+  String get memberNeighboursRateLimited;
+
+  /// No description provided for @memberNeighboursApprovedOnly.
+  ///
+  /// In bn, this message translates to:
+  /// **'শুধুমাত্র অনুমোদিত সদস্যরা প্রতিবেশী তথ্য দেখতে পারেন।'**
+  String get memberNeighboursApprovedOnly;
+
+  /// No description provided for @memberNeighboursDialerUnavailable.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই ডিভাইসে কল করা যাচ্ছে না।'**
+  String get memberNeighboursDialerUnavailable;
+
+  /// No description provided for @memberNeighboursWhatsappUnavailable.
+  ///
+  /// In bn, this message translates to:
+  /// **'হোয়াটসঅ্যাপ খোলা যাচ্ছে না।'**
+  String get memberNeighboursWhatsappUnavailable;
+
+  /// No description provided for @memberProfileNeighbourDirectoryLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্রতিবেশী তথ্যে আমার মোবাইল নম্বর দেখান'**
+  String get memberProfileNeighbourDirectoryLabel;
+
+  /// No description provided for @memberProfileNeighbourDirectoryHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'বন্ধ করলে প্রতিবেশীরা শুধু আপনার নাম, জমির পরিমাণ ও দাগ দেখবেন।'**
+  String get memberProfileNeighbourDirectoryHint;
 }
 
 class _AppLocalizationsDelegate

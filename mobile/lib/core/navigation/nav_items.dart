@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../auth/session.dart';
 import '../enums/enums.dart';
 
 /// One config list drives both bottom-nav (member) and drawer
@@ -55,6 +56,14 @@ class AppNav {
       route: '/cost-shares',
       icon: Icons.pie_chart_outline,
       requiredPermission: 'profile.view_own',
+      tier: LandingTierFilter.member,
+    ),
+    // 5th member entry: lands under "More", primary tabs stay unchanged.
+    NavItem(
+      labelKey: _t((l) => l.navNeighbours),
+      route: '/neighbours',
+      icon: Icons.holiday_village_outlined,
+      requiredPermission: AppPermissions.neighbourView,
       tier: LandingTierFilter.member,
     ),
     NavItem(

@@ -141,6 +141,14 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'neighbours',
+            canActivate: [permissionGuard(['neighbour.view'])],
+            loadComponent: () =>
+              import('./features/member/pages/neighbours/neighbours.component').then(
+                (m) => m.NeighboursComponent,
+              ),
+          },
+          {
             path: 'change-password',
             loadComponent: () =>
               import('./features/member/pages/change-password/change-password.component').then(

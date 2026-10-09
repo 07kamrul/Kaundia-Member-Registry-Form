@@ -198,8 +198,15 @@ MemberProfile memberProfileFromApi(Map<dynamic, dynamic> api) {
     receiptPhotoUrl: _toFileUrl(api['receipt_photo_path']) ?? '',
     properties: [for (final p in props) memberPropertyFromApi(p as Map<dynamic, dynamic>)],
     nominees: [for (final n in nominees) memberNomineeFromApi(n as Map<dynamic, dynamic>)],
+    showInNeighbourDirectory: _boolOr(api['show_in_neighbour_directory'], fallback: true),
   );
 }
+
+bool _boolOr(dynamic v, {required bool fallback}) => switch (v) {
+      final bool b => b,
+      final num n => n != 0,
+      _ => fallback,
+    };
 
 MemberProperty memberPropertyFromApi(Map<dynamic, dynamic> api) {
   final coOwners = (api['co_owners'] as List<dynamic>? ?? const []);

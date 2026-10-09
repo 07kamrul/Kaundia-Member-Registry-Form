@@ -46,6 +46,7 @@ class _ProfileEditViewState extends State<ProfileEditView> {
       key: TextEditingController(text: _initial(key)),
   };
   String? _photoPath;
+  late bool _showInNeighbourDirectory = widget.profile.showInNeighbourDirectory;
 
   String? _initial(String key) => switch (key) {
         'fullName' => widget.profile.fullName,
@@ -118,6 +119,7 @@ class _ProfileEditViewState extends State<ProfileEditView> {
           urgentContactRelation: _emptyToNull(_text('urgentContactRelation')),
           urgentContactMobile: _emptyToNull(_text('urgentContactMobile')),
           urgentContactAddress: _emptyToNull(_text('urgentContactAddress')),
+          showInNeighbourDirectory: _showInNeighbourDirectory,
         )));
   }
 
@@ -154,6 +156,7 @@ class _ProfileEditViewState extends State<ProfileEditView> {
               _fieldsCard(loc.memberProfilePersonalInfoTitle, _personalKeys, loc),
               _addressCard(loc),
               _fieldsCard(loc.memberProfileContactTitle, _contactKeys, loc),
+              _neighbourDirectoryCard(loc),
             ],
           ),
         ),
@@ -195,6 +198,23 @@ class _ProfileEditViewState extends State<ProfileEditView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _neighbourDirectoryCard(AppLocalizations loc) {
+    return AppCard(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: SwitchListTile(
+        key: const ValueKey('neighbourDirectorySwitch'),
+        value: _showInNeighbourDirectory,
+        secondary: const Icon(Icons.holiday_village_outlined),
+        title: Text(loc.memberProfileNeighbourDirectoryLabel),
+        subtitle: Text(loc.memberProfileNeighbourDirectoryHint),
+        onChanged: (v) {
+          setState(() => _showInNeighbourDirectory = v);
+          _syncDraft(context);
+        },
       ),
     );
   }

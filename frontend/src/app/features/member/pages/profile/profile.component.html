@@ -172,6 +172,26 @@
             <span class="profile-row-label">{{ 'member.profile.emailLabel' | translate }}</span>
             <span class="profile-row-value profile-row-value-wrap">@if (profile.email) {<a class="profile-link" [href]="'mailto:' + profile.email">{{ profile.email }}</a>} @else {—}</span>
           </div>
+          <div class="profile-row profile-row-stack neighbour-directory-pref">
+            <span class="profile-row-label" id="neighbour-directory-label">{{ 'member.profile.neighbourDirectory.label' | translate }}</span>
+            <span class="profile-row-value neighbour-directory-control">
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  aria-labelledby="neighbour-directory-label"
+                  aria-describedby="neighbour-directory-hint"
+                  [checked]="profile.showInNeighbourDirectory"
+                  [disabled]="directorySaving"
+                  (change)="toggleNeighbourDirectory($event)"
+                />
+                <span class="toggle-switch-track"></span>
+              </label>
+            </span>
+            <span class="field-hint" id="neighbour-directory-hint">{{ 'member.profile.neighbourDirectory.hint' | translate }}</span>
+            @if (directoryError) {
+              <span class="error-box neighbour-directory-error" role="alert">{{ directoryError }}</span>
+            }
+          </div>
         </div>
       </div>
 

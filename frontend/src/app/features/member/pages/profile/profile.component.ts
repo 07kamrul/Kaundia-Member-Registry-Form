@@ -78,6 +78,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   willRequeue = false;
   readonly photoFailed = signal(false);
 
+  // Neighbour-directory visibility: a non-core preference saved on toggle.
+  directorySaving = false;
+  directoryError = '';
+
   // Pending photo replacement: picked in edit mode, uploaded on save.
   selectedPhoto: File | null = null;
   photoPreviewUrl: string | null = null;
@@ -546,6 +550,37 @@ export class ProfileComponent implements OnInit, OnDestroy {
       error: () => {
         this.photoUploadError = this.translate.instant('member.profile.photoUploadError');
         this.saving = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  /**
+   * Sends only `show_in_neighbour_directory` (a boolean), so it can never
+   * touch core fields or re-queue an approved membership for review.
+   */
+  toggleNeighbourDirectory(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!this.profile || this.directorySaving) {
+      input.checked = this.profile?.showInNeighbourDirectory ?? true;
+      return;
+    }
+    const previous = this.profile.showInNeighbourDirectory;
+    const next = input.checked;
+    this.directorySaving = true;
+    this.directoryError = '';
+    this.profile = { ...this.profile, showInNeighbourDirectory: next };
+    this.memberService.updateProfile({ showInNeighbourDirectory: next }).subscribe({
+      next: (updated) => {
+        this.profile = updated;
+        this.directorySaving = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        if (this.profile) this.profile = { ...this.profile, showInNeighbourDirectory: previous };
+        input.checked = previous;
+        this.directoryError = this.translate.instant('member.profile.saveError');
+        this.directorySaving = false;
         this.cdr.markForCheck();
       },
     });

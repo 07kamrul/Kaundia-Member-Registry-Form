@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Integer, String, Text, func, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -73,6 +73,12 @@ class Member(Base):
 
     # Photo
     member_photo_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
+    # Neighbour directory: when False, other members see this member's name,
+    # land and dags but not their mobile number.
+    show_in_neighbour_directory: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default=true(), nullable=False
+    )
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(

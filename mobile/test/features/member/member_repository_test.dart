@@ -42,7 +42,7 @@ void main() {
     });
 
     test('updateProfile sends snake_case sparse body', () async {
-      when(() => api.patch('/member/profile', any(that: isA<Map<String, String?>>())))
+      when(() => api.patch('/member/profile', any(that: isA<Map<String, Object?>>())))
           .thenAnswer((_) async => {
                 'member_id': 1,
                 'status': 'pending',
@@ -56,9 +56,9 @@ void main() {
               });
       await repo.updateProfile(const MemberProfileUpdate(fullName: 'X', mobile: '+8801800000000'));
       final captured =
-          verify(() => api.patch('/member/profile', captureAny(that: isA<Map<String, String?>>())))
+          verify(() => api.patch('/member/profile', captureAny(that: isA<Map<String, Object?>>())))
               .captured
-              .single as Map<String, String?>;
+              .single as Map<String, Object?>;
       expect(captured, {
         'full_name': 'X',
         'mobile': '+8801800000000',

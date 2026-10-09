@@ -15,6 +15,7 @@ from app.api.routes import (
     finance,
     installment_payments,
     member,
+    neighbours,
     notices,
     public,
     rbac,
@@ -112,6 +113,7 @@ app.include_router(auth.router, prefix=api_router_prefix)
 app.include_router(admin.router, prefix=api_router_prefix)
 app.include_router(notices.router, prefix=api_router_prefix)
 app.include_router(member.router, prefix=api_router_prefix)
+app.include_router(neighbours.router, prefix=api_router_prefix)
 app.include_router(rbac.router, prefix=api_router_prefix)
 app.include_router(public.router, prefix=api_router_prefix)
 app.include_router(society_costs.router, prefix=api_router_prefix)

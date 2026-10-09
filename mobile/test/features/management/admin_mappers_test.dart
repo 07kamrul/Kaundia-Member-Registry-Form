@@ -254,7 +254,7 @@ void main() {
         ],
       };
       final p = Map<String, dynamic>.from(base).toProfileEntity();
-      expect(p is MemberProfile, isTrue);
+      expect(p, isA<MemberProfile>());
       expect(p.memberId, 'KND-0009');
       expect(p.updatedAt, '2026-03-01T00:00:00Z');
       expect(p.reviewedAt, '2026-02-03T00:00:00Z');

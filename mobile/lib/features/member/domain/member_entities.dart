@@ -44,6 +44,7 @@ class MemberProfile extends Equatable {
     required this.receiptPhotoUrl,
     required this.properties,
     required this.nominees,
+    this.showInNeighbourDirectory = true,
   });
 
   final String memberId;
@@ -85,6 +86,9 @@ class MemberProfile extends Equatable {
   final List<MemberProperty> properties;
   final List<MemberNominee> nominees;
 
+  /// Non-core privacy preference: mobile shown in the neighbour directory.
+  final bool showInNeighbourDirectory;
+
   MemberStatus get memberStatus => MemberStatusX.fromName(status);
 
   bool hasCurrentAddress() =>
@@ -105,6 +109,7 @@ class MemberProfile extends Equatable {
         urgentContactRelation, urgentContactMobile, urgentContactAddress,
         admissionFee, subscription, receiptNo, paymentMethod, memberSignature,
         submissionDate, memberPhotoUrl, receiptPhotoUrl, properties, nominees,
+        showInNeighbourDirectory,
       ];
 }
 
@@ -235,6 +240,7 @@ class MemberProfileUpdate {
     this.urgentContactRelation,
     this.urgentContactMobile,
     this.urgentContactAddress,
+    this.showInNeighbourDirectory,
   });
 
   final String? fullName;
@@ -264,6 +270,9 @@ class MemberProfileUpdate {
   final String? urgentContactMobile;
   final String? urgentContactAddress;
 
+  /// Non-core (never re-queues review); omitted from the body when null.
+  final bool? showInNeighbourDirectory;
+
   /// Editing any of these on an approved profile re-queues it for review
   /// (mirrors Angular CORE_FIELDS).
   static const List<String> coreFields = [
@@ -274,7 +283,7 @@ class MemberProfileUpdate {
     'currentUpazila', 'currentDistrict', 'currentDivision',
   ];
 
-  Map<String, String?> toSnakeCaseBody() => {
+  Map<String, Object?> toSnakeCaseBody() => <String, Object?>{
         'full_name': fullName,
         'father_or_husband': fatherOrHusband,
         'mother': mother,
@@ -301,6 +310,7 @@ class MemberProfileUpdate {
         'urgent_contact_relation': urgentContactRelation,
         'urgent_contact_mobile': urgentContactMobile,
         'urgent_contact_address': urgentContactAddress,
+        'show_in_neighbour_directory': showInNeighbourDirectory,
       }..removeWhere((_, v) => v == null);
 
   /// True when any core field differs between [current] profile values and
