@@ -50,6 +50,31 @@
   min-width: 0;
 }
 
+.dag-search-clear {
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  cursor: pointer;
+  padding: 0.15rem;
+  display: inline-flex;
+}
+
+/* Searched dag polygons pulse a few times, then stay solid. Leaflet draws
+   these paths itself, so the class is applied via ::ng-deep. */
+:host ::ng-deep .dag-search-hit {
+  animation: dag-hit-pulse 0.9s ease-in-out 3;
+}
+
+@keyframes dag-hit-pulse {
+  0%,
+  100% {
+    fill-opacity: 0.2;
+  }
+  50% {
+    fill-opacity: 0.75;
+  }
+}
+
 .locate-error {
   margin: 0;
   font-size: 0.8rem;
@@ -225,6 +250,11 @@
 
   &.error {
     color: var(--danger, #c0392b);
+    border-color: currentcolor;
+  }
+
+  &.warn {
+    color: var(--amber-700, #8a5a00);
     border-color: currentcolor;
   }
 }

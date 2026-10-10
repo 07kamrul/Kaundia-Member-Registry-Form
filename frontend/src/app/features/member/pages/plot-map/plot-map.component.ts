@@ -24,7 +24,11 @@ import { LanguageService } from '../../../../core/services/language.service';
 import { MemberService, type MemberProperty } from '../../../../core/services/member.service';
 import { localizeDigits } from '../../../../core/services/roadmap.service';
 import { PlotMapService } from '../../../../core/services/plot-map.service';
-import { LandDataService, type LandPlotFeature } from '../../../../core/services/land-data.service';
+import {
+  LandDataService,
+  type LandFeatureCollection,
+  type LandPlotFeature,
+} from '../../../../core/services/land-data.service';
 import { telHref, whatsAppHref } from '../../../../shared/phone-input/contact-links';
 import { toAsciiDigits } from '../../../../core/services/digits.helper';
 import {
@@ -98,6 +102,12 @@ export function saveErrorKey(error: unknown): string {
     return `member.plotMap.draw.errors.${code}`;
   }
   return 'member.plotMap.draw.errors.generic';
+}
+
+/** Dag numbers compare as ASCII digits without the "RS-" prefix, so "4611",
+ *  "RS-4611" and Bangla digits all resolve to the same plot. */
+export function normalizeDagNo(value: string): string {
+  return toAsciiDigits(value).trim().toUpperCase().replace(/^RS-?/, '');
 }
 
 export function boundaryErrorKey(error: unknown): string {
@@ -196,11 +206,24 @@ export class PlotMapComponent implements AfterViewInit {
   readonly viewsOpen = signal(false);
   readonly externalLoading = signal(false);
   readonly externalError = signal(false);
+  /** Server had more plots than the response cap — warn instead of losing them silently. */
+  readonly externalTruncated = signal(false);
   readonly mapModes: Array<{ mode: PlotMapMode; labelKey: string; icon: IconName }> = [
     { mode: 'boundaries', labelKey: 'member.plotMap.views.boundaries', icon: 'edit' },
     { mode: 'bds', labelKey: 'member.plotMap.views.bds', icon: 'map' },
     { mode: 'rajuk', labelKey: 'member.plotMap.views.rajuk', icon: 'doc' },
   ];
+
+  // Dag-number search on the official map views (BDS dag no / RAJUK RS dag no).
+  readonly dagQuery = signal('');
+  readonly dagNotFound = signal(false);
+  /** Normalized dag number whose polygons stay highlighted on the layer. */
+  readonly highlightDag = signal<string | null>(null);
+  readonly dagSearchPlaceholderKey = computed(() =>
+    this.mapMode() === 'bds'
+      ? 'member.plotMap.views.bdsSearchPlaceholder'
+      : 'member.plotMap.views.rsSearchPlaceholder',
+  );
 
   private map: L.Map | null = null;
   private readonly featureLayers = new Map<string, L.Polygon>();
@@ -210,6 +233,13 @@ export class PlotMapComponent implements AfterViewInit {
   private bdsLayer: L.GeoJSON | null = null;
   private rajukLayer: L.GeoJSON | null = null;
   private rajukSub: Subscription | null = null;
+  // Last fetched collection + requested bounds per official view. The whole
+  // mouza dataset fits one capped response, so a covered viewport re-renders
+  // from cache instead of re-downloading on every pan.
+  private bdsCollection: LandFeatureCollection | null = null;
+  private bdsLoadedBounds: L.LatLngBounds | null = null;
+  private rajukCollection: LandFeatureCollection | null = null;
+  private rajukLoadedBounds: L.LatLngBounds | null = null;
 
   private properties = signal<MemberProperty[]>([]);
 
@@ -303,6 +333,7 @@ export class PlotMapComponent implements AfterViewInit {
       this.loadRajukPlots();
     } else if (this.mapMode() === 'bds') {
       this.loadBdsMouza();
+      this.updateBdsLabels();
     } else if (this.mapMode() === 'boundaries') {
       this.loadFeatures();
     }
@@ -384,6 +415,7 @@ export class PlotMapComponent implements AfterViewInit {
     this.cancelDraw();
     this.closeSheet();
     this.externalError.set(false);
+    this.externalTruncated.set(false);
     this.mapMode.set(mode);
 
     const map = this.map;
@@ -394,6 +426,8 @@ export class PlotMapComponent implements AfterViewInit {
       this.search.set('');
       this.renderFeatures(); // hides member polygons filtered by cleared search
     }
+    // The dag search is mode-specific (BDS dag no vs RAJUK RS dag no).
+    this.clearDagSearch();
 
     if (mode === 'bds') {
       this.removeRajukLayer();
@@ -420,24 +454,25 @@ export class PlotMapComponent implements AfterViewInit {
   private loadBdsMouza(): void {
     const map = this.map;
     if (!map) return;
+    const viewport = map.getBounds();
+    if (this.bdsCollection && this.bdsLoadedBounds?.contains(viewport)) {
+      this.externalTruncated.set(!!this.bdsCollection.truncated);
+      if (!this.bdsLayer) this.renderBds(this.bdsCollection);
+      return;
+    }
+    const requestBounds = viewport.pad(0.25);
     this.externalLoading.set(true);
     this.landDataService
-      .dagsInBbox(this.bboxString())
+      .dagsInBbox(requestBounds.toBBoxString())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (collection) => {
           this.externalLoading.set(false);
           if (this.mapMode() !== 'bds' || !this.map) return;
-          this.removeBdsLayer();
-          this.bdsLayer = L.geoJSON(collection as never, {
-            style: { color: '#1a3fd4', weight: 2, fillColor: '#2b50e0', fillOpacity: 0.2 },
-            onEachFeature: (feature, layer) =>
-              layer.bindPopup(
-                this.bdsPopupHtml(feature as LandPlotFeature, layer as L.Polygon),
-                { maxWidth: 340, minWidth: 250 },
-              ),
-          }).addTo(this.map);
-          this.updateBdsLabels();
+          this.bdsCollection = collection;
+          this.bdsLoadedBounds = requestBounds;
+          this.externalTruncated.set(!!collection.truncated);
+          this.renderBds(collection);
         },
         error: () => {
           this.externalLoading.set(false);
@@ -446,17 +481,37 @@ export class PlotMapComponent implements AfterViewInit {
       });
   }
 
-  /** Permanent dag labels only when zoomed in enough to read them. */
+  private renderBds(collection: LandFeatureCollection): void {
+    const map = this.map;
+    if (!map) return;
+    this.removeBdsLayer();
+    this.bdsLayer = L.geoJSON(collection as never, {
+      style: (feature) =>
+        this.externalStyle('bds', (feature as LandPlotFeature | undefined)?.properties),
+      onEachFeature: (feature, layer) =>
+        layer.bindPopup(
+          this.bdsPopupHtml(feature as LandPlotFeature, layer as L.Polygon),
+          { maxWidth: 340, minWidth: 250 },
+        ),
+    }).addTo(map);
+    this.updateBdsLabels();
+  }
+
+  /** Permanent dag labels only when zoomed in enough to read them, and only
+   * for polygons in view — the full mouza holds thousands of plots and one
+   * DOM marker per polygon would freeze the tab. */
   private updateBdsLabels(): void {
     const map = this.map;
     const layer = this.bdsLayer;
     if (!map || !layer) return;
     const show = map.getZoom() >= BDS_LABEL_MIN_ZOOM;
+    const view = map.getBounds().pad(0.1);
     layer.eachLayer((child: L.Layer) => {
       const polygon = child as L.Polygon & { __dagLabel?: L.Marker };
       const dag = (polygon.feature as { properties?: { dag?: string } })?.properties?.dag;
       if (!dag) return;
-      if (show && !polygon.__dagLabel) {
+      const visible = show && view.intersects(polygon.getBounds());
+      if (visible && !polygon.__dagLabel) {
         const label = L.marker(polygon.getBounds().getCenter(), {
           icon: L.divIcon({ className: 'bds-dag-label', html: String(dag), iconSize: null as never }),
           interactive: false,
@@ -464,7 +519,7 @@ export class PlotMapComponent implements AfterViewInit {
         });
         label.addTo(map);
         polygon.__dagLabel = label;
-      } else if (!show && polygon.__dagLabel) {
+      } else if (!visible && polygon.__dagLabel) {
         map.removeLayer(polygon.__dagLabel);
         polygon.__dagLabel = undefined;
       }
@@ -516,28 +571,46 @@ export class PlotMapComponent implements AfterViewInit {
   }
 
   private loadRajukPlots(): void {
-    if (!this.map) return;
+    const map = this.map;
+    if (!map) return;
+    const viewport = map.getBounds();
+    if (this.rajukCollection && this.rajukLoadedBounds?.contains(viewport)) {
+      this.externalTruncated.set(!!this.rajukCollection.truncated);
+      if (!this.rajukLayer) this.renderRajuk(this.rajukCollection);
+      return;
+    }
+    const requestBounds = viewport.pad(0.25);
     this.externalLoading.set(true);
     this.rajukSub?.unsubscribe();
     this.rajukSub = this.landDataService
-      .masterplanInBbox(this.bboxString())
+      .masterplanInBbox(requestBounds.toBBoxString())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (collection) => {
           this.externalLoading.set(false);
           if (this.mapMode() !== 'rajuk' || !this.map) return;
-          this.removeRajukLayer();
-          this.rajukLayer = L.geoJSON(collection as never, {
-            style: { color: '#7a8b12', weight: 1.5, fillColor: '#b7c94a', fillOpacity: 0.3 },
-            onEachFeature: (feature, layer) =>
-              layer.bindPopup(this.rajukPopupHtml(feature as LandPlotFeature, layer as L.Polygon)),
-          }).addTo(this.map);
+          this.rajukCollection = collection;
+          this.rajukLoadedBounds = requestBounds;
+          this.externalTruncated.set(!!collection.truncated);
+          this.renderRajuk(collection);
         },
         error: () => {
           this.externalLoading.set(false);
           this.externalError.set(true);
         },
       });
+  }
+
+  private renderRajuk(collection: LandFeatureCollection): void {
+    const map = this.map;
+    if (!map) return;
+    this.removeRajukLayer();
+    this.rajukLayer = L.geoJSON(collection as never, {
+      style: (feature) =>
+        this.externalStyle('rajuk', (feature as LandPlotFeature | undefined)?.properties),
+      onEachFeature: (feature, layer) =>
+        layer.bindPopup(this.rajukPopupHtml(feature as LandPlotFeature, layer as L.Polygon)),
+    }).addTo(map);
   }
 
   private rajukPopupHtml(feature: LandPlotFeature, layer: L.Polygon): string {
@@ -561,6 +634,105 @@ export class PlotMapComponent implements AfterViewInit {
       this.map.removeLayer(this.rajukLayer);
       this.rajukLayer = null;
     }
+  }
+
+  // ---- Dag-number search (BDS dag / RAJUK RS dag) --------------------------
+
+  private dagKeyOf(props: LandPlotFeature['properties'] | undefined): string {
+    if (!props) return '';
+    const value = props.dag ?? props.rs_plot_no ?? props.plot_no;
+    return value === undefined || value === null ? '' : normalizeDagNo(String(value));
+  }
+
+  /** Layer style that keeps the searched dag highlighted across bbox reloads. */
+  private externalStyle(
+    mode: 'bds' | 'rajuk',
+    props?: LandPlotFeature['properties'],
+  ): L.PathOptions {
+    const base: L.PathOptions =
+      mode === 'bds'
+        ? { color: '#1a3fd4', weight: 2, fillColor: '#2b50e0', fillOpacity: 0.2 }
+        : { color: '#7a8b12', weight: 1.5, fillColor: '#b7c94a', fillOpacity: 0.3 };
+    const highlight = this.highlightDag();
+    if (!highlight || this.dagKeyOf(props) !== highlight) return base;
+    return { ...base, color: '#e65100', weight: 4, fillOpacity: 0.5, className: 'dag-search-hit' };
+  }
+
+  /** Restyles the already-rendered layer so a hit lights up immediately. */
+  private styleSearchedLayer(): void {
+    const layer = this.mapMode() === 'bds' ? this.bdsLayer : this.rajukLayer;
+    if (!layer) return;
+    layer.eachLayer((child: L.Layer) => {
+      const polygon = child as L.Polygon;
+      polygon.setStyle(
+        this.externalStyle(this.mapMode() as 'bds' | 'rajuk', polygon.feature?.properties),
+      );
+    });
+  }
+
+  onDagQueryInput(value: string): void {
+    this.dagQuery.set(value);
+    if (!value.trim()) this.clearDagSearch();
+  }
+
+  clearDagSearch(): void {
+    this.dagQuery.set('');
+    this.dagNotFound.set(false);
+    this.highlightDag.set(null);
+    this.styleSearchedLayer();
+  }
+
+  searchDag(event?: Event): void {
+    event?.preventDefault();
+    const mode = this.mapMode();
+    if (mode !== 'bds' && mode !== 'rajuk') return;
+    const query = toAsciiDigits(this.dagQuery().trim());
+    if (!query) return;
+    this.dagNotFound.set(false);
+    this.externalError.set(false);
+    this.externalLoading.set(true);
+    const request$ =
+      mode === 'bds'
+        ? this.landDataService.lookupDag('bds', query)
+        : this.landDataService.lookupRsPlot(query);
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (collection) => {
+        this.externalLoading.set(false);
+        const features = collection.features ?? [];
+        if (!features.length) {
+          this.highlightDag.set(null);
+          this.dagNotFound.set(true);
+          return;
+        }
+        this.highlightDag.set(this.dagKeyOf(features[0].properties));
+        this.styleSearchedLayer();
+        this.fitToFeatures(features);
+      },
+      error: () => {
+        this.externalLoading.set(false);
+        this.externalError.set(true);
+      },
+    });
+  }
+
+  /** Flies to the looked-up plots; the moveend reload re-renders them in view. */
+  private fitToFeatures(features: LandPlotFeature[]): void {
+    const map = this.map;
+    if (!map) return;
+    const points: L.LatLngTuple[] = [];
+    for (const feature of features) {
+      const ringsOfPairs = feature.geometry?.coordinates ?? [];
+      // Polygon (rings of pairs) vs MultiPolygon (polygons of rings).
+      const polygons = Array.isArray(ringsOfPairs[0]?.[0]?.[0])
+        ? (ringsOfPairs as number[][][][])
+        : (ringsOfPairs as number[][][]).map((rings) => [rings]);
+      for (const rings of polygons) {
+        for (const ring of rings) {
+          for (const pair of ring) points.push([pair[1], pair[0]]);
+        }
+      }
+    }
+    if (points.length) map.fitBounds(L.latLngBounds(points).pad(0.25), { maxZoom: 18 });
   }
 
   private featureLayerVisible(feature: PlotFeature): boolean {

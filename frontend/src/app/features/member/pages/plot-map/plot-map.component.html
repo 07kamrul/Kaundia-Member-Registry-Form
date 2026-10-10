@@ -13,6 +13,29 @@
             [attr.aria-label]="'member.plotMap.searchPlaceholder' | translate"
           />
         </div>
+      } @else if (mapMode() === 'bds' || mapMode() === 'rajuk') {
+        <form class="dag-search" (submit)="searchDag($event)">
+          <app-icon name="pin" [size]="16" />
+          <input
+            type="search"
+            class="dag-search-input"
+            [placeholder]="dagSearchPlaceholderKey() | translate"
+            [value]="dagQuery()"
+            (input)="onDagQueryInput($any($event.target).value)"
+            (keydown.enter)="searchDag($event)"
+            [attr.aria-label]="dagSearchPlaceholderKey() | translate"
+          />
+          @if (dagQuery()) {
+            <button
+              type="button"
+              class="dag-search-clear"
+              (click)="clearDagSearch()"
+              [attr.aria-label]="'common.close' | translate"
+            >
+              <app-icon name="close" [size]="14" />
+            </button>
+          }
+        </form>
       }
       <button type="button" class="btn btn-secondary btn-sm locate-btn" (click)="locateMe()">
         <app-icon name="pin" [size]="16" />
@@ -29,6 +52,9 @@
         </button>
       }
     </div>
+    @if (dagNotFound()) {
+      <p class="locate-error" role="alert">{{ 'member.plotMap.views.dagNotFound' | translate }}</p>
+    }
     @if (myLocationError()) {
       <p class="locate-error" role="alert">{{ 'member.plotMap.locationError' | translate }}</p>
     }
@@ -103,6 +129,10 @@
     } @else if (externalError()) {
       <div class="external-status error" role="alert">
         {{ 'member.plotMap.views.loadError' | translate }}
+      </div>
+    } @else if (externalTruncated()) {
+      <div class="external-status warn" role="alert">
+        {{ 'member.plotMap.views.partialData' | translate }}
       </div>
     }
 

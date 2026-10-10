@@ -101,7 +101,10 @@ class Settings(BaseSettings):
     # Baked into the Docker image read-only; verified against meta.json
     # checksums at startup — a bad dataset must fail the boot, not the map.
     land_data_dir: str = Field(default="data/uttar-kaundia", validation_alias="LAND_DATA_DIR")
-    land_map_result_cap: int = Field(default=2000, ge=1, validation_alias="LAND_MAP_RESULT_CAP")
+    # Must stay above the dataset size (6.8k BDS dags + 2.5k RAJUK RS plots):
+    # the whole mouza is visible in one viewport, and a lower cap silently
+    # drops sheets from the map (the client only gets `truncated: true`).
+    land_map_result_cap: int = Field(default=10_000, ge=1, validation_alias="LAND_MAP_RESULT_CAP")
 
     @model_validator(mode="after")
     def _reject_insecure_secret_in_production(self) -> "Settings":

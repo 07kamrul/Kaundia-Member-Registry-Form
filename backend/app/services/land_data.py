@@ -60,6 +60,10 @@ class LandDataProvider(ABC):
     def masterplan_features_in_bbox(self, bbox: BBox, limit: int = 500) -> list[dict]:
         """RAJUK DAP overlay plots (may be empty when the overlay wasn't ingested)."""
 
+    @abstractmethod
+    def masterplan_find(self, rs_plot_no: str) -> list[dict]:
+        """All overlay plots whose RS number equals ``rs_plot_no``."""
+
 
 def _ascii_digits(text: str) -> str:
     return (text or "").translate(str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")).strip()
@@ -71,6 +75,12 @@ def _normalize_sheet(sheet: str) -> str:
     if s.isdigit() and len(s) < 3:
         s = s.zfill(3)
     return s
+
+
+def _normalize_rs(rs_plot_no: str) -> str:
+    """RS plots are stored as "RS-4611"; index and query them by digits only,
+    so "4611", "RS-4611" and Bangla digits all match the same plot."""
+    return _ascii_digits(str(rs_plot_no)).upper().replace("RS-", "").strip()
 
 
 class LocalJsonLandDataProvider(LandDataProvider):
@@ -161,6 +171,7 @@ class LocalJsonLandDataProvider(LandDataProvider):
 
     def _load_masterplan(self) -> list[tuple[dict, tuple[float, float]]]:
         """RAJUK DAP overlay, optional — an absent file is not an error."""
+        self._masterplan_by_rs: dict[str, list[dict]] = {}
         path = self.root / "masterplan.geojson"
         if not path.is_file():
             return []
@@ -171,6 +182,9 @@ class LocalJsonLandDataProvider(LandDataProvider):
         out = []
         for feature in fc.get("features", []):
             out.append((feature, self._centroid_of(feature)))
+            rs = feature.get("properties", {}).get("rs_plot_no")
+            if rs:
+                self._masterplan_by_rs.setdefault(_normalize_rs(rs), []).append(feature)
         return out
 
     # -- LandDataProvider ----------------------------------------------------
@@ -210,6 +224,9 @@ class LocalJsonLandDataProvider(LandDataProvider):
                 if len(out) >= limit:
                     break
         return out
+
+    def masterplan_find(self, rs_plot_no: str) -> list[dict]:
+        return list(self._masterplan_by_rs.get(_normalize_rs(rs_plot_no), []))
 
 
 @lru_cache(maxsize=1)

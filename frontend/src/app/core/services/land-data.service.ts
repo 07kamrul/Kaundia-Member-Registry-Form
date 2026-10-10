@@ -43,10 +43,24 @@ export class LandDataService {
     });
   }
 
+  /** Every sheet containing a BDS dag number (Bangla digits accepted). */
+  lookupDag(survey: string, dagNo: string): Observable<LandFeatureCollection> {
+    return this.http.get<LandFeatureCollection>(
+      `${environment.apiBaseUrl}/land/dag/${survey}/lookup/${encodeURIComponent(dagNo)}`,
+    );
+  }
+
   /** RAJUK DAP 2022–2035 RS plots for the viewport. */
   masterplanInBbox(bbox: string): Observable<LandFeatureCollection> {
     return this.http.get<LandFeatureCollection>(`${environment.apiBaseUrl}/land/masterplan`, {
       params: { bbox },
     });
+  }
+
+  /** RS plots matching a dag number ("4611", "RS-4611", Bangla digits). */
+  lookupRsPlot(rsPlotNo: string): Observable<LandFeatureCollection> {
+    return this.http.get<LandFeatureCollection>(
+      `${environment.apiBaseUrl}/land/masterplan/lookup/${encodeURIComponent(rsPlotNo)}`,
+    );
   }
 }

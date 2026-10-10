@@ -77,6 +77,23 @@ def get_dags_in_bbox(
     }
 
 
+@router.get("/dag/{survey}/lookup/{dag_no}")
+def lookup_dag(
+    survey: str,
+    dag_no: str,
+    member: Member = Depends(require_member_permission(VIEW_PERMISSION)),
+    provider: LandDataProvider = Depends(get_land_data_provider),
+) -> dict:
+    """Find every sheet containing a dag number (accepts Bangla digits).
+
+    Declared before the /dag/{survey}/{sheet}/{dag} catch-all — FastAPI matches
+    in declaration order, so "lookup" would otherwise be read as a sheet name.
+    """
+    _approved(member)
+    features = provider.find_dags(survey, dag_no)
+    return {"type": "FeatureCollection", "count": len(features), "features": features}
+
+
 @router.get("/dag/{survey}/{sheet}/{dag}")
 def get_single_dag(
     survey: str,
@@ -93,19 +110,6 @@ def get_single_dag(
             detail={"code": "DAG_NOT_FOUND", "message": "No such dag in the local dataset."},
         )
     return feature
-
-
-@router.get("/dag/{survey}/lookup/{dag_no}")
-def lookup_dag(
-    survey: str,
-    dag_no: str,
-    member: Member = Depends(require_member_permission(VIEW_PERMISSION)),
-    provider: LandDataProvider = Depends(get_land_data_provider),
-) -> dict:
-    """Find every sheet containing a dag number (accepts Bangla digits)."""
-    _approved(member)
-    features = provider.find_dags(survey, dag_no)
-    return {"type": "FeatureCollection", "count": len(features), "features": features}
 
 
 @router.get("/masterplan")
@@ -125,6 +129,18 @@ def get_masterplan_in_bbox(
         "truncated": len(features) > cap,
         "features": features[:cap],
     }
+
+
+@router.get("/masterplan/lookup/{rs_plot_no}")
+def lookup_masterplan_plot(
+    rs_plot_no: str,
+    member: Member = Depends(require_member_permission(VIEW_PERMISSION)),
+    provider: LandDataProvider = Depends(get_land_data_provider),
+) -> dict:
+    """Find every RS plot with this number (accepts "RS-4611", "4611", Bangla digits)."""
+    _approved(member)
+    features = provider.masterplan_find(rs_plot_no)
+    return {"type": "FeatureCollection", "count": len(features), "features": features}
 
 
 __all__ = ["router"]

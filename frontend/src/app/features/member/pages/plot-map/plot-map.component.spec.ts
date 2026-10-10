@@ -5,11 +5,13 @@ import { of, Subject, throwError, type Observable } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../../../../core/services/auth.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { LandDataService, type LandFeatureCollection } from '../../../../core/services/land-data.service';
 import { MemberService } from '../../../../core/services/member.service';
 import { PlotMapService } from '../../../../core/services/plot-map.service';
 import { toBoundaryOwner, toPlotMapPage } from '../../../../core/models/plot-boundary.model';
 import {
   PlotMapComponent,
+  normalizeDagNo,
   ownerErrorKey,
   saveErrorKey,
 } from './plot-map.component';
@@ -49,11 +51,14 @@ export const L = vi.hoisted(() => {
     on: vi.fn().mockReturnThis(),
     remove: vi.fn(),
     setStyle: vi.fn(),
+    eachLayer: vi.fn(),
     getBounds: vi.fn(() => ({ pad: vi.fn(() => ({})) })),
     getLatLngs: vi.fn(() => []),
     pm: { enable: vi.fn(), disable: vi.fn() },
   });
-  const mapStub = {
+  // A fresh stub per L.map() call: tests assert on recorded calls (fitBounds,
+  // moveend handlers…), and one shared instance would leak counts across tests.
+  const makeMapStub = () => ({
     on: vi.fn(),
     off: vi.fn(),
     setView: vi.fn(),
@@ -61,11 +66,22 @@ export const L = vi.hoisted(() => {
     removeLayer: vi.fn(),
     addLayer: vi.fn(),
     remove: vi.fn(),
-    getBounds: vi.fn(() => ({ toBBoxString: () => '90.30,23.70,90.50,23.80' })),
+    getZoom: vi.fn(() => 15),
+    // Self-padded, self-containing bounds: a cached official layer always
+    // covers the viewport, which the BDS/RAJUK cache tests rely on.
+    getBounds: vi.fn(() => {
+      const bounds = {
+        toBBoxString: () => '90.30,23.70,90.50,23.80',
+        pad: () => bounds,
+        contains: () => true,
+        intersects: () => false,
+      };
+      return bounds;
+    }),
     pm: { enableDraw: vi.fn(), disable: vi.fn() },
-  };
+  });
   const stub = {
-    map: vi.fn(() => mapStub),
+    map: vi.fn(() => makeMapStub()),
     tileLayer: vi.fn(() => layerStub()),
     polygon: vi.fn(() => layerStub()),
     geoJSON: vi.fn(() => layerStub()),
@@ -113,6 +129,38 @@ export function httpError(status: number, code?: string): HttpErrorResponse {
     status,
     error: code ? { detail: { code, message: 'raw' } } : 'x',
   });
+}
+
+const EMPTY_COLLECTION: LandFeatureCollection = {
+  type: 'FeatureCollection',
+  count: 0,
+  features: [],
+};
+
+/** A single-dag collection; properties shape depends on the map view. */
+export function dagCollection(properties: Record<string, unknown>): LandFeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    count: 1,
+    features: [
+      {
+        type: 'Feature',
+        properties,
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [90.32, 23.8],
+              [90.33, 23.8],
+              [90.33, 23.81],
+              [90.32, 23.81],
+              [90.32, 23.8],
+            ],
+          ],
+        },
+      },
+    ],
+  };
 }
 
 export interface SetupOptions {
@@ -170,6 +218,14 @@ export function setup(options: SetupOptions = {}) {
       }),
     ),
   };
+  const landDataService = {
+    // Official map views fetch per-bbox on load; searches hit the lookup
+    // endpoints. Spied after the testing module is configured below.
+    dagsInBbox: vi.fn(() => of(EMPTY_COLLECTION)),
+    masterplanInBbox: vi.fn(() => of(EMPTY_COLLECTION)),
+    lookupDag: vi.fn(() => of(EMPTY_COLLECTION)),
+    lookupRsPlot: vi.fn(() => of(EMPTY_COLLECTION)),
+  };
   const permissions = options.permissions ?? ['boundary.view', 'boundary.draw_own'];
 
   TestBed.configureTestingModule({
@@ -178,6 +234,7 @@ export function setup(options: SetupOptions = {}) {
       provideTranslateService(),
       { provide: PlotMapService, useValue: plotMapService },
       { provide: MemberService, useValue: memberService },
+      { provide: LandDataService, useValue: landDataService },
       { provide: LanguageService, useValue: { lang: vi.fn(() => 'en'), setLang: vi.fn() } },
       {
         provide: AuthService,
@@ -189,7 +246,23 @@ export function setup(options: SetupOptions = {}) {
   const component = fixture.componentInstance;
   fixture.detectChanges();
   const el = fixture.nativeElement as HTMLElement;
-  return { fixture, component, el, plotMapService, ownerSubject, OWNER_OK };
+  // The hoisted Leaflet map stub is shared by every component instance, so
+  // its call records would otherwise leak between tests.
+  const mapStub = (component as unknown as { map: { fitBounds: ReturnType<typeof vi.fn> } | null })
+    .map;
+  mapStub?.fitBounds.mockClear();
+  return {
+    fixture,
+    component,
+    el,
+    plotMapService,
+    ownerSubject,
+    OWNER_OK,
+    dagsInBbox: landDataService.dagsInBbox,
+    masterplanInBbox: landDataService.masterplanInBbox,
+    lookupDag: landDataService.lookupDag,
+    lookupRsPlot: landDataService.lookupRsPlot,
+  };
 }
 
 describe('PlotMapComponent', () => {
@@ -294,6 +367,145 @@ describe('PlotMapComponent', () => {
     expect(send.disabled).toBe(false);
     send.click();
     expect(plotMapService.report).toHaveBeenCalledWith(7, 'Fence is wrong');
+  });
+});
+
+describe('plot-map dag search (BDS / RAJUK views)', () => {
+  /** The Leaflet map is private; tests only need its call records. */
+  function mapStubOf(component: PlotMapComponent): { fitBounds: ReturnType<typeof vi.fn> } {
+    return (component as unknown as { map: { fitBounds: ReturnType<typeof vi.fn> } }).map!;
+  }
+
+  it('shows the member-boundary search only in boundaries view', () => {
+    const { el } = setup();
+    expect(el.querySelector('.dag-search')?.tagName).toBe('DIV');
+  });
+
+  it('shows the BDS dag search with its own placeholder in the BDS view', () => {
+    const { fixture, component, el } = setup();
+    component.selectMapMode('bds');
+    fixture.detectChanges();
+    const form = el.querySelector('form.dag-search')!;
+    expect(form).not.toBeNull();
+    expect(form.querySelector('input')!.getAttribute('placeholder')).toBe(
+      'member.plotMap.views.bdsSearchPlaceholder',
+    );
+  });
+
+  it('shows the RS dag search placeholder in the RAJUK view', () => {
+    const { fixture, component, el } = setup();
+    component.selectMapMode('rajuk');
+    fixture.detectChanges();
+    const form = el.querySelector('form.dag-search')!;
+    expect(form.querySelector('input')!.getAttribute('placeholder')).toBe(
+      'member.plotMap.views.rsSearchPlaceholder',
+    );
+  });
+
+  it('looks the dag up on the BDS endpoint, converting Bangla digits', () => {
+    const { component, lookupDag } = setup();
+    component.mapMode.set('bds');
+    component.dagQuery.set('৪৬১১');
+    component.searchDag();
+    expect(lookupDag).toHaveBeenCalledWith('bds', '4611');
+  });
+
+  it('looks the plot up on the masterplan endpoint in the RAJUK view', () => {
+    const { component, lookupRsPlot, lookupDag } = setup();
+    component.mapMode.set('rajuk');
+    component.dagQuery.set('RS-105');
+    component.searchDag();
+    expect(lookupRsPlot).toHaveBeenCalledWith('RS-105');
+    expect(lookupDag).not.toHaveBeenCalled();
+  });
+
+  it('flies to and highlights the matched dag', () => {
+    const { fixture, component, el, lookupDag } = setup();
+    lookupDag.mockReturnValue(of(dagCollection({ dag: '4611' })));
+    component.mapMode.set('bds');
+    component.dagQuery.set('4611');
+    component.searchDag();
+    fixture.detectChanges();
+    expect(component.highlightDag()).toBe('4611');
+    expect(mapStubOf(component).fitBounds).toHaveBeenCalled();
+    expect(component.dagNotFound()).toBe(false);
+    expect(el.querySelector('.dag-search-clear')).not.toBeNull();
+  });
+
+  it('normalizes the RS- prefix when highlighting a RAJUK hit', () => {
+    const { component, lookupRsPlot } = setup();
+    lookupRsPlot.mockReturnValue(of(dagCollection({ rs_plot_no: 'RS-105', plot_no: 105 })));
+    component.mapMode.set('rajuk');
+    component.dagQuery.set('105');
+    component.searchDag();
+    expect(component.highlightDag()).toBe('105');
+  });
+
+  it('reports not-found and never flies when the dag does not exist', () => {
+    const { fixture, component, el, lookupDag } = setup();
+    component.mapMode.set('bds');
+    component.dagQuery.set('999999');
+    component.searchDag();
+    fixture.detectChanges();
+    expect(component.dagNotFound()).toBe(true);
+    expect(component.highlightDag()).toBeNull();
+    expect(mapStubOf(component).fitBounds).not.toHaveBeenCalled();
+    expect(el.querySelector('.locate-error')?.textContent).toContain(
+      'member.plotMap.views.dagNotFound',
+    );
+  });
+
+  it('clears query, highlight and message via the clear button', () => {
+    const { fixture, component, el, lookupDag } = setup();
+    lookupDag.mockReturnValue(of(dagCollection({ dag: '4611' })));
+    component.mapMode.set('bds');
+    component.dagQuery.set('4611');
+    component.searchDag();
+    fixture.detectChanges();
+    (el.querySelector('.dag-search-clear') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.dagQuery()).toBe('');
+    expect(component.highlightDag()).toBeNull();
+    expect(el.querySelector('.dag-search-clear')).toBeNull();
+  });
+
+  it('clears the dag search when switching map views', () => {
+    const { component, lookupDag } = setup();
+    lookupDag.mockReturnValue(of(dagCollection({ dag: '4611' })));
+    component.mapMode.set('bds');
+    component.dagQuery.set('4611');
+    component.searchDag();
+    component.selectMapMode('boundaries');
+    expect(component.dagQuery()).toBe('');
+    expect(component.highlightDag()).toBeNull();
+    expect(component.dagNotFound()).toBe(false);
+  });
+
+  it('normalizes dag numbers to comparable ASCII digits without the RS prefix', () => {
+    expect(normalizeDagNo('4611')).toBe('4611');
+    expect(normalizeDagNo(' RS-4611 ')).toBe('4611');
+    expect(normalizeDagNo('৪৬১১')).toBe('4611');
+    expect(normalizeDagNo('১৩')).toBe('13');
+  });
+
+  it('warns instead of silently dropping plots when the server truncates', () => {
+    const { fixture, component, el, dagsInBbox } = setup();
+    dagsInBbox.mockReturnValue(of({ ...EMPTY_COLLECTION, count: 0, truncated: true }));
+    component.selectMapMode('bds');
+    fixture.detectChanges();
+    expect(component.externalTruncated()).toBe(true);
+    expect(el.querySelector('.external-status.warn')?.textContent).toContain(
+      'member.plotMap.views.partialData',
+    );
+  });
+
+  it('serves later BDS visits from cache instead of refetching the same area', () => {
+    const { component, dagsInBbox } = setup();
+    component.selectMapMode('bds');
+    expect(dagsInBbox).toHaveBeenCalledTimes(1);
+    component.selectMapMode('boundaries');
+    component.selectMapMode('bds');
+    expect(dagsInBbox).toHaveBeenCalledTimes(1);
   });
 });
 

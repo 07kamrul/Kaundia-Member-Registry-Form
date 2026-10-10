@@ -114,6 +114,24 @@ def test_provider_find_dags(provider):
     assert hits and all(h["properties"]["dag"] == "13" for h in hits)
 
 
+def test_provider_masterplan_find_accepts_digits_prefix_and_bangla(provider):
+    feature = provider.masterplan_features_in_bbox(
+        (90.3039, 23.7851, 90.3423, 23.8327), limit=1
+    )
+    assert feature, "overlay dataset must be present for this test"
+    rs = feature[0]["properties"]["rs_plot_no"]  # e.g. "RS-4611"
+    digits = rs.split("-")[-1]
+    bangla = digits.translate(str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯"))
+    for query in (rs, digits.lower(), bangla):
+        hits = provider.masterplan_find(query)
+        assert hits, query
+        assert all(h["properties"]["rs_plot_no"] == rs for h in hits)
+
+
+def test_provider_masterplan_find_missing_is_empty(provider):
+    assert provider.masterplan_find("9999999") == []
+
+
 def test_provider_bbox_query_inside_mouza(provider):
     features = provider.features_in_bbox((90.326, 23.820, 90.335, 23.830), limit=50)
     assert features
@@ -153,7 +171,9 @@ async def test_endpoints_require_auth(client):
     assert (await client.get("/api/land/meta")).status_code == 401
     assert (await client.get("/api/land/dags", params={"bbox": "90.32,23.82,90.33,23.83"})).status_code == 401
     assert (await client.get("/api/land/dag/bds/001/13")).status_code == 401
+    assert (await client.get("/api/land/dag/bds/lookup/13")).status_code == 401
     assert (await client.get("/api/land/masterplan", params={"bbox": "90.32,23.82,90.33,23.83"})).status_code == 401
+    assert (await client.get("/api/land/masterplan/lookup/4611")).status_code == 401
 
 
 async def test_dags_requires_bbox(client, db_session):
@@ -176,6 +196,22 @@ async def test_dags_happy_path(client, db_session):
     props = body["features"][0]["properties"]
     # no personal data in the served payload
     assert set(props) <= {"survey", "sheet", "dag", "label_bn", "area_sqm"}
+
+
+async def test_full_mouza_not_truncated_by_default_cap(client, db_session, provider):
+    """The whole mouza is visible in one viewport, so the default result cap
+    must cover the entire dataset — a lower cap silently drops whole sheets
+    from the map (the member just sees blank areas)."""
+    member = await _approved_member(db_session, "FullMouzaMember")
+    resp = await client.get(
+        "/api/land/dags",
+        params={"bbox": "90.295,23.78,90.36,23.84"},
+        headers=_member_headers(member),
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["truncated"] is False
+    assert body["count"] == provider.dataset_meta()["counts"]["dags"]
 
 
 async def test_pending_member_forbidden(client, db_session):
@@ -205,3 +241,42 @@ async def test_masterplan_overlay(client, db_session):
     )
     assert resp.status_code == 200
     assert resp.json()["count"] > 0
+
+
+async def test_masterplan_lookup_happy_path(client, db_session):
+    member = await _approved_member(db_session, "RsLookupMember")
+    bbox = {"bbox": "90.3039,23.7851,90.3423,23.8327"}
+    sample = await client.get("/api/land/masterplan", params=bbox, headers=_member_headers(member))
+    rs = sample.json()["features"][0]["properties"]["rs_plot_no"]
+
+    resp = await client.get(f"/api/land/masterplan/lookup/{rs}", headers=_member_headers(member))
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["type"] == "FeatureCollection"
+    assert body["count"] >= 1
+    assert all(f["properties"]["rs_plot_no"] == rs for f in body["features"])
+
+    # the same plot is reachable without the RS- prefix and via Bangla digits
+    digits = rs.split("-")[-1]
+    for query in (digits, digits.translate(str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯"))):
+        alt = await client.get(f"/api/land/masterplan/lookup/{query}", headers=_member_headers(member))
+        assert alt.status_code == 200
+        assert alt.json()["count"] == body["count"]
+
+
+async def test_masterplan_lookup_unknown_plot_is_empty_collection(client, db_session):
+    member = await _approved_member(db_session, "RsLookupMissing")
+    resp = await client.get(
+        "/api/land/masterplan/lookup/9999999", headers=_member_headers(member)
+    )
+    assert resp.status_code == 200
+    assert resp.json() == {"type": "FeatureCollection", "count": 0, "features": []}
+
+
+async def test_dag_lookup_endpoint(client, db_session):
+    member = await _approved_member(db_session, "DagLookupMember")
+    resp = await client.get("/api/land/dag/bds/lookup/১৩", headers=_member_headers(member))
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["count"] >= 1
+    assert all(f["properties"]["dag"] == "13" for f in body["features"])
