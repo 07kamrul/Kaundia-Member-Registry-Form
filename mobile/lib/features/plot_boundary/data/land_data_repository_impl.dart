@@ -1,4 +1,5 @@
 import '../../../core/network/api_client.dart';
+import '../domain/dag_details_entities.dart';
 import '../domain/geo.dart';
 import '../domain/land_data_repository.dart';
 import '../domain/land_entities.dart';
@@ -29,6 +30,17 @@ class LandDataRepositoryImpl implements LandDataRepository {
       LandLayer.rajuk => '/land/masterplan/lookup/$encoded',
     };
     return _collection(await _api.getUri(path));
+  }
+
+  @override
+  Future<DagDetails> dagDetails(String survey, String sheet, String dag) async {
+    final path = '/land/dag/${Uri.encodeComponent(survey)}'
+        '/${Uri.encodeComponent(sheet)}/${Uri.encodeComponent(dag)}';
+    final data = await _api.getUri(path);
+    if (data is! Map) {
+      throw const FormatException('Unexpected /land/dag payload');
+    }
+    return DagDetailsDto.fromJson(data).toEntity();
   }
 
   LandCollection _collection(dynamic data) {

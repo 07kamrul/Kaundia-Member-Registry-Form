@@ -481,6 +481,11 @@
     </div>
   }
 
+  <!-- Official-style BDS dag information dialog -->
+  @if (dagDialog(); as target) {
+    <app-dag-info-dialog [target]="target" (closed)="closeDagDialog()" />
+  }
+
   <!-- Replace-pending confirm: saving while a review is pending replaces it -->
   <app-confirm-modal
     [open]="replaceTarget() !== null"

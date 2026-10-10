@@ -215,55 +215,22 @@ void main() {
   });
 
   group('LandInfoSheet', () {
-    testWidgets('BDS card shows the settlement-portal fields', (tester) async {
+    testWidgets('RAJUK card opens Street View at the plot centre',
+        (tester) async {
       LatLng? streetView;
       await tester.pumpWidget(_harness(LandInfoSheet(
-        layer: LandLayer.bds,
-        plot: _plot(dag: '4611', sheet: '3', area: 12345),
+        plot: _plot(rs: '77'),
         onStreetView: (p) => streetView = p,
       )));
-
-      expect(find.text('Dag / plot information'), findsOneWidget);
-      expect(find.text('4611'), findsOneWidget);
-      expect(find.text('BDS (2019) — Viti survey'), findsOneWidget);
-      expect(find.text('Uttar Kaundia, Savar, Dhaka'), findsOneWidget);
-      expect(find.text('1.2345'), findsOneWidget, reason: 'm² -> hectare');
-      expect(find.textContaining('Khatian and ownership'), findsOneWidget);
 
       await tester.tap(find.text('Google Street View'));
       expect(streetView?.latitude, closeTo(23.81, 1e-9));
       expect(streetView?.longitude, closeTo(90.305, 1e-9));
     });
 
-    testWidgets('missing sheet and area render as dashes', (tester) async {
-      await tester.pumpWidget(_harness(LandInfoSheet(
-        layer: LandLayer.bds,
-        plot: _plot(dag: '1'),
-        onStreetView: (_) {},
-      )));
-
-      expect(find.text('—'), findsNWidgets(2));
-    });
-
-    testWidgets('BDS card uses Bangla digits in the Bangla locale',
-        (tester) async {
-      await tester.pumpWidget(_harness(
-        LandInfoSheet(
-          layer: LandLayer.bds,
-          plot: _plot(dag: '4611', sheet: '3', area: 10000),
-          onStreetView: (_) {},
-        ),
-        locale: const Locale('bn'),
-      ));
-
-      expect(find.text('৪৬১১'), findsOneWidget);
-      expect(find.text('১.০০০০'), findsOneWidget);
-    });
-
     testWidgets('RAJUK card shows the RS plot and fixed JL number',
         (tester) async {
       await tester.pumpWidget(_harness(LandInfoSheet(
-        layer: LandLayer.rajuk,
         plot: _plot(rs: '77'),
         onStreetView: (_) {},
       )));

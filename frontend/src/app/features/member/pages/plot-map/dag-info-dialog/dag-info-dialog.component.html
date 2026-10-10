@@ -1,0 +1,122 @@
+<div class="dag-overlay" (click)="onOverlayClick($event)" (keydown)="onKeydown($event)">
+  <div
+    #panel
+    class="dag-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dag-dialog-title"
+    tabindex="-1"
+  >
+    <header class="dag-header">
+      <h2 id="dag-dialog-title" class="dag-title">
+        {{ 'member.plotMap.dagInfo.title' | translate: { dag: dagLabel() } }}
+      </h2>
+      <button
+        type="button"
+        class="dag-close-x"
+        [attr.aria-label]="'member.plotMap.dagInfo.close' | translate"
+        (click)="close()"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+    </header>
+
+    <div class="dag-body" tabindex="0" [attr.aria-busy]="state().status === 'loading'">
+      @switch (state().status) {
+        @case ('loading') {
+          <div class="dag-skeleton" role="status" [attr.aria-label]="'member.plotMap.dagInfo.loading' | translate">
+            <div class="skeleton-line skeleton-lg"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-lg"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        }
+        @case ('error') {
+          <div class="dag-error" role="alert">
+            <p>{{ 'member.plotMap.dagInfo.error.' + $any(state()).kind | translate }}</p>
+            @if ($any(state()).kind !== 'notFound') {
+              <button type="button" class="dag-retry" (click)="load()">
+                {{ 'member.plotMap.dagInfo.retry' | translate }}
+              </button>
+            }
+          </div>
+        }
+        @case ('loaded') {
+          @if (view(); as v) {
+            <h3 class="dag-section">{{ 'member.plotMap.dagInfo.landSection' | translate }}</h3>
+            <table class="dag-table dag-land">
+              <tbody>
+                <tr>
+                  <th scope="row">{{ 'member.plotMap.dagInfo.dagNo' | translate }}</th>
+                  <td>{{ dagLabel() }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">{{ 'member.plotMap.dagInfo.surveyType' | translate }}</th>
+                  <td>{{ surveyLabel() }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">{{ 'member.plotMap.dagInfo.mouza' | translate }}</th>
+                  <td>{{ v.mouza }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">{{ 'member.plotMap.dagInfo.totalLand' | translate }}</th>
+                  <td>
+                    {{ v.figures.value }} {{ v.unitLabel }}
+                    @if (v.figures.shatak) {
+                      <span class="dag-approx">
+                        {{ 'member.plotMap.dagInfo.approx' | translate: { value: v.figures.shatak } }}
+                      </span>
+                    }
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3 class="dag-section">{{ 'member.plotMap.dagInfo.khatianSection' | translate }}</h3>
+            <table class="dag-table dag-khatian">
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'member.plotMap.dagInfo.khatianNo' | translate }}</th>
+                  <th scope="col">{{ 'member.plotMap.dagInfo.ownerName' | translate }}</th>
+                  <th scope="col">{{ 'member.plotMap.dagInfo.currentStage' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (group of v.groups; track group.khatian.khatian_no) {
+                  @for (row of group.rows; track $index) {
+                    <tr [class.row-odd]="row.stripe === 'odd'" [class.row-even]="row.stripe === 'even'">
+                      @if (row.isFirst) {
+                        <td class="dag-span" [attr.rowspan]="group.rows.length">{{ group.number }}</td>
+                      }
+                      <td class="dag-owner">{{ row.owner }}</td>
+                      @if (row.isFirst) {
+                        <td class="dag-span" [attr.rowspan]="group.rows.length">{{ group.stage }}</td>
+                      }
+                    </tr>
+                  }
+                } @empty {
+                  <tr>
+                    <td class="dag-empty" colspan="3">{{ 'member.plotMap.dagInfo.noKhatians' | translate }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            <p class="dag-source">
+              {{ 'member.plotMap.dagInfo.source' | translate: { date: v.collected } }}
+            </p>
+          }
+        }
+      }
+    </div>
+
+    <footer class="dag-footer">
+      <button type="button" class="dag-close-btn" (click)="close()">
+        {{ 'member.plotMap.dagInfo.close' | translate }}
+      </button>
+    </footer>
+  </div>
+</div>

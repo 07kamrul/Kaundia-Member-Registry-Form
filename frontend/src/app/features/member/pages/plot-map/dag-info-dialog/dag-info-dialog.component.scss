@@ -1,0 +1,285 @@
+// Official-look dialog. Colours are component-scoped CSS variables so the
+// header/footer stay the portal's blue/grey in both themes while the body
+// surfaces follow light/dark.
+:host {
+  --dag-header-from: #1f4fa8;
+  --dag-header-to: #3b7ddd;
+  --dag-accent: #e8a33d;
+  --dag-surface: #ffffff;
+  --dag-text: #1c2833;
+  --dag-muted: #5b6875;
+  --dag-border: #c9d3de;
+  --dag-label-bg: #f4f7fa;
+  --dag-head-bg: #dfe6ee;
+  --dag-stripe: #f1f3f6;
+  --dag-notice-bg: #fdf6e7;
+  --dag-footer-bg: #f7f8fa;
+  --dag-close-bg: #6c757d;
+  --dag-close-hover: #565e64;
+}
+
+@mixin dark-tokens {
+  --dag-surface: #1b2230;
+  --dag-text: #e6ebf2;
+  --dag-muted: #9aa7b6;
+  --dag-border: #3a4556;
+  --dag-label-bg: #232c3b;
+  --dag-head-bg: #2c374a;
+  --dag-stripe: #232c3b;
+  --dag-notice-bg: #3a3322;
+  --dag-footer-bg: #1f2736;
+}
+
+:host-context(html[data-theme='dark']) {
+  @include dark-tokens;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html:not([data-theme='light'])) {
+    @include dark-tokens;
+  }
+}
+
+.dag-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(10, 14, 20, 0.55);
+}
+
+.dag-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 68vw;
+  max-width: 1100px;
+  max-height: 90vh;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--dag-surface);
+  color: var(--dag-text);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+  outline: none;
+}
+
+.dag-header {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  background: linear-gradient(90deg, var(--dag-header-from), var(--dag-header-to));
+  color: #fff;
+}
+
+.dag-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff;
+}
+
+.dag-close-x {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #1a1a1f;
+  color: #fff;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: #000;
+  }
+}
+
+.dag-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.1rem 1.25rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.dag-section {
+  margin: 1.1rem 0 0.55rem;
+  color: var(--dag-accent);
+  font-size: 1rem;
+  font-weight: 700;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.dag-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    border: 1px solid var(--dag-border);
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+  }
+}
+
+.dag-land {
+  th {
+    width: 48%;
+    background: var(--dag-label-bg);
+    font-weight: 500;
+  }
+
+  td {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.dag-approx {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--dag-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.dag-khatian {
+  thead th {
+    background: var(--dag-head-bg);
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .dag-span {
+    width: 22%;
+    background: var(--dag-label-bg);
+    text-align: center;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row-odd .dag-owner {
+    background: var(--dag-stripe);
+  }
+
+  .row-even .dag-owner {
+    background: var(--dag-surface);
+  }
+
+  .dag-empty {
+    background: var(--dag-notice-bg);
+    text-align: center;
+    color: var(--dag-muted);
+  }
+}
+
+.dag-source {
+  margin: 0.9rem 0 0;
+  color: var(--dag-muted);
+  font-size: 0.78rem;
+}
+
+.dag-skeleton {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.dag-error {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--dag-border);
+  border-radius: 8px;
+  background: var(--dag-notice-bg);
+
+  p {
+    margin: 0;
+  }
+}
+
+.dag-retry {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--dag-header-from);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dag-footer {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.8rem 1.25rem;
+  border-top: 1px solid var(--dag-border);
+  background: var(--dag-footer-bg);
+}
+
+.dag-close-btn {
+  padding: 0.55rem 1.4rem;
+  border: 0;
+  border-radius: 4px;
+  background: var(--dag-close-bg);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--dag-close-hover);
+  }
+}
+
+.dag-close-x:focus-visible,
+.dag-close-btn:focus-visible,
+.dag-retry:focus-visible,
+.dag-body:focus-visible {
+  outline: 3px solid #f2b84b;
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .dag-overlay {
+    padding: 0.5rem;
+  }
+
+  .dag-dialog {
+    width: 100%;
+    max-height: 100%;
+    height: 100%;
+    border-radius: 12px;
+  }
+
+  .dag-body {
+    padding: 0.9rem 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .dag-table {
+    th,
+    td {
+      padding: 0.45rem 0.5rem;
+    }
+  }
+
+  .dag-khatian .dag-span {
+    width: 26%;
+  }
+}

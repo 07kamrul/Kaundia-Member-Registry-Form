@@ -18,6 +18,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import * as L from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
+import { DagInfoDialogComponent, type DagTarget } from './dag-info-dialog/dag-info-dialog.component';
 import { IconComponent, type IconName } from '../../../../shared/icon/icon.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { LanguageService } from '../../../../core/services/language.service';
@@ -110,15 +111,6 @@ export function normalizeDagNo(value: string): string {
   return toAsciiDigits(value).trim().toUpperCase().replace(/^RS-?/, '');
 }
 
-/** Escapes text interpolated into the runtime-built Leaflet popup HTML. */
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 export function boundaryErrorKey(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
     const code =
@@ -144,7 +136,7 @@ type DrawStep = 'idle' | 'pick' | 'draw';
   selector: 'app-plot-map',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, IconComponent, ConfirmModalComponent],
+  imports: [FormsModule, TranslatePipe, IconComponent, ConfirmModalComponent, DagInfoDialogComponent],
   templateUrl: './plot-map.component.html',
   styleUrl: './plot-map.component.scss',
 })
@@ -167,12 +159,9 @@ export class PlotMapComponent implements AfterViewInit {
   readonly search = signal('');
   readonly myLocationError = signal(false);
   readonly outsideSociety = signal(false);
-  /** Dag of the currently open BDS popup; lets a bbox re-render re-open it on
-   * the freshly created polygon instead of dropping the user's card. */
-  private openBdsDag: string | null = null;
-  /** True while a re-render re-opens the carried-over popup, so the close
-   * handler doesn't mistake it for a user dismiss. */
-  private reopeningPopup = false;
+  /** BDS dag whose official-style info dialog is open (null = closed). The
+   * polygon stays highlighted red while it is, even across bbox re-renders. */
+  readonly dagDialog = signal<DagTarget | null>(null);
 
   // Polygon details sheet ("popup" rendered by Angular so it can be a bottom
   // sheet on touch screens and is fully testable).
@@ -359,21 +348,12 @@ export class PlotMapComponent implements AfterViewInit {
       if (this.moveDebounce) clearTimeout(this.moveDebounce);
       this.moveDebounce = setTimeout(() => this.zone.run(() => this.onViewMoved()), MOVE_DEBOUNCE_MS);
     });
-    // Leaflet auto-pans once when a popup opens, but the BDS card grows after
-    // the khatian rows stream in and can end up sliding under the floating top
-    // bar. Re-running the layout after the open settles (and again next frame
-    // for async content) keeps the card fully below the bar.
+    // RAJUK popups fill in after open; re-run layout so they stay below the
+    // floating top bar.
     map.on('popupopen', (event: L.PopupEvent) => {
       const popup = event.popup;
-      const dag = popup.getElement()?.querySelector<HTMLElement>('.bds-popup')?.dataset['dag'];
-      this.openBdsDag = dag ?? null;
       setTimeout(() => popup.update(), MOVE_DEBOUNCE_MS + 50);
       requestAnimationFrame(() => popup.update());
-    });
-    map.on('popupclose', () => {
-      // Only an explicit user close should forget the card; re-renders close
-      // the popup as a side effect and immediately re-open it.
-      if (!this.reopeningPopup) this.openBdsDag = null;
     });
     map.on('zoomend', () => this.zone.runOutsideAngular(() => this.updateBdsLabels()));
     map.on('move', () => this.updateSheetPos());
@@ -479,6 +459,7 @@ export class PlotMapComponent implements AfterViewInit {
     }
     this.cancelDraw();
     this.closeSheet();
+    this.dagDialog.set(null);
     this.externalError.set(false);
     this.externalTruncated.set(false);
     this.mapMode.set(mode);
@@ -561,29 +542,33 @@ export class PlotMapComponent implements AfterViewInit {
   private renderBds(collection: LandFeatureCollection): void {
     const map = this.map;
     if (!map) return;
-    // The open popup belongs to a polygon that is about to be replaced; carry
-    // it over so a background data refresh doesn't slam the card shut.
-    const reopenDag = this.openBdsDag;
     this.removeBdsLayer();
     this.bdsLayer = L.geoJSON(collection as never, {
       style: (feature) =>
         this.externalStyle('bds', (feature as LandPlotFeature | undefined)?.properties),
       onEachFeature: (feature, layer) =>
-        layer.bindPopup(
-          this.bdsPopupHtml(feature as LandPlotFeature, layer as L.Polygon),
-          this.externalPopupOptions(),
+        layer.on('click', () =>
+          this.zone.run(() => this.openDagDialog((feature as LandPlotFeature).properties)),
         ),
     }).addTo(map);
-    if (reopenDag) {
-      this.reopeningPopup = true;
-      this.bdsLayer.eachLayer((child: L.Layer) => {
-        const dag = (child as { feature?: { properties?: { dag?: string } } }).feature?.properties
-          ?.dag;
-        if (dag === reopenDag) (child as L.Polygon).openPopup();
-      });
-      this.reopeningPopup = false;
-    }
     this.updateBdsLabels();
+  }
+
+  /** Opens the official-style dialog for a clicked BDS dag and lights it up. */
+  private openDagDialog(props: LandPlotFeature['properties'] | undefined): void {
+    const dag = props?.dag;
+    const sheet = props?.sheet;
+    if (!dag || !sheet) return;
+    this.dagDialog.set({ survey: props?.survey ?? 'bds', sheet, dag: normalizeDagNo(String(dag)) });
+    this.styleSearchedLayer();
+  }
+
+  /** Closes the dialog, drops the highlight and hands focus back to the map. */
+  closeDagDialog(): void {
+    if (!this.dagDialog()) return;
+    this.dagDialog.set(null);
+    this.styleSearchedLayer();
+    this.mapContainer().nativeElement.focus({ preventScroll: true });
   }
 
   /** Permanent dag labels only when zoomed in enough to read them, and only
@@ -624,98 +609,6 @@ export class PlotMapComponent implements AfterViewInit {
     });
     map.removeLayer(this.bdsLayer);
     this.bdsLayer = null;
-  }
-
-  /** Settlement-portal style dag information card (mirrors settlement.gov.bd):
-   * blue title bar, orange section headings, a land info table and a khatian
-   * table whose rows come from backend/data/shared/khatians.json. */
-  private bdsPopupHtml(feature: LandPlotFeature, layer: L.Polygon): HTMLElement {
-    const props = feature.properties ?? {};
-    const dagRaw = String(props.dag ?? props.label_bn ?? '');
-    const dag = this.digits(dagRaw);
-    const t = (key: string, params?: Record<string, unknown>) =>
-      this.translate.instant(`member.plotMap.views.${key}`, params);
-    const areaHectare =
-      typeof props.area_sqm === 'number' && props.area_sqm > 0
-        ? this.digits((props.area_sqm / 10_000).toFixed(4))
-        : '—';
-    const center = layer.getBounds().getCenter();
-    const streetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${center.lat},${center.lng}`;
-
-    const root = document.createElement('div');
-    root.className = 'bds-popup';
-    root.dataset['dag'] = dagRaw;
-    root.innerHTML = `
-      <div class="bds-popup-header">${escapeHtml(t('bdsHeader', { dag }))}</div>
-      <div class="bds-popup-body">
-        <h4 class="bds-popup-section">${escapeHtml(t('landInfoSection'))}</h4>
-        <table class="bds-popup-table">
-          <tbody>
-            <tr><th scope="row">${escapeHtml(t('dagNoLabel'))}</th><td>${escapeHtml(dag)}</td></tr>
-            <tr><th scope="row">${escapeHtml(t('surveyTypeLabel'))}</th><td>${escapeHtml(t('surveyTypeValue'))}</td></tr>
-            <tr><th scope="row">${escapeHtml(t('mouzaNameLabel'))}</th><td>${escapeHtml(t('mouzaNameValue'))}</td></tr>
-            <tr><th scope="row">${escapeHtml(t('areaLabel'))}</th><td>${escapeHtml(areaHectare)}</td></tr>
-          </tbody>
-        </table>
-        <h4 class="bds-popup-section">${escapeHtml(t('khatianSection'))}</h4>
-        <table class="bds-popup-table bds-khatian-table">
-          <thead>
-            <tr>
-              <th>${escapeHtml(t('khatianNoLabel'))}</th>
-              <th>${escapeHtml(t('ownerNameLabel'))}</th>
-              <th>${escapeHtml(t('currentShareLabel'))}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td colspan="3" class="bds-khatian-loading">${escapeHtml(t('khatianLoading'))}</td></tr>
-          </tbody>
-        </table>
-        <div class="bds-popup-footer">
-          <a class="bds-popup-link" href="${streetView}" target="_blank" rel="noopener noreferrer">
-            ${escapeHtml(t('streetView'))}
-          </a>
-          <button type="button" class="bds-popup-close">${escapeHtml(t('closeBtn'))}</button>
-        </div>
-      </div>`;
-    root.querySelector('.bds-popup-close')?.addEventListener('click', () => {
-      this.map?.closePopup();
-    });
-
-    const tbody = root.querySelector('.bds-khatian-table tbody');
-    this.landDataService
-      .khatians()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (catalog) => {
-          const entries = catalog[normalizeDagNo(dagRaw)];
-          if (!tbody) return;
-          if (!entries?.length) {
-            tbody.innerHTML = `
-              <tr><td colspan="3" class="bds-khatian-note">${escapeHtml(t('khatianNote'))}</td></tr>`;
-          } else {
-            tbody.innerHTML = entries
-              .map((entry) => {
-                const owners = entry.owners.length ? entry.owners : [''];
-                const span = owners.length;
-                const noCell = `<td rowspan="${span}" class="bds-khatian-no">${escapeHtml(this.digits(entry.no))}</td>`;
-                const statusCell = `<td rowspan="${span}" class="bds-khatian-status">${escapeHtml(entry.status)}</td>`;
-                const rows = owners.map(
-                  (name) => `<tr><td>${escapeHtml(name)}</td></tr>`,
-                );
-                rows[0] = rows[0].replace('<tr>', `<tr>${noCell}`);
-                rows[0] = rows[0].replace('</tr>', `${statusCell}</tr>`);
-                return rows.join('');
-              })
-              .join('');
-          }
-          // The popup opened with the short loading placeholder, so Leaflet
-          // auto-panned for that smaller card; the filled khatian table makes
-          // it taller, so re-run layout + auto-pan or it slides under the
-          // floating top bar.
-          layer.getPopup()?.update();
-        },
-      });
-    return root;
   }
 
   private loadRajukPlots(): void {
@@ -804,6 +697,10 @@ export class PlotMapComponent implements AfterViewInit {
       mode === 'bds'
         ? { color: '#1a3fd4', weight: 2, fillColor: '#2b50e0', fillOpacity: 0.2 }
         : { color: '#7a8b12', weight: 1.5, fillColor: '#b7c94a', fillOpacity: 0.3 };
+    const dialogDag = mode === 'bds' ? this.dagDialog()?.dag : undefined;
+    if (dialogDag && this.dagKeyOf(props) === dialogDag) {
+      return { ...base, color: '#d32f2f', weight: 3, fillColor: '#d32f2f', fillOpacity: 0.4 };
+    }
     const highlight = this.highlightDag();
     if (!highlight || this.dagKeyOf(props) !== highlight) return base;
     return { ...base, color: '#e65100', weight: 4, fillOpacity: 0.5, className: 'dag-search-hit' };

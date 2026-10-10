@@ -11,7 +11,7 @@ async def test_serves_geo_dataset_without_auth(client):
 
 @pytest.mark.asyncio
 async def test_extension_is_optional(client):
-    res = await client.get("/api/data/khatians")
+    res = await client.get("/api/data/bd-geo")
 
     assert res.status_code == 200
 

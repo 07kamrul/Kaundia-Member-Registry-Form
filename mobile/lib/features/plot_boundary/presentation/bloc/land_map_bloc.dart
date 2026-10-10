@@ -34,6 +34,7 @@ class LandMapBloc extends Bloc<LandMapEvent, LandMapState> {
     on<LandDagSearched>(_onDagSearched);
     on<LandSearchCleared>(_onSearchCleared);
     on<LandRetryRequested>(_onRetry);
+    on<LandPlotSelected>(_onPlotSelected);
   }
 
   final LandDataRepository? _injectedRepository;
@@ -171,5 +172,12 @@ class LandMapBloc extends Bloc<LandMapEvent, LandMapState> {
 
   void _onSearchCleared(LandSearchCleared event, Emitter<LandMapState> emit) {
     emit(state.copyWith(clearHighlight: true, dagNotFound: false));
+  }
+
+  void _onPlotSelected(LandPlotSelected event, Emitter<LandMapState> emit) {
+    final key = event.dagKey;
+    emit(key == null || key.isEmpty
+        ? state.copyWith(clearHighlight: true)
+        : state.copyWith(highlightDag: key));
   }
 }

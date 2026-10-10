@@ -6,11 +6,18 @@ same guards as the plot-map feature: approved members only, bbox required,
 result caps, rate limiting. No outbound network calls.
 """
 
+import logging
+import math
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.permissions import require_member_permission
+from app.core.rate_limit import SlidingWindowRateLimiter
+from app.db.session import get_db
 from app.models.member import Member, MemberStatus
+from app.services.audit import record_audit
 from app.services.land_data import (
     LandDataProvider,
     get_land_data_provider,
@@ -20,6 +27,28 @@ from app.api.routes.plot_map import _parse_bbox
 router = APIRouter(prefix="/land", tags=["land"])
 
 VIEW_PERMISSION = "boundary.view"
+
+logger = logging.getLogger(__name__)
+_settings = get_settings()
+_detail_limiter = SlidingWindowRateLimiter(
+    max_requests=_settings.dag_detail_rate_limit,
+    window_seconds=_settings.dag_detail_rate_window_seconds,
+)
+
+
+def _enforce_detail_rate_limit(member_id: int) -> None:
+    retry_after = _detail_limiter.check(member_id)
+    if retry_after is None:
+        return
+    logger.warning("Dag detail rate limit reached by member_id=%s", member_id)
+    raise HTTPException(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        detail={
+            "code": "DAG_DETAIL_RATE_LIMITED",
+            "message": "Too many dag lookups. Please try again later.",
+        },
+        headers={"Retry-After": str(max(1, math.ceil(retry_after)))},
+    )
 
 
 def _approved(member: Member) -> Member:
@@ -95,21 +124,40 @@ def lookup_dag(
 
 
 @router.get("/dag/{survey}/{sheet}/{dag}")
-def get_single_dag(
+async def get_dag_details(
     survey: str,
     sheet: str,
     dag: str,
     member: Member = Depends(require_member_permission(VIEW_PERMISSION)),
     provider: LandDataProvider = Depends(get_land_data_provider),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
+    """Land details + khatian/owner rows for one dag (the official-style dialog).
+
+    The only door to owner names: one dag per call, approved members only,
+    rate-limited and audited. There is deliberately no list/search/export.
+    """
     _approved(member)
-    feature = provider.get_dag(survey, sheet, dag)
-    if feature is None:
+    _enforce_detail_rate_limit(member.id)
+    details = provider.get_dag_details(survey, sheet, dag)
+    if details is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "DAG_NOT_FOUND", "message": "No such dag in the local dataset."},
+            detail={
+                "code": "DAG_NOT_FOUND",
+                "message": f"No dag {dag} on sheet {sheet} of survey '{survey}' in the local dataset.",
+            },
         )
-    return feature
+    record_audit(
+        db,
+        actor_admin_id=None,
+        action="land.dag_detail_lookup",
+        entity_type="land_dag",
+        entity_id=f"{details['survey']}:{details['sheet']}:{details['dag']}",
+        detail=f"viewer_member_id={member.id}",
+    )
+    await db.commit()
+    return details
 
 
 @router.get("/masterplan")

@@ -1,4 +1,5 @@
 import '../data/land_data_dtos.dart';
+import 'dag_details_entities.dart';
 import 'geo.dart';
 import 'land_entities.dart';
 
@@ -51,4 +52,51 @@ extension LandCollectionDtoX on LandCollectionDto {
         ],
         truncated: truncated,
       );
+}
+
+extension DagDetailsDtoX on DagDetailsDto {
+  DagDetails toEntity() {
+    final land = totalLand;
+    final value = land?['value'];
+    final unit = land?['unit'];
+    return DagDetails(
+      survey: survey,
+      sheet: sheet,
+      dag: dag,
+      mouza: MouzaInfo(
+        nameBn: _text(mouza['name_bn']),
+        nameEn: _text(mouza['name_en']),
+        upazilaBn: _text(mouza['upazila_bn']),
+        upazilaEn: _text(mouza['upazila_en']),
+        districtBn: _text(mouza['district_bn']),
+        districtEn: _text(mouza['district_en']),
+      ),
+      totalLand: value is num && unit is String
+          ? TotalLand(value: value.toDouble(), unit: unit)
+          : null,
+      khatians: [for (final k in khatians) k.toEntity()],
+      sourceNote: sourceNote,
+      sourceName: sourceName,
+      fetchedAt: fetchedAt == null ? null : DateTime.tryParse(fetchedAt!),
+    );
+  }
+}
+
+extension KhatianDtoX on KhatianDto {
+  Khatian toEntity() => Khatian(
+        khatianNo: khatianNo,
+        owners: owners,
+        stage: switch (stageCode) {
+          'objection' => KhatianStage.objection,
+          'appeal' => KhatianStage.appeal,
+          _ => KhatianStage.unknown,
+        },
+        stageBn: stageBn,
+      );
+}
+
+String? _text(Object? v) {
+  if (v is! String) return null;
+  final s = v.trim();
+  return s.isEmpty ? null : s;
 }

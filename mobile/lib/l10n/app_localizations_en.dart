@@ -6072,4 +6072,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plotMapSearchClear => 'Clear search';
+
+  @override
+  String dagInfoTitle(String dag) {
+    return 'Plot/Dag No. $dag details';
+  }
+
+  @override
+  String get dagInfoLandHeading => 'Land Information';
+
+  @override
+  String get dagInfoKhatianHeading => 'Khatian Information';
+
+  @override
+  String get dagInfoPlotNo => 'Plot/Dag No.';
+
+  @override
+  String get dagInfoSurveyType => 'Survey Type';
+
+  @override
+  String get dagInfoSurveyBds => 'BDS';
+
+  @override
+  String get dagInfoMouza => 'Mouza';
+
+  @override
+  String get dagInfoTotalLand => 'Total Land';
+
+  @override
+  String get dagInfoUnitAcre => 'acre';
+
+  @override
+  String dagInfoShatangsho(String value) {
+    return '≈ $value decimal';
+  }
+
+  @override
+  String get dagInfoKhatianNo => 'Khatian No.';
+
+  @override
+  String get dagInfoOwnerName => 'Owner Name';
+
+  @override
+  String get dagInfoCurrentStage => 'Current Stage';
+
+  @override
+  String get dagInfoStageObjection => 'Objection stage';
+
+  @override
+  String get dagInfoStageAppeal => 'Appeal stage';
+
+  @override
+  String get dagInfoNoKhatian =>
+      'No khatian information was found for this dag';
+
+  @override
+  String dagInfoSource(String source, String date) {
+    return 'Source: $source · Collected: $date';
+  }
+
+  @override
+  String get dagInfoClose => 'Close';
+
+  @override
+  String get dagInfoCloseSemantics => 'Close dag details';
+
+  @override
+  String get dagInfoRetry => 'Retry';
+
+  @override
+  String get dagInfoRetrySemantics => 'Retry loading dag details';
+
+  @override
+  String get dagInfoFailure =>
+      'Could not load the dag details. Please try again.';
+
+  @override
+  String get dagInfoNotFound => 'No official record was found for this dag.';
+
+  @override
+  String get dagInfoRateLimited =>
+      'Too many requests. Please wait a moment and try again.';
 }

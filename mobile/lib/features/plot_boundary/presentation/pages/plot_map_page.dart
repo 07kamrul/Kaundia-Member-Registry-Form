@@ -16,10 +16,12 @@ import '../../domain/land_entities.dart';
 import '../../domain/phone_links.dart';
 import '../../domain/plot_boundary_entities.dart';
 import '../../domain/plot_boundary_failure.dart';
+import '../bloc/dag_info_cubit.dart';
 import '../bloc/land_map_bloc.dart';
 import '../bloc/my_boundaries_cubit.dart';
 import '../bloc/my_location_cubit.dart';
 import '../bloc/plot_map_bloc.dart';
+import '../widgets/dag_info_sheet.dart';
 import '../widgets/draw_panel_sheet.dart';
 import '../widgets/land_info_sheet.dart';
 import '../widgets/map/boundary_polygon_layer.dart';
@@ -55,6 +57,7 @@ class PlotMapPage extends StatelessWidget {
     this.report,
     this.canDraw,
     this.tileProvider,
+    this.createDagInfoCubit,
   });
 
   /// Test seams; each defaults to the live implementation.
@@ -63,6 +66,9 @@ class PlotMapPage extends StatelessWidget {
   final MyLocationCubit Function()? createLocationCubit;
   final MyBoundariesCubit Function()? createDrawCubit;
   final ExternalLinkLauncher launcher;
+
+  /// Builds the khatian cubit for a tapped dag (sheet, dag); live by default.
+  final DagInfoCubit Function(String sheet, String dag)? createDagInfoCubit;
 
   /// Report-a-problem use case (defaults to the live repository).
   final Future<void> Function(String boundaryId, String note)? report;
@@ -94,6 +100,7 @@ class PlotMapPage extends StatelessWidget {
         canDraw: canDraw,
         createDrawCubit: createDrawCubit,
         tileProvider: tileProvider,
+        createDagInfoCubit: createDagInfoCubit,
       ),
     );
   }
@@ -107,8 +114,10 @@ class _PlotMapView extends StatefulWidget {
     this.canDraw,
     this.createDrawCubit,
     this.tileProvider,
+    this.createDagInfoCubit,
   });
 
+  final DagInfoCubit Function(String sheet, String dag)? createDagInfoCubit;
   final TileProvider? tileProvider;
   final SocietyBbox? society;
   final ExternalLinkLauncher launcher;
@@ -262,12 +271,26 @@ class _PlotMapViewState extends State<_PlotMapView> {
     }
     final plot = land.collection?.plotAt(point);
     if (plot == null) return;
+    if (layer == LandLayer.bds) {
+      _showDagInfo(plot);
+      return;
+    }
     showLandInfoSheet(
       context,
-      layer: layer,
       plot: plot,
       launcher: widget.launcher,
     );
+  }
+
+  Future<void> _showDagInfo(LandPlot plot) async {
+    final land = context.read<LandMapBloc>();
+    land.add(LandPlotSelected(plot.dagKey));
+    await showDagInfoSheet(
+      context,
+      plot: plot,
+      createCubit: widget.createDagInfoCubit,
+    );
+    if (mounted) land.add(const LandPlotSelected(null));
   }
 
   /// Top-most visible boundary under [point] (later features draw on top).
@@ -440,8 +463,10 @@ class _PlotMapViewState extends State<_PlotMapView> {
           builder: (sheetCtx, s) {
             final loc = AppLocalizations.of(sheetCtx);
             final failureMessage = switch (s.ownerFailureKind) {
-              PlotBoundaryFailureKind.rateLimited => loc.plotMapOwnerRateLimited,
-              PlotBoundaryFailureKind.notApproved => loc.plotMapOwnerNotApproved,
+              PlotBoundaryFailureKind.rateLimited =>
+                loc.plotMapOwnerRateLimited,
+              PlotBoundaryFailureKind.notApproved =>
+                loc.plotMapOwnerNotApproved,
               PlotBoundaryFailureKind.network => loc.commonNetworkError,
               _ => loc.plotMapOwnerLoadError,
             };

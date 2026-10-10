@@ -97,6 +97,14 @@ class Settings(BaseSettings):
         default=600, ge=1, validation_alias="BOUNDARY_OWNER_LOOKUP_RATE_WINDOW_SECONDS"
     )
 
+    # Dag detail dialog: owner names per dag, so lookups are rate-limited + audited.
+    dag_detail_rate_limit: int = Field(
+        default=60, ge=1, validation_alias="DAG_DETAIL_RATE_LIMIT"
+    )
+    dag_detail_rate_window_seconds: int = Field(
+        default=600, ge=1, validation_alias="DAG_DETAIL_RATE_WINDOW_SECONDS"
+    )
+
     # Local land dataset (ingested BDS mouza map) served via /api/land.
     # Baked into the Docker image read-only; verified against meta.json
     # checksums at startup — a bad dataset must fail the boot, not the map.

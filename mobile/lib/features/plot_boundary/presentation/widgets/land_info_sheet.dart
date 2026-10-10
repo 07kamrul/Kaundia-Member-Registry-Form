@@ -11,18 +11,15 @@ import 'owner_bottom_sheet.dart' show formatDigits;
 /// RS journal number printed in the RAJUK popup (mirrors Angular).
 const String kRajukJlNo = '245';
 
-const int _sqmPerHectare = 10000;
-
-/// Info card for a tapped BDS dag or RAJUK RS plot (the Angular popups).
+/// Info card for a tapped RAJUK RS plot (the Angular popup). BDS dags use
+/// the khatian dialog instead (`dag_info_sheet.dart`).
 class LandInfoSheet extends StatelessWidget {
   const LandInfoSheet({
     super.key,
-    required this.layer,
     required this.plot,
     required this.onStreetView,
   });
 
-  final LandLayer layer;
   final LandPlot plot;
   final void Function(LatLng point) onStreetView;
 
@@ -33,33 +30,13 @@ class LandInfoSheet extends StatelessWidget {
     String digits(String? v) =>
         v == null || v.isEmpty ? '—' : formatDigits(context, v);
 
-    final (title, rows) = switch (layer) {
-      LandLayer.bds => (
-          loc.plotMapViewsBdsInfoTitle,
-          [
-            (loc.plotMapViewsDagNoLabel, digits(plot.displayDag)),
-            (
-              loc.plotMapViewsSurveyTypeLabel,
-              loc.plotMapViewsSurveyTypeValue,
-            ),
-            (
-              loc.plotMapViewsMouzaNameLabel,
-              loc.plotMapViewsMouzaNameValue,
-            ),
-            (loc.plotMapViewsSheetNoLabel, digits(plot.sheet)),
-            (loc.plotMapViewsAreaLabel, digits(_hectares(plot.areaSqm))),
-          ],
-        ),
-      LandLayer.rajuk => (
-          '${loc.plotMapViewsRsPlotNo}: '
-              '${digits(plot.rsPlotNo ?? plot.plotNo)}',
-          [
-            (loc.plotMapViewsRsJlNo, digits(kRajukJlNo)),
-            ('', loc.plotMapViewsMouzaLabel),
-            ('', loc.plotMapViewsThanaLabel),
-          ],
-        ),
-    };
+    final title =
+        '${loc.plotMapViewsRsPlotNo}: ${digits(plot.rsPlotNo ?? plot.plotNo)}';
+    final rows = [
+      (loc.plotMapViewsRsJlNo, digits(kRajukJlNo)),
+      ('', loc.plotMapViewsMouzaLabel),
+      ('', loc.plotMapViewsThanaLabel),
+    ];
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -71,9 +48,7 @@ class LandInfoSheet extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  layer == LandLayer.bds
-                      ? Icons.map_outlined
-                      : Icons.description_outlined,
+                  Icons.description_outlined,
                   color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 10),
@@ -89,10 +64,6 @@ class LandInfoSheet extends StatelessWidget {
             const SizedBox(height: 12),
             for (final (label, value) in rows)
               _InfoRow(label: label, value: value),
-            if (layer == LandLayer.bds) ...[
-              const SizedBox(height: 12),
-              _NoteBox(text: loc.plotMapViewsKhatianNote),
-            ],
             const SizedBox(height: 16),
             AppButton(
               label: loc.plotMapViewsStreetView,
@@ -109,10 +80,6 @@ class LandInfoSheet extends StatelessWidget {
       ),
     );
   }
-
-  static String? _hectares(double? areaSqm) => areaSqm != null && areaSqm > 0
-      ? (areaSqm / _sqmPerHectare).toStringAsFixed(4)
-      : null;
 }
 
 class _InfoRow extends StatelessWidget {
@@ -151,45 +118,9 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _NoteBox extends StatelessWidget {
-  const _NoteBox({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.info_outline,
-              size: 16, color: scheme.onSecondaryContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 12.5,
-                color: scheme.onSecondaryContainer,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Opens [LandInfoSheet] for [plot]; Street View goes through [launcher].
 Future<void> showLandInfoSheet(
   BuildContext context, {
-  required LandLayer layer,
   required LandPlot plot,
   required ExternalLinkLauncher launcher,
 }) {
@@ -198,7 +129,6 @@ Future<void> showLandInfoSheet(
     isScrollControlled: true,
     showDragHandle: true,
     builder: (sheetContext) => LandInfoSheet(
-      layer: layer,
       plot: plot,
       onStreetView: (point) async {
         final opened = await launcher.open(streetViewUri(point));

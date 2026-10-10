@@ -4,7 +4,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/geo.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/land_data_repository.dart';
+import 'package:kaundia_app/features/plot_boundary/domain/dag_details_entities.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/land_entities.dart';
+import 'package:kaundia_app/features/plot_boundary/presentation/bloc/dag_info_cubit.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/plot_boundary_entities.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/plot_boundary_repository.dart';
 import 'package:kaundia_app/features/plot_boundary/presentation/bloc/land_map_bloc.dart';
@@ -79,6 +81,20 @@ void main() {
     );
     when(() => landRepo.lookup(any(), any()))
         .thenAnswer((_) async => const LandCollection());
+    when(() => landRepo.dagDetails(any(), any(), any()))
+        .thenAnswer((_) async => const DagDetails(
+              survey: 'bds',
+              sheet: '002',
+              dag: '88',
+              mouza: MouzaInfo(nameEn: 'Uttar Kaundia'),
+              khatians: [
+                Khatian(
+                  khatianNo: '12',
+                  owners: ['Test Owner One'],
+                  stage: KhatianStage.objection,
+                ),
+              ],
+            ));
   });
 
   Future<void> pumpPage(
@@ -107,6 +123,8 @@ void main() {
         ),
         createLandBloc: () =>
             LandMapBloc(repository: landRepo, debounce: Duration.zero),
+        createDagInfoCubit: (sheet, dag) =>
+            DagInfoCubit(sheet: sheet, dag: dag, repository: landRepo),
         createLocationCubit: () => MyLocationCubit(
           society: _bbox,
           positionProvider: () async {
@@ -219,7 +237,7 @@ void main() {
     expect(find.text('Contact hidden'), findsOneWidget);
   });
 
-  testWidgets('tapping a BDS plot opens the dag info card', (tester) async {
+  testWidgets('tapping a BDS plot opens the khatian dialog', (tester) async {
     await pumpPage(tester);
     await tester.tap(find.text('BDS dag map'));
     await _settle(tester);
@@ -227,9 +245,11 @@ void main() {
     await tester.tapAt(tester.getCenter(find.byType(FlutterMap)));
     await _settle(tester);
 
-    expect(find.text('Dag / plot information'), findsOneWidget);
-    expect(find.text('88'), findsWidgets);
-    expect(find.text('0.5000'), findsOneWidget);
+    verify(() => landRepo.dagDetails('bds', '002', '88')).called(1);
+    expect(find.text('Plot/Dag No. 88 details'), findsOneWidget);
+    expect(find.text('Test Owner One'), findsOneWidget);
+    expect(find.text('Objection stage'), findsOneWidget);
+    expect(find.text('Google Street View'), findsNothing);
   });
 
   testWidgets('locating outside the society shows the notice', (tester) async {

@@ -11233,6 +11233,150 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'অনুসন্ধান মুছুন'**
   String get plotMapSearchClear;
+
+  /// No description provided for @dagInfoTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্লট/দাগ নাম্বার {dag} তথ্য বিবরণঃ'**
+  String dagInfoTitle(String dag);
+
+  /// No description provided for @dagInfoLandHeading.
+  ///
+  /// In bn, this message translates to:
+  /// **'ভূমি তথ্য বিবরণঃ'**
+  String get dagInfoLandHeading;
+
+  /// No description provided for @dagInfoKhatianHeading.
+  ///
+  /// In bn, this message translates to:
+  /// **'খতিয়ানের তথ্যঃ'**
+  String get dagInfoKhatianHeading;
+
+  /// No description provided for @dagInfoPlotNo.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্লট/দাগ নাম্বার'**
+  String get dagInfoPlotNo;
+
+  /// No description provided for @dagInfoSurveyType.
+  ///
+  /// In bn, this message translates to:
+  /// **'সার্ভের ধরণ'**
+  String get dagInfoSurveyType;
+
+  /// No description provided for @dagInfoSurveyBds.
+  ///
+  /// In bn, this message translates to:
+  /// **'বিডিএস'**
+  String get dagInfoSurveyBds;
+
+  /// No description provided for @dagInfoMouza.
+  ///
+  /// In bn, this message translates to:
+  /// **'মৌজা'**
+  String get dagInfoMouza;
+
+  /// No description provided for @dagInfoTotalLand.
+  ///
+  /// In bn, this message translates to:
+  /// **'মোট জমি'**
+  String get dagInfoTotalLand;
+
+  /// No description provided for @dagInfoUnitAcre.
+  ///
+  /// In bn, this message translates to:
+  /// **'একর'**
+  String get dagInfoUnitAcre;
+
+  /// No description provided for @dagInfoShatangsho.
+  ///
+  /// In bn, this message translates to:
+  /// **'≈ {value} শতাংশ'**
+  String dagInfoShatangsho(String value);
+
+  /// No description provided for @dagInfoKhatianNo.
+  ///
+  /// In bn, this message translates to:
+  /// **'খতিয়ান নং'**
+  String get dagInfoKhatianNo;
+
+  /// No description provided for @dagInfoOwnerName.
+  ///
+  /// In bn, this message translates to:
+  /// **'মালিকের নাম'**
+  String get dagInfoOwnerName;
+
+  /// No description provided for @dagInfoCurrentStage.
+  ///
+  /// In bn, this message translates to:
+  /// **'চলমান স্তর'**
+  String get dagInfoCurrentStage;
+
+  /// No description provided for @dagInfoStageObjection.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপত্তি স্তর'**
+  String get dagInfoStageObjection;
+
+  /// No description provided for @dagInfoStageAppeal.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপিল স্তর'**
+  String get dagInfoStageAppeal;
+
+  /// No description provided for @dagInfoNoKhatian.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই দাগের খতিয়ান তথ্য পাওয়া যায়নি'**
+  String get dagInfoNoKhatian;
+
+  /// No description provided for @dagInfoSource.
+  ///
+  /// In bn, this message translates to:
+  /// **'তথ্যসূত্র: {source} · সংগৃহীত: {date}'**
+  String dagInfoSource(String source, String date);
+
+  /// No description provided for @dagInfoClose.
+  ///
+  /// In bn, this message translates to:
+  /// **'বন্ধ করুন'**
+  String get dagInfoClose;
+
+  /// No description provided for @dagInfoCloseSemantics.
+  ///
+  /// In bn, this message translates to:
+  /// **'দাগের তথ্য বন্ধ করুন'**
+  String get dagInfoCloseSemantics;
+
+  /// No description provided for @dagInfoRetry.
+  ///
+  /// In bn, this message translates to:
+  /// **'আবার চেষ্টা করুন'**
+  String get dagInfoRetry;
+
+  /// No description provided for @dagInfoRetrySemantics.
+  ///
+  /// In bn, this message translates to:
+  /// **'দাগের তথ্য আবার লোড করুন'**
+  String get dagInfoRetrySemantics;
+
+  /// No description provided for @dagInfoFailure.
+  ///
+  /// In bn, this message translates to:
+  /// **'দাগের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।'**
+  String get dagInfoFailure;
+
+  /// No description provided for @dagInfoNotFound.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই দাগের কোনো সরকারি তথ্য পাওয়া যায়নি।'**
+  String get dagInfoNotFound;
+
+  /// No description provided for @dagInfoRateLimited.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনেক বেশি অনুরোধ। কিছুক্ষণ পর আবার চেষ্টা করুন।'**
+  String get dagInfoRateLimited;
 }
 
 class _AppLocalizationsDelegate

@@ -51,11 +51,48 @@ reprojection is applied; `pyproj` is only needed if the source ever changes.
 
 ## Field policy (privacy)
 
-The map layer carries only `Dag_No`. **No owner names or personal data exist
-in it**, and the personal-data-bearing khatian endpoints (`GetKhatianDataList`
-etc.) are deliberately not ingested. `area_sqm` in our dataset is computed
-from geometry (approximate, sanity range 1–500 000 m²). `khatian_no` and
-`land_class` are unavailable in this source.
+The **map layer** carries only `Dag_No` — no personal data. Owner names are
+published by the portal's dag popup (`GetKhatianDataList_MapSearch`) and are
+ingested separately by `fetch_khatians.py` + `build_khatians.py` under strict
+rules:
+
+- Names live **only** in `backend/data/uttar-kaundia/khatians/<survey>/<sheet>.json`
+  — never in the geometry GeoJSON, `dag-index.json`, `meta.json`, the bbox/list
+  endpoints, any search index, `data/shared/` or any public/Angular asset.
+- They leave the backend only through `GET /api/land/dag/{survey}/{sheet}/{dag}`:
+  approved members only, rate-limited, audited, one dag per call. There is no
+  list/export endpoint and no search by owner name.
+- `data/_raw/` (raw responses, may hold cookies/HAR) stays gitignored.
+- `area_sqm` in the geometry set is computed from polygons (approximate).
+
+### Khatian ingest
+
+```bash
+python3 fetch_khatians.py --dry-run     # dag count + time estimate
+python3 fetch_khatians.py --workers 3   # resumable; aborts on HTTP 403/429
+python3 build_khatians.py               # validate + write khatians/ + meta.json
+```
+
+`POST /Khatian/GetKhatianDataList_MapSearch` (form fields `compcode`=4105,
+`rsnum`=201901, `unitcod`=010510211, `CurDag`=<dag>) returns three arrays:
+`rptKhtSearch01a` (khatian rows: `khtnum`, `khtstatus`), `01b` (owners:
+`khtnum`, `ownname`) and `01c` (areas: `khtnum`, `pltnum`, `tpltarea`,
+`kpltarea`, `khtshare`). A few dags answer `{"message": "…"}` instead (the
+portal withholds their khatians); these become `"khatians": []` with
+`"source_note": "hidden_by_source"`.
+
+**"মোট জমি" unit = acre (একর)** — verified: the median of
+`geometry area / (official value × 4046.856 m²)` over ~2.4k dags is 1.00
+(it would be 0.41 for hectares). The popup shows `tpltarea` when non-zero,
+otherwise the sum of `kpltarea`; the build script reproduces this and records
+the check in `meta.json → khatians.land_unit`. Re-run `build_khatians.py`
+after every `ingest.py` run (the latter rewrites `meta.json`).
+
+Terms: the portal is a public government service and these endpoints answer
+anonymous browser sessions, but no terms-of-use page was located that
+explicitly permits automated access — confirm with the committee before
+re-running at scale. The fetcher is sequential-by-default, throttled and
+stops on the first 403/429.
 
 ## Validation performed before writing
 

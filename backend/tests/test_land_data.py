@@ -228,6 +228,7 @@ async def test_single_dag_404(client, db_session):
     member = await _approved_member(db_session, "MissingDagMember")
     ok = await client.get("/api/land/dag/bds/001/13", headers=_member_headers(member))
     assert ok.status_code == 200
+    assert {"total_land", "khatians", "mouza", "source"} <= ok.json().keys()
     missing = await client.get("/api/land/dag/bds/001/999999", headers=_member_headers(member))
     assert missing.status_code == 404
 

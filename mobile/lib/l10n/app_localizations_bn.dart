@@ -6061,4 +6061,83 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get plotMapSearchClear => 'অনুসন্ধান মুছুন';
+
+  @override
+  String dagInfoTitle(String dag) {
+    return 'প্লট/দাগ নাম্বার $dag তথ্য বিবরণঃ';
+  }
+
+  @override
+  String get dagInfoLandHeading => 'ভূমি তথ্য বিবরণঃ';
+
+  @override
+  String get dagInfoKhatianHeading => 'খতিয়ানের তথ্যঃ';
+
+  @override
+  String get dagInfoPlotNo => 'প্লট/দাগ নাম্বার';
+
+  @override
+  String get dagInfoSurveyType => 'সার্ভের ধরণ';
+
+  @override
+  String get dagInfoSurveyBds => 'বিডিএস';
+
+  @override
+  String get dagInfoMouza => 'মৌজা';
+
+  @override
+  String get dagInfoTotalLand => 'মোট জমি';
+
+  @override
+  String get dagInfoUnitAcre => 'একর';
+
+  @override
+  String dagInfoShatangsho(String value) {
+    return '≈ $value শতাংশ';
+  }
+
+  @override
+  String get dagInfoKhatianNo => 'খতিয়ান নং';
+
+  @override
+  String get dagInfoOwnerName => 'মালিকের নাম';
+
+  @override
+  String get dagInfoCurrentStage => 'চলমান স্তর';
+
+  @override
+  String get dagInfoStageObjection => 'আপত্তি স্তর';
+
+  @override
+  String get dagInfoStageAppeal => 'আপিল স্তর';
+
+  @override
+  String get dagInfoNoKhatian => 'এই দাগের খতিয়ান তথ্য পাওয়া যায়নি';
+
+  @override
+  String dagInfoSource(String source, String date) {
+    return 'তথ্যসূত্র: $source · সংগৃহীত: $date';
+  }
+
+  @override
+  String get dagInfoClose => 'বন্ধ করুন';
+
+  @override
+  String get dagInfoCloseSemantics => 'দাগের তথ্য বন্ধ করুন';
+
+  @override
+  String get dagInfoRetry => 'আবার চেষ্টা করুন';
+
+  @override
+  String get dagInfoRetrySemantics => 'দাগের তথ্য আবার লোড করুন';
+
+  @override
+  String get dagInfoFailure => 'দাগের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get dagInfoNotFound => 'এই দাগের কোনো সরকারি তথ্য পাওয়া যায়নি।';
+
+  @override
+  String get dagInfoRateLimited =>
+      'অনেক বেশি অনুরোধ। কিছুক্ষণ পর আবার চেষ্টা করুন।';
 }

@@ -38,3 +38,12 @@ final class LandSearchCleared extends LandMapEvent {
 final class LandRetryRequested extends LandMapEvent {
   const LandRetryRequested();
 }
+
+/// A plot was tapped: keep it highlighted until the info sheet closes
+/// ([dagKey] null clears it). No camera move.
+final class LandPlotSelected extends LandMapEvent {
+  const LandPlotSelected(this.dagKey);
+  final String? dagKey;
+  @override
+  List<Object?> get props => [dagKey];
+}

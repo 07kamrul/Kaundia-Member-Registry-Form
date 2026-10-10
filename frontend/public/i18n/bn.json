@@ -885,23 +885,6 @@
         "bdsSearchPlaceholder": "বিডিএস দাগ নম্বর দিয়ে খুঁজুন",
         "rsSearchPlaceholder": "আরএস দাগ নম্বর দিয়ে খুঁজুন",
         "dagNotFound": "এই দাগ নম্বরে কোনো প্লট পাওয়া যায়নি।",
-        "bdsInfoTitle": "দাগ/প্লট তথ্য বিবরণ",
-        "bdsHeader": "দাগ/নালা নাম্বার {{dag}} তথ্য বিবরণ",
-        "dagNoLabel": "প্রট/নালা নাম্বার",
-        "surveyTypeLabel": "সার্ভের ধরণ",
-        "surveyTypeValue": "ভিটি জরিপ (বিডিএস) ২০১৯",
-        "mouzaNameLabel": "মৌজা",
-        "mouzaNameValue": "উত্তর কাউন্দিয়া, সাভার, ঢাকা",
-        "sheetNoLabel": "শীট নম্বর",
-        "areaLabel": "মোট জমি",
-        "landInfoSection": "ভূমি তথ্য বিবরণ",
-        "khatianSection": "খতিয়ানের তথ্য",
-        "khatianNoLabel": "খতিয়ান নং",
-        "ownerNameLabel": "মালিকের নাম",
-        "currentShareLabel": "চলমান জর",
-        "khatianLoading": "খতিয়ানের তথ্য লোড হচ্ছে…",
-        "closeBtn": "বন্ধ করুন",
-        "khatianNote": "খতিয়ান ও মালিকানার তথ্য এই অ্যাপে নেই। সরকারি সেটেলমেন্ট পোর্টালে যাচাই করুন।",
         "mouzaLabel": "মৌজা: উত্তর কাউন্দিয়া",
         "thanaLabel": "সাভার উপজেলা, ঢাকা",
         "rsPlotNo": "আরএস প্লট নং",
@@ -914,6 +897,39 @@
         "approved": "অনুমোদিত",
         "pendingHint": "অ্যাডমিন যাচাই করার পর অন্যরা এটি দেখতে পারবেন।",
         "rejectionNote": "অ্যাডমিনের মন্তব্য"
+      },
+      "dagInfo": {
+        "title": "প্লট/দাগ নাম্বার {{dag}} তথ্য বিবরণঃ",
+        "landSection": "ভূমি তথ্য বিবরণঃ",
+        "dagNo": "প্লট/দাগ নাম্বার",
+        "surveyType": "সার্ভের ধরণ",
+        "mouza": "মৌজা",
+        "totalLand": "মোট জমি",
+        "approx": "(≈ {{value}} শতাংশ)",
+        "khatianSection": "খতিয়ানের তথ্যঃ",
+        "khatianNo": "খতিয়ান নং",
+        "ownerName": "মালিকের নাম",
+        "currentStage": "চলমান স্তর",
+        "noKhatians": "এই দাগের খতিয়ান তথ্য পাওয়া যায়নি",
+        "close": "বন্ধ করুন",
+        "retry": "আবার চেষ্টা করুন",
+        "loading": "তথ্য লোড হচ্ছে…",
+        "source": "তথ্যসূত্র: settlement.gov.bd · সংগৃহীত: {{date}}",
+        "survey": {
+          "bds": "বিডিএস"
+        },
+        "unit": {
+          "acre": "একর"
+        },
+        "stage": {
+          "objection": "আপত্তি স্তর",
+          "appeal": "আপিল স্তর"
+        },
+        "error": {
+          "generic": "তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।",
+          "notFound": "এই দাগের তথ্য পাওয়া যায়নি।",
+          "rateLimited": "অনেক বেশি অনুরোধ করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।"
+        }
       }
     }
   },

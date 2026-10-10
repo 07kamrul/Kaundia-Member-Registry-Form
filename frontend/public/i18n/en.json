@@ -885,23 +885,6 @@
         "bdsSearchPlaceholder": "Search by BDS dag number",
         "rsSearchPlaceholder": "Search by RS dag number",
         "dagNotFound": "No plot found with this dag number.",
-        "bdsInfoTitle": "Dag / plot information",
-        "bdsHeader": "Dag / plot no {{dag}} — details",
-        "dagNoLabel": "Plot / nala no",
-        "surveyTypeLabel": "Survey type",
-        "surveyTypeValue": "BDS (2019) — Viti survey",
-        "mouzaNameLabel": "Mouza",
-        "mouzaNameValue": "Uttar Kaundia, Savar, Dhaka",
-        "sheetNoLabel": "Sheet no",
-        "areaLabel": "Total land area",
-        "landInfoSection": "Land information",
-        "khatianSection": "Khatian information",
-        "khatianNoLabel": "Khatian no",
-        "ownerNameLabel": "Owner name",
-        "currentShareLabel": "Current share",
-        "khatianLoading": "Loading khatian data…",
-        "closeBtn": "Close",
-        "khatianNote": "Khatian and ownership details are not available in this app. Verify them on the official settlement portal.",
         "mouzaLabel": "Mouza: Uttar Kaundia",
         "thanaLabel": "Savar Upazila, Dhaka",
         "rsPlotNo": "RS Plot No",
@@ -914,6 +897,39 @@
         "approved": "Approved",
         "pendingHint": "Others will see this after the admin verifies it.",
         "rejectionNote": "Admin's note"
+      },
+      "dagInfo": {
+        "title": "Plot/Dag No. {{dag}} — Details",
+        "landSection": "Land Information",
+        "dagNo": "Plot/Dag No.",
+        "surveyType": "Survey Type",
+        "mouza": "Mouza",
+        "totalLand": "Total Land",
+        "approx": "(≈ {{value}} shatak)",
+        "khatianSection": "Khatian Information",
+        "khatianNo": "Khatian No.",
+        "ownerName": "Owner Name",
+        "currentStage": "Current Stage",
+        "noKhatians": "No khatian information found for this dag",
+        "close": "Close",
+        "retry": "Retry",
+        "loading": "Loading details…",
+        "source": "Source: settlement.gov.bd · Collected: {{date}}",
+        "survey": {
+          "bds": "BDS"
+        },
+        "unit": {
+          "acre": "acre"
+        },
+        "stage": {
+          "objection": "Objection stage",
+          "appeal": "Appeal stage"
+        },
+        "error": {
+          "generic": "Could not load the details. Please try again.",
+          "notFound": "No details found for this dag.",
+          "rateLimited": "Too many requests. Please try again in a few minutes."
+        }
       }
     }
   },

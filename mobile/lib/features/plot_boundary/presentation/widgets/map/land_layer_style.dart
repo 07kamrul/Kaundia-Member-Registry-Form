@@ -26,11 +26,11 @@ class LandLayerStyle {
     strokeWidth: 1.5,
   );
 
-  /// The plot found by a dag search stays orange across reloads.
+  /// The selected / searched plot: red outline, ~40% red fill.
   static const LandLayerStyle highlight = LandLayerStyle(
-    fill: Color(0x80E65100),
-    stroke: Color(0xFFE65100),
-    strokeWidth: 4,
+    fill: Color(0x66E53935),
+    stroke: Color(0xFFE53935),
+    strokeWidth: 3,
   );
 
   static LandLayerStyle of(LandLayer layer) => switch (layer) {

@@ -68,3 +68,74 @@ String? _str(Object? v) {
   final s = v.toString().trim();
   return s.isEmpty ? null : s;
 }
+
+/// Raw `GET /land/dag/{survey}/{sheet}/{dag}` payload.
+class DagDetailsDto {
+  const DagDetailsDto({
+    required this.survey,
+    required this.sheet,
+    required this.dag,
+    this.mouza = const {},
+    this.totalLand,
+    this.khatians = const [],
+    this.sourceNote,
+    this.sourceName,
+    this.fetchedAt,
+  });
+
+  factory DagDetailsDto.fromJson(Map<dynamic, dynamic> json) {
+    final source = json['source'] is Map ? json['source'] as Map : const {};
+    final rawKhatians = json['khatians'];
+    return DagDetailsDto(
+      survey: _str(json['survey']) ?? '',
+      sheet: _str(json['sheet']) ?? '',
+      dag: _str(json['dag']) ?? '',
+      mouza: json['mouza'] is Map ? json['mouza'] as Map : const {},
+      totalLand: json['total_land'] is Map ? json['total_land'] as Map : null,
+      khatians: [
+        for (final k in rawKhatians is List ? rawKhatians : const [])
+          if (k is Map) KhatianDto.fromJson(k),
+      ],
+      sourceNote: _str(json['source_note']),
+      sourceName: _str(source['name']),
+      fetchedAt: _str(source['fetched_at']),
+    );
+  }
+
+  final String survey;
+  final String sheet;
+  final String dag;
+  final Map<dynamic, dynamic> mouza;
+  final Map<dynamic, dynamic>? totalLand;
+  final List<KhatianDto> khatians;
+  final String? sourceNote;
+  final String? sourceName;
+  final String? fetchedAt;
+}
+
+class KhatianDto {
+  const KhatianDto({
+    required this.khatianNo,
+    required this.owners,
+    this.stageCode,
+    this.stageBn,
+  });
+
+  factory KhatianDto.fromJson(Map<dynamic, dynamic> json) {
+    final rawOwners = json['owners'];
+    return KhatianDto(
+      khatianNo: _str(json['khatian_no']) ?? '',
+      owners: [
+        for (final o in rawOwners is List ? rawOwners : const [])
+          if (_str(o) case final name?) name,
+      ],
+      stageCode: _str(json['stage_code']),
+      stageBn: _str(json['stage_bn']),
+    );
+  }
+
+  final String khatianNo;
+  final List<String> owners;
+  final String? stageCode;
+  final String? stageBn;
+}

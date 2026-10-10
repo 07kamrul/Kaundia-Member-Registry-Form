@@ -11,6 +11,9 @@ into a clear boot failure (the map feature cannot work without the dataset,
 and silently serving an empty map would hide the problem).
 
 The map layer contains no personal data — only dag numbers and geometry.
+Owner names live solely in ``khatians/<survey>/<sheet>.json`` and leave this
+module only through ``get_dag_details`` (one dag at a time, never listed,
+indexed or searched).
 """
 
 from __future__ import annotations
@@ -44,6 +47,10 @@ class LandDataProvider(ABC):
     @abstractmethod
     def get_dag(self, survey: str, sheet: str, dag: str) -> dict | None:
         """Full GeoJSON feature for one dag, or None."""
+
+    @abstractmethod
+    def get_dag_details(self, survey: str, sheet: str, dag: str) -> dict | None:
+        """Official land details + khatian/owner rows for one dag, or None."""
 
     @abstractmethod
     def find_dags(self, survey: str, dag_no: str) -> list[dict]:
@@ -94,6 +101,7 @@ class LocalJsonLandDataProvider(LandDataProvider):
         self._by_dag: dict[str, list[str]] = {}  # "survey:dag" -> keys
         self._centroids: dict[str, tuple[float, float]] = {}
         self._build_index()
+        self._khatians: dict[str, dict] = self._load_khatians()
         self._masterplan = self._load_masterplan()
 
     # -- loading -----------------------------------------------------------
@@ -169,6 +177,43 @@ class LocalJsonLandDataProvider(LandDataProvider):
         lat = sum(p[1] for p in pts) / len(pts)
         return (lng, lat)
 
+    def _load_khatians(self) -> dict[str, dict]:
+        """Per-dag khatian records, verified against meta.json and complete:
+        every geometry dag must have one (the detail dialog relies on it)."""
+        block = self._meta.get("khatians")
+        if not block:
+            raise LandDataError(
+                "Land dataset has no khatian block in meta.json. "
+                "Run scripts/ingest_land_data/build_khatians.py."
+            )
+        unit = (block.get("land_unit") or {}).get("unit")
+        if not unit:
+            raise LandDataError("Khatian land-area unit is not verified in meta.json.")
+        records: dict[str, dict] = {}
+        for rel, expected in (block.get("sha256") or {}).items():
+            path = self.root / rel
+            if not path.is_file():
+                raise LandDataError(f"Khatian dataset file missing: {path}")
+            raw = path.read_bytes()
+            if hashlib.sha256(raw).hexdigest() != expected:
+                raise LandDataError(
+                    f"Khatian dataset checksum mismatch for {rel} — re-run build_khatians.py."
+                )
+            try:
+                by_dag = json.loads(raw)
+            except json.JSONDecodeError as exc:
+                raise LandDataError(f"Khatian dataset file corrupt ({path}): {exc}") from exc
+            survey, sheet = rel.removesuffix(".json").split("/")[-2:]
+            for dag, record in by_dag.items():
+                records[f"{survey}:{sheet}:{dag}"] = record
+        uncovered = self._features.keys() - records.keys()
+        if uncovered:
+            raise LandDataError(
+                f"Khatian dataset incomplete: {len(uncovered)} dags without a record, "
+                f"e.g. {sorted(uncovered)[:3]}."
+            )
+        return records
+
     def _load_masterplan(self) -> list[tuple[dict, tuple[float, float]]]:
         """RAJUK DAP overlay, optional — an absent file is not an error."""
         self._masterplan_by_rs: dict[str, list[dict]] = {}
@@ -195,6 +240,27 @@ class LocalJsonLandDataProvider(LandDataProvider):
     def get_dag(self, survey: str, sheet: str, dag: str) -> dict | None:
         return self._features.get(f"{survey}:{_normalize_sheet(sheet)}:{_ascii_digits(dag)}")
 
+    def get_dag_details(self, survey: str, sheet: str, dag: str) -> dict | None:
+        key = f"{survey}:{_normalize_sheet(sheet)}:{_ascii_digits(dag)}"
+        record = self._khatians.get(key)
+        if record is None:
+            return None
+        block = self._meta["khatians"]
+        return {
+            "survey": survey,
+            "sheet": _normalize_sheet(sheet),
+            "dag": _ascii_digits(dag),
+            "mouza": block["mouza"],
+            "total_land": record["total_land"],
+            "khatians": record["khatians"],
+            "source_note": record.get("source_note"),
+            "source": {
+                "name": "settlement.gov.bd",
+                "fetched_at": block["fetched_at"],
+                "dataset_version": self._meta.get("dataset_version"),
+            },
+        }
+
     def find_dags(self, survey: str, dag_no: str) -> list[dict]:
         keys = self._by_dag.get(f"{survey}:{_ascii_digits(dag_no)}", [])
         return [self._features[k] for k in keys]
@@ -213,6 +279,9 @@ class LocalJsonLandDataProvider(LandDataProvider):
         # Checksums are an integrity mechanism, not client data.
         meta = dict(self._meta)
         meta.pop("sha256", None)
+        meta["khatians"] = {
+            k: v for k, v in (meta.get("khatians") or {}).items() if k != "sha256"
+        }
         return meta
 
     def masterplan_features_in_bbox(self, bbox: BBox, limit: int = 500) -> list[dict]:

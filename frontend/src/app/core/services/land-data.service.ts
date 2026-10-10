@@ -1,20 +1,39 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-/** One khatian record of a dag, as stored in backend/data/shared/khatians.json. */
-export interface KhatianEntry {
+/** One khatian row of a dag, as served by GET /land/dag/{survey}/{sheet}/{dag}. */
+export interface DagKhatian {
   /** Khatian number (ASCII digits). */
-  no: string;
-  /** Recorded owner names, top to bottom as printed on the portal. */
+  khatian_no: string;
+  /** Recorded owner names, top to bottom as printed on the portal (verbatim). */
   owners: string[];
-  /** Current share column (চলমান জর) as printed on the portal. */
-  status: string;
+  /** Known stage code ("objection" | "appeal"), null when the source stage is unmapped. */
+  stage_code: string | null;
+  /** Stage text exactly as published (Bangla). */
+  stage_bn: string;
 }
 
-/** Khatian records keyed by ASCII dag number. */
-export type KhatianCatalog = Record<string, KhatianEntry[]>;
+export interface DagDetails {
+  survey: string;
+  sheet: string;
+  dag: string;
+  mouza: {
+    name_bn: string;
+    name_en: string;
+    upazila_bn: string;
+    upazila_en: string;
+    district_bn: string;
+    district_en: string;
+  };
+  /** Official "মোট জমি" number as published, with its verified unit. */
+  total_land: { value: number; unit: string };
+  khatians: DagKhatian[];
+  /** "hidden_by_source" when the portal withholds this dag's khatians. */
+  source_note: string | null;
+  source: { name: string; fetched_at: string; dataset_version: string };
+}
 
 /** Minimal GeoJSON shapes as served by our /api/land endpoints. */
 export interface LandPlotFeature {
@@ -47,20 +66,17 @@ export interface LandFeatureCollection {
  */
 @Injectable({ providedIn: 'root' })
 export class LandDataService {
-  private khatianCatalog$?: Observable<KhatianCatalog>;
-
   constructor(private http: HttpClient) {}
 
   /**
-   * Khatian (ownership) records from the static JSON catalog. Fetched once
-   * and shared across every popup; dags missing from the catalog show the
-   * "verify on the settlement portal" note instead.
+   * Land details + khatian/owner rows for one dag. Members only, rate-limited
+   * and audited server-side, so it is fetched lazily per opened dialog and
+   * never cached or prefetched.
    */
-  khatians(): Observable<KhatianCatalog> {
-    this.khatianCatalog$ ??= this.http
-      .get<KhatianCatalog>(`${environment.apiBaseUrl}/data/khatians.json`)
-      .pipe(shareReplay(1));
-    return this.khatianCatalog$;
+  dagDetails(survey: string, sheet: string, dag: string): Observable<DagDetails> {
+    return this.http.get<DagDetails>(
+      `${environment.apiBaseUrl}/land/dag/${encodeURIComponent(survey)}/${encodeURIComponent(sheet)}/${encodeURIComponent(dag)}`,
+    );
   }
 
   /** BDS dag polygons for the viewport (minLng,minLat,maxLng,maxLat order). */

@@ -1871,5 +1871,45 @@
   "plotMapTimelinePendingHint": "অ্যাডমিন যাচাই করার পর অন্যরা এটি দেখতে পারবেন।",
   "plotMapTimelineRejectionNote": "অ্যাডমিনের মন্তব্য",
   "plotMapDrawLoadError": "আপনার প্লট ও সীমানা লোড করা যায়নি।",
-  "plotMapSearchClear": "অনুসন্ধান মুছুন"
+  "plotMapSearchClear": "অনুসন্ধান মুছুন",
+  "dagInfoTitle": "প্লট/দাগ নাম্বার {dag} তথ্য বিবরণঃ",
+  "@dagInfoTitle": {
+    "placeholders": {
+      "dag": {"type": "String"}
+    }
+  },
+  "dagInfoLandHeading": "ভূমি তথ্য বিবরণঃ",
+  "dagInfoKhatianHeading": "খতিয়ানের তথ্যঃ",
+  "dagInfoPlotNo": "প্লট/দাগ নাম্বার",
+  "dagInfoSurveyType": "সার্ভের ধরণ",
+  "dagInfoSurveyBds": "বিডিএস",
+  "dagInfoMouza": "মৌজা",
+  "dagInfoTotalLand": "মোট জমি",
+  "dagInfoUnitAcre": "একর",
+  "dagInfoShatangsho": "≈ {value} শতাংশ",
+  "@dagInfoShatangsho": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "dagInfoKhatianNo": "খতিয়ান নং",
+  "dagInfoOwnerName": "মালিকের নাম",
+  "dagInfoCurrentStage": "চলমান স্তর",
+  "dagInfoStageObjection": "আপত্তি স্তর",
+  "dagInfoStageAppeal": "আপিল স্তর",
+  "dagInfoNoKhatian": "এই দাগের খতিয়ান তথ্য পাওয়া যায়নি",
+  "dagInfoSource": "তথ্যসূত্র: {source} · সংগৃহীত: {date}",
+  "@dagInfoSource": {
+    "placeholders": {
+      "source": {"type": "String"},
+      "date": {"type": "String"}
+    }
+  },
+  "dagInfoClose": "বন্ধ করুন",
+  "dagInfoCloseSemantics": "দাগের তথ্য বন্ধ করুন",
+  "dagInfoRetry": "আবার চেষ্টা করুন",
+  "dagInfoRetrySemantics": "দাগের তথ্য আবার লোড করুন",
+  "dagInfoFailure": "দাগের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।",
+  "dagInfoNotFound": "এই দাগের কোনো সরকারি তথ্য পাওয়া যায়নি।",
+  "dagInfoRateLimited": "অনেক বেশি অনুরোধ। কিছুক্ষণ পর আবার চেষ্টা করুন।"
 }

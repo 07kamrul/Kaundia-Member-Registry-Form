@@ -2370,5 +2370,45 @@
   "plotMapTimelinePendingHint": "Others will see this after the admin verifies it.",
   "plotMapTimelineRejectionNote": "Admin's note",
   "plotMapDrawLoadError": "Could not load your plots and boundaries.",
-  "plotMapSearchClear": "Clear search"
+  "plotMapSearchClear": "Clear search",
+  "dagInfoTitle": "Plot/Dag No. {dag} details",
+  "@dagInfoTitle": {
+    "placeholders": {
+      "dag": {"type": "String"}
+    }
+  },
+  "dagInfoLandHeading": "Land Information",
+  "dagInfoKhatianHeading": "Khatian Information",
+  "dagInfoPlotNo": "Plot/Dag No.",
+  "dagInfoSurveyType": "Survey Type",
+  "dagInfoSurveyBds": "BDS",
+  "dagInfoMouza": "Mouza",
+  "dagInfoTotalLand": "Total Land",
+  "dagInfoUnitAcre": "acre",
+  "dagInfoShatangsho": "≈ {value} decimal",
+  "@dagInfoShatangsho": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "dagInfoKhatianNo": "Khatian No.",
+  "dagInfoOwnerName": "Owner Name",
+  "dagInfoCurrentStage": "Current Stage",
+  "dagInfoStageObjection": "Objection stage",
+  "dagInfoStageAppeal": "Appeal stage",
+  "dagInfoNoKhatian": "No khatian information was found for this dag",
+  "dagInfoSource": "Source: {source} · Collected: {date}",
+  "@dagInfoSource": {
+    "placeholders": {
+      "source": {"type": "String"},
+      "date": {"type": "String"}
+    }
+  },
+  "dagInfoClose": "Close",
+  "dagInfoCloseSemantics": "Close dag details",
+  "dagInfoRetry": "Retry",
+  "dagInfoRetrySemantics": "Retry loading dag details",
+  "dagInfoFailure": "Could not load the dag details. Please try again.",
+  "dagInfoNotFound": "No official record was found for this dag.",
+  "dagInfoRateLimited": "Too many requests. Please wait a moment and try again."
 }
