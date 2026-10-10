@@ -21,6 +21,17 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "allowedCommonJsDependencies": [
+              "leaflet",
+              "@geoman-io/leaflet-geoman-free",
+              "@turf/jsts",
+              "rbush",
+              "skmeans",
+              "concaveman",
+              "fast-deep-equal",
+              "earcut",
+              "qrcode"
+            ],
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -37,9 +48,6 @@
             ],
             "styles": [
               "src/styles.scss"
-            ],
-            "allowedCommonJsDependencies": [
-              "qrcode"
             ]
           },
           "configurations": {
