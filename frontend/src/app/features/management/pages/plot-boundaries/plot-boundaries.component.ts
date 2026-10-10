@@ -14,7 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import * as L from 'leaflet';
-import '@geoman-io/leaflet-geoman-free';
+import '../../../../shared/map/leaflet-geoman-setup';
 import { IconComponent } from '../../../../shared/icon/icon.component';
 import { PlotMapService } from '../../../../core/services/plot-map.service';
 import { LanguageService } from '../../../../core/services/language.service';

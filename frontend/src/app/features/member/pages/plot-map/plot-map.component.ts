@@ -16,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 import type { Subscription } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import * as L from 'leaflet';
-import '@geoman-io/leaflet-geoman-free';
+import '../../../../shared/map/leaflet-geoman-setup';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
 import { DagInfoDialogComponent, type DagTarget } from './dag-info-dialog/dag-info-dialog.component';
 import { IconComponent, type IconName } from '../../../../shared/icon/icon.component';
