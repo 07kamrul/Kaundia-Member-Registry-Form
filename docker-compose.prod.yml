@@ -1,0 +1,19 @@
+# Production override: run pre-published images instead of building on the
+# server. Set BACKEND_IMAGE / FRONTEND_IMAGE in the server's .env, e.g.
+#
+#   BACKEND_IMAGE=docker.io/07kamrul/kaundia-backend:latest
+#   FRONTEND_IMAGE=docker.io/07kamrul/kaundia-frontend:latest
+#
+# Used together with docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull backend
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
+#
+# The backend/frontend `build:` sections from the base file stay defined but
+# are never invoked because server-deploy.sh always passes --no-build; the
+# image tags above win.
+services:
+  backend:
+    image: ${BACKEND_IMAGE:?set BACKEND_IMAGE in .env}
+
+  frontend:
+    image: ${FRONTEND_IMAGE:?set FRONTEND_IMAGE in .env}
