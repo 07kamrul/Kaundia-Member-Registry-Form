@@ -8,6 +8,10 @@ extension BoundaryStatusX on BoundaryStatus {
   static BoundaryStatus fromName(String? name) => switch (name) {
         'draft' => BoundaryStatus.draft,
         'pending_review' => BoundaryStatus.pendingReview,
+        // Version-level review statuses (amended workflow).
+        'pending' => BoundaryStatus.pendingReview,
+        'superseded' => BoundaryStatus.draft,
+        'withdrawn' => BoundaryStatus.draft,
         'approved' => BoundaryStatus.approved,
         'rejected' => BoundaryStatus.rejected,
         'disputed' => BoundaryStatus.disputed,

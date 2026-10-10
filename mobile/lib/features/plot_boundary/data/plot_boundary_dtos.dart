@@ -66,7 +66,7 @@ class MapFeatureDto {
   factory MapFeatureDto.fromJson(Map<dynamic, dynamic> json) => MapFeatureDto(
         boundaryId: _str(json['boundary_id']) ?? '',
         propertyId: _str(json['property_id']) ?? '',
-        status: _str(json['status']),
+        status: _str(json['review_status'] ?? json['status']),
         isMine: json['is_mine'] == true,
         rsDag: _str(json['rs_dag']),
         csDag: _str(json['cs_dag']),
@@ -128,7 +128,7 @@ class BoundaryOwnerDto {
         ownerName: _str(json['owner_name']) ?? '',
         mobile: _str(json['mobile']),
         contactHidden: json['contact_hidden'] == true,
-        status: _str(json['status']),
+        status: _str(json['review_status'] ?? json['status']),
         rsDag: _str(json['rs_dag']),
         csDag: _str(json['cs_dag']),
         landQuantity: _str(json['land_quantity']),
@@ -169,7 +169,7 @@ class MyBoundaryDto {
   factory MyBoundaryDto.fromJson(Map<dynamic, dynamic> json) => MyBoundaryDto(
         id: _str(json['id']) ?? _str(json['boundary_id']) ?? '',
         propertyId: _str(json['property_id']) ?? '',
-        status: _str(json['status']),
+        status: _str(json['review_status'] ?? json['status']),
         geometry: PolygonGeometryDto.fromJson(json['geometry'] is Map
             ? json['geometry']
             : json),
@@ -216,7 +216,7 @@ class BoundaryVersionDto {
       BoundaryVersionDto(
         id: _str(json['id']) ?? '',
         version: _int(json['version']) ?? 0,
-        status: _str(json['status']),
+        status: _str(json['review_status'] ?? json['status']),
         createdAt: _dateTime(json['created_at']),
         geometry: PolygonGeometryDto.fromJson(json['geometry'] is Map
             ? json['geometry']

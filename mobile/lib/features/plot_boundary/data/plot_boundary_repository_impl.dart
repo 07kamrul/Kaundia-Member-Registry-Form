@@ -69,8 +69,8 @@ class PlotBoundaryRepositoryImpl implements PlotBoundaryRepository {
   }
 
   @override
-  Future<void> deleteBoundary(String id) async {
-    await _api.delete('/member/plot-boundaries/$id');
+  Future<void> withdrawBoundary(String id) async {
+    await _api.post('/member/plot-boundaries/$id/withdraw', <String, dynamic>{});
   }
 
   @override

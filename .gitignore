@@ -1,2 +1,8 @@
 .env
 .env.local
+
+# Raw captured upstream responses (privacy + size) — never commit
+data/_raw/
+
+# Ingest virtualenv
+scripts/ingest_land_data/.venv/

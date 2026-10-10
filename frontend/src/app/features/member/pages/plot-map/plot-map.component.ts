@@ -24,8 +24,7 @@ import { LanguageService } from '../../../../core/services/language.service';
 import { MemberService, type MemberProperty } from '../../../../core/services/member.service';
 import { localizeDigits } from '../../../../core/services/roadmap.service';
 import { PlotMapService } from '../../../../core/services/plot-map.service';
-import { BdsMapService, type BdsPlotFeature } from '../../../../core/services/bds-map.service';
-import { RajukMapService, type RajukPlotFeature } from '../../../../core/services/rajuk-map.service';
+import { LandDataService, type LandPlotFeature } from '../../../../core/services/land-data.service';
 import { telHref, whatsAppHref } from '../../../../shared/phone-input/contact-links';
 import { toAsciiDigits } from '../../../../core/services/digits.helper';
 import {
@@ -130,8 +129,7 @@ type DrawStep = 'idle' | 'pick' | 'draw';
 })
 export class PlotMapComponent implements AfterViewInit {
   private readonly plotMapService = inject(PlotMapService);
-  private readonly bdsMapService = inject(BdsMapService);
-  private readonly rajukMapService = inject(RajukMapService);
+  private readonly landDataService = inject(LandDataService);
   private readonly memberService = inject(MemberService);
   private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
@@ -277,6 +275,8 @@ export class PlotMapComponent implements AfterViewInit {
   private onViewMoved(): void {
     if (this.mapMode() === 'rajuk') {
       this.loadRajukPlots();
+    } else if (this.mapMode() === 'bds') {
+      this.loadBdsMouza();
     } else if (this.mapMode() === 'boundaries') {
       this.loadFeatures();
     }
@@ -393,19 +393,20 @@ export class PlotMapComponent implements AfterViewInit {
 
   private loadBdsMouza(): void {
     const map = this.map;
-    if (!map || this.bdsLayer) return;
+    if (!map) return;
     this.externalLoading.set(true);
-    this.bdsMapService
-      .fetchMouza()
+    this.landDataService
+      .dagsInBbox(this.bboxString())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (collection) => {
           this.externalLoading.set(false);
           if (this.mapMode() !== 'bds' || !this.map) return;
+          this.removeBdsLayer();
           this.bdsLayer = L.geoJSON(collection as never, {
             style: { color: '#1a3fd4', weight: 2, fillColor: '#2b50e0', fillOpacity: 0.2 },
             onEachFeature: (feature, layer) =>
-              layer.bindPopup(this.bdsPopupHtml(feature as BdsPlotFeature, layer as L.Polygon)),
+              layer.bindPopup(this.bdsPopupHtml(feature as LandPlotFeature, layer as L.Polygon)),
           }).addTo(this.map);
           this.updateBdsLabels();
         },
@@ -424,7 +425,7 @@ export class PlotMapComponent implements AfterViewInit {
     const show = map.getZoom() >= BDS_LABEL_MIN_ZOOM;
     layer.eachLayer((child: L.Layer) => {
       const polygon = child as L.Polygon & { __dagLabel?: L.Marker };
-      const dag = (polygon.feature as { properties?: { Dag_No?: string } })?.properties?.Dag_No;
+      const dag = (polygon.feature as { properties?: { dag?: string } })?.properties?.dag;
       if (!dag) return;
       if (show && !polygon.__dagLabel) {
         const label = L.marker(polygon.getBounds().getCenter(), {
@@ -452,8 +453,8 @@ export class PlotMapComponent implements AfterViewInit {
     this.bdsLayer = null;
   }
 
-  private bdsPopupHtml(feature: BdsPlotFeature, layer: L.Polygon): string {
-    const dag = this.digits(feature.properties?.Dag_No ?? '');
+  private bdsPopupHtml(feature: LandPlotFeature, layer: L.Polygon): string {
+    const dag = this.digits(feature.properties?.dag ?? feature.properties?.label_bn ?? '');
     const center = layer.getBounds().getCenter();
     const streetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${center.lat},${center.lng}`;
     return `
@@ -461,9 +462,6 @@ export class PlotMapComponent implements AfterViewInit {
         <strong>${this.translate.instant('member.plotMap.views.bdsDag')} ${dag}</strong>
         <p>${this.translate.instant('member.plotMap.views.bdsSurvey')}</p>
         <p>${this.translate.instant('member.plotMap.views.mouzaLabel')}</p>
-        <a href="https://settlement.gov.bd/Map/MapSearch" target="_blank" rel="noopener noreferrer">
-          ${this.translate.instant('member.plotMap.views.openBds')}
-        </a>
         <a href="${streetView}" target="_blank" rel="noopener noreferrer">
           ${this.translate.instant('member.plotMap.views.streetView')}
         </a>
@@ -474,8 +472,8 @@ export class PlotMapComponent implements AfterViewInit {
     if (!this.map) return;
     this.externalLoading.set(true);
     this.rajukSub?.unsubscribe();
-    this.rajukSub = this.rajukMapService
-      .listPlots(this.bboxString())
+    this.rajukSub = this.landDataService
+      .masterplanInBbox(this.bboxString())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (collection) => {
@@ -485,7 +483,7 @@ export class PlotMapComponent implements AfterViewInit {
           this.rajukLayer = L.geoJSON(collection as never, {
             style: { color: '#7a8b12', weight: 1.5, fillColor: '#b7c94a', fillOpacity: 0.3 },
             onEachFeature: (feature, layer) =>
-              layer.bindPopup(this.rajukPopupHtml(feature as RajukPlotFeature, layer as L.Polygon)),
+              layer.bindPopup(this.rajukPopupHtml(feature as LandPlotFeature, layer as L.Polygon)),
           }).addTo(this.map);
         },
         error: () => {
@@ -495,7 +493,7 @@ export class PlotMapComponent implements AfterViewInit {
       });
   }
 
-  private rajukPopupHtml(feature: RajukPlotFeature, layer: L.Polygon): string {
+  private rajukPopupHtml(feature: LandPlotFeature, layer: L.Polygon): string {
     const props = feature.properties ?? {};
     const center = layer.getBounds().getCenter();
     const streetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${center.lat},${center.lng}`;

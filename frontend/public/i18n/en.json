@@ -811,7 +811,11 @@
         "approved": "Approved",
         "mine": "Mine",
         "rejected": "Rejected",
-        "disputed": "Disputed"
+        "disputed": "Disputed",
+        "pending": "Waiting for approval",
+        "superseded": "Superseded",
+        "withdrawn": "Withdrawn",
+        "deleted": "Deleted"
       },
       "details": {
         "title": "Plot details",
@@ -852,7 +856,12 @@
           "NOT_YOUR_PROPERTY": "This property does not belong to your account.",
           "BOUNDARY_EXISTS": "This property already has a boundary.",
           "generic": "Could not save the boundary. Please try again."
-        }
+        },
+        "withdraw": "Withdraw submission",
+        "withdrawTitle": "Withdraw submission?",
+        "withdrawMessage": "Your pending submission will be marked withdrawn. Any approved shape stays live.",
+        "replaceTitle": "Replace pending submission?",
+        "replaceMessage": "A submission is already awaiting review. Saving now replaces it with this shape."
       },
       "validation": {
         "selfIntersection": "The outline crosses itself - fix the highlighted overlap.",
@@ -865,7 +874,7 @@
         "title": "Map views",
         "boundaries": "My plot boundary map",
         "boundariesHint": "Member-marked boundaries",
-        "bds": "BDS map (settlement.gov.bd)",
+        "bds": "BDS dag map",
         "bdsHint": "Official mouza plot map",
         "rajuk": "RAJUK masterplan (DAP)",
         "rajukHint": "DAP RS plots of Uttar Kaundia",
@@ -877,8 +886,14 @@
         "thanaLabel": "Savar Upazila, Dhaka",
         "rsPlotNo": "RS Plot No",
         "rsJlNo": "RS JL No",
-        "openBds": "Open in settlement.gov.bd",
         "streetView": "Google Street View"
+      },
+      "timeline": {
+        "submitted": "Submitted",
+        "underReview": "Under review",
+        "approved": "Approved",
+        "pendingHint": "Others will see this after the admin verifies it.",
+        "rejectionNote": "Admin's note"
       }
     }
   },
@@ -1934,13 +1949,19 @@
         "computedArea": "Computed area"
       },
       "preview": {
-        "title": "Boundary preview"
+        "title": "Boundary preview",
+        "pendingNotice": "A member submission is awaiting review; the approved shape stays live for others until you decide.",
+        "deletedReason": "Deleted — reason"
       },
       "actions": {
         "approve": "Approve",
         "reject": "Reject",
         "versions": "Version history",
-        "evidence": "Evidence export"
+        "evidence": "Evidence export",
+        "add": "Add polygon",
+        "edit": "Edit shape",
+        "delete": "Delete boundary",
+        "includeDeleted": "Show deleted"
       },
       "modal": {
         "noteOptional": "Note (optional)",
@@ -1950,7 +1971,9 @@
         "loadFailed": "Could not load boundaries.",
         "generic": "Could not complete the action. Please try again.",
         "forbidden": "You do not have permission for this action.",
-        "noteRequired": "A note is required to reject."
+        "noteRequired": "A note is required to reject.",
+        "overlapConfirm": "This shape overlaps approved boundaries. Tick the confirmation below to save and open disputes.",
+        "overlapConfirmAccept": "Save anyway and open dispute records"
       },
       "versions": {
         "title": "Version history",
@@ -1971,6 +1994,16 @@
         "overlap": "Overlap",
         "resolve": "Resolve",
         "dismiss": "Dismiss"
+      },
+      "delete": {
+        "warning": "The boundary is soft-deleted: members lose access immediately, but the version history is kept as evidence.",
+        "reasonLabel": "Reason (required)"
+      },
+      "add": {
+        "memberId": "Member ID",
+        "propertyId": "Property ID",
+        "geometryLabel": "GeoJSON Polygon",
+        "geometryPlaceholder": "{\"type\": \"Polygon\", \"coordinates\": [[[90.40, 23.80], ...]]}"
       }
     }
   },

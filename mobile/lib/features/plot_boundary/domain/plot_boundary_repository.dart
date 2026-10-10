@@ -27,8 +27,9 @@ abstract class PlotBoundaryRepository {
     required List<LatLng> points,
   });
 
-  /// DELETE /member/plot-boundaries/{id} (soft delete, 204).
-  Future<void> deleteBoundary(String id);
+  /// POST /member/plot-boundaries/{id}/withdraw — members cannot delete;
+  /// only the pending submission is withdrawn, the live shape is untouched.
+  Future<void> withdrawBoundary(String id);
 
   /// GET /member/plot-boundaries/{id}/versions
   Future<List<BoundaryVersion>> getVersions(String boundaryId);
@@ -82,11 +83,11 @@ class SaveBoundary {
           : _repository.updateBoundary(id: id, points: points);
 }
 
-class DeleteBoundary {
-  const DeleteBoundary(this._repository);
+class WithdrawBoundary {
+  const WithdrawBoundary(this._repository);
   final PlotBoundaryRepository _repository;
 
-  Future<void> call(String id) => _repository.deleteBoundary(id);
+  Future<void> call(String id) => _repository.withdrawBoundary(id);
 }
 
 class GetBoundaryVersions {
