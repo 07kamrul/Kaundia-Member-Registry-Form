@@ -1,22 +1,24 @@
 <div class="plot-map-page">
   <div class="map-toolbar">
     <div class="toolbar-row">
-      <div class="dag-search">
-        <app-icon name="pin" [size]="16" />
-        <input
-          type="search"
-          class="dag-search-input"
-          [placeholder]="'member.plotMap.searchPlaceholder' | translate"
-          [value]="search()"
-          (input)="onSearchInput($any($event.target).value)"
-          [attr.aria-label]="'member.plotMap.searchPlaceholder' | translate"
-        />
-      </div>
+      @if (mapMode() === 'boundaries') {
+        <div class="dag-search">
+          <app-icon name="pin" [size]="16" />
+          <input
+            type="search"
+            class="dag-search-input"
+            [placeholder]="'member.plotMap.searchPlaceholder' | translate"
+            [value]="search()"
+            (input)="onSearchInput($any($event.target).value)"
+            [attr.aria-label]="'member.plotMap.searchPlaceholder' | translate"
+          />
+        </div>
+      }
       <button type="button" class="btn btn-secondary btn-sm locate-btn" (click)="locateMe()">
         <app-icon name="pin" [size]="16" />
         {{ 'member.plotMap.myLocation' | translate }}
       </button>
-      @if (canDraw()) {
+      @if (canDraw() && mapMode() === 'boundaries') {
         <button
           type="button"
           class="btn btn-primary btn-sm draw-btn"
@@ -47,7 +49,7 @@
     }
   </div>
 
-  <div class="legend" role="list" [attr.aria-label]="'member.plotMap.legend' | translate">
+  <div class="legend" role="list" [attr.aria-label]="'member.plotMap.legend' | translate" [hidden]="mapMode() !== 'boundaries'">
     @for (item of legendItems; track item.status) {
       <span class="legend-chip" role="listitem">
         <span class="legend-swatch" [style.background]="item.color"></span>
@@ -58,6 +60,49 @@
 
   <div class="map-wrap">
     <div #mapEl class="map-canvas" [attr.aria-label]="'member.plotMap.title' | translate"></div>
+
+    <!-- Map view switcher -->
+    <div class="map-views" [class.open]="viewsOpen()">
+      <button
+        type="button"
+        class="map-views-toggle"
+        (click)="toggleViews()"
+        [attr.aria-expanded]="viewsOpen()"
+        [attr.aria-label]="'member.plotMap.views.title' | translate"
+      >
+        <app-icon name="map" [size]="16" />
+        {{ 'member.plotMap.views.title' | translate }}
+      </button>
+      @if (viewsOpen()) {
+        <div class="map-views-panel" role="menu">
+          @for (view of mapModes; track view.mode) {
+            <button
+              type="button"
+              role="menuitemradio"
+              class="map-view-option"
+              [class.active]="mapMode() === view.mode"
+              [attr.aria-checked]="mapMode() === view.mode"
+              (click)="selectMapMode(view.mode)"
+            >
+              <app-icon [name]="view.icon" [size]="16" />
+              <span>{{ view.labelKey | translate }}</span>
+              <span class="view-sub">{{ 'member.plotMap.views.' + view.mode + 'Hint' | translate }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (externalLoading()) {
+      <div class="external-status" role="status">
+        {{ 'member.plotMap.views.loading' | translate }}
+      </div>
+    } @else if (externalError()) {
+      <div class="external-status error" role="alert">
+        {{ 'member.plotMap.views.loadError' | translate }}
+      </div>
+    }
+
     @if (mapLoading()) {
       <div class="map-loading" aria-hidden="true">
         <div class="skeleton-line skeleton-lg"></div>

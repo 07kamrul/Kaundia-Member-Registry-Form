@@ -860,6 +860,25 @@
         "areaMismatch": "The drawn area differs a lot from your declared land quantity.",
         "area": "Drawn area",
         "ok": "The outline looks valid."
+      },
+      "views": {
+        "title": "Map views",
+        "boundaries": "My plot boundary map",
+        "boundariesHint": "Member-marked boundaries",
+        "bds": "BDS map (settlement.gov.bd)",
+        "bdsHint": "Official mouza plot map",
+        "rajuk": "RAJUK masterplan (DAP)",
+        "rajukHint": "DAP RS plots of Uttar Kaundia",
+        "loading": "Loading official map data…",
+        "loadError": "Could not load the official map data. Please try again later.",
+        "bdsDag": "Dag No",
+        "bdsSurvey": "Survey: BDS (2019) · Sheet map of mouza Uttar Kaundia",
+        "mouzaLabel": "Mouza: Uttar Kaundia",
+        "thanaLabel": "Savar Upazila, Dhaka",
+        "rsPlotNo": "RS Plot No",
+        "rsJlNo": "RS JL No",
+        "openBds": "Open in settlement.gov.bd",
+        "streetView": "Google Street View"
       }
     }
   },

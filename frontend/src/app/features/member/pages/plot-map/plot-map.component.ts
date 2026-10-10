@@ -18,12 +18,14 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import * as L from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import { ConfirmModalComponent } from '../../../../shared/confirm-modal/confirm-modal.component';
-import { IconComponent } from '../../../../shared/icon/icon.component';
+import { IconComponent, type IconName } from '../../../../shared/icon/icon.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { MemberService, type MemberProperty } from '../../../../core/services/member.service';
 import { localizeDigits } from '../../../../core/services/roadmap.service';
 import { PlotMapService } from '../../../../core/services/plot-map.service';
+import { BdsMapService, type BdsPlotFeature } from '../../../../core/services/bds-map.service';
+import { RajukMapService, type RajukPlotFeature } from '../../../../core/services/rajuk-map.service';
 import { telHref, whatsAppHref } from '../../../../shared/phone-input/contact-links';
 import { toAsciiDigits } from '../../../../core/services/digits.helper';
 import {
@@ -42,6 +44,10 @@ import { environment } from '../../../../../environments/environment';
 const MOVE_DEBOUNCE_MS = 300;
 const SOCIETY_CENTER: L.LatLngTuple = [23.77, 90.39];
 const DISCLAIMER_KEY = 'krmf_boundary_disclaimer_dismissed';
+const MOUZA_CENTER: L.LatLngTuple = [23.7985, 90.3325];
+const BDS_LABEL_MIN_ZOOM = 16;
+
+export type PlotMapMode = 'boundaries' | 'bds' | 'rajuk';
 
 /** Leaflet default marker/icons are unused; polygons only. */
 const STATUS_COLORS: Record<string, string> = {
@@ -123,6 +129,8 @@ type DrawStep = 'idle' | 'pick' | 'draw';
 })
 export class PlotMapComponent implements AfterViewInit {
   private readonly plotMapService = inject(PlotMapService);
+  private readonly bdsMapService = inject(BdsMapService);
+  private readonly rajukMapService = inject(RajukMapService);
   private readonly memberService = inject(MemberService);
   private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
@@ -174,11 +182,26 @@ export class PlotMapComponent implements AfterViewInit {
 
   readonly showDrawPanel = signal(false);
 
+  // Map view modes: member boundaries (default), official BDS mouza map,
+  // RAJUK DAP masterplan.
+  readonly mapMode = signal<PlotMapMode>('boundaries');
+  readonly viewsOpen = signal(false);
+  readonly externalLoading = signal(false);
+  readonly externalError = signal(false);
+  readonly mapModes: Array<{ mode: PlotMapMode; labelKey: string; icon: IconName }> = [
+    { mode: 'boundaries', labelKey: 'member.plotMap.views.boundaries', icon: 'edit' },
+    { mode: 'bds', labelKey: 'member.plotMap.views.bds', icon: 'map' },
+    { mode: 'rajuk', labelKey: 'member.plotMap.views.rajuk', icon: 'doc' },
+  ];
+
   private map: L.Map | null = null;
   private readonly featureLayers = new Map<number, L.Polygon>();
   private moveDebounce: ReturnType<typeof setTimeout> | null = null;
   private featuresSub: Subscription | null = null;
   private drawnLayer: L.Polygon | null = null;
+  private bdsLayer: L.GeoJSON | null = null;
+  private rajukLayer: L.GeoJSON | null = null;
+  private rajukSub: Subscription | null = null;
 
   private properties = signal<MemberProperty[]>([]);
 
@@ -222,8 +245,9 @@ export class PlotMapComponent implements AfterViewInit {
 
     map.on('moveend', () => {
       if (this.moveDebounce) clearTimeout(this.moveDebounce);
-      this.moveDebounce = setTimeout(() => this.zone.run(() => this.loadFeatures()), MOVE_DEBOUNCE_MS);
+      this.moveDebounce = setTimeout(() => this.zone.run(() => this.onViewMoved()), MOVE_DEBOUNCE_MS);
     });
+    map.on('zoomend', () => this.zone.runOutsideAngular(() => this.updateBdsLabels()));
 
     map.on('pm:drawmove', () => this.zone.run(() => this.syncDrawnGeometry()));
     map.on('pm:vertexadded', () => this.zone.run(() => this.syncDrawnGeometry()));
@@ -240,6 +264,15 @@ export class PlotMapComponent implements AfterViewInit {
   }
 
   // ---- Data loading -------------------------------------------------------
+
+  /** Reload whichever layer the active map view needs. */
+  private onViewMoved(): void {
+    if (this.mapMode() === 'rajuk') {
+      this.loadRajukPlots();
+    } else if (this.mapMode() === 'boundaries') {
+      this.loadFeatures();
+    }
+  }
 
   private bboxString(): string {
     return this.map
@@ -298,6 +331,177 @@ export class PlotMapComponent implements AfterViewInit {
       layer.on('click', () => this.zone.run(() => this.onFeatureClick(feature)));
       layer.addTo(map);
       this.featureLayers.set(feature.boundaryId, layer);
+    }
+  }
+
+  // ---- Map view modes (boundaries / BDS / RAJUK) ---------------------------
+
+  selectMapMode(mode: PlotMapMode): void {
+    if (this.mapMode() === mode) {
+      this.viewsOpen.set(false);
+      return;
+    }
+    this.viewsOpen.set(false);
+    this.cancelDraw();
+    this.closeSheet();
+    this.externalError.set(false);
+    this.mapMode.set(mode);
+
+    const map = this.map;
+    if (!map) return;
+
+    // Search and draw only apply to the member boundary view.
+    if (mode !== 'boundaries') {
+      this.search.set('');
+      this.renderFeatures(); // hides member polygons filtered by cleared search
+    }
+
+    if (mode === 'bds') {
+      this.removeRajukLayer();
+      this.loadBdsMouza();
+    } else {
+      this.removeBdsLayer();
+    }
+
+    if (mode === 'rajuk') {
+      this.loadRajukPlots();
+    } else {
+      this.removeRajukLayer();
+      if (this.rajukSub) {
+        this.rajukSub.unsubscribe();
+        this.rajukSub = null;
+      }
+    }
+  }
+
+  toggleViews(): void {
+    this.viewsOpen.update((open) => !open);
+  }
+
+  private loadBdsMouza(): void {
+    const map = this.map;
+    if (!map || this.bdsLayer) return;
+    this.externalLoading.set(true);
+    this.bdsMapService
+      .fetchMouza()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (collection) => {
+          this.externalLoading.set(false);
+          if (this.mapMode() !== 'bds' || !this.map) return;
+          this.bdsLayer = L.geoJSON(collection as never, {
+            style: { color: '#1a3fd4', weight: 2, fillColor: '#2b50e0', fillOpacity: 0.2 },
+            onEachFeature: (feature, layer) =>
+              layer.bindPopup(this.bdsPopupHtml(feature as BdsPlotFeature, layer as L.Polygon)),
+          }).addTo(this.map);
+          this.updateBdsLabels();
+        },
+        error: () => {
+          this.externalLoading.set(false);
+          this.externalError.set(true);
+        },
+      });
+  }
+
+  /** Permanent dag labels only when zoomed in enough to read them. */
+  private updateBdsLabels(): void {
+    const map = this.map;
+    const layer = this.bdsLayer;
+    if (!map || !layer) return;
+    const show = map.getZoom() >= BDS_LABEL_MIN_ZOOM;
+    layer.eachLayer((child: L.Layer) => {
+      const polygon = child as L.Polygon & { __dagLabel?: L.Marker };
+      const dag = (polygon.feature as { properties?: { Dag_No?: string } })?.properties?.Dag_No;
+      if (!dag) return;
+      if (show && !polygon.__dagLabel) {
+        const label = L.marker(polygon.getBounds().getCenter(), {
+          icon: L.divIcon({ className: 'bds-dag-label', html: String(dag), iconSize: null as never }),
+          interactive: false,
+          keyboard: false,
+        });
+        label.addTo(map);
+        polygon.__dagLabel = label;
+      } else if (!show && polygon.__dagLabel) {
+        map.removeLayer(polygon.__dagLabel);
+        polygon.__dagLabel = undefined;
+      }
+    });
+  }
+
+  private removeBdsLayer(): void {
+    const map = this.map;
+    if (!map || !this.bdsLayer) return;
+    this.bdsLayer.eachLayer((child: L.Layer) => {
+      const label = (child as L.Polygon & { __dagLabel?: L.Marker }).__dagLabel;
+      if (label) map.removeLayer(label);
+    });
+    map.removeLayer(this.bdsLayer);
+    this.bdsLayer = null;
+  }
+
+  private bdsPopupHtml(feature: BdsPlotFeature, layer: L.Polygon): string {
+    const dag = this.digits(feature.properties?.Dag_No ?? '');
+    const center = layer.getBounds().getCenter();
+    const streetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${center.lat},${center.lng}`;
+    return `
+      <div class="bds-popup">
+        <strong>${this.translate.instant('member.plotMap.views.bdsDag')} ${dag}</strong>
+        <p>${this.translate.instant('member.plotMap.views.bdsSurvey')}</p>
+        <p>${this.translate.instant('member.plotMap.views.mouzaLabel')}</p>
+        <a href="https://settlement.gov.bd/Map/MapSearch" target="_blank" rel="noopener noreferrer">
+          ${this.translate.instant('member.plotMap.views.openBds')}
+        </a>
+        <a href="${streetView}" target="_blank" rel="noopener noreferrer">
+          ${this.translate.instant('member.plotMap.views.streetView')}
+        </a>
+      </div>`;
+  }
+
+  private loadRajukPlots(): void {
+    if (!this.map) return;
+    this.externalLoading.set(true);
+    this.rajukSub?.unsubscribe();
+    this.rajukSub = this.rajukMapService
+      .listPlots(this.bboxString())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (collection) => {
+          this.externalLoading.set(false);
+          if (this.mapMode() !== 'rajuk' || !this.map) return;
+          this.removeRajukLayer();
+          this.rajukLayer = L.geoJSON(collection as never, {
+            style: { color: '#7a8b12', weight: 1.5, fillColor: '#b7c94a', fillOpacity: 0.3 },
+            onEachFeature: (feature, layer) =>
+              layer.bindPopup(this.rajukPopupHtml(feature as RajukPlotFeature, layer as L.Polygon)),
+          }).addTo(this.map);
+        },
+        error: () => {
+          this.externalLoading.set(false);
+          this.externalError.set(true);
+        },
+      });
+  }
+
+  private rajukPopupHtml(feature: RajukPlotFeature, layer: L.Polygon): string {
+    const props = feature.properties ?? {};
+    const center = layer.getBounds().getCenter();
+    const streetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${center.lat},${center.lng}`;
+    return `
+      <div class="rajuk-popup">
+        <strong>${this.translate.instant('member.plotMap.views.rsPlotNo')}: ${this.digits(props.rs_plot_no ?? props.plot_no ?? '')}</strong>
+        <p>${this.translate.instant('member.plotMap.views.rsJlNo')}: 245</p>
+        <p>${this.translate.instant('member.plotMap.views.mouzaLabel')}</p>
+        <p>${this.translate.instant('member.plotMap.views.thanaLabel')}</p>
+        <a href="${streetView}" target="_blank" rel="noopener noreferrer">
+          ${this.translate.instant('member.plotMap.views.streetView')}
+        </a>
+      </div>`;
+  }
+
+  private removeRajukLayer(): void {
+    if (this.map && this.rajukLayer) {
+      this.map.removeLayer(this.rajukLayer);
+      this.rajukLayer = null;
     }
   }
 
@@ -494,7 +698,8 @@ export class PlotMapComponent implements AfterViewInit {
   }
 
   cancelDraw(): void {
-    (this.map?.pm as unknown as { disable: () => void } | undefined)?.disable();
+    const pm = this.map?.pm as unknown as { disable?: () => void } | undefined;
+    pm?.disable?.();
     this.drawnLayer?.remove();
     this.drawnLayer = null;
     this.drawnGeometry.set(null);

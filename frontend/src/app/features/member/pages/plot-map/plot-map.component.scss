@@ -1,5 +1,6 @@
-@use 'leaflet/dist/leaflet.css';
-@use '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+/* Leaflet + Geoman styles are global (styles.scss): Angular would scope them
+   here, and Leaflet's dynamically-created panes never carry the _ngcontent
+   attribute, so scoped rules don't match and the map renders broken. */
 
 :host {
   display: block;
@@ -128,6 +129,119 @@
   gap: 0.5rem;
   padding: 2rem;
   background: var(--surface-2);
+}
+
+// Map view switcher (boundaries / BDS / RAJUK).
+.map-views {
+  position: absolute;
+  z-index: 900;
+  // below Leaflet's zoom control, which shares the top-left corner
+  top: 4.6rem;
+  inset-inline-start: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.map-views-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--gray-800);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
+}
+
+.map-views-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 15%);
+}
+
+.map-view-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'icon label' 'icon sub';
+  align-items: center;
+  column-gap: 0.45rem;
+  padding: 0.4rem 0.55rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-800);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: start;
+  cursor: pointer;
+
+  app-icon {
+    grid-area: icon;
+  }
+
+  span {
+    grid-area: label;
+  }
+
+  .view-sub {
+    grid-area: sub;
+    font-size: 0.7rem;
+    color: var(--gray-500);
+  }
+
+  &:hover,
+  &.active {
+    background: var(--surface-2);
+  }
+
+  &.active {
+    outline: 1px solid var(--brand-600, var(--gray-400));
+  }
+}
+
+.external-status {
+  position: absolute;
+  z-index: 900;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-700);
+  font-size: 0.8rem;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
+
+  &.error {
+    color: var(--danger, #c0392b);
+    border-color: currentcolor;
+  }
+}
+
+// Dag-number labels over BDS polygons.
+::ng-deep .bds-dag-label {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: #10267e;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 2px #fff;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .details-sheet {

@@ -14,6 +14,7 @@ from app.services.plot_boundary import ValidationIssue
 from app.api.routes import (
     admin,
     auth,
+    external_maps,
     fee_payments,
     finance,
     installment_payments,
@@ -135,6 +136,7 @@ app.include_router(resolution_book.router, prefix=api_router_prefix)
 app.include_router(installment_payments.router, prefix=api_router_prefix)
 app.include_router(fee_payments.router, prefix=api_router_prefix)
 app.include_router(plot_map.router, prefix=api_router_prefix)
+app.include_router(external_maps.router, prefix=api_router_prefix)
 app.include_router(plot_boundary_admin.router, prefix=api_router_prefix)
 
 app.mount("/uploads", UploadStaticFiles(), name="uploads")
