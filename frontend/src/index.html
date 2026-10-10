@@ -8,6 +8,12 @@
   <link rel="icon" type="image/png" href="images/title_logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Warm the tile hosts early: the plot map opens with dozens of cold
+       connections otherwise (Leaflet's {s} spread = three OSM hosts). -->
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org">
+  <link rel="preconnect" href="https://b.tile.openstreetmap.org">
+  <link rel="preconnect" href="https://c.tile.openstreetmap.org">
+  <link rel="preconnect" href="https://server.arcgisonline.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tiro+Bangla&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>

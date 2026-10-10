@@ -200,6 +200,17 @@ export class PlotMapComponent implements AfterViewInit {
 
   readonly showDrawPanel = signal(false);
 
+  // Floating legend card: open by default on desktop, collapsed on phones.
+  readonly legendOpen = signal(
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(min-width: 768px)').matches
+      : true,
+  );
+
+  toggleLegend(): void {
+    this.legendOpen.update((open) => !open);
+  }
+
   // Map view modes: member boundaries (default), official BDS mouza map,
   // RAJUK DAP masterplan.
   readonly mapMode = signal<PlotMapMode>('boundaries');
@@ -226,6 +237,7 @@ export class PlotMapComponent implements AfterViewInit {
   );
 
   private map: L.Map | null = null;
+  private resizeObserver: ResizeObserver | null = null;
   private readonly featureLayers = new Map<string, L.Polygon>();
   private moveDebounce: ReturnType<typeof setTimeout> | null = null;
   private featuresSub: Subscription | null = null;
@@ -255,6 +267,15 @@ export class PlotMapComponent implements AfterViewInit {
     this.zone.runOutsideAngular(() => this.initMap());
     this.loadProperties();
     this.loadFeatures();
+    // Leaflet measures the container once at construction and never again;
+    // the shell keeps settling afterwards (disclaimer text, fonts, legend,
+    // sidebar, rotation), leaving tiles covering only part of the box. The
+    // observer's initial callback also corrects any mis-measured first size.
+    this.destroyRef.onDestroy(() => {
+      this.resizeObserver?.disconnect();
+      this.map?.remove();
+      this.map = null;
+    });
   }
 
   /** Society bbox as Leaflet bounds — the only area this map may show. */
@@ -282,6 +303,9 @@ export class PlotMapComponent implements AfterViewInit {
       maxBounds: society.pad(0.05),
       maxBoundsViscosity: 1.0,
       touchZoom: true,
+      // Zoom/layers controls are re-added bottom-right; the top corners host
+      // the app's own floating toolbar and view switcher.
+      zoomControl: false,
     });
     // A natural fitBounds of the mouza bbox lands at ~z13, which reads as
     // "middle of nowhere" — start at z14 so the mouza fills the view.
@@ -289,20 +313,33 @@ export class PlotMapComponent implements AfterViewInit {
 
     const street = L.tileLayer(environment.mapTileUrl, {
       maxZoom: 19,
+      // keepBuffer renders tiles beyond the viewport edge so panning shows no
+      // grey; updateWhenZooming skips tile requests for the transient
+      // intermediate zoom during pinch/zoom animations.
+      keepBuffer: 3,
+      updateWhenZooming: false,
       attribution: '© OpenStreetMap contributors',
     });
     const satellite = L.tileLayer(environment.satelliteTileUrl, {
       maxZoom: 19,
+      keepBuffer: 3,
+      updateWhenZooming: false,
       attribution: '© Esri World Imagery',
     });
     street.addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
     L.control
       .layers(
         { Street: street, Satellite: satellite },
         {},
-        { position: 'topright' },
+        { position: 'bottomright' },
       )
       .addTo(map);
+
+    // Re-measure whenever the container's box changes. initMap runs outside
+    // the Angular zone, so these callbacks never trigger change detection.
+    this.resizeObserver = new ResizeObserver(() => map.invalidateSize());
+    this.resizeObserver.observe(this.mapContainer().nativeElement);
 
     map.on('moveend', () => {
       if (this.moveDebounce) clearTimeout(this.moveDebounce);

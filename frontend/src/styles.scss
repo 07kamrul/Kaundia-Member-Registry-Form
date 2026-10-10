@@ -3459,3 +3459,14 @@ a {
   font-weight: 700;
   color: #1f3d2a;
 }
+
+/* The plot boundary map is a full-bleed page: the shell's centered max-width
+   and padding would leave dead gutters around the map, so relax both when the
+   map page is mounted (:has() is supported in all current browsers). */
+.app-body:has(app-plot-map) {
+  max-width: 100%;
+}
+
+.app-body:has(app-plot-map) .app-content {
+  padding: 0;
+}

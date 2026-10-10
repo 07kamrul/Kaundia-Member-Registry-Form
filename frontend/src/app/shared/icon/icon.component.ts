@@ -39,7 +39,8 @@ export type IconName =
   | 'edit'
   | 'plus'
   | 'id-card'
-  | 'chart';
+  | 'chart'
+  | 'layers';
 
 const ICON_PATHS: Record<IconName, string> = {
   dashboard:
@@ -92,6 +93,7 @@ const ICON_PATHS: Record<IconName, string> = {
   plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
   'id-card': '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="1.75"/><path d="M5.5 16c.5-1.5 1.6-2.3 3-2.3s2.5.8 3 2.3"/><path d="M14 9.5h4.5M14 12.5h4.5"/>',
   chart: '<path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 2.5L20 7"/><circle cx="20" cy="7" r="1.3"/>',
+  layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m4.5 12.5 7.5 4.2 7.5-4.2"/><path d="m4.5 16.5 7.5 4.2 7.5-4.2"/>',
 };
 
 const SAFE_ICON_HTML = new Map<IconName, SafeHtml>();

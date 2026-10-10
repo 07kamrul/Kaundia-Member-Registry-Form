@@ -1,140 +1,153 @@
 <div class="plot-map-page">
-  <div class="map-toolbar">
-    <div class="toolbar-row">
-      @if (mapMode() === 'boundaries') {
-        <div class="dag-search">
-          <app-icon name="pin" [size]="16" />
-          <input
-            type="search"
-            class="dag-search-input"
-            [placeholder]="'member.plotMap.searchPlaceholder' | translate"
-            [value]="search()"
-            (input)="onSearchInput($any($event.target).value)"
-            [attr.aria-label]="'member.plotMap.searchPlaceholder' | translate"
-          />
-        </div>
-      } @else if (mapMode() === 'bds' || mapMode() === 'rajuk') {
-        <form class="dag-search" (submit)="searchDag($event)">
-          <app-icon name="pin" [size]="16" />
-          <input
-            type="search"
-            class="dag-search-input"
-            [placeholder]="dagSearchPlaceholderKey() | translate"
-            [value]="dagQuery()"
-            (input)="onDagQueryInput($any($event.target).value)"
-            (keydown.enter)="searchDag($event)"
-            [attr.aria-label]="dagSearchPlaceholderKey() | translate"
-          />
-          @if (dagQuery()) {
-            <button
-              type="button"
-              class="dag-search-clear"
-              (click)="clearDagSearch()"
-              [attr.aria-label]="'common.close' | translate"
-            >
-              <app-icon name="close" [size]="14" />
-            </button>
-          }
-        </form>
-      }
-      <button type="button" class="btn btn-secondary btn-sm locate-btn" (click)="locateMe()">
-        <app-icon name="pin" [size]="16" />
-        {{ 'member.plotMap.myLocation' | translate }}
-      </button>
-      @if (canDraw() && mapMode() === 'boundaries') {
-        <button
-          type="button"
-          class="btn btn-primary btn-sm draw-btn"
-          (click)="openDrawPanel()"
-        >
-          <app-icon name="edit" [size]="16" />
-          {{ 'member.plotMap.draw.open' | translate }}
-        </button>
-      }
-    </div>
-    @if (dagNotFound()) {
-      <p class="locate-error" role="alert">{{ 'member.plotMap.views.dagNotFound' | translate }}</p>
-    }
-    @if (myLocationError()) {
-      <p class="locate-error" role="alert">{{ 'member.plotMap.locationError' | translate }}</p>
-    }
-    @if (outsideSociety()) {
-      <p class="locate-error" role="alert">{{ 'member.plotMap.outsideSociety' | translate }}</p>
-    }
-  </div>
-
-  <div class="disclaimer-banner" role="note">
-    <app-icon name="alert" [size]="16" />
-    <span class="disclaimer-text">{{ disclaimerText() }}</span>
-    @if (!disclaimerDismissed()) {
-      <button
-        type="button"
-        class="disclaimer-dismiss"
-        (click)="dismissDisclaimer()"
-        [attr.aria-label]="'common.close' | translate"
-      >
-        <app-icon name="close" [size]="14" />
-      </button>
-    }
-  </div>
-
-  <div class="legend" role="list" [attr.aria-label]="'member.plotMap.legend' | translate" [hidden]="mapMode() !== 'boundaries'">
-    @for (item of legendItems; track item.status) {
-      <span class="legend-chip" role="listitem">
-        <span class="legend-swatch" [style.background]="item.color"></span>
-        {{ 'member.plotMap.status.' + item.status | translate }}
-      </span>
-    }
-  </div>
-
   <div class="map-wrap">
     <div #mapEl class="map-canvas" [attr.aria-label]="'member.plotMap.title' | translate"></div>
 
-    <!-- Map view switcher -->
-    <div class="map-views" [class.open]="viewsOpen()">
+    <!-- Floating toolbar: search + actions above the map -->
+    <div class="map-topbar">
+      <div class="toolbar-row">
+        @if (mapMode() === 'boundaries') {
+          <div class="dag-search">
+            <app-icon name="pin" [size]="16" />
+            <input
+              type="search"
+              class="dag-search-input"
+              [placeholder]="'member.plotMap.searchPlaceholder' | translate"
+              [value]="search()"
+              (input)="onSearchInput($any($event.target).value)"
+              [attr.aria-label]="'member.plotMap.searchPlaceholder' | translate"
+            />
+          </div>
+        } @else if (mapMode() === 'bds' || mapMode() === 'rajuk') {
+          <form class="dag-search" (submit)="searchDag($event)">
+            <app-icon name="pin" [size]="16" />
+            <input
+              type="search"
+              class="dag-search-input"
+              [placeholder]="dagSearchPlaceholderKey() | translate"
+              [value]="dagQuery()"
+              (input)="onDagQueryInput($any($event.target).value)"
+              (keydown.enter)="searchDag($event)"
+              [attr.aria-label]="dagSearchPlaceholderKey() | translate"
+            />
+            @if (dagQuery()) {
+              <button
+                type="button"
+                class="dag-search-clear"
+                (click)="clearDagSearch()"
+                [attr.aria-label]="'common.close' | translate"
+              >
+                <app-icon name="close" [size]="14" />
+              </button>
+            }
+          </form>
+        }
+        <button
+          type="button"
+          class="toolbar-btn locate-btn"
+          (click)="locateMe()"
+          [attr.aria-label]="'member.plotMap.myLocation' | translate"
+        >
+          <app-icon name="pin" [size]="16" />
+          <span class="btn-label">{{ 'member.plotMap.myLocation' | translate }}</span>
+        </button>
+        @if (canDraw() && mapMode() === 'boundaries') {
+          <button
+            type="button"
+            class="toolbar-btn primary draw-btn"
+            (click)="openDrawPanel()"
+          >
+            <app-icon name="edit" [size]="16" />
+            <span class="btn-label">{{ 'member.plotMap.draw.open' | translate }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Map view switcher: segmented control -->
+      <div class="map-modes" role="tablist" [attr.aria-label]="'member.plotMap.views.title' | translate">
+        @for (view of mapModes; track view.mode) {
+          <button
+            type="button"
+            role="tab"
+            class="map-mode-tab"
+            [class.active]="mapMode() === view.mode"
+            [attr.aria-selected]="mapMode() === view.mode"
+            [title]="'member.plotMap.views.' + view.mode + 'Hint' | translate"
+            (click)="selectMapMode(view.mode)"
+          >
+            <app-icon [name]="view.icon" [size]="15" />
+            <span class="btn-label">{{ view.labelKey | translate }}</span>
+          </button>
+        }
+      </div>
+
+      @if (dagNotFound()) {
+        <p class="locate-error" role="alert">{{ 'member.plotMap.views.dagNotFound' | translate }}</p>
+      }
+      @if (myLocationError()) {
+        <p class="locate-error" role="alert">{{ 'member.plotMap.locationError' | translate }}</p>
+      }
+      @if (outsideSociety()) {
+        <p class="locate-error" role="alert">{{ 'member.plotMap.outsideSociety' | translate }}</p>
+      }
+    </div>
+
+    <!-- Disclaimer toast (session-dismissible) -->
+    @if (!disclaimerDismissed() && disclaimerText()) {
+      <div class="disclaimer-banner" role="note">
+        <app-icon name="alert" [size]="15" />
+        <span class="disclaimer-text">{{ disclaimerText() }}</span>
+        <button
+          type="button"
+          class="disclaimer-dismiss"
+          (click)="dismissDisclaimer()"
+          [attr.aria-label]="'common.close' | translate"
+        >
+          <app-icon name="close" [size]="14" />
+        </button>
+      </div>
+    }
+
+    <!-- Collapsible legend card -->
+    <div class="legend" role="list" [attr.aria-label]="'member.plotMap.legend' | translate" [hidden]="mapMode() !== 'boundaries'">
       <button
         type="button"
-        class="map-views-toggle"
-        (click)="toggleViews()"
-        [attr.aria-expanded]="viewsOpen()"
-        [attr.aria-label]="'member.plotMap.views.title' | translate"
+        class="legend-toggle"
+        (click)="toggleLegend()"
+        [attr.aria-expanded]="legendOpen()"
+        [attr.aria-label]="'member.plotMap.legend' | translate"
       >
-        <app-icon name="map" [size]="16" />
-        {{ 'member.plotMap.views.title' | translate }}
+        <app-icon name="layers" [size]="15" />
+        <span class="btn-label">{{ 'member.plotMap.legend' | translate }}</span>
+        <app-icon class="legend-caret" [class.open]="legendOpen()" name="chevron-down" [size]="14" />
       </button>
-      @if (viewsOpen()) {
-        <div class="map-views-panel" role="menu">
-          @for (view of mapModes; track view.mode) {
-            <button
-              type="button"
-              role="menuitemradio"
-              class="map-view-option"
-              [class.active]="mapMode() === view.mode"
-              [attr.aria-checked]="mapMode() === view.mode"
-              (click)="selectMapMode(view.mode)"
-            >
-              <app-icon [name]="view.icon" [size]="16" />
-              <span>{{ view.labelKey | translate }}</span>
-              <span class="view-sub">{{ 'member.plotMap.views.' + view.mode + 'Hint' | translate }}</span>
-            </button>
+      @if (legendOpen()) {
+        <div class="legend-body">
+          @for (item of legendItems; track item.status) {
+            <span class="legend-chip" role="listitem">
+              <span class="legend-swatch" [style.background]="item.color"></span>
+              {{ 'member.plotMap.status.' + item.status | translate }}
+            </span>
           }
         </div>
       }
     </div>
 
-    @if (externalLoading()) {
-      <div class="external-status" role="status">
-        {{ 'member.plotMap.views.loading' | translate }}
-      </div>
-    } @else if (externalError()) {
-      <div class="external-status error" role="alert">
-        {{ 'member.plotMap.views.loadError' | translate }}
-      </div>
-    } @else if (externalTruncated()) {
-      <div class="external-status warn" role="alert">
-        {{ 'member.plotMap.views.partialData' | translate }}
-      </div>
-    }
+    <!-- Official-data status + disclaimer notices, stacked bottom-center -->
+    <div class="map-notices">
+      @if (externalLoading()) {
+        <div class="external-status" role="status">
+          {{ 'member.plotMap.views.loading' | translate }}
+        </div>
+      } @else if (externalError()) {
+        <div class="external-status error" role="alert">
+          {{ 'member.plotMap.views.loadError' | translate }}
+        </div>
+      } @else if (externalTruncated()) {
+        <div class="external-status warn" role="alert">
+          {{ 'member.plotMap.views.partialData' | translate }}
+        </div>
+      }
+    </div>
 
     @if (mapLoading()) {
       <div class="map-loading" aria-hidden="true">
@@ -153,6 +166,7 @@
       [style.--sheet-x.px]="sheetPos()?.x"
       [style.--sheet-y.px]="sheetPos()?.y"
     >
+      <div class="sheet-grip" aria-hidden="true"></div>
       <header class="sheet-head">
         <h2 class="sheet-title">
           {{ 'member.plotMap.details.title' | translate }}
@@ -189,22 +203,29 @@
           </button>
         </div>
       } @else if (sel.owner; as owner) {
-        <p class="owner-name">{{ owner.ownerName }}</p>
-        <div class="dag-row">
-          <span class="meta-chip">
-            RS: {{ digits(owner.rsDag) }} · CS: {{ digits(owner.csDag) }}
-          </span>
+        <div class="owner-card">
+          <span class="owner-avatar" aria-hidden="true">{{ (owner.ownerName ?? '?').charAt(0) }}</span>
+          <div class="owner-id">
+            <p class="owner-name">{{ owner.ownerName }}</p>
+            <span class="meta-chip">
+              RS: {{ digits(owner.rsDag) }} · CS: {{ digits(owner.csDag) }}
+            </span>
+          </div>
         </div>
-        <p class="owner-meta">
-          {{ 'member.plotMap.details.landQuantity' | translate }}:
-          {{ digits(owner.landQuantity) }}
-        </p>
-        <p class="owner-meta">
-          {{ 'member.plotMap.details.area' | translate }}:
-          {{ digits(owner.computedAreaSqm) }} m² ·
-          {{ digits(owner.computedAreaShotangsho) }}
-          {{ 'member.plotMap.details.shotangsho' | translate }}
-        </p>
+        <dl class="fact-grid">
+          <div class="fact">
+            <dt>{{ 'member.plotMap.details.landQuantity' | translate }}</dt>
+            <dd>{{ digits(owner.landQuantity) }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ 'member.plotMap.details.area' | translate }}</dt>
+            <dd>
+              {{ digits(owner.computedAreaSqm) }} m² ·
+              {{ digits(owner.computedAreaShotangsho) }}
+              {{ 'member.plotMap.details.shotangsho' | translate }}
+            </dd>
+          </div>
+        </dl>
         <div class="contact-row">
           @if (owner.contactHidden || !owner.mobile) {
             <span class="contact-hidden">
@@ -212,19 +233,20 @@
             </span>
           } @else {
             @if (ownerContactLinks(owner).tel; as telHrefValue) {
-              <a class="btn btn-secondary btn-sm call-link" [href]="telHrefValue">
+              <a class="toolbar-btn contact-link call-link" [href]="telHrefValue">
                 <app-icon name="phone" [size]="16" />
-                {{ digits(owner.mobile) }}
+                <span class="btn-label">{{ digits(owner.mobile) }}</span>
               </a>
             }
             @if (ownerContactLinks(owner).wa; as waHrefValue) {
               <a
-                class="btn btn-secondary btn-sm whatsapp-link"
+                class="toolbar-btn contact-link whatsapp-link"
                 [href]="waHrefValue"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                WhatsApp
+                <app-icon name="check-circle" [size]="16" />
+                <span class="btn-label">WhatsApp</span>
               </a>
             }
           }
@@ -236,9 +258,9 @@
               {{ 'member.plotMap.report.thanks' | translate }}
             </p>
           } @else {
-            <button type="button" class="btn btn-secondary btn-sm" (click)="openReport()">
+            <button type="button" class="toolbar-btn ghost" (click)="openReport()">
               <app-icon name="alert" [size]="16" />
-              {{ 'member.plotMap.report.open' | translate }}
+              <span class="btn-label">{{ 'member.plotMap.report.open' | translate }}</span>
             </button>
           }
         </div>
@@ -250,6 +272,7 @@
   <!-- Draw panel -->
   @if (showDrawPanel()) {
     <section class="details-sheet draw-panel" role="dialog" [attr.aria-label]="'member.plotMap.draw.open' | translate">
+      <div class="sheet-grip" aria-hidden="true"></div>
       <header class="sheet-head">
         <h2 class="sheet-title">
           {{ (editingBoundary() ? 'member.plotMap.draw.editTitle' : 'member.plotMap.draw.title') | translate }}
@@ -267,7 +290,7 @@
           <ul class="property-list">
             @for (property of availableProperties(); track property.id) {
               <li>
-                <label class="property-option">
+                <label class="property-option" [class.checked]="selectedPropertyId() === property.id">
                   <input
                     type="radio"
                     name="draw-property"
@@ -281,11 +304,12 @@
           </ul>
           <button
             type="button"
-            class="btn btn-primary"
+            class="toolbar-btn primary draw-start"
             [disabled]="!selectedPropertyId()"
             (click)="startDrawing()"
           >
-            {{ 'member.plotMap.draw.start' | translate }}
+            <app-icon name="edit" [size]="16" />
+            <span class="btn-label">{{ 'member.plotMap.draw.start' | translate }}</span>
           </button>
         }
 
@@ -337,18 +361,18 @@
                 <div class="mine-actions">
                   <button
                     type="button"
-                    class="btn btn-secondary btn-sm"
+                    class="toolbar-btn ghost"
                     (click)="startEditing(boundary)"
                   >
-                    {{ 'member.plotMap.draw.edit' | translate }}
+                    <span class="btn-label">{{ 'member.plotMap.draw.edit' | translate }}</span>
                   </button>
                   @if (boundary.hasPending) {
                     <button
                       type="button"
-                      class="btn btn-danger btn-sm"
+                      class="toolbar-btn danger"
                       (click)="withdrawTarget.set(boundary)"
                     >
-                      {{ 'member.plotMap.draw.withdraw' | translate }}
+                      <span class="btn-label">{{ 'member.plotMap.draw.withdraw' | translate }}</span>
                     </button>
                   }
                 </div>
@@ -399,16 +423,16 @@
           </div>
         }
         <div class="draw-actions">
-          <button type="button" class="btn btn-secondary btn-sm" (click)="cancelDraw()">
-            {{ 'common.cancel' | translate }}
+          <button type="button" class="toolbar-btn ghost" (click)="cancelDraw()">
+            <span class="btn-label">{{ 'common.cancel' | translate }}</span>
           </button>
           <button
             type="button"
-            class="btn btn-primary btn-sm"
+            class="toolbar-btn primary"
             [disabled]="!validation().valid || saving()"
             (click)="requestSave()"
           >
-            {{ 'common.save' | translate }}
+            <span class="btn-label">{{ 'common.save' | translate }}</span>
           </button>
         </div>
       }
@@ -440,16 +464,16 @@
             </div>
           }
           <div class="draw-actions">
-            <button type="button" class="btn btn-secondary btn-sm" (click)="reportOpen.set(false)">
-              {{ 'common.cancel' | translate }}
+            <button type="button" class="toolbar-btn ghost" (click)="reportOpen.set(false)">
+              <span class="btn-label">{{ 'common.cancel' | translate }}</span>
             </button>
             <button
               type="button"
-              class="btn btn-primary btn-sm"
+              class="toolbar-btn primary"
               [disabled]="!reportNote().trim() || reportSending()"
               (click)="sendReport()"
             >
-              {{ 'member.plotMap.report.send' | translate }}
+              <span class="btn-label">{{ 'member.plotMap.report.send' | translate }}</span>
             </button>
           </div>
         }

@@ -40,6 +40,19 @@ Object.defineProperty(globalThis, 'sessionStorage', {
   value: memoryStorage(),
 });
 
+// jsdom has no ResizeObserver; initMap() attaches one so the map re-measures
+// when the shell's layout settles. The real one fires an initial callback —
+// the test double never fires, so no invalidation happens in tests.
+class ResizeObserverStub {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+Object.defineProperty(globalThis, 'ResizeObserver', {
+  configurable: true,
+  value: ResizeObserverStub,
+});
+
 /**
  * Leaflet + Geoman are replaced with a shared stub so the component suite
  * stays hermetic: no tiles, no real map, no canvas. Only the surface the
@@ -63,6 +76,7 @@ export const L = vi.hoisted(() => {
     off: vi.fn(),
     setView: vi.fn(),
     fitBounds: vi.fn(),
+    invalidateSize: vi.fn(),
     removeLayer: vi.fn(),
     addLayer: vi.fn(),
     remove: vi.fn(),
@@ -88,7 +102,10 @@ export const L = vi.hoisted(() => {
     latLngBounds: vi.fn(() => ({
       pad: vi.fn(() => ({ getCenter: vi.fn(() => ({ lat: 23.809, lng: 90.323 })) })),
     })),
-    control: { layers: vi.fn(() => ({ addTo: vi.fn() })) },
+    control: {
+      layers: vi.fn(() => ({ addTo: vi.fn() })),
+      zoom: vi.fn(() => ({ addTo: vi.fn() })),
+    },
   };
   return stub;
 });
@@ -358,12 +375,12 @@ describe('PlotMapComponent', () => {
     fixture.detectChanges();
     component.openReport();
     fixture.detectChanges();
-    expect((el.querySelector('.modal-card .btn.btn-primary') as HTMLButtonElement).disabled).toBe(
+    expect((el.querySelector('.modal-card .toolbar-btn.primary') as HTMLButtonElement).disabled).toBe(
       true,
     );
     component.reportNote.set('Fence is wrong');
     fixture.detectChanges();
-    const send = el.querySelector<HTMLButtonElement>('.modal-card .btn.btn-primary')!;
+    const send = el.querySelector<HTMLButtonElement>('.modal-card .toolbar-btn.primary')!;
     expect(send.disabled).toBe(false);
     send.click();
     expect(plotMapService.report).toHaveBeenCalledWith(7, 'Fence is wrong');

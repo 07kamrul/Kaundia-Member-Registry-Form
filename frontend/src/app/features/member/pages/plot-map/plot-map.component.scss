@@ -8,36 +8,147 @@
 
 .plot-map-page {
   position: relative;
-  display: flex;
-  flex-direction: column;
   height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
   min-height: 480px;
-  gap: 0.5rem;
 }
 
-.map-toolbar {
+/* Full-bleed map: every control floats over the tiles on glass surfaces so
+   the viewport stays dedicated to the map itself. */
+.map-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-2);
+}
+
+// Frosted panel shared by every floating control.
+.map-topbar,
+.legend,
+.external-status,
+.disclaimer-banner,
+.details-sheet {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--gray-200) 80%, transparent);
+  box-shadow: var(--shadow-md);
+}
+
+.map-topbar {
+  position: absolute;
+  z-index: 900;
+  top: 0.65rem;
+  inset-inline: 0.65rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
 }
 
 .toolbar-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem;
   align-items: center;
+}
+
+// Compact pill button used for every floating action.
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--gray-800);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    background: var(--surface-2);
+    border-color: var(--gray-300);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &.primary {
+    background: var(--emerald-700);
+    border-color: var(--emerald-700);
+    color: #fff;
+
+    &:hover {
+      background: var(--emerald-600);
+      border-color: var(--emerald-600);
+    }
+  }
+
+  &.danger {
+    background: transparent;
+    border-color: var(--red-600);
+    color: var(--red-600);
+
+    &:hover {
+      background: var(--red-50);
+    }
+  }
+
+  &.ghost {
+    background: transparent;
+    box-shadow: none;
+  }
 }
 
 .dag-search {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  flex: 1 1 220px;
-  max-width: 340px;
-  padding: 0.35rem 0.6rem;
+  flex: 1 1 200px;
+  max-width: 360px;
+  min-height: 2.5rem;
+  padding: 0.3rem 0.75rem;
   background: var(--surface);
   border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
+  border-radius: 999px;
+  color: var(--gray-500);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus-within {
+    border-color: var(--emerald-600);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--emerald-600) 18%, transparent);
+  }
 }
 
 .dag-search-input {
@@ -47,6 +158,7 @@
   background: transparent;
   color: var(--gray-800);
   font: inherit;
+  font-size: 0.88rem;
   min-width: 0;
 }
 
@@ -55,8 +167,13 @@
   background: transparent;
   color: var(--gray-600);
   cursor: pointer;
-  padding: 0.15rem;
+  padding: 0.25rem;
   display: inline-flex;
+  border-radius: 50%;
+
+  &:hover {
+    background: var(--surface-2);
+  }
 }
 
 /* Searched dag polygons pulse a few times, then stay solid. Leaflet draws
@@ -75,22 +192,83 @@
   }
 }
 
+// Segmented map view switcher (boundaries / BDS / RAJUK).
+.map-modes {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0.2rem;
+  gap: 0.15rem;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gray-200) 80%, transparent);
+  border-radius: 999px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.map-mode-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.15rem;
+  padding: 0.3rem 0.75rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gray-700);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+
+  &.active {
+    background: var(--emerald-700);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+}
+
 .locate-error {
   margin: 0;
+  padding: 0.35rem 0.7rem;
+  align-self: flex-start;
   font-size: 0.8rem;
   color: var(--red-600);
+  background: color-mix(in srgb, var(--red-50) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red-200) 80%, transparent);
+  border-radius: var(--radius-md);
 }
 
 .disclaimer-banner {
+  position: absolute;
+  z-index: 880;
+  bottom: 3.4rem;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.45rem 0.7rem;
-  background: var(--amber-50);
-  border: 1px solid var(--amber-200);
+  width: min(92%, 560px);
+  padding: 0.5rem 0.75rem;
   border-radius: var(--radius-md);
-  font-size: 0.82rem;
-  color: var(--gray-800);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--gray-700);
+
+  app-icon {
+    flex-shrink: 0;
+    color: var(--gold);
+  }
 }
 
 .disclaimer-text {
@@ -102,26 +280,67 @@
   background: transparent;
   color: var(--gray-600);
   cursor: pointer;
-  padding: 0.15rem;
+  padding: 0.25rem;
   display: inline-flex;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--surface-2);
+  }
 }
 
+// Collapsible legend card, bottom-left.
 .legend {
+  position: absolute;
+  z-index: 880;
+  bottom: 0.75rem;
+  inset-inline-start: 0.75rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-width: min(75%, 15rem);
+}
+
+.legend-toggle {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 0.4rem;
+  width: 100%;
+  min-height: 2.4rem;
+  padding: 0.35rem 0.7rem;
+  border: none;
+  background: transparent;
+  color: var(--gray-800);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: start;
+}
+
+.legend-caret {
+  margin-inline-start: auto;
+  transition: transform 0.2s ease;
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+.legend-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.15rem 0.7rem 0.6rem;
 }
 
 .legend-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   font-size: 0.75rem;
-  padding: 0.2rem 0.55rem;
-  background: var(--surface);
-  border: 1px solid var(--gray-200);
-  border-radius: 999px;
   color: var(--gray-700);
+  white-space: nowrap;
 }
 
 .legend-swatch {
@@ -129,134 +348,53 @@
   height: 0.7rem;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 15%);
 }
 
-.map-wrap {
-  position: relative;
-  flex: 1;
-  min-height: 320px;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.map-canvas {
+.map-notices {
   position: absolute;
-  inset: 0;
+  z-index: 880;
+  bottom: 0.85rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  pointer-events: none;
+  max-width: min(92%, 26rem);
+}
+
+.external-status {
+  pointer-events: auto;
+  max-width: 100%;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  color: var(--gray-700);
+  font-size: 0.8rem;
+
+  &.error {
+    color: var(--red-600);
+    border-color: currentcolor;
+  }
+
+  &.warn {
+    color: var(--gold-strong);
+    border-color: currentcolor;
+  }
 }
 
 .map-loading {
   position: absolute;
   inset: 0;
+  z-index: 700;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 0.5rem;
   padding: 2rem;
   background: var(--surface-2);
-}
-
-// Map view switcher (boundaries / BDS / RAJUK).
-.map-views {
-  position: absolute;
-  z-index: 900;
-  // below Leaflet's zoom control, which shares the top-left corner
-  top: 4.6rem;
-  inset-inline-start: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.map-views-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  color: var(--gray-800);
-  font: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
-}
-
-.map-views-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.4rem;
-  background: var(--surface);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 14px rgb(0 0 0 / 15%);
-}
-
-.map-view-option {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas: 'icon label' 'icon sub';
-  align-items: center;
-  column-gap: 0.45rem;
-  padding: 0.4rem 0.55rem;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--gray-800);
-  font: inherit;
-  font-size: 0.85rem;
-  text-align: start;
-  cursor: pointer;
-
-  app-icon {
-    grid-area: icon;
-  }
-
-  span {
-    grid-area: label;
-  }
-
-  .view-sub {
-    grid-area: sub;
-    font-size: 0.7rem;
-    color: var(--gray-500);
-  }
-
-  &:hover,
-  &.active {
-    background: var(--surface-2);
-  }
-
-  &.active {
-    outline: 1px solid var(--brand-600, var(--gray-400));
-  }
-}
-
-.external-status {
-  position: absolute;
-  z-index: 900;
-  bottom: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--gray-200);
-  color: var(--gray-700);
-  font-size: 0.8rem;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
-
-  &.error {
-    color: var(--danger, #c0392b);
-    border-color: currentcolor;
-  }
-
-  &.warn {
-    color: var(--amber-700, #8a5a00);
-    border-color: currentcolor;
-  }
 }
 
 // Dag-number labels over BDS polygons.
@@ -279,13 +417,32 @@
   z-index: 1000;
   inset-inline: 0.5rem;
   bottom: 0.5rem;
-  background: var(--surface);
-  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 0.9rem 1rem;
-  max-height: 60%;
+  padding: 0.4rem 1rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  max-height: 62%;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: sheet-in 0.22s ease;
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// Mobile bottom-sheet grip.
+.sheet-grip {
+  width: 2.4rem;
+  height: 0.3rem;
+  margin: 0.3rem auto 0.45rem;
+  border-radius: 999px;
+  background: var(--gray-300);
 }
 
 .sheet-head {
@@ -293,30 +450,39 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .sheet-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--gray-800);
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .sheet-close {
   border: none;
-  background: transparent;
-  color: var(--gray-600);
+  background: var(--surface-2);
+  color: var(--gray-700);
   cursor: pointer;
   display: inline-flex;
-  padding: 0.25rem;
+  padding: 0.4rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--gray-200);
+  }
 }
 
 .mine-chip {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.12rem 0.5rem;
   border-radius: 999px;
   background: rgba(30, 102, 208, 0.12);
   color: #1e66d0;
@@ -329,47 +495,106 @@
   padding: 0.25rem 0;
 }
 
-.owner-name {
-  margin: 0 0 0.35rem;
-  font-weight: 600;
-  color: var(--gray-800);
+// Owner identity block: avatar + name + dag chips.
+.owner-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 0.6rem;
 }
 
-.owner-meta,
-.dag-row {
-  margin: 0.15rem 0;
-  font-size: 0.85rem;
-  color: var(--gray-700);
+.owner-avatar {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--emerald-700) 14%, var(--surface));
+  color: var(--emerald-700);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.owner-id {
+  min-width: 0;
+}
+
+.owner-name {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--gray-800);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .meta-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.75rem;
-  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.55rem;
   background: var(--surface-2);
   border-radius: 999px;
   color: var(--gray-700);
+}
+
+.fact-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+  margin: 0 0 0.6rem;
+}
+
+.fact {
+  padding: 0.45rem 0.6rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+
+  dt {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gray-500);
+    margin: 0 0 0.1rem;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--gray-800);
+  }
 }
 
 .contact-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.contact-link {
+  border-color: var(--gray-200);
 }
 
 .contact-hidden {
   font-size: 0.8rem;
   color: var(--gray-500);
-  padding: 0.3rem 0.6rem;
+  padding: 0.35rem 0.7rem;
   background: var(--surface-2);
   border-radius: var(--radius-sm);
 }
 
 .report-row {
   margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--gray-200);
 }
 
 .report-done {
@@ -382,13 +607,14 @@
 }
 
 .draw-panel {
-  max-height: 75%;
+  max-height: 78%;
 }
 
 .draw-hint,
 .draw-empty {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.6rem;
   font-size: 0.85rem;
+  line-height: 1.4;
   color: var(--gray-700);
 }
 
@@ -399,34 +625,60 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 
 .property-option {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.7rem;
   font-size: 0.88rem;
   color: var(--gray-800);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+
+  &.checked {
+    border-color: var(--emerald-600);
+    background: color-mix(in srgb, var(--emerald-700) 8%, var(--surface));
+  }
+
+  input {
+    accent-color: var(--emerald-700);
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.draw-start {
+  width: 100%;
+  justify-content: center;
 }
 
 .mine-heading {
-  margin: 0.5rem 0;
-  font-size: 0.85rem;
-  color: var(--gray-600);
+  margin: 0.75rem 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-500);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .mine-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 0.5rem;
-  padding: 0.4rem 0.55rem;
+  padding: 0.6rem 0.7rem;
   border: 1px solid var(--gray-200);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  background: var(--surface);
 }
 
 .mine-info {
@@ -434,6 +686,7 @@
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .mine-dag {
@@ -445,13 +698,14 @@
 
 .mine-actions {
   display: flex;
-  gap: 0.35rem;
-  flex-shrink: 0;
+  gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .status-chip {
   font-size: 0.68rem;
-  padding: 0.1rem 0.45rem;
+  font-weight: 600;
+  padding: 0.12rem 0.5rem;
   border-radius: 999px;
   white-space: nowrap;
 
@@ -462,12 +716,12 @@
   &.status-pending,
   &.status-pending_review,
   &.status-draft {
-    background: rgba(201, 134, 30, 0.15);
-    color: var(--amber-200);
+    background: rgba(201, 134, 30, 0.16);
+    color: var(--gold-strong);
   }
   &.status-disputed {
     background: rgba(192, 57, 43, 0.15);
-    color: #c0392b;
+    color: var(--red-600);
   }
   &.status-rejected {
     background: rgba(138, 138, 138, 0.18);
@@ -475,10 +729,67 @@
   }
 }
 
+.status-timeline {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.7rem;
+  color: var(--gray-600);
+  flex-wrap: wrap;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    &::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gray-400);
+    }
+
+    &.done::before {
+      background: #2e7d32;
+    }
+
+    &.active::before {
+      background: #c9861e;
+    }
+
+    &.rejected::before {
+      background: #c0392b;
+    }
+
+    &:not(:last-child)::after {
+      content: '';
+      width: 14px;
+      height: 1px;
+      background: var(--gray-400);
+    }
+  }
+}
+
+.pending-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--gold-strong);
+}
+
+.review-note {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--red-600);
+}
+
 .validation-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.35rem;
   margin-bottom: 0.6rem;
 }
 
@@ -534,6 +845,8 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   padding: 1rem 1.1rem;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
 }
 
 .modal-title {
@@ -567,6 +880,8 @@
     border: 1px solid var(--gray-200);
     background: var(--surface);
     color: var(--gray-800);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
   }
 
   .leaflet-control-layers-list label {
@@ -574,9 +889,19 @@
   }
 
   .leaflet-control-attribution {
-    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 85%, transparent);
     color: var(--gray-600);
     font-size: 0.65rem;
+  }
+
+  // Leaflet controls sit above the app's floating panels but below sheets.
+  .leaflet-control-container .leaflet-bottom.leaflet-right {
+    z-index: 850;
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .leaflet-bar a {
+    border-radius: 0;
   }
 }
 
@@ -587,103 +912,136 @@
   }
 
   .leaflet-geoman-draw-toolbar a {
-    min-width: 34px;
-    min-height: 34px;
-    line-height: 34px;
+    min-width: 36px;
+    min-height: 36px;
+    line-height: 36px;
   }
 }
 
-/* Tablet: sheet becomes a card anchored to the clicked plot (bottom sheet on
-   smaller screens). The clamp keeps it inside the map; max-height uses the same
-   clamped top so it never runs past the bottom edge. */
+/* Tablet and up: details sheet becomes a floating card anchored to the clicked
+   plot; the draw panel docks top-left. The clamp keeps the card inside the map
+   and its max-height tracks the clamped top so it never runs past the edge. */
 @media (min-width: 768px) {
-  .details-sheet:not(.draw-panel) {
+  .details-sheet {
     inset-inline: unset;
     left: clamp(0.5rem, var(--sheet-x, 0.75rem), calc(100% - 25.5rem));
     right: auto;
     top: clamp(0.5rem, var(--sheet-y, 0.75rem), calc(100% - 8rem));
     bottom: auto;
-    width: 360px;
+    width: 380px;
     max-height: calc(100% - clamp(0.5rem, var(--sheet-y, 0.75rem), calc(100% - 8rem)) - 0.75rem);
+    padding-top: 0.9rem;
+
+    .sheet-grip {
+      display: none;
+    }
   }
 
   .details-sheet.draw-panel {
-    inset-inline: unset;
     left: 0.75rem;
     right: auto;
-    top: 0.75rem;
-    bottom: auto;
-    width: 360px;
+    top: auto;
+    bottom: 0.75rem;
     max-height: calc(100% - 1.5rem);
+  }
+
+  .fact-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-/* Wide desktop: taller map, roomier sheet. */
+/* Wide desktop: roomier cards. */
 @media (min-width: 1280px) {
   .plot-map-page {
     height: calc(100vh - 72px);
+    height: calc(100dvh - 72px);
   }
 
   .details-sheet {
-    width: 400px;
+    width: 420px;
   }
 }
 
-.status-timeline {
-  display: flex;
-  gap: 0.35rem;
-  align-items: center;
-  list-style: none;
-  margin: 0.45rem 0 0;
-  padding: 0;
-  font-size: 0.7rem;
-  color: var(--gray-600);
-  flex-wrap: wrap;
+/* Phones: hide button labels, keep icons (with aria-labels) so the toolbar
+   fits on one row; larger hit areas. */
+@media (max-width: 640px) {
+  .map-topbar {
+    top: 0.5rem;
+    inset-inline: 0.5rem;
+    padding: 0.45rem;
+  }
 
-  li {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+  .toolbar-btn .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 
-    &::before {
-      content: '';
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--gray-400);
-    }
+  .toolbar-btn {
+    min-width: 2.6rem;
+  }
 
-    &.done::before {
-      background: #2e7d32;
-    }
+  .dag-search {
+    flex: 1 1 100%;
+    max-width: none;
+  }
 
-    &.active::before {
-      background: #c9861e;
-    }
+  .map-mode-tab .btn-label {
+    // Keep the mode labels — they are the primary navigation.
+    display: inline;
+  }
 
-    &.rejected::before {
-      background: #c0392b;
-    }
+  .legend {
+    bottom: auto;
+    top: 7.6rem;
+    max-width: 11rem;
+  }
 
-    &:not(:last-child)::after {
-      content: '';
-      width: 14px;
-      height: 1px;
-      background: var(--gray-400);
-    }
+  .disclaimer-banner {
+    bottom: 4.1rem;
+    width: min(94%, 30rem);
+  }
+
+  .map-notices {
+    bottom: 0.6rem;
+    width: calc(100% - 1.5rem);
+  }
+
+  .details-sheet {
+    inset-inline: 0.4rem;
+    bottom: 0.4rem;
+    max-height: 68%;
   }
 }
 
-.pending-hint {
-  margin: 0.35rem 0 0;
-  font-size: 0.72rem;
-  color: var(--amber-200, #c9861e);
+/* Coarse pointers: everything grows to a comfortable touch target. */
+@media (pointer: coarse) {
+  .toolbar-btn,
+  .map-mode-tab,
+  .dag-search-clear,
+  .sheet-close,
+  .disclaimer-dismiss,
+  .legend-toggle {
+    min-height: 2.75rem;
+  }
+
+  .dag-search {
+    min-height: 2.75rem;
+  }
 }
 
-.review-note {
-  margin: 0.35rem 0 0;
-  font-size: 0.72rem;
-  color: #c0392b;
+/* Reduced motion: no sheet slide, no pulse. */
+@media (prefers-reduced-motion: reduce) {
+  .details-sheet {
+    animation: none;
+  }
+
+  :host ::ng-deep .dag-search-hit {
+    animation: none;
+  }
 }
 
 /* Pulsing dot marking the member's live position (Leaflet divIcon). */
