@@ -5803,4 +5803,266 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boundaryMobile => 'Mobile';
+
+  @override
+  String get plotMapTitle => 'Plot Boundary Map';
+
+  @override
+  String get plotMapLocationError => 'Could not determine your location.';
+
+  @override
+  String get plotMapOutsideSociety =>
+      'You are outside the Uttar Kaundia area — showing the society map instead.';
+
+  @override
+  String get plotMapLegend => 'Legend';
+
+  @override
+  String get plotMapStatusDraft => 'Draft';
+
+  @override
+  String get plotMapStatusPendingReview => 'Pending review';
+
+  @override
+  String get plotMapStatusApproved => 'Approved';
+
+  @override
+  String get plotMapStatusMine => 'Mine';
+
+  @override
+  String get plotMapStatusRejected => 'Rejected';
+
+  @override
+  String get plotMapStatusDisputed => 'Disputed';
+
+  @override
+  String get plotMapStatusPending => 'Waiting for approval';
+
+  @override
+  String get plotMapStatusSuperseded => 'Superseded';
+
+  @override
+  String get plotMapStatusWithdrawn => 'Withdrawn';
+
+  @override
+  String get plotMapStatusDeleted => 'Deleted';
+
+  @override
+  String get plotMapDetailsTitle => 'Plot details';
+
+  @override
+  String get plotMapDetailsLandQuantity => 'Declared land';
+
+  @override
+  String get plotMapDetailsArea => 'Computed area';
+
+  @override
+  String get plotMapDetailsShotangsho => 'শতাংশ';
+
+  @override
+  String get plotMapDetailsContactHidden => 'Contact hidden';
+
+  @override
+  String get plotMapOwnerRateLimited =>
+      'Too many lookups - please wait a moment and try again.';
+
+  @override
+  String get plotMapOwnerNotApproved =>
+      'This boundary is not approved yet, so owner details are unavailable.';
+
+  @override
+  String get plotMapOwnerLoadError => 'Could not load owner details.';
+
+  @override
+  String get plotMapDrawOpen => 'Draw boundary';
+
+  @override
+  String get plotMapDrawTitle => 'Draw your plot boundary';
+
+  @override
+  String get plotMapDrawEditTitle => 'Edit my boundary';
+
+  @override
+  String get plotMapDrawPickHint =>
+      'Choose one of your properties that has no boundary yet, then draw its outline on the map.';
+
+  @override
+  String get plotMapDrawNoProperties =>
+      'None of your properties is available for drawing - either all have boundaries already or no property is registered.';
+
+  @override
+  String get plotMapDrawStart => 'Draw on map';
+
+  @override
+  String get plotMapDrawMyBoundaries => 'My boundaries';
+
+  @override
+  String get plotMapDrawEdit => 'Edit';
+
+  @override
+  String get plotMapDrawErrorsInvalidGeometry =>
+      'The drawn shape is not a valid polygon.';
+
+  @override
+  String get plotMapDrawErrorsSelfIntersecting =>
+      'The outline crosses itself - fix the overlapping part and try again.';
+
+  @override
+  String get plotMapDrawErrorsOutsideSocietyArea =>
+      'The outline goes outside the society area.';
+
+  @override
+  String get plotMapDrawErrorsZeroArea =>
+      'The drawn shape has no area - add more points.';
+
+  @override
+  String get plotMapDrawErrorsTooManyVertices =>
+      'Too many points - simplify the outline.';
+
+  @override
+  String get plotMapDrawErrorsNotYourProperty =>
+      'This property does not belong to your account.';
+
+  @override
+  String get plotMapDrawErrorsBoundaryExists =>
+      'This property already has a boundary.';
+
+  @override
+  String get plotMapDrawErrorsGeneric =>
+      'Could not save the boundary. Please try again.';
+
+  @override
+  String get plotMapDrawWithdraw => 'Withdraw submission';
+
+  @override
+  String get plotMapDrawWithdrawTitle => 'Withdraw submission?';
+
+  @override
+  String get plotMapDrawWithdrawMessage =>
+      'Your pending submission will be marked withdrawn. Any approved shape stays live.';
+
+  @override
+  String get plotMapDrawReplaceTitle => 'Replace pending submission?';
+
+  @override
+  String get plotMapDrawReplaceMessage =>
+      'A submission is already awaiting review. Saving now replaces it with this shape.';
+
+  @override
+  String get plotMapValidationSelfIntersection =>
+      'The outline crosses itself - fix the highlighted overlap.';
+
+  @override
+  String get plotMapValidationOutsideSociety =>
+      'Part of the outline is outside the society area.';
+
+  @override
+  String get plotMapValidationAreaMismatch =>
+      'The drawn area differs a lot from your declared land quantity.';
+
+  @override
+  String get plotMapValidationArea => 'Drawn area';
+
+  @override
+  String get plotMapValidationOk => 'The outline looks valid.';
+
+  @override
+  String get plotMapViewsTitle => 'Map views';
+
+  @override
+  String get plotMapViewsBoundaries => 'My plot boundary map';
+
+  @override
+  String get plotMapViewsBoundariesHint => 'Member-marked boundaries';
+
+  @override
+  String get plotMapViewsBds => 'BDS dag map';
+
+  @override
+  String get plotMapViewsBdsHint => 'Official mouza plot map';
+
+  @override
+  String get plotMapViewsRajuk => 'RAJUK masterplan (DAP)';
+
+  @override
+  String get plotMapViewsRajukHint => 'DAP RS plots of Uttar Kaundia';
+
+  @override
+  String get plotMapViewsLoading => 'Loading official map data…';
+
+  @override
+  String get plotMapViewsLoadError =>
+      'Could not load the official map data. Please try again later.';
+
+  @override
+  String get plotMapViewsPartialData =>
+      'Not all plots could be loaded for this view — zoom in to load the rest.';
+
+  @override
+  String get plotMapViewsBdsSearchPlaceholder => 'Search by BDS dag number';
+
+  @override
+  String get plotMapViewsRsSearchPlaceholder => 'Search by RS dag number';
+
+  @override
+  String get plotMapViewsDagNotFound => 'No plot found with this dag number.';
+
+  @override
+  String get plotMapViewsBdsInfoTitle => 'Dag / plot information';
+
+  @override
+  String get plotMapViewsDagNoLabel => 'Dag / plot no';
+
+  @override
+  String get plotMapViewsSurveyTypeLabel => 'Survey type';
+
+  @override
+  String get plotMapViewsSurveyTypeValue => 'BDS (2019) — Viti survey';
+
+  @override
+  String get plotMapViewsMouzaNameLabel => 'Mouza';
+
+  @override
+  String get plotMapViewsMouzaNameValue => 'Uttar Kaundia, Savar, Dhaka';
+
+  @override
+  String get plotMapViewsSheetNoLabel => 'Sheet no';
+
+  @override
+  String get plotMapViewsAreaLabel => 'Land area (hectare)';
+
+  @override
+  String get plotMapViewsKhatianNote =>
+      'Khatian and ownership details are not available in this app. Verify them on the official settlement portal.';
+
+  @override
+  String get plotMapViewsMouzaLabel => 'Mouza: Uttar Kaundia';
+
+  @override
+  String get plotMapViewsThanaLabel => 'Savar Upazila, Dhaka';
+
+  @override
+  String get plotMapViewsRsPlotNo => 'RS Plot No';
+
+  @override
+  String get plotMapViewsRsJlNo => 'RS JL No';
+
+  @override
+  String get plotMapViewsStreetView => 'Google Street View';
+
+  @override
+  String get plotMapTimelineSubmitted => 'Submitted';
+
+  @override
+  String get plotMapTimelineUnderReview => 'Under review';
+
+  @override
+  String get plotMapTimelineApproved => 'Approved';
+
+  @override
+  String get plotMapTimelinePendingHint =>
+      'Others will see this after the admin verifies it.';
+
+  @override
+  String get plotMapTimelineRejectionNote => 'Admin\'s note';
 }

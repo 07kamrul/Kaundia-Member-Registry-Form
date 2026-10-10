@@ -110,6 +110,15 @@ export function normalizeDagNo(value: string): string {
   return toAsciiDigits(value).trim().toUpperCase().replace(/^RS-?/, '');
 }
 
+/** Escapes text interpolated into the runtime-built Leaflet popup HTML. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export function boundaryErrorKey(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
     const code =
@@ -214,7 +223,6 @@ export class PlotMapComponent implements AfterViewInit {
   // Map view modes: member boundaries (default), official BDS mouza map,
   // RAJUK DAP masterplan.
   readonly mapMode = signal<PlotMapMode>('boundaries');
-  readonly viewsOpen = signal(false);
   readonly externalLoading = signal(false);
   readonly externalError = signal(false);
   /** Server had more plots than the response cap — warn instead of losing them silently. */
@@ -445,10 +453,8 @@ export class PlotMapComponent implements AfterViewInit {
 
   selectMapMode(mode: PlotMapMode): void {
     if (this.mapMode() === mode) {
-      this.viewsOpen.set(false);
-      return;
+        return;
     }
-    this.viewsOpen.set(false);
     this.cancelDraw();
     this.closeSheet();
     this.externalError.set(false);
@@ -482,10 +488,6 @@ export class PlotMapComponent implements AfterViewInit {
         this.rajukSub = null;
       }
     }
-  }
-
-  toggleViews(): void {
-    this.viewsOpen.update((open) => !open);
   }
 
   private loadBdsMouza(): void {
@@ -528,7 +530,7 @@ export class PlotMapComponent implements AfterViewInit {
       onEachFeature: (feature, layer) =>
         layer.bindPopup(
           this.bdsPopupHtml(feature as LandPlotFeature, layer as L.Polygon),
-          { maxWidth: 340, minWidth: 250 },
+          { maxWidth: 460, minWidth: 280 },
         ),
     }).addTo(map);
     this.updateBdsLabels();
@@ -574,37 +576,90 @@ export class PlotMapComponent implements AfterViewInit {
     this.bdsLayer = null;
   }
 
-  /** Settlement-portal style dag information card (mirrors settlement.gov.bd). */
-  private bdsPopupHtml(feature: LandPlotFeature, layer: L.Polygon): string {
+  /** Settlement-portal style dag information card (mirrors settlement.gov.bd):
+   * blue title bar, orange section headings, a land info table and a khatian
+   * table whose rows come from public/data/khatians.json. */
+  private bdsPopupHtml(feature: LandPlotFeature, layer: L.Polygon): HTMLElement {
     const props = feature.properties ?? {};
-    const dag = this.digits(props.dag ?? props.label_bn ?? '');
-    const sheet = this.digits(props.sheet ?? '');
-    const t = (key: string) => this.translate.instant(`member.plotMap.views.${key}`);
+    const dagRaw = String(props.dag ?? props.label_bn ?? '');
+    const dag = this.digits(dagRaw);
+    const t = (key: string, params?: Record<string, unknown>) =>
+      this.translate.instant(`member.plotMap.views.${key}`, params);
     const areaHectare =
       typeof props.area_sqm === 'number' && props.area_sqm > 0
         ? this.digits((props.area_sqm / 10_000).toFixed(4))
         : '—';
     const center = layer.getBounds().getCenter();
     const streetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${center.lat},${center.lng}`;
-    const row = (labelKey: string, value: string) => `
-      <tr><th scope="row">${t(labelKey)}</th><td>${value}</td></tr>`;
-    return `
-      <div class="bds-popup">
-        <h3 class="bds-popup-title">${t('bdsInfoTitle')}</h3>
+
+    const root = document.createElement('div');
+    root.className = 'bds-popup';
+    root.innerHTML = `
+      <div class="bds-popup-header">${escapeHtml(t('bdsHeader', { dag }))}</div>
+      <div class="bds-popup-body">
+        <h4 class="bds-popup-section">${escapeHtml(t('landInfoSection'))}</h4>
         <table class="bds-popup-table">
           <tbody>
-            ${row('dagNoLabel', dag)}
-            ${row('surveyTypeLabel', t('surveyTypeValue'))}
-            ${row('mouzaNameLabel', t('mouzaNameValue'))}
-            ${row('sheetNoLabel', sheet)}
-            ${row('areaLabel', areaHectare)}
+            <tr><th scope="row">${escapeHtml(t('dagNoLabel'))}</th><td>${escapeHtml(dag)}</td></tr>
+            <tr><th scope="row">${escapeHtml(t('surveyTypeLabel'))}</th><td>${escapeHtml(t('surveyTypeValue'))}</td></tr>
+            <tr><th scope="row">${escapeHtml(t('mouzaNameLabel'))}</th><td>${escapeHtml(t('mouzaNameValue'))}</td></tr>
+            <tr><th scope="row">${escapeHtml(t('areaLabel'))}</th><td>${escapeHtml(areaHectare)}</td></tr>
           </tbody>
         </table>
-        <p class="bds-popup-note">${t('khatianNote')}</p>
-        <a class="bds-popup-link" href="${streetView}" target="_blank" rel="noopener noreferrer">
-          ${t('streetView')}
-        </a>
+        <h4 class="bds-popup-section">${escapeHtml(t('khatianSection'))}</h4>
+        <table class="bds-popup-table bds-khatian-table">
+          <thead>
+            <tr>
+              <th>${escapeHtml(t('khatianNoLabel'))}</th>
+              <th>${escapeHtml(t('ownerNameLabel'))}</th>
+              <th>${escapeHtml(t('currentShareLabel'))}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="3" class="bds-khatian-loading">${escapeHtml(t('khatianLoading'))}</td></tr>
+          </tbody>
+        </table>
+        <div class="bds-popup-footer">
+          <a class="bds-popup-link" href="${streetView}" target="_blank" rel="noopener noreferrer">
+            ${escapeHtml(t('streetView'))}
+          </a>
+          <button type="button" class="bds-popup-close">${escapeHtml(t('closeBtn'))}</button>
+        </div>
       </div>`;
+    root.querySelector('.bds-popup-close')?.addEventListener('click', () => {
+      this.map?.closePopup();
+    });
+
+    const tbody = root.querySelector('.bds-khatian-table tbody');
+    this.landDataService
+      .khatians()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (catalog) => {
+          const entries = catalog[normalizeDagNo(dagRaw)];
+          if (!tbody) return;
+          if (!entries?.length) {
+            tbody.innerHTML = `
+              <tr><td colspan="3" class="bds-khatian-note">${escapeHtml(t('khatianNote'))}</td></tr>`;
+            return;
+          }
+          tbody.innerHTML = entries
+            .map((entry) => {
+              const owners = entry.owners.length ? entry.owners : [''];
+              const span = owners.length;
+              const noCell = `<td rowspan="${span}" class="bds-khatian-no">${escapeHtml(this.digits(entry.no))}</td>`;
+              const statusCell = `<td rowspan="${span}" class="bds-khatian-status">${escapeHtml(entry.status)}</td>`;
+              const rows = owners.map(
+                (name) => `<tr><td>${escapeHtml(name)}</td></tr>`,
+              );
+              rows[0] = rows[0].replace('<tr>', `<tr>${noCell}`);
+              rows[0] = rows[0].replace('</tr>', `${statusCell}</tr>`);
+              return rows.join('');
+            })
+            .join('');
+        },
+      });
+    return root;
   }
 
   private loadRajukPlots(): void {

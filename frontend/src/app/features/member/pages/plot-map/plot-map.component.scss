@@ -33,7 +33,7 @@
 .external-status,
 .disclaimer-banner,
 .details-sheet {
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid color-mix(in srgb, var(--gray-200) 80%, transparent);
@@ -940,9 +940,9 @@
   .details-sheet.draw-panel {
     left: 0.75rem;
     right: auto;
-    top: auto;
-    bottom: 0.75rem;
-    max-height: calc(100% - 1.5rem);
+    top: 8.2rem;
+    bottom: auto;
+    max-height: calc(100% - 9rem);
   }
 
   .fact-grid {
@@ -996,7 +996,7 @@
 
   .legend {
     bottom: auto;
-    top: 7.6rem;
+    top: 11.5rem;
     max-width: 11rem;
   }
 

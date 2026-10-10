@@ -40,7 +40,21 @@ class AppConfig {
   );
 
   /// Society extent as `minLng,minLat,maxLng,maxLat` (plot-map initial camera
-  /// and client-side inside-society validation). Empty when not configured.
-  static const String societyBboxRaw =
-      String.fromEnvironment('SOCIETY_BBOX', defaultValue: '');
+  /// and client-side inside-society validation). Defaults to the society extent.
+  static const String societyBboxRaw = String.fromEnvironment(
+    'SOCIETY_BBOX',
+    defaultValue: defaultSocietyBbox,
+  );
+
+  /// Uttar Kaundia society extent (mirrors Angular `environment.societyBbox`).
+  static const String defaultSocietyBbox = '90.3000,23.7800,90.3470,23.8380';
+
+  /// Society centre and default zoom (mirrors Angular SOCIETY_CENTER / z14).
+  static const double societyCenterLat = 23.809;
+  static const double societyCenterLng = 90.323;
+  static const double societyDefaultZoom = 14;
+
+  /// Uttar Kaundia mouza centre (mirrors Angular MOUZA_CENTER).
+  static const double mouzaCenterLat = 23.7985;
+  static const double mouzaCenterLng = 90.3325;
 }

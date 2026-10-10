@@ -5792,4 +5792,267 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get boundaryMobile => 'মোবাইল';
+
+  @override
+  String get plotMapTitle => 'জমির সীমানা ম্যাপ';
+
+  @override
+  String get plotMapLocationError => 'আপনার অবস্থান নির্ধারণ করা যায়নি।';
+
+  @override
+  String get plotMapOutsideSociety =>
+      'আপনি উত্তর কাউন্দিয়া এলাকার বাইরে আছেন — পরিবর্তে সোসাইটির মানচিত্র দেখানো হচ্ছে।';
+
+  @override
+  String get plotMapLegend => 'রংয়ের নির্দেশ';
+
+  @override
+  String get plotMapStatusDraft => 'খসড়া';
+
+  @override
+  String get plotMapStatusPendingReview => 'পর্যালোচনার অপেক্ষায়';
+
+  @override
+  String get plotMapStatusApproved => 'অনুমোদিত';
+
+  @override
+  String get plotMapStatusMine => 'আমার';
+
+  @override
+  String get plotMapStatusRejected => 'বাতিল';
+
+  @override
+  String get plotMapStatusDisputed => 'মতবিরোধ';
+
+  @override
+  String get plotMapStatusPending => 'অনুমোদনের অপেক্ষায়';
+
+  @override
+  String get plotMapStatusSuperseded => 'পরিবর্তিত';
+
+  @override
+  String get plotMapStatusWithdrawn => 'প্রত্যাহৃত';
+
+  @override
+  String get plotMapStatusDeleted => 'মুছে ফেলা';
+
+  @override
+  String get plotMapDetailsTitle => 'প্লটের বিবরণ';
+
+  @override
+  String get plotMapDetailsLandQuantity => 'ঘোষিত জমি';
+
+  @override
+  String get plotMapDetailsArea => 'নির্ধারিত আয়তন';
+
+  @override
+  String get plotMapDetailsShotangsho => 'শতাংশ';
+
+  @override
+  String get plotMapDetailsContactHidden => 'যোগাযোগ গোপন';
+
+  @override
+  String get plotMapOwnerRateLimited =>
+      'অনেক বেশি অনুরোধ - কিছুক্ষণ পর আবার চেষ্টা করুন।';
+
+  @override
+  String get plotMapOwnerNotApproved =>
+      'এই সীমানা এখনো অনুমোদিত নয়, তাই মালিকের তথ্য দেখা যাচ্ছে না।';
+
+  @override
+  String get plotMapOwnerLoadError => 'মালিকের তথ্য লোড করা যায়নি।';
+
+  @override
+  String get plotMapDrawOpen => 'সীমানা আঁকুন';
+
+  @override
+  String get plotMapDrawTitle => 'আপনার প্লটের সীমানা আঁকুন';
+
+  @override
+  String get plotMapDrawEditTitle => 'আমার সীমানা সম্পাদনা';
+
+  @override
+  String get plotMapDrawPickHint =>
+      'যে সম্পত্তিতে এখনো সীমানা নেই সেটি বেছে নিয়ে ম্যাপে সীমানা আঁকুন।';
+
+  @override
+  String get plotMapDrawNoProperties =>
+      'আঁকার জন্য কোনো সম্পত্তি পাওয়া যায়নি - সবগুলোতেই সীমানা আছে অথবা কোনো সম্পত্তি নিবন্ধিত নয়।';
+
+  @override
+  String get plotMapDrawStart => 'ম্যাপে আঁকুন';
+
+  @override
+  String get plotMapDrawMyBoundaries => 'আমার সীমানাসমূহ';
+
+  @override
+  String get plotMapDrawEdit => 'সম্পাদনা';
+
+  @override
+  String get plotMapDrawErrorsInvalidGeometry => 'আঁকা আকৃতিটি বৈধ বহুভুজ নয়।';
+
+  @override
+  String get plotMapDrawErrorsSelfIntersecting =>
+      'সীমারেখা নিজেকে ছেদ করেছে - ছেদাংশ ঠিক করে আবার চেষ্টা করুন।';
+
+  @override
+  String get plotMapDrawErrorsOutsideSocietyArea =>
+      'সীমারেখার কিছু অংশ সোসাইটির সীমার বাইরে চলে গেছে।';
+
+  @override
+  String get plotMapDrawErrorsZeroArea =>
+      'আঁকা আকৃতির ক্ষেত্রফল শূন্য - আরও পয়েন্ট যোগ করুন।';
+
+  @override
+  String get plotMapDrawErrorsTooManyVertices =>
+      'অনেক বেশি পয়েন্ট - সীমারেখা সরল করুন।';
+
+  @override
+  String get plotMapDrawErrorsNotYourProperty =>
+      'এই সম্পত্তিটি আপনার অ্যাকাউন্টের নয়।';
+
+  @override
+  String get plotMapDrawErrorsBoundaryExists =>
+      'এই সম্পত্তিতে ইতিমধ্যে একটি সীমানা আছে।';
+
+  @override
+  String get plotMapDrawErrorsGeneric =>
+      'সীমানা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get plotMapDrawWithdraw => 'জমা প্রত্যাহার';
+
+  @override
+  String get plotMapDrawWithdrawTitle => 'জমা প্রত্যাহার করবেন?';
+
+  @override
+  String get plotMapDrawWithdrawMessage =>
+      'অপেক্ষমাণ জমাটি প্রত্যাহৃত হিসেবে চিহ্নিত হবে। অনুমোদিত সীমানা অপরিবর্তিত থাকবে।';
+
+  @override
+  String get plotMapDrawReplaceTitle => 'অপেক্ষমাণ জমা প্রতিস্থাপন করবেন?';
+
+  @override
+  String get plotMapDrawReplaceMessage =>
+      'একটি জমা ইতিমধ্যে যাচাইয়ের অপেক্ষায় আছে। এখন সংরক্ষণ করলে এই আকার তা প্রতিস্থাপন করবে।';
+
+  @override
+  String get plotMapValidationSelfIntersection =>
+      'সীমারেখা নিজেকে ছেদ করেছে - ছেদাংশ ঠিক করুন।';
+
+  @override
+  String get plotMapValidationOutsideSociety =>
+      'সীমারেখার কিছু অংশ সোসাইটির সীমার বাইরে।';
+
+  @override
+  String get plotMapValidationAreaMismatch =>
+      'আঁকা এলাকা আপনার ঘোষিত জমির পরিমাণের সাথে অনেক মিলছে না।';
+
+  @override
+  String get plotMapValidationArea => 'আঁকা এলাকা';
+
+  @override
+  String get plotMapValidationOk => 'সীমারেখাটি ঠিক আছে।';
+
+  @override
+  String get plotMapViewsTitle => 'ম্যাপ ভিউ';
+
+  @override
+  String get plotMapViewsBoundaries => 'আমার প্লট সীমানা ম্যাপ';
+
+  @override
+  String get plotMapViewsBoundariesHint => 'সদস্য চিহ্নিত সীমানা';
+
+  @override
+  String get plotMapViewsBds => 'বিডিএস ড্যাগ ম্যাপ';
+
+  @override
+  String get plotMapViewsBdsHint => 'সরকারি মৌজা প্লট ম্যাপ';
+
+  @override
+  String get plotMapViewsRajuk => 'রাজউক মাস্টারপ্ল্যান (ডিএপি)';
+
+  @override
+  String get plotMapViewsRajukHint => 'উত্তর কাউন্দিয়ার ডিএপি আরএস প্লট';
+
+  @override
+  String get plotMapViewsLoading => 'সরকারি ম্যাপ ডেটা লোড হচ্ছে…';
+
+  @override
+  String get plotMapViewsLoadError =>
+      'সরকারি ম্যাপ ডেটা লোড করা যায়নি। পরে আবার চেষ্টা করুন।';
+
+  @override
+  String get plotMapViewsPartialData =>
+      'এই ভিউতে সব প্লট লোড হয়নি — বাকিগুলো দেখতে ম্যাপে জুম ইন করুন।';
+
+  @override
+  String get plotMapViewsBdsSearchPlaceholder =>
+      'বিডিএস দাগ নম্বর দিয়ে খুঁজুন';
+
+  @override
+  String get plotMapViewsRsSearchPlaceholder => 'আরএস দাগ নম্বর দিয়ে খুঁজুন';
+
+  @override
+  String get plotMapViewsDagNotFound =>
+      'এই দাগ নম্বরে কোনো প্লট পাওয়া যায়নি।';
+
+  @override
+  String get plotMapViewsBdsInfoTitle => 'দাগ/প্লট তথ্য বিবরণ';
+
+  @override
+  String get plotMapViewsDagNoLabel => 'দাগ/প্লট নম্বর';
+
+  @override
+  String get plotMapViewsSurveyTypeLabel => 'সার্ভের ধরণ';
+
+  @override
+  String get plotMapViewsSurveyTypeValue => 'ভিটি জরিপ (বিডিএস) ২০১৯';
+
+  @override
+  String get plotMapViewsMouzaNameLabel => 'মৌজা';
+
+  @override
+  String get plotMapViewsMouzaNameValue => 'উত্তর কাউন্দিয়া, সাভার, ঢাকা';
+
+  @override
+  String get plotMapViewsSheetNoLabel => 'শীট নম্বর';
+
+  @override
+  String get plotMapViewsAreaLabel => 'জমির পরিমাণ (হেক্টর)';
+
+  @override
+  String get plotMapViewsKhatianNote =>
+      'খতিয়ান ও মালিকানার তথ্য এই অ্যাপে নেই। সরকারি সেটেলমেন্ট পোর্টালে যাচাই করুন।';
+
+  @override
+  String get plotMapViewsMouzaLabel => 'মৌজা: উত্তর কাউন্দিয়া';
+
+  @override
+  String get plotMapViewsThanaLabel => 'সাভার উপজেলা, ঢাকা';
+
+  @override
+  String get plotMapViewsRsPlotNo => 'আরএস প্লট নং';
+
+  @override
+  String get plotMapViewsRsJlNo => 'আরএস জেএল নং';
+
+  @override
+  String get plotMapViewsStreetView => 'গুগল স্ট্রিট ভিউ';
+
+  @override
+  String get plotMapTimelineSubmitted => 'জমা দেওয়া হয়েছে';
+
+  @override
+  String get plotMapTimelineUnderReview => 'যাচাই চলছে';
+
+  @override
+  String get plotMapTimelineApproved => 'অনুমোদিত';
+
+  @override
+  String get plotMapTimelinePendingHint =>
+      'অ্যাডমিন যাচাই করার পর অন্যরা এটি দেখতে পারবেন।';
+
+  @override
+  String get plotMapTimelineRejectionNote => 'অ্যাডমিনের মন্তব্য';
 }

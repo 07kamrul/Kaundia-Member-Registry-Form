@@ -3399,21 +3399,42 @@ a {
 /* ==========================================================================
    BDS dag info popup (Leaflet popup content is built at runtime, so the
    styles must live here next to the global Leaflet CSS — component scoping
-   never reaches it). Mirrors the settlement.gov.bd dag-detail card.
+   never reaches it). Mirrors the settlement.gov.bd dag-detail card: blue
+   title bar, orange section headings, bordered info tables.
    ========================================================================== */
 
 /* Colors are fixed (not theme tokens): the Leaflet popup wrapper is always
    white, so dark-mode tokens would render light text on white. */
 .bds-popup {
   font-size: 0.85rem;
-  color: #1a2a20;
+  color: #1c2833;
 }
 
-.bds-popup-title {
-  margin: 0 0 0.6rem;
-  font-size: 0.95rem;
+.bds-popup-header {
+  margin: -0.75rem -1rem 0.9rem;
+  padding: 0.65rem 2.2rem 0.65rem 0.9rem;
+  background: linear-gradient(180deg, #4aa0e0 0%, #2172bf 100%);
+  border-radius: var(--radius-md, 8px) var(--radius-md, 8px) 0 0;
+  color: #fff;
   font-weight: 700;
-  color: #1f3d2a;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Leaflet's built-in close × sits on the blue bar — make it read as the
+   portal's dark round close button. */
+.leaflet-popup-content-wrapper:has(.bds-popup) .leaflet-popup-close-button {
+  color: #fff;
+  font-size: 1.15rem;
+  padding: 0.35rem 0.5rem 0 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.bds-popup-section {
+  margin: 0.9rem 0 0.45rem;
+  color: #e8a33d;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .bds-popup-table {
@@ -3422,42 +3443,85 @@ a {
 
   th,
   td {
-    border: 1px solid #e2dbc5;
-    padding: 0.4rem 0.55rem;
+    border: 1px solid #c9d3de;
+    padding: 0.45rem 0.6rem;
     text-align: left;
     vertical-align: top;
     word-break: break-word;
   }
 
-  th {
-    width: 45%;
-    font-weight: 600;
-    color: #47564a;
-    background: #faf8f1;
+  thead th {
+    background: #dfe6ee;
+    font-weight: 700;
+    text-align: center;
+    color: #1c2833;
   }
 
-  td {
+  tbody th {
+    width: 45%;
     font-weight: 600;
-    color: #1a2a20;
+    color: #3d4a56;
+    background: #f4f7fa;
+  }
+
+  tbody td {
+    font-weight: 600;
+    color: #1c2833;
     font-variant-numeric: tabular-nums;
+  }
+
+  tbody tr:nth-child(even) > * {
+    background: #f9fbfd;
   }
 }
 
-.bds-popup-note {
-  margin: 0.6rem 0;
-  padding: 0.45rem 0.55rem;
-  border-radius: var(--radius-sm);
-  background: #f1e4c3;
-  border: 1px solid #c9a34c;
-  color: #47564a;
-  font-size: 0.78rem;
-  line-height: 1.5;
+/* Khatian table: the number and share cells span all owner rows. */
+.bds-khatian-table {
+  .bds-khatian-no,
+  .bds-khatian-status {
+    text-align: center;
+    vertical-align: middle;
+    background: #fff;
+  }
+
+  .bds-khatian-status {
+    min-width: 5.5rem;
+  }
+
+  .bds-khatian-loading,
+  .bds-khatian-note {
+    font-weight: 500;
+    color: #4a5866;
+    background: #fdf6e7;
+  }
+}
+
+.bds-popup-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.bds-popup-close {
+  padding: 0.45rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  background: #64748b;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #475569;
+  }
 }
 
 .bds-popup-link {
-  display: inline-block;
   font-weight: 700;
-  color: #1f3d2a;
+  color: #2172bf;
 }
 
 /* The plot boundary map is a full-bleed page: the shell's centered max-width

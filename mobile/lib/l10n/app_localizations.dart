@@ -10741,6 +10741,486 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'মোবাইল'**
   String get boundaryMobile;
+
+  /// No description provided for @plotMapTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমির সীমানা ম্যাপ'**
+  String get plotMapTitle;
+
+  /// No description provided for @plotMapLocationError.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনার অবস্থান নির্ধারণ করা যায়নি।'**
+  String get plotMapLocationError;
+
+  /// No description provided for @plotMapOutsideSociety.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনি উত্তর কাউন্দিয়া এলাকার বাইরে আছেন — পরিবর্তে সোসাইটির মানচিত্র দেখানো হচ্ছে।'**
+  String get plotMapOutsideSociety;
+
+  /// No description provided for @plotMapLegend.
+  ///
+  /// In bn, this message translates to:
+  /// **'রংয়ের নির্দেশ'**
+  String get plotMapLegend;
+
+  /// No description provided for @plotMapStatusDraft.
+  ///
+  /// In bn, this message translates to:
+  /// **'খসড়া'**
+  String get plotMapStatusDraft;
+
+  /// No description provided for @plotMapStatusPendingReview.
+  ///
+  /// In bn, this message translates to:
+  /// **'পর্যালোচনার অপেক্ষায়'**
+  String get plotMapStatusPendingReview;
+
+  /// No description provided for @plotMapStatusApproved.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনুমোদিত'**
+  String get plotMapStatusApproved;
+
+  /// No description provided for @plotMapStatusMine.
+  ///
+  /// In bn, this message translates to:
+  /// **'আমার'**
+  String get plotMapStatusMine;
+
+  /// No description provided for @plotMapStatusRejected.
+  ///
+  /// In bn, this message translates to:
+  /// **'বাতিল'**
+  String get plotMapStatusRejected;
+
+  /// No description provided for @plotMapStatusDisputed.
+  ///
+  /// In bn, this message translates to:
+  /// **'মতবিরোধ'**
+  String get plotMapStatusDisputed;
+
+  /// No description provided for @plotMapStatusPending.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনুমোদনের অপেক্ষায়'**
+  String get plotMapStatusPending;
+
+  /// No description provided for @plotMapStatusSuperseded.
+  ///
+  /// In bn, this message translates to:
+  /// **'পরিবর্তিত'**
+  String get plotMapStatusSuperseded;
+
+  /// No description provided for @plotMapStatusWithdrawn.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্রত্যাহৃত'**
+  String get plotMapStatusWithdrawn;
+
+  /// No description provided for @plotMapStatusDeleted.
+  ///
+  /// In bn, this message translates to:
+  /// **'মুছে ফেলা'**
+  String get plotMapStatusDeleted;
+
+  /// No description provided for @plotMapDetailsTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্লটের বিবরণ'**
+  String get plotMapDetailsTitle;
+
+  /// No description provided for @plotMapDetailsLandQuantity.
+  ///
+  /// In bn, this message translates to:
+  /// **'ঘোষিত জমি'**
+  String get plotMapDetailsLandQuantity;
+
+  /// No description provided for @plotMapDetailsArea.
+  ///
+  /// In bn, this message translates to:
+  /// **'নির্ধারিত আয়তন'**
+  String get plotMapDetailsArea;
+
+  /// No description provided for @plotMapDetailsShotangsho.
+  ///
+  /// In bn, this message translates to:
+  /// **'শতাংশ'**
+  String get plotMapDetailsShotangsho;
+
+  /// No description provided for @plotMapDetailsContactHidden.
+  ///
+  /// In bn, this message translates to:
+  /// **'যোগাযোগ গোপন'**
+  String get plotMapDetailsContactHidden;
+
+  /// No description provided for @plotMapOwnerRateLimited.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনেক বেশি অনুরোধ - কিছুক্ষণ পর আবার চেষ্টা করুন।'**
+  String get plotMapOwnerRateLimited;
+
+  /// No description provided for @plotMapOwnerNotApproved.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই সীমানা এখনো অনুমোদিত নয়, তাই মালিকের তথ্য দেখা যাচ্ছে না।'**
+  String get plotMapOwnerNotApproved;
+
+  /// No description provided for @plotMapOwnerLoadError.
+  ///
+  /// In bn, this message translates to:
+  /// **'মালিকের তথ্য লোড করা যায়নি।'**
+  String get plotMapOwnerLoadError;
+
+  /// No description provided for @plotMapDrawOpen.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা আঁকুন'**
+  String get plotMapDrawOpen;
+
+  /// No description provided for @plotMapDrawTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনার প্লটের সীমানা আঁকুন'**
+  String get plotMapDrawTitle;
+
+  /// No description provided for @plotMapDrawEditTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'আমার সীমানা সম্পাদনা'**
+  String get plotMapDrawEditTitle;
+
+  /// No description provided for @plotMapDrawPickHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'যে সম্পত্তিতে এখনো সীমানা নেই সেটি বেছে নিয়ে ম্যাপে সীমানা আঁকুন।'**
+  String get plotMapDrawPickHint;
+
+  /// No description provided for @plotMapDrawNoProperties.
+  ///
+  /// In bn, this message translates to:
+  /// **'আঁকার জন্য কোনো সম্পত্তি পাওয়া যায়নি - সবগুলোতেই সীমানা আছে অথবা কোনো সম্পত্তি নিবন্ধিত নয়।'**
+  String get plotMapDrawNoProperties;
+
+  /// No description provided for @plotMapDrawStart.
+  ///
+  /// In bn, this message translates to:
+  /// **'ম্যাপে আঁকুন'**
+  String get plotMapDrawStart;
+
+  /// No description provided for @plotMapDrawMyBoundaries.
+  ///
+  /// In bn, this message translates to:
+  /// **'আমার সীমানাসমূহ'**
+  String get plotMapDrawMyBoundaries;
+
+  /// No description provided for @plotMapDrawEdit.
+  ///
+  /// In bn, this message translates to:
+  /// **'সম্পাদনা'**
+  String get plotMapDrawEdit;
+
+  /// No description provided for @plotMapDrawErrorsInvalidGeometry.
+  ///
+  /// In bn, this message translates to:
+  /// **'আঁকা আকৃতিটি বৈধ বহুভুজ নয়।'**
+  String get plotMapDrawErrorsInvalidGeometry;
+
+  /// No description provided for @plotMapDrawErrorsSelfIntersecting.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমারেখা নিজেকে ছেদ করেছে - ছেদাংশ ঠিক করে আবার চেষ্টা করুন।'**
+  String get plotMapDrawErrorsSelfIntersecting;
+
+  /// No description provided for @plotMapDrawErrorsOutsideSocietyArea.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমারেখার কিছু অংশ সোসাইটির সীমার বাইরে চলে গেছে।'**
+  String get plotMapDrawErrorsOutsideSocietyArea;
+
+  /// No description provided for @plotMapDrawErrorsZeroArea.
+  ///
+  /// In bn, this message translates to:
+  /// **'আঁকা আকৃতির ক্ষেত্রফল শূন্য - আরও পয়েন্ট যোগ করুন।'**
+  String get plotMapDrawErrorsZeroArea;
+
+  /// No description provided for @plotMapDrawErrorsTooManyVertices.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনেক বেশি পয়েন্ট - সীমারেখা সরল করুন।'**
+  String get plotMapDrawErrorsTooManyVertices;
+
+  /// No description provided for @plotMapDrawErrorsNotYourProperty.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই সম্পত্তিটি আপনার অ্যাকাউন্টের নয়।'**
+  String get plotMapDrawErrorsNotYourProperty;
+
+  /// No description provided for @plotMapDrawErrorsBoundaryExists.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই সম্পত্তিতে ইতিমধ্যে একটি সীমানা আছে।'**
+  String get plotMapDrawErrorsBoundaryExists;
+
+  /// No description provided for @plotMapDrawErrorsGeneric.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।'**
+  String get plotMapDrawErrorsGeneric;
+
+  /// No description provided for @plotMapDrawWithdraw.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমা প্রত্যাহার'**
+  String get plotMapDrawWithdraw;
+
+  /// No description provided for @plotMapDrawWithdrawTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমা প্রত্যাহার করবেন?'**
+  String get plotMapDrawWithdrawTitle;
+
+  /// No description provided for @plotMapDrawWithdrawMessage.
+  ///
+  /// In bn, this message translates to:
+  /// **'অপেক্ষমাণ জমাটি প্রত্যাহৃত হিসেবে চিহ্নিত হবে। অনুমোদিত সীমানা অপরিবর্তিত থাকবে।'**
+  String get plotMapDrawWithdrawMessage;
+
+  /// No description provided for @plotMapDrawReplaceTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'অপেক্ষমাণ জমা প্রতিস্থাপন করবেন?'**
+  String get plotMapDrawReplaceTitle;
+
+  /// No description provided for @plotMapDrawReplaceMessage.
+  ///
+  /// In bn, this message translates to:
+  /// **'একটি জমা ইতিমধ্যে যাচাইয়ের অপেক্ষায় আছে। এখন সংরক্ষণ করলে এই আকার তা প্রতিস্থাপন করবে।'**
+  String get plotMapDrawReplaceMessage;
+
+  /// No description provided for @plotMapValidationSelfIntersection.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমারেখা নিজেকে ছেদ করেছে - ছেদাংশ ঠিক করুন।'**
+  String get plotMapValidationSelfIntersection;
+
+  /// No description provided for @plotMapValidationOutsideSociety.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমারেখার কিছু অংশ সোসাইটির সীমার বাইরে।'**
+  String get plotMapValidationOutsideSociety;
+
+  /// No description provided for @plotMapValidationAreaMismatch.
+  ///
+  /// In bn, this message translates to:
+  /// **'আঁকা এলাকা আপনার ঘোষিত জমির পরিমাণের সাথে অনেক মিলছে না।'**
+  String get plotMapValidationAreaMismatch;
+
+  /// No description provided for @plotMapValidationArea.
+  ///
+  /// In bn, this message translates to:
+  /// **'আঁকা এলাকা'**
+  String get plotMapValidationArea;
+
+  /// No description provided for @plotMapValidationOk.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমারেখাটি ঠিক আছে।'**
+  String get plotMapValidationOk;
+
+  /// No description provided for @plotMapViewsTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'ম্যাপ ভিউ'**
+  String get plotMapViewsTitle;
+
+  /// No description provided for @plotMapViewsBoundaries.
+  ///
+  /// In bn, this message translates to:
+  /// **'আমার প্লট সীমানা ম্যাপ'**
+  String get plotMapViewsBoundaries;
+
+  /// No description provided for @plotMapViewsBoundariesHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'সদস্য চিহ্নিত সীমানা'**
+  String get plotMapViewsBoundariesHint;
+
+  /// No description provided for @plotMapViewsBds.
+  ///
+  /// In bn, this message translates to:
+  /// **'বিডিএস ড্যাগ ম্যাপ'**
+  String get plotMapViewsBds;
+
+  /// No description provided for @plotMapViewsBdsHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'সরকারি মৌজা প্লট ম্যাপ'**
+  String get plotMapViewsBdsHint;
+
+  /// No description provided for @plotMapViewsRajuk.
+  ///
+  /// In bn, this message translates to:
+  /// **'রাজউক মাস্টারপ্ল্যান (ডিএপি)'**
+  String get plotMapViewsRajuk;
+
+  /// No description provided for @plotMapViewsRajukHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'উত্তর কাউন্দিয়ার ডিএপি আরএস প্লট'**
+  String get plotMapViewsRajukHint;
+
+  /// No description provided for @plotMapViewsLoading.
+  ///
+  /// In bn, this message translates to:
+  /// **'সরকারি ম্যাপ ডেটা লোড হচ্ছে…'**
+  String get plotMapViewsLoading;
+
+  /// No description provided for @plotMapViewsLoadError.
+  ///
+  /// In bn, this message translates to:
+  /// **'সরকারি ম্যাপ ডেটা লোড করা যায়নি। পরে আবার চেষ্টা করুন।'**
+  String get plotMapViewsLoadError;
+
+  /// No description provided for @plotMapViewsPartialData.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই ভিউতে সব প্লট লোড হয়নি — বাকিগুলো দেখতে ম্যাপে জুম ইন করুন।'**
+  String get plotMapViewsPartialData;
+
+  /// No description provided for @plotMapViewsBdsSearchPlaceholder.
+  ///
+  /// In bn, this message translates to:
+  /// **'বিডিএস দাগ নম্বর দিয়ে খুঁজুন'**
+  String get plotMapViewsBdsSearchPlaceholder;
+
+  /// No description provided for @plotMapViewsRsSearchPlaceholder.
+  ///
+  /// In bn, this message translates to:
+  /// **'আরএস দাগ নম্বর দিয়ে খুঁজুন'**
+  String get plotMapViewsRsSearchPlaceholder;
+
+  /// No description provided for @plotMapViewsDagNotFound.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই দাগ নম্বরে কোনো প্লট পাওয়া যায়নি।'**
+  String get plotMapViewsDagNotFound;
+
+  /// No description provided for @plotMapViewsBdsInfoTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'দাগ/প্লট তথ্য বিবরণ'**
+  String get plotMapViewsBdsInfoTitle;
+
+  /// No description provided for @plotMapViewsDagNoLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'দাগ/প্লট নম্বর'**
+  String get plotMapViewsDagNoLabel;
+
+  /// No description provided for @plotMapViewsSurveyTypeLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'সার্ভের ধরণ'**
+  String get plotMapViewsSurveyTypeLabel;
+
+  /// No description provided for @plotMapViewsSurveyTypeValue.
+  ///
+  /// In bn, this message translates to:
+  /// **'ভিটি জরিপ (বিডিএস) ২০১৯'**
+  String get plotMapViewsSurveyTypeValue;
+
+  /// No description provided for @plotMapViewsMouzaNameLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'মৌজা'**
+  String get plotMapViewsMouzaNameLabel;
+
+  /// No description provided for @plotMapViewsMouzaNameValue.
+  ///
+  /// In bn, this message translates to:
+  /// **'উত্তর কাউন্দিয়া, সাভার, ঢাকা'**
+  String get plotMapViewsMouzaNameValue;
+
+  /// No description provided for @plotMapViewsSheetNoLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'শীট নম্বর'**
+  String get plotMapViewsSheetNoLabel;
+
+  /// No description provided for @plotMapViewsAreaLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমির পরিমাণ (হেক্টর)'**
+  String get plotMapViewsAreaLabel;
+
+  /// No description provided for @plotMapViewsKhatianNote.
+  ///
+  /// In bn, this message translates to:
+  /// **'খতিয়ান ও মালিকানার তথ্য এই অ্যাপে নেই। সরকারি সেটেলমেন্ট পোর্টালে যাচাই করুন।'**
+  String get plotMapViewsKhatianNote;
+
+  /// No description provided for @plotMapViewsMouzaLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'মৌজা: উত্তর কাউন্দিয়া'**
+  String get plotMapViewsMouzaLabel;
+
+  /// No description provided for @plotMapViewsThanaLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'সাভার উপজেলা, ঢাকা'**
+  String get plotMapViewsThanaLabel;
+
+  /// No description provided for @plotMapViewsRsPlotNo.
+  ///
+  /// In bn, this message translates to:
+  /// **'আরএস প্লট নং'**
+  String get plotMapViewsRsPlotNo;
+
+  /// No description provided for @plotMapViewsRsJlNo.
+  ///
+  /// In bn, this message translates to:
+  /// **'আরএস জেএল নং'**
+  String get plotMapViewsRsJlNo;
+
+  /// No description provided for @plotMapViewsStreetView.
+  ///
+  /// In bn, this message translates to:
+  /// **'গুগল স্ট্রিট ভিউ'**
+  String get plotMapViewsStreetView;
+
+  /// No description provided for @plotMapTimelineSubmitted.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমা দেওয়া হয়েছে'**
+  String get plotMapTimelineSubmitted;
+
+  /// No description provided for @plotMapTimelineUnderReview.
+  ///
+  /// In bn, this message translates to:
+  /// **'যাচাই চলছে'**
+  String get plotMapTimelineUnderReview;
+
+  /// No description provided for @plotMapTimelineApproved.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনুমোদিত'**
+  String get plotMapTimelineApproved;
+
+  /// No description provided for @plotMapTimelinePendingHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'অ্যাডমিন যাচাই করার পর অন্যরা এটি দেখতে পারবেন।'**
+  String get plotMapTimelinePendingHint;
+
+  /// No description provided for @plotMapTimelineRejectionNote.
+  ///
+  /// In bn, this message translates to:
+  /// **'অ্যাডমিনের মন্তব্য'**
+  String get plotMapTimelineRejectionNote;
 }
 
 class _AppLocalizationsDelegate
