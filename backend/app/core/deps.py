@@ -82,6 +82,27 @@ async def get_current_member(
     return await _resolve_member(credentials, db, eager=False)
 
 
+async def get_current_member_optional(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Member | None:
+    """Authenticated member, or None for anonymous callers — used by endpoints
+    that are optionally public behind a config flag (e.g. the plot map)."""
+    if credentials is None:
+        return None
+    payload = decode_token(credentials.credentials)
+    if payload is None or payload.get("type") != "access":
+        return None
+    if normalize_token_role(payload.get("role")) != "member":
+        return None
+    try:
+        subject = int(payload["sub"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    result = await db.execute(select(Member).where(Member.id == subject))
+    return result.scalar_one_or_none()
+
+
 async def get_current_member_detail(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_db),

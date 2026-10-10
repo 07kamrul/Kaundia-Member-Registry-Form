@@ -84,12 +84,24 @@ class Settings(BaseSettings):
     boundary_map_result_cap: int = Field(
         default=500, ge=1, validation_alias="BOUNDARY_MAP_RESULT_CAP"
     )
+    # When true, anonymous visitors get the live map with dag numbers only —
+    # never owner names or mobiles. Off by default because the owner popup
+    # carries personal contact details.
+    boundary_map_public_view: bool = Field(
+        default=False, validation_alias="BOUNDARY_MAP_PUBLIC_VIEW"
+    )
     boundary_owner_lookup_rate_limit: int = Field(
         default=30, ge=1, validation_alias="BOUNDARY_OWNER_LOOKUP_RATE_LIMIT"
     )
     boundary_owner_lookup_rate_window_seconds: int = Field(
         default=600, ge=1, validation_alias="BOUNDARY_OWNER_LOOKUP_RATE_WINDOW_SECONDS"
     )
+
+    # Local land dataset (ingested BDS mouza map) served via /api/land.
+    # Baked into the Docker image read-only; verified against meta.json
+    # checksums at startup — a bad dataset must fail the boot, not the map.
+    land_data_dir: str = Field(default="data/uttar-kaundia", validation_alias="LAND_DATA_DIR")
+    land_map_result_cap: int = Field(default=2000, ge=1, validation_alias="LAND_MAP_RESULT_CAP")
 
     @model_validator(mode="after")
     def _reject_insecure_secret_in_production(self) -> "Settings":

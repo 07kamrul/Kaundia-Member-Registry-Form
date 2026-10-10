@@ -429,6 +429,7 @@
     background: rgba(46, 125, 50, 0.15);
     color: #2e7d32;
   }
+  &.status-pending,
   &.status-pending_review,
   &.status-draft {
     background: rgba(201, 134, 30, 0.15);
@@ -562,9 +563,21 @@
   }
 }
 
-/* Tablet: sheet becomes a left-side card. */
+/* Tablet: sheet becomes a card anchored to the clicked plot (bottom sheet on
+   smaller screens). The clamp keeps it inside the map; max-height uses the same
+   clamped top so it never runs past the bottom edge. */
 @media (min-width: 768px) {
-  .details-sheet {
+  .details-sheet:not(.draw-panel) {
+    inset-inline: unset;
+    left: clamp(0.5rem, var(--sheet-x, 0.75rem), calc(100% - 25.5rem));
+    right: auto;
+    top: clamp(0.5rem, var(--sheet-y, 0.75rem), calc(100% - 8rem));
+    bottom: auto;
+    width: 360px;
+    max-height: calc(100% - clamp(0.5rem, var(--sheet-y, 0.75rem), calc(100% - 8rem)) - 0.75rem);
+  }
+
+  .details-sheet.draw-panel {
     inset-inline: unset;
     left: 0.75rem;
     right: auto;
@@ -584,4 +597,61 @@
   .details-sheet {
     width: 400px;
   }
+}
+
+.status-timeline {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  font-size: 0.7rem;
+  color: var(--gray-600);
+  flex-wrap: wrap;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    &::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gray-400);
+    }
+
+    &.done::before {
+      background: #2e7d32;
+    }
+
+    &.active::before {
+      background: #c9861e;
+    }
+
+    &.rejected::before {
+      background: #c0392b;
+    }
+
+    &:not(:last-child)::after {
+      content: '';
+      width: 14px;
+      height: 1px;
+      background: var(--gray-400);
+    }
+  }
+}
+
+.pending-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: var(--amber-200, #c9861e);
+}
+
+.review-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: #c0392b;
 }

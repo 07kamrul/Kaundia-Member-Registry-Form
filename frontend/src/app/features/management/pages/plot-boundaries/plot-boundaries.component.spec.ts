@@ -36,7 +36,7 @@ vi.mock('leaflet', () => L);
 const BOUNDARY = {
   id: 11,
   property_id: 3,
-  status: 'pending_review' as const,
+  status: 'pending' as const,
   geometry: {
     type: 'Polygon' as const,
     coordinates: [
@@ -52,7 +52,15 @@ const BOUNDARY = {
   computed_area_sqm: 1234,
   computed_area_shotangsho: 30,
   current_version: 2,
+  live_version_id: 21,
+  pending_version_id: 22,
+  live_review_status: 'approved' as const,
+  pending_review_status: 'pending' as const,
+  is_disputed: false,
   review_note: null,
+  is_deleted: false,
+  deleted_reason: null,
+  deleted_at: null,
   rs_dag: '830',
   cs_dag: '412',
   land_quantity: '5',
@@ -83,12 +91,14 @@ function setup() {
   const resolveDispute = vi.fn(() => of({ ...DISPUTE, status: 'resolved' }));
   const adminVersions = vi.fn(() => of([]));
   const evidence = vi.fn(() => of({ type: 'FeatureCollection' }));
+  const adminPendingCount = vi.fn(() => of(0));
   const plotMapService = {
     adminList,
     adminApprove,
     adminReject,
     adminVersions,
     evidence,
+    adminPendingCount,
     listDisputes,
     resolveDispute,
   };
@@ -111,23 +121,23 @@ function setup() {
 describe('PlotBoundariesComponent', () => {
   it('loads the pending queue and lists boundaries', () => {
     const { fixture, el, plotMapService } = setup();
-    expect(plotMapService.adminList).toHaveBeenCalledWith('pending_review', undefined);
+    expect(plotMapService.adminList).toHaveBeenCalledWith('pending', undefined, false);
     fixture.detectChanges();
     expect(el.querySelector('.pb-list')?.textContent).toContain('Karim');
   });
 
   it('approves with an optional note via the service', () => {
     const { component, plotMapService } = setup();
-    component.select(BOUNDARY as never);
+    component.select(toAdminBoundary(BOUNDARY));
     component.openApprove();
     component.approveNote.set('Looks right');
     component.confirmApprove();
-    expect(plotMapService.adminApprove).toHaveBeenCalledWith(11, 'Looks right');
+    expect(plotMapService.adminApprove).toHaveBeenCalledWith(22, 'Looks right');
   });
 
   it('locks reject until a note is typed, then calls the service', () => {
     const { component, plotMapService } = setup();
-    component.select(BOUNDARY as never);
+    component.select(toAdminBoundary(BOUNDARY));
     component.openReject();
     expect(component.rejectConfirmDisabled()).toBe(true);
     component.confirmReject();
@@ -135,12 +145,12 @@ describe('PlotBoundariesComponent', () => {
     component.rejectNote.set('Outline does not match khatian');
     expect(component.rejectConfirmDisabled()).toBe(false);
     component.confirmReject();
-    expect(plotMapService.adminReject).toHaveBeenCalledWith(11, 'Outline does not match khatian');
+    expect(plotMapService.adminReject).toHaveBeenCalledWith(22, 'Outline does not match khatian');
   });
 
   it('shows a dedicated error when reject comes back 422 NOTE_REQUIRED', () => {
     const { component, plotMapService } = setup();
-    component.select(BOUNDARY as never);
+    component.select(toAdminBoundary(BOUNDARY));
     component.openReject();
     component.rejectNote.set('x');
     plotMapService.adminReject = vi.fn(() => throwError(() => httpError(422)));
@@ -164,7 +174,7 @@ describe('PlotBoundariesComponent', () => {
 
   it('opens version history through the admin endpoint', () => {
     const { component, plotMapService } = setup();
-    component.select(BOUNDARY as never);
+    component.select(toAdminBoundary(BOUNDARY));
     component.openVersions();
     expect(plotMapService.adminVersions).toHaveBeenCalledWith(11);
     expect(component.versionsOpen()).toBe(true);
@@ -172,7 +182,7 @@ describe('PlotBoundariesComponent', () => {
 
   it('fetches the evidence bundle for export', () => {
     const { component, plotMapService } = setup();
-    component.select(BOUNDARY as never);
+    component.select(toAdminBoundary(BOUNDARY));
     component.exportEvidence();
     expect(plotMapService.evidence).toHaveBeenCalledWith(11);
     expect(component.evidenceExporting()).toBe(false);

@@ -1,7 +1,9 @@
 """Admin endpoints for boundary review, disputes, versions and evidence export.
 
-Gated by `boundary.review` (approve/reject) and `boundary.manage` (disputes,
-evidence). Every decision writes an audit row plus an immutable version row.
+Gated by `boundary.review` (approve/reject, add/edit on behalf) and
+`boundary.manage` (disputes, evidence, delete). Every decision writes an audit
+row plus an immutable version row. Admin add/edit goes live immediately — the
+admin is the verifier; member submissions wait in the pending queue.
 """
 
 import logging
@@ -18,18 +20,20 @@ from app.models.admin import AdminUser
 from app.models.member import Member
 from app.models.plot_boundary import (
     BoundaryDispute,
-    BoundaryStatus,
-    ChangeType,
     PlotBoundary,
     PlotBoundaryVersion,
+    ReviewStatus,
 )
 from app.models.property import Property
 from app.schemas.plot_boundary import version_out as _version_out
 from app.schemas.plot_boundary import (
     AdminBoundaryOut,
+    AdminBoundaryUpsertRequest,
+    AdminDeleteRequest,
     BoundaryDisputeOut,
     BoundaryVersionOut,
     DisputeResolveRequest,
+    PendingCountOut,
     ReviewActionRequest,
 )
 from app.services import plot_boundary as boundary_service
@@ -56,7 +60,27 @@ async def _load_boundary(db: AsyncSession, boundary_id: int) -> PlotBoundary:
     return boundary
 
 
-def _to_admin_out(boundary: PlotBoundary, property_row: Property | None, member: Member | None) -> AdminBoundaryOut:
+async def _load_version(db: AsyncSession, version_id: int | None) -> PlotBoundaryVersion | None:
+    if version_id is None:
+        return None
+    return await db.get(PlotBoundaryVersion, version_id)
+
+
+def _effective_status(boundary: PlotBoundary) -> str:
+    if boundary.is_deleted:
+        return "deleted"
+    if boundary.pending_version_id is not None:
+        return ReviewStatus.PENDING.value
+    if boundary.live_version_id is not None:
+        return ReviewStatus.APPROVED.value
+    return ReviewStatus.REJECTED.value
+
+
+async def _to_admin_out(boundary: PlotBoundary, property_row: Property | None, member: Member | None, db: AsyncSession) -> AdminBoundaryOut:
+    live = await _load_version(db, boundary.live_version_id)
+    pending = await _load_version(db, boundary.pending_version_id)
+    actionable = pending or live
+    flagged = await boundary_service.open_disputes(db, [boundary.id])
     return AdminBoundaryOut(
         id=boundary.id,
         property_id=boundary.property_id,
@@ -67,13 +91,20 @@ def _to_admin_out(boundary: PlotBoundary, property_row: Property | None, member:
         cs_dag=property_row.dag_no_cs if property_row else None,
         khatian_no=property_row.khatian_no if property_row else None,
         land_quantity=property_row.land_quantity if property_row else None,
-        status=boundary.status,
-        geometry=boundary.geom,
-        computed_area_sqm=boundary.computed_area_sqm,
-        computed_area_shotangsho=boundary.computed_area_shotangsho,
+        status=_effective_status(boundary),
+        live_version_id=boundary.live_version_id,
+        pending_version_id=boundary.pending_version_id,
+        live_review_status=live.review_status if live else None,
+        pending_review_status=pending.review_status if pending else None,
+        is_disputed=boundary.id in flagged,
         current_version=boundary.current_version,
-        review_note=boundary.review_note,
+        geometry=actionable.geom if actionable else None,
+        computed_area_sqm=actionable.computed_area_sqm if actionable else None,
+        computed_area_shotangsho=boundary.computed_area_shotangsho,
+        review_note=(pending.review_note if pending else boundary.review_note),
         is_deleted=boundary.is_deleted,
+        deleted_reason=boundary.deleted_reason,
+        deleted_at=boundary.deleted_at,
     )
 
 
@@ -84,6 +115,32 @@ async def _notify_owner(db: AsyncSession, boundary: PlotBoundary, subject: str, 
             await send_email(owner.email, subject, body)
         except Exception:  # pragma: no cover - best effort
             logger.exception("boundary notification email failed")
+
+
+async def _boundary_out_or_404(db: AsyncSession, boundary_id: int) -> AdminBoundaryOut:
+    boundary = await _load_boundary(db, boundary_id)
+    property_row = await db.get(Property, boundary.property_id)
+    member = await db.get(Member, boundary.member_id)
+    return await _to_admin_out(boundary, property_row, member, db)
+
+
+@router.get("/plot-boundaries/pending/count", response_model=PendingCountOut)
+async def pending_count(
+    _admin: AdminUser = Depends(require_permission(REVIEW_PERMISSION)),
+    db: AsyncSession = Depends(get_db),
+) -> PendingCountOut:
+    """Dashboard/nav badge: how many member submissions await review."""
+    total = (
+        await db.execute(
+            select(func.count())
+            .select_from(PlotBoundary)
+            .where(
+                PlotBoundary.is_deleted.is_(False),
+                PlotBoundary.pending_version_id.is_not(None),
+            )
+        )
+    ).scalar_one()
+    return PendingCountOut(count=total)
 
 
 @router.get("/plot-boundaries", response_model=list[AdminBoundaryOut])
@@ -97,23 +154,16 @@ async def list_boundaries(
     query = select(PlotBoundary).order_by(PlotBoundary.id.desc()).limit(200)
     if not include_deleted:
         query = query.where(PlotBoundary.is_deleted.is_(False))
-    if boundary_status:
-        query = query.where(PlotBoundary.status == boundary_status)
-    if search:
-        like = f"%{search.strip()}%"
-        query = query.join(Property, PlotBoundary.property_id == Property.id).where(
-            or_(
-                Property.dag_no_rs.ilike(like),
-                Property.dag_no_cs.ilike(like),
-                Property.khatian_no.ilike(like),
-            )
-        )
     rows = (await db.execute(query)).scalars().all()
+
     out: list[AdminBoundaryOut] = []
     for boundary in rows:
+        effective = _effective_status(boundary)
+        if boundary_status and effective != boundary_status:
+            continue
         property_row = await db.get(Property, boundary.property_id)
         member = await db.get(Member, boundary.member_id)
-        out.append(_to_admin_out(boundary, property_row, member))
+        out.append(await _to_admin_out(boundary, property_row, member, db))
     return out
 
 
@@ -123,104 +173,108 @@ async def get_boundary(
     _admin: AdminUser = Depends(require_permission(REVIEW_PERMISSION)),
     db: AsyncSession = Depends(get_db),
 ) -> AdminBoundaryOut:
-    boundary = await _load_boundary(db, boundary_id)
-    property_row = await db.get(Property, boundary.property_id)
-    member = await db.get(Member, boundary.member_id)
-    return _to_admin_out(boundary, property_row, member)
+    return await _boundary_out_or_404(db, boundary_id)
 
 
-@router.post("/plot-boundaries/{boundary_id}/approve", response_model=AdminBoundaryOut)
-async def approve_boundary(
+@router.post("/plot-boundaries", response_model=AdminBoundaryOut, status_code=status.HTTP_201_CREATED)
+async def admin_create_boundary(
+    payload: AdminBoundaryUpsertRequest,
+    admin: AdminUser = Depends(require_permission(MANAGE_PERMISSION)),
+    db: AsyncSession = Depends(get_db),
+) -> AdminBoundaryOut:
+    """Add a polygon on behalf of any member — goes live immediately."""
+    boundary, disputes = await boundary_service.admin_create_boundary(
+        db, admin.id, payload.member_id, payload.property_id, payload.geometry.model_dump(),
+        confirm_overlap=payload.confirm_overlap,
+    )
+    await db.commit()
+    await db.refresh(boundary)
+    await _notify_owner(
+        db, boundary,
+        "জমির সীমানা কমিটি কর্তৃক যুক্ত / Plot boundary added by the committee",
+        f"<p>A boundary #{boundary.id} was added for your property #{boundary.property_id} "
+        f"by the committee and is now visible on the map.</p>",
+    )
+    return await _boundary_out_or_404(db, boundary.id)
+
+
+@router.put("/plot-boundaries/{boundary_id}", response_model=AdminBoundaryOut)
+async def admin_edit_boundary(
     boundary_id: int,
+    payload: AdminBoundaryUpsertRequest,
+    admin: AdminUser = Depends(require_permission(MANAGE_PERMISSION)),
+    db: AsyncSession = Depends(get_db),
+) -> AdminBoundaryOut:
+    """Edit any member's polygon — goes live immediately, member is notified."""
+    boundary, disputes = await boundary_service.admin_edit_boundary(
+        db, admin.id, boundary_id, payload.geometry.model_dump(),
+        confirm_overlap=payload.confirm_overlap,
+    )
+    await db.commit()
+    await db.refresh(boundary)
+    await _notify_owner(
+        db, boundary,
+        "জমির সীমানা কমিটি কর্তৃক সম্পাদিত / Plot boundary edited by the committee",
+        f"<p>Your boundary #{boundary.id} was corrected by the committee.</p>",
+    )
+    return await _boundary_out_or_404(db, boundary_id)
+
+
+@router.delete("/plot-boundaries/{boundary_id}", response_model=AdminBoundaryOut)
+async def admin_delete_boundary(
+    boundary_id: int,
+    payload: AdminDeleteRequest,
+    admin: AdminUser = Depends(require_permission(MANAGE_PERMISSION)),
+    db: AsyncSession = Depends(get_db),
+) -> AdminBoundaryOut:
+    """Soft delete with a mandatory reason; the version history is kept."""
+    boundary = await boundary_service.admin_delete_boundary(db, admin.id, boundary_id, payload.reason.strip())
+    await db.commit()
+    await db.refresh(boundary)
+    await _notify_owner(
+        db, boundary,
+        "জমির সীমানা মুছে ফেলা হয়েছে / Plot boundary removed",
+        f"<p>Your boundary #{boundary.id} was removed by the committee. Reason: {payload.reason}</p>",
+    )
+    return await _boundary_out_or_404(db, boundary_id)
+
+
+@router.post("/plot-boundary-versions/{version_id}/approve", response_model=AdminBoundaryOut)
+async def approve_version(
+    version_id: int,
     payload: ReviewActionRequest,
     admin: AdminUser = Depends(require_permission(REVIEW_PERMISSION)),
     db: AsyncSession = Depends(get_db),
 ) -> AdminBoundaryOut:
-    boundary = await _load_boundary(db, boundary_id)
-    if boundary.status not in (
-        BoundaryStatus.PENDING_REVIEW.value,
-        BoundaryStatus.REJECTED.value,
-        BoundaryStatus.DISPUTED.value,
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "NOT_PENDING", "message": "Only a boundary awaiting review can be approved."},
-        )
-
-    boundary.status = BoundaryStatus.APPROVED.value
-    boundary.reviewed_by = admin.id
-    boundary.reviewed_at = _now_iso()
-    boundary.current_version += 1
-    db.add(
-        boundary_service.record_version(
-            boundary, change_type=ChangeType.APPROVE, admin_id=admin.id, note=payload.note
-        )
+    boundary, version, disputes = await boundary_service.approve_version(
+        db, admin.id, version_id, payload.note
     )
-    record_audit(
-        db,
-        actor_admin_id=admin.id,
-        action="boundary.approve",
-        entity_type="plot_boundary",
-        entity_id=str(boundary.id),
-        detail=f"note={payload.note or ''}",
-    )
-
-    # Overlap detection runs after approval; overlaps become disputes, not blocks.
-    await boundary_service.open_disputes_for(db, boundary)
     await db.commit()
     await db.refresh(boundary)
 
-    disputed = boundary.status == BoundaryStatus.DISPUTED.value
     await _notify_owner(
         db,
         boundary,
         "জমির সীমানা অনুমোদিত / Plot boundary approved",
-        f"<p>Boundary #{boundary.id} was approved."
-        + (" Overlaps with other boundaries were flagged for committee review.</p>" if disputed else "</p>"),
+        f"<p>Boundary #{boundary.id} (version {version.version}) was approved."
+        + (" Overlaps with other boundaries were flagged for committee review.</p>" if disputes else "</p>"),
     )
-
-    property_row = await db.get(Property, boundary.property_id)
-    member = await db.get(Member, boundary.member_id)
-    return _to_admin_out(boundary, property_row, member)
+    return await _boundary_out_or_404(db, boundary.id)
 
 
-@router.post("/plot-boundaries/{boundary_id}/reject", response_model=AdminBoundaryOut)
-async def reject_boundary(
-    boundary_id: int,
+@router.post("/plot-boundary-versions/{version_id}/reject", response_model=AdminBoundaryOut)
+async def reject_version(
+    version_id: int,
     payload: ReviewActionRequest,
     admin: AdminUser = Depends(require_permission(REVIEW_PERMISSION)),
     db: AsyncSession = Depends(get_db),
 ) -> AdminBoundaryOut:
-    boundary = await _load_boundary(db, boundary_id)
-    if boundary.status == BoundaryStatus.APPROVED.value:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "ALREADY_APPROVED", "message": "An approved boundary cannot be rejected; edit it instead."},
-        )
-    if not payload.note:
+    if not payload.note or not payload.note.strip():
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"code": "NOTE_REQUIRED", "message": "A rejection note is required."},
         )
-
-    boundary.status = BoundaryStatus.REJECTED.value
-    boundary.reviewed_by = admin.id
-    boundary.reviewed_at = _now_iso()
-    boundary.review_note = payload.note
-    boundary.current_version += 1
-    db.add(
-        boundary_service.record_version(
-            boundary, change_type=ChangeType.REJECT, admin_id=admin.id, note=payload.note
-        )
-    )
-    record_audit(
-        db,
-        actor_admin_id=admin.id,
-        action="boundary.reject",
-        entity_type="plot_boundary",
-        entity_id=str(boundary.id),
-        detail=f"note={payload.note}",
-    )
+    boundary, version = await boundary_service.reject_version(db, admin.id, version_id, payload.note.strip())
     await db.commit()
     await db.refresh(boundary)
 
@@ -228,11 +282,9 @@ async def reject_boundary(
         db,
         boundary,
         "জমির সীমানা বাতিল / Plot boundary rejected",
-        f"<p>Boundary #{boundary.id} was rejected. Reason: {payload.note}</p>",
+        f"<p>Boundary #{boundary.id} (version {version.version}) was rejected. Reason: {payload.note}</p>",
     )
-    property_row = await db.get(Property, boundary.property_id)
-    member = await db.get(Member, boundary.member_id)
-    return _to_admin_out(boundary, property_row, member)
+    return await _boundary_out_or_404(db, boundary.id)
 
 
 @router.get("/plot-boundaries/{boundary_id}/versions", response_model=list[BoundaryVersionOut])
@@ -242,12 +294,7 @@ async def list_versions(
     db: AsyncSession = Depends(get_db),
 ) -> list[PlotBoundaryVersion]:
     await _load_boundary(db, boundary_id)
-    result = await db.execute(
-        select(PlotBoundaryVersion)
-        .where(PlotBoundaryVersion.boundary_id == boundary_id)
-        .order_by(PlotBoundaryVersion.version)
-    )
-    return [_version_out(v) for v in result.scalars().all()]
+    return [_version_out(v) for v in await boundary_service.boundary_versions(db, boundary_id)]
 
 
 @router.get("/plot-boundaries/{boundary_id}/evidence")
@@ -301,38 +348,6 @@ async def resolve_dispute(
     dispute.resolved_by = admin.id
     dispute.resolved_at = _now_iso()
     dispute.resolution_note = payload.resolution_note
-
-    # If both sides of the dispute are otherwise fine, restore approved status.
-    if dispute.status == "resolved" or dispute.status == "dismissed":
-        open_left = (
-            await db.execute(
-                select(func.count())
-                .select_from(BoundaryDispute)
-                .where(BoundaryDispute.status == "open", BoundaryDispute.boundary_id == dispute.boundary_id)
-            )
-        ).scalar_one()
-        if open_left == 0:
-            boundary = await db.get(PlotBoundary, dispute.boundary_id)
-            if boundary and boundary.status == BoundaryStatus.DISPUTED.value:
-                boundary.status = BoundaryStatus.APPROVED.value
-        if dispute.other_boundary_id:
-            open_other = (
-                await db.execute(
-                    select(func.count())
-                    .select_from(BoundaryDispute)
-                    .where(
-                        BoundaryDispute.status == "open",
-                        or_(
-                            BoundaryDispute.boundary_id == dispute.other_boundary_id,
-                            BoundaryDispute.other_boundary_id == dispute.other_boundary_id,
-                        ),
-                    )
-                )
-            ).scalar_one()
-            if open_other == 0:
-                other = await db.get(PlotBoundary, dispute.other_boundary_id)
-                if other and other.status == BoundaryStatus.DISPUTED.value:
-                    other.status = BoundaryStatus.APPROVED.value
 
     record_audit(
         db,

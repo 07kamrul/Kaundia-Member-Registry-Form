@@ -23,6 +23,7 @@ import type {
   BoundaryDispute,
   BoundaryVersion,
   DisputeStatus,
+  PolygonGeometry,
 } from '../../../../core/models/plot-boundary.model';
 
 /** Maps a failed review action to an i18n key (403 vs generic). */
@@ -32,14 +33,24 @@ export function reviewErrorKey(error: unknown): string {
   return 'admin.plotBoundaries.errors.generic';
 }
 
-const STATUS_TABS = [
-  'pending_review',
-  'approved',
-  'rejected',
-  'disputed',
-] as const;
+const STATUS_TABS = ['pending', 'approved', 'rejected', 'deleted'] as const;
 
 const DISPUTE_TABS: DisputeStatus[] = ['open', 'resolved', 'dismissed'];
+
+/** Maps a failed admin save to an i18n key (overlap confirmation vs generic). */
+export function saveErrorKey(error: unknown): string {
+  if (!(error instanceof HttpErrorResponse)) return 'admin.plotBoundaries.errors.generic';
+  const code =
+    (error.error as { detail?: { code?: string } } | null)?.detail?.code ?? null;
+  if (code === 'OVERLAP_CONFIRMATION_REQUIRED') return 'admin.plotBoundaries.errors.overlapConfirm';
+  if (error.status === 403) return 'admin.plotBoundaries.errors.forbidden';
+  return 'admin.plotBoundaries.errors.generic';
+}
+
+export interface OverlapInfo {
+  boundary_id: number;
+  overlap_area_sqm: number;
+}
 
 @Component({
   selector: 'app-plot-boundaries',
@@ -56,13 +67,16 @@ export class PlotBoundariesComponent implements OnInit {
   readonly lang = inject(LanguageService).lang;
 
   readonly tab = signal<'queue' | 'disputes'>('queue');
-  readonly statusFilter = signal<string>('pending_review');
+  readonly statusFilter = signal<string>('pending');
   readonly search = signal('');
   readonly loading = signal(false);
   readonly loadErrorKey = signal<string | null>(null);
   readonly boundaries = signal<AdminBoundary[]>([]);
   readonly disputes = signal<BoundaryDispute[]>([]);
   readonly disputeFilter = signal<DisputeStatus>('open');
+  readonly includeDeleted = signal(false);
+  /** Dashboard/nav badge: submissions awaiting review. */
+  readonly pendingCount = signal(0);
 
   readonly statusTabs = STATUS_TABS;
   readonly disputeTabs = DISPUTE_TABS;
@@ -93,8 +107,40 @@ export class PlotBoundariesComponent implements OnInit {
   readonly rejectOpen = signal(false);
   readonly rejectConfirmDisabled = computed(() => !this.rejectNote().trim());
 
+  /** Delete (soft, reason mandatory). */
+  readonly deleteOpen = signal(false);
+  readonly deleteReason = signal('');
+  readonly deleting = signal(false);
+  readonly deleteConfirmDisabled = computed(() => this.deleteReason().trim().length < 3);
+
+  /** Add polygon on behalf of a member (GeoJSON entry, goes live immediately). */
+  readonly addOpen = signal(false);
+  readonly addMemberId = signal<number | null>(null);
+  readonly addPropertyId = signal<number | null>(null);
+  readonly addGeometry = signal('');
+  readonly addSaving = signal(false);
+  readonly addErrorKey = signal<string | null>(null);
+  readonly addOverlaps = signal<OverlapInfo[]>([]);
+  readonly addConfirmOverlap = signal(false);
+
+  /** Edit the selected polygon's shape (GeoJSON entry, goes live immediately). */
+  readonly editOpen = signal(false);
+  readonly editGeometry = signal('');
+  readonly editSaving = signal(false);
+  readonly editErrorKey = signal<string | null>(null);
+  readonly editOverlaps = signal<OverlapInfo[]>([]);
+  readonly editConfirmOverlap = signal(false);
+
   ngOnInit(): void {
     this.load();
+    this.loadPendingCount();
+  }
+
+  loadPendingCount(): void {
+    this.plotMapService
+      .adminPendingCount()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (count) => this.pendingCount.set(count) });
   }
 
   load(): void {
@@ -105,7 +151,7 @@ export class PlotBoundariesComponent implements OnInit {
     this.loading.set(true);
     this.loadErrorKey.set(null);
     this.plotMapService
-      .adminList(this.statusFilter() || undefined, this.search().trim() || undefined)
+      .adminList(this.statusFilter() || undefined, this.search().trim() || undefined, this.includeDeleted())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => {
@@ -180,11 +226,12 @@ export class PlotBoundariesComponent implements OnInit {
 
   confirmApprove(): void {
     const boundary = this.selected();
-    if (!boundary || this.approving()) return;
+    const versionId = boundary?.pendingVersionId;
+    if (!boundary || !versionId || this.approving()) return;
     this.approving.set(true);
     this.actionErrorKey.set(null);
     this.plotMapService
-      .adminApprove(boundary.id, this.approveNote().trim() || undefined)
+      .adminApprove(versionId, this.approveNote().trim() || undefined)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
@@ -192,6 +239,7 @@ export class PlotBoundariesComponent implements OnInit {
           this.approveOpen.set(false);
           this.selected.set(updated);
           this.load();
+          this.loadPendingCount();
         },
         error: (err: unknown) => {
           this.approving.set(false);
@@ -208,12 +256,13 @@ export class PlotBoundariesComponent implements OnInit {
 
   confirmReject(): void {
     const boundary = this.selected();
+    const versionId = boundary?.pendingVersionId;
     const note = this.rejectNote().trim();
-    if (!boundary || !note || this.rejecting()) return;
+    if (!boundary || !versionId || !note || this.rejecting()) return;
     this.rejecting.set(true);
     this.actionErrorKey.set(null);
     this.plotMapService
-      .adminReject(boundary.id, note)
+      .adminReject(versionId, note)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
@@ -221,6 +270,7 @@ export class PlotBoundariesComponent implements OnInit {
           this.rejectOpen.set(false);
           this.selected.set(updated);
           this.load();
+          this.loadPendingCount();
         },
         error: (err: unknown) => {
           this.rejecting.set(false);
@@ -229,6 +279,130 @@ export class PlotBoundariesComponent implements OnInit {
               ? 'admin.plotBoundaries.errors.noteRequired'
               : reviewErrorKey(err),
           );
+        },
+      });
+  }
+
+  // ---- Admin add / edit / delete -------------------------------------------
+
+  openDelete(): void {
+    this.deleteOpen.set(true);
+    this.deleteReason.set('');
+    this.actionErrorKey.set(null);
+  }
+
+  confirmDelete(): void {
+    const boundary = this.selected();
+    const reason = this.deleteReason().trim();
+    if (!boundary || reason.length < 3 || this.deleting()) return;
+    this.deleting.set(true);
+    this.actionErrorKey.set(null);
+    this.plotMapService
+      .adminDelete(boundary.id, reason)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.deleting.set(false);
+          this.deleteOpen.set(false);
+          this.selected.set(updated);
+          this.load();
+        },
+        error: (err: unknown) => {
+          this.deleting.set(false);
+          this.actionErrorKey.set(saveErrorKey(err));
+        },
+      });
+  }
+
+  openAdd(): void {
+    this.addOpen.set(true);
+    this.addMemberId.set(null);
+    this.addPropertyId.set(null);
+    this.addGeometry.set('');
+    this.addErrorKey.set(null);
+    this.addOverlaps.set([]);
+    this.addConfirmOverlap.set(false);
+  }
+
+  /** Parse and sanity-check the pasted GeoJSON Polygon. */
+  private parseGeometry(raw: string): PolygonGeometry | null {
+    try {
+      const parsed = JSON.parse(raw) as PolygonGeometry;
+      if (parsed?.type !== 'Polygon' || !Array.isArray(parsed.coordinates?.[0])) return null;
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  /** The 409 overlap confirmation carries the conflicting boundaries. */
+  private overlapsOf(error: unknown): OverlapInfo[] {
+    if (error instanceof HttpErrorResponse && error.status === 409) {
+      return (
+        (error.error as { detail?: { overlaps?: OverlapInfo[] } } | null)?.detail?.overlaps ?? []
+      );
+    }
+    return [];
+  }
+
+  confirmAdd(confirmOverlap = false): void {
+    const memberId = this.addMemberId();
+    const propertyId = this.addPropertyId();
+    const geometry = this.parseGeometry(this.addGeometry());
+    if (!memberId || !propertyId || !geometry || this.addSaving()) return;
+    this.addSaving.set(true);
+    this.addErrorKey.set(null);
+    this.plotMapService
+      .adminCreate(memberId, propertyId, geometry, confirmOverlap)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (created) => {
+          this.addSaving.set(false);
+          this.addOpen.set(false);
+          this.selected.set(created);
+          this.load();
+        },
+        error: (err: unknown) => {
+          this.addSaving.set(false);
+          this.addOverlaps.set(this.overlapsOf(err));
+          this.addConfirmOverlap.set(this.overlapsOf(err).length > 0);
+          this.addErrorKey.set(saveErrorKey(err));
+        },
+      });
+  }
+
+  openEdit(): void {
+    const boundary = this.selected();
+    if (!boundary) return;
+    this.editOpen.set(true);
+    this.editGeometry.set(JSON.stringify(boundary.geometry, null, 2));
+    this.editErrorKey.set(null);
+    this.editOverlaps.set([]);
+    this.editConfirmOverlap.set(false);
+  }
+
+  confirmEdit(confirmOverlap = false): void {
+    const boundary = this.selected();
+    const geometry = this.parseGeometry(this.editGeometry());
+    if (!boundary || !geometry || this.editSaving()) return;
+    this.editSaving.set(true);
+    this.editErrorKey.set(null);
+    this.plotMapService
+      .adminEdit(boundary.id, geometry, confirmOverlap)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.editSaving.set(false);
+          this.editOpen.set(false);
+          this.selected.set(updated);
+          this.renderPreview(updated);
+          this.load();
+        },
+        error: (err: unknown) => {
+          this.editSaving.set(false);
+          this.editOverlaps.set(this.overlapsOf(err));
+          this.editConfirmOverlap.set(this.overlapsOf(err).length > 0);
+          this.editErrorKey.set(saveErrorKey(err));
         },
       });
   }

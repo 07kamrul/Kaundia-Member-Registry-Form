@@ -109,16 +109,32 @@
         <div class="skeleton-line"></div>
       </div>
     }
-  </div>
 
-  <!-- Polygon details sheet (bottom sheet on mobile, side card on desktop) -->
-  @if (selected(); as sel) {
-    <section class="details-sheet" role="dialog" [attr.aria-label]="'member.plotMap.details.title' | translate">
+    <!-- Polygon details sheet (bottom sheet on mobile, anchored card on desktop).
+         Lives inside .map-wrap so its absolute position matches map container points. -->
+    @if (selected(); as sel) {
+    <section
+      class="details-sheet"
+      role="dialog"
+      [attr.aria-label]="'member.plotMap.details.title' | translate"
+      [style.--sheet-x.px]="sheetPos()?.x"
+      [style.--sheet-y.px]="sheetPos()?.y"
+    >
       <header class="sheet-head">
         <h2 class="sheet-title">
           {{ 'member.plotMap.details.title' | translate }}
           @if (sel.feature.isMine) {
             <span class="mine-chip">{{ 'member.plotMap.status.mine' | translate }}</span>
+          }
+          @if (sel.feature.reviewStatus !== 'approved') {
+            <span class="status-chip" [class]="'status-' + sel.feature.reviewStatus">
+              {{ 'member.plotMap.status.' + sel.feature.reviewStatus | translate }}
+            </span>
+          }
+          @if (sel.feature.isDisputed) {
+            <span class="status-chip status-disputed">
+              {{ 'member.plotMap.status.disputed' | translate }}
+            </span>
           }
         </h2>
         <button type="button" class="sheet-close" (click)="closeSheet()">
@@ -195,7 +211,8 @@
         </div>
       }
     </section>
-  }
+    }
+  </div>
 
   <!-- Draw panel -->
   @if (showDrawPanel()) {
@@ -245,11 +262,45 @@
             @for (boundary of myBoundaries(); track boundary.id) {
               <li class="mine-item">
                 <div class="mine-info">
-                  <span class="status-chip" [class]="'status-' + boundary.status">
-                    {{ 'member.plotMap.status.' + boundary.status | translate }}
+                  <span class="status-chip" [class]="'status-' + boundary.reviewStatus">
+                    {{ 'member.plotMap.status.' + boundary.reviewStatus | translate }}
                   </span>
                   <span class="mine-dag">{{ boundaryLabel(boundary) }}</span>
                 </div>
+
+                <!-- Status timeline: submitted → under review → approved/rejected -->
+                <ol class="status-timeline" aria-label="review status">
+                  <li [class.done]="true">
+                    {{ 'member.plotMap.timeline.submitted' | translate }}
+                  </li>
+                  <li
+                    [class.done]="boundary.reviewStatus !== 'pending'"
+                    [class.active]="boundary.reviewStatus === 'pending'"
+                  >
+                    {{ 'member.plotMap.timeline.underReview' | translate }}
+                  </li>
+                  @if (boundary.reviewStatus === 'rejected') {
+                    <li class="done rejected">
+                      {{ 'member.plotMap.status.rejected' | translate }}
+                    </li>
+                  } @else {
+                    <li [class.done]="boundary.liveReviewStatus === 'approved'">
+                      {{ 'member.plotMap.timeline.approved' | translate }}
+                    </li>
+                  }
+                </ol>
+                @if (boundary.reviewStatus === 'pending') {
+                  <p class="pending-hint">
+                    {{ 'member.plotMap.timeline.pendingHint' | translate }}
+                  </p>
+                }
+                @if (boundary.reviewStatus === 'rejected' && boundary.reviewNote) {
+                  <p class="review-note">
+                    {{ 'member.plotMap.timeline.rejectionNote' | translate }}:
+                    {{ boundary.reviewNote }}
+                  </p>
+                }
+
                 <div class="mine-actions">
                   <button
                     type="button"
@@ -258,13 +309,15 @@
                   >
                     {{ 'member.plotMap.draw.edit' | translate }}
                   </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="deleteTarget.set(boundary)"
-                  >
-                    {{ 'common.delete' | translate }}
-                  </button>
+                  @if (boundary.hasPending) {
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      (click)="withdrawTarget.set(boundary)"
+                    >
+                      {{ 'member.plotMap.draw.withdraw' | translate }}
+                    </button>
+                  }
                 </div>
               </li>
             }
@@ -320,7 +373,7 @@
             type="button"
             class="btn btn-primary btn-sm"
             [disabled]="!validation().valid || saving()"
-            (click)="saveDrawn()"
+            (click)="requestSave()"
           >
             {{ 'common.save' | translate }}
           </button>
@@ -371,16 +424,28 @@
     </div>
   }
 
-  <!-- Delete confirm -->
+  <!-- Replace-pending confirm: saving while a review is pending replaces it -->
   <app-confirm-modal
-    [open]="deleteTarget() !== null"
-    [title]="'member.plotMap.draw.deleteTitle' | translate"
-    [message]="'member.plotMap.draw.deleteMessage' | translate"
-    [confirmLabel]="'common.delete' | translate"
+    [open]="replaceTarget() !== null"
+    [title]="'member.plotMap.draw.replaceTitle' | translate"
+    [message]="'member.plotMap.draw.replaceMessage' | translate"
+    [confirmLabel]="'common.save' | translate"
+    [cancelLabel]="'common.cancel' | translate"
+    [loading]="saving()"
+    (confirm)="saveDrawn()"
+    (cancel)="replaceTarget.set(null)"
+  />
+
+  <!-- Withdraw confirm -->
+  <app-confirm-modal
+    [open]="withdrawTarget() !== null"
+    [title]="'member.plotMap.draw.withdrawTitle' | translate"
+    [message]="'member.plotMap.draw.withdrawMessage' | translate"
+    [confirmLabel]="'member.plotMap.draw.withdraw' | translate"
     [cancelLabel]="'common.cancel' | translate"
     [danger]="true"
-    [loading]="deleting()"
-    (confirm)="confirmDelete()"
-    (cancel)="cancelDelete()"
+    [loading]="withdrawing()"
+    (confirm)="confirmWithdraw()"
+    (cancel)="cancelWithdraw()"
   />
 </div>

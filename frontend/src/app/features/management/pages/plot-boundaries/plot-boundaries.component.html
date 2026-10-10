@@ -22,6 +22,9 @@
       (click)="selectTab('queue')"
     >
       {{ 'admin.plotBoundaries.tabs.queue' | translate }}
+      @if (pendingCount() > 0) {
+        <span class="pending-badge">{{ digits(pendingCount()) }}</span>
+      }
     </button>
     <button
       type="button"
@@ -60,6 +63,18 @@
           (input)="onSearch($any($event.target).value)"
         />
       </div>
+      <button type="button" class="btn btn-primary btn-sm" (click)="openAdd()">
+        <app-icon name="edit" [size]="16" />
+        {{ 'admin.plotBoundaries.actions.add' | translate }}
+      </button>
+      <label class="include-deleted">
+        <input
+          type="checkbox"
+          [checked]="includeDeleted()"
+          (change)="includeDeleted.set($any($event.target).checked); load()"
+        />
+        {{ 'admin.plotBoundaries.actions.includeDeleted' | translate }}
+      </label>
     </div>
   } @else {
     <div class="filter-row">
@@ -165,14 +180,39 @@
           </div>
         }
 
+        @if (sel.pendingReviewStatus === 'pending') {
+          <p class="preview-warning">
+            {{ 'admin.plotBoundaries.preview.pendingNotice' | translate }}
+          </p>
+        }
+        @if (sel.isDisputed) {
+          <p class="preview-warning disputed">
+            {{ 'member.plotMap.status.disputed' | translate }}
+          </p>
+        }
+        @if (sel.status === 'deleted' && sel.deletedReason) {
+          <p class="preview-warning disputed">
+            {{ 'admin.plotBoundaries.preview.deletedReason' | translate }}:
+            {{ sel.deletedReason }}
+          </p>
+        }
+
         <div class="preview-actions">
-          @if (sel.status === 'pending_review') {
+          @if (sel.pendingVersionId) {
             <button type="button" class="btn btn-primary btn-sm" (click)="openApprove()">
               <app-icon name="check-circle" [size]="16" />
               {{ 'admin.plotBoundaries.actions.approve' | translate }}
             </button>
             <button type="button" class="btn btn-danger btn-sm" (click)="openReject()">
               {{ 'admin.plotBoundaries.actions.reject' | translate }}
+            </button>
+          }
+          @if (!sel.isDeleted) {
+            <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit()">
+              {{ 'admin.plotBoundaries.actions.edit' | translate }}
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="openDelete()">
+              {{ 'common.delete' | translate }}
             </button>
           }
           <button type="button" class="btn btn-secondary btn-sm" (click)="openVersions()">
@@ -334,15 +374,15 @@
                 <tr>
                   <td>{{ digits(version.version) }}</td>
                   <td>{{ version.changeType }}</td>
-                  <td>{{ 'member.plotMap.status.' + version.status | translate }}</td>
+                  <td>{{ 'member.plotMap.status.' + version.reviewStatus | translate }}</td>
                   <td>
-                    @if (version.changedByAdminId) {
+                    @if (version.submittedByRole === 'admin' || version.changedByAdminId) {
                       admin #{{ digits(version.changedByAdminId) }}
                     } @else {
                       member #{{ digits(version.changedByMemberId) }}
                     }
                   </td>
-                  <td>{{ version.note ?? '—' }}</td>
+                  <td>{{ version.reviewNote ?? version.note ?? '—' }}</td>
                   <td>{{ version.createdAt | date: 'short' }}</td>
                 </tr>
               }
@@ -352,6 +392,162 @@
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary btn-sm" (click)="versionsOpen.set(false)">
             {{ 'common.close' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Delete modal (reason mandatory, soft delete) -->
+  @if (deleteOpen()) {
+    <div class="modal-backdrop" (click)="deleteOpen.set(false)">
+      <div class="modal-card" role="dialog" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'admin.plotBoundaries.actions.delete' | translate }}</h3>
+        <p class="pb-item-sub">{{ 'admin.plotBoundaries.delete.warning' | translate }}</p>
+        <label class="modal-label" for="delete-reason">
+          {{ 'admin.plotBoundaries.delete.reasonLabel' | translate }}
+        </label>
+        <textarea
+          id="delete-reason"
+          class="modal-textarea"
+          rows="3"
+          [value]="deleteReason()"
+          (input)="deleteReason.set($any($event.target).value)"
+        ></textarea>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="deleteOpen.set(false)">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            [disabled]="deleteConfirmDisabled() || deleting()"
+            (click)="confirmDelete()"
+          >
+            {{ 'common.delete' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Add polygon modal (goes live immediately) -->
+  @if (addOpen()) {
+    <div class="modal-backdrop" (click)="addOpen.set(false)">
+      <div class="modal-card" role="dialog" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'admin.plotBoundaries.actions.add' | translate }}</h3>
+        <label class="modal-label" for="add-member">{{ 'admin.plotBoundaries.add.memberId' | translate }}</label>
+        <input
+          id="add-member"
+          type="number"
+          class="pb-search-input"
+          [value]="addMemberId() ?? ''"
+          (input)="addMemberId.set($any($event.target).value ? +$any($event.target).value : null)"
+        />
+        <label class="modal-label" for="add-property">{{ 'admin.plotBoundaries.add.propertyId' | translate }}</label>
+        <input
+          id="add-property"
+          type="number"
+          class="pb-search-input"
+          [value]="addPropertyId() ?? ''"
+          (input)="addPropertyId.set($any($event.target).value ? +$any($event.target).value : null)"
+        />
+        <label class="modal-label" for="add-geometry">{{ 'admin.plotBoundaries.add.geometryLabel' | translate }}</label>
+        <textarea
+          id="add-geometry"
+          class="modal-textarea"
+          rows="6"
+          [placeholder]="'admin.plotBoundaries.add.geometryPlaceholder' | translate"
+          [value]="addGeometry()"
+          (input)="addGeometry.set($any($event.target).value)"
+        ></textarea>
+        @if (addErrorKey(); as key) {
+          <div class="error-box" role="alert">
+            <p class="error-text">{{ key | translate }}</p>
+            @if (addOverlaps().length > 0) {
+              <ul class="overlap-list">
+                @for (overlap of addOverlaps(); track overlap.boundary_id) {
+                  <li>
+                    #{{ digits(overlap.boundary_id) }} —
+                    {{ digits(overlap.overlap_area_sqm) }} m²
+                  </li>
+                }
+              </ul>
+              <label class="include-deleted">
+                <input
+                  type="checkbox"
+                  [checked]="addConfirmOverlap()"
+                  (change)="addConfirmOverlap.set($any($event.target).checked)"
+                />
+                {{ 'admin.plotBoundaries.errors.overlapConfirmAccept' | translate }}
+              </label>
+            }
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addOpen.set(false)">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            [disabled]="!addMemberId() || !addPropertyId() || !addGeometry().trim() || addSaving()"
+            (click)="confirmAdd(addConfirmOverlap())"
+          >
+            {{ 'common.save' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Edit polygon modal (goes live immediately) -->
+  @if (editOpen()) {
+    <div class="modal-backdrop" (click)="editOpen.set(false)">
+      <div class="modal-card" role="dialog" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'admin.plotBoundaries.actions.edit' | translate }}</h3>
+        <label class="modal-label" for="edit-geometry">{{ 'admin.plotBoundaries.add.geometryLabel' | translate }}</label>
+        <textarea
+          id="edit-geometry"
+          class="modal-textarea"
+          rows="8"
+          [value]="editGeometry()"
+          (input)="editGeometry.set($any($event.target).value)"
+        ></textarea>
+        @if (editErrorKey(); as key) {
+          <div class="error-box" role="alert">
+            <p class="error-text">{{ key | translate }}</p>
+            @if (editOverlaps().length > 0) {
+              <ul class="overlap-list">
+                @for (overlap of editOverlaps(); track overlap.boundary_id) {
+                  <li>
+                    #{{ digits(overlap.boundary_id) }} —
+                    {{ digits(overlap.overlap_area_sqm) }} m²
+                  </li>
+                }
+              </ul>
+              <label class="include-deleted">
+                <input
+                  type="checkbox"
+                  [checked]="editConfirmOverlap()"
+                  (change)="editConfirmOverlap.set($any($event.target).checked)"
+                />
+                {{ 'admin.plotBoundaries.errors.overlapConfirmAccept' | translate }}
+              </label>
+            }
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="editOpen.set(false)">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            [disabled]="!editGeometry().trim() || editSaving()"
+            (click)="confirmEdit(editConfirmOverlap())"
+          >
+            {{ 'common.save' | translate }}
           </button>
         </div>
       </div>

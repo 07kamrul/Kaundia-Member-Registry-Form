@@ -9,12 +9,13 @@ from sqlalchemy import text
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
+from app.services.land_data import LandDataError
 from app.services.plot_boundary import ValidationIssue
 
 from app.api.routes import (
     admin,
     auth,
-    external_maps,
+    land_data,
     fee_payments,
     finance,
     installment_payments,
@@ -50,6 +51,17 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     # startup makes "file saved here, server looking there" mismatches obvious.
     logger.info("[uploads] serving directory: %s", settings.upload_root)
     check_upload_root()
+    # Fail fast when the local land dataset is missing/corrupt — the map
+    # feature cannot work without it and a silent empty map hides the fault.
+    try:
+        from app.services.land_data import get_land_data_provider
+        provider = get_land_data_provider()
+        logger.info("[land-data] dataset_version=%s, dags=%s",
+                    provider.dataset_meta().get("dataset_version"),
+                    (provider.dataset_meta().get("counts") or {}).get("dags"))
+    except LandDataError as exc:
+        logger.error("[land-data] %s", exc)
+        raise
     # Warm the pool so the first request doesn't pay connection setup (remote
     # Postgres handshakes dominate first-hit latency), then release everything
     # cleanly on shutdown so the process exits without dangling connections.
@@ -136,7 +148,7 @@ app.include_router(resolution_book.router, prefix=api_router_prefix)
 app.include_router(installment_payments.router, prefix=api_router_prefix)
 app.include_router(fee_payments.router, prefix=api_router_prefix)
 app.include_router(plot_map.router, prefix=api_router_prefix)
-app.include_router(external_maps.router, prefix=api_router_prefix)
+app.include_router(land_data.router, prefix=api_router_prefix)
 app.include_router(plot_boundary_admin.router, prefix=api_router_prefix)
 
 app.mount("/uploads", UploadStaticFiles(), name="uploads")

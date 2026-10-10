@@ -3,17 +3,24 @@
  * (docs/plot-boundary-api.md). Geometry is RFC 7946 GeoJSON:
  * [longitude, latitude] order, ring closed. Use geo.helper.ts for the
  * [lat,lng] <-> [lng,lat] conversion - never flip axes ad hoc.
+ *
+ * Review state is version-level: a boundary has a `live` version everyone
+ * sees (approved) and at most one `pending` version awaiting review. The
+ * owner additionally sees their own pending/rejected shapes.
  */
 
-export type BoundaryStatus = 'draft' | 'pending_review' | 'approved' | 'rejected' | 'disputed';
+export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'superseded' | 'withdrawn';
 
-export const BOUNDARY_STATUSES: readonly BoundaryStatus[] = [
-  'draft',
-  'pending_review',
+export const REVIEW_STATUSES: readonly ReviewStatus[] = [
+  'pending',
   'approved',
   'rejected',
-  'disputed',
+  'superseded',
+  'withdrawn',
 ];
+
+/** Derived admin queue status for a boundary. */
+export type BoundaryQueueStatus = ReviewStatus | 'deleted';
 
 export interface PolygonGeometry {
   type: 'Polygon';
@@ -26,8 +33,9 @@ export interface PlotFeature {
   propertyId: number;
   rsDag: string | null;
   csDag: string | null;
-  status: BoundaryStatus;
+  reviewStatus: ReviewStatus;
   isMine: boolean;
+  isDisputed: boolean;
   geometry: PolygonGeometry;
 }
 
@@ -36,8 +44,10 @@ export interface PlotFeatureApiModel {
   property_id: number;
   rs_dag: string | null;
   cs_dag: string | null;
-  status: BoundaryStatus;
+  review_status: ReviewStatus;
+  status: ReviewStatus; // legacy alias
   is_mine: boolean;
+  is_disputed: boolean;
   geometry: PolygonGeometry;
 }
 
@@ -67,7 +77,8 @@ export interface BoundaryOwner {
   landQuantity: string | null;
   computedAreaSqm: number;
   computedAreaShotangsho: number;
-  status: BoundaryStatus;
+  reviewStatus: ReviewStatus;
+  isDisputed: boolean;
 }
 
 export interface BoundaryOwnerApiModel {
@@ -80,19 +91,29 @@ export interface BoundaryOwnerApiModel {
   land_quantity: string | null;
   computed_area_sqm: number;
   computed_area_shotangsho: number;
-  status: BoundaryStatus;
+  review_status: ReviewStatus;
+  status: ReviewStatus; // legacy alias
+  is_disputed: boolean;
 }
 
 /** One of the signed-in member's own boundaries (any status). */
 export interface MyBoundary {
   id: number;
   propertyId: number;
-  status: BoundaryStatus;
+  /** True when a submission of this boundary is awaiting review. */
+  hasPending: boolean;
+  /** Review status of the actionable version (pending, else latest rejection, else live). */
+  reviewStatus: ReviewStatus;
+  /** The actionable shape: pending if one exists, else live, else last rejected. */
   geometry: PolygonGeometry;
   computedAreaSqm: number;
   computedAreaShotangsho: number;
   currentVersion: number;
+  /** Decision note on the pending/rejected version (required on reject). */
   reviewNote: string | null;
+  /** The approved shape everyone sees - null until the first approval. */
+  liveReviewStatus: ReviewStatus | null;
+  liveGeometry: PolygonGeometry | null;
   rsDag: string | null;
   csDag: string | null;
   landQuantity: string | null;
@@ -102,12 +123,16 @@ export interface MyBoundary {
 export interface MyBoundaryApiModel {
   id: number;
   property_id: number;
-  status: BoundaryStatus;
+  has_pending: boolean;
+  review_status: ReviewStatus;
+  status: ReviewStatus; // legacy alias
   geometry: PolygonGeometry;
   computed_area_sqm: number;
   computed_area_shotangsho: number;
   current_version: number;
   review_note: string | null;
+  live_review_status: ReviewStatus | null;
+  live_geometry: PolygonGeometry | null;
   rs_dag: string | null;
   cs_dag: string | null;
   land_quantity: string | null;
@@ -119,10 +144,13 @@ export interface BoundaryVersion {
   version: number;
   geometry: PolygonGeometry;
   computedAreaSqm: number;
-  status: BoundaryStatus;
+  reviewStatus: ReviewStatus;
   changeType: string;
+  submittedByRole: 'member' | 'admin';
   changedByMemberId: number | null;
   changedByAdminId: number | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
   note: string | null;
   createdAt: string;
 }
@@ -132,24 +160,38 @@ export interface BoundaryVersionApiModel {
   version: number;
   geometry: PolygonGeometry;
   computed_area_sqm: number;
-  status: BoundaryStatus;
+  review_status: ReviewStatus;
+  status: ReviewStatus; // legacy alias
   change_type: string;
+  submitted_by_role: 'member' | 'admin';
   changed_by_member_id: number | null;
   changed_by_admin_id: number | null;
+  reviewed_at: string | null;
+  review_note: string | null;
   note: string | null;
   created_at: string;
 }
 
-/** Admin listing row - adds member identity to MyBoundary. */
+/** Admin listing row - adds member identity and workflow pointers. */
 export interface AdminBoundary {
   id: number;
   propertyId: number;
-  status: BoundaryStatus;
+  /** Derived queue status: pending | approved | rejected | deleted. */
+  status: BoundaryQueueStatus;
+  /** Actionable geometry: the pending shape if one awaits review, else live. */
   geometry: PolygonGeometry;
   computedAreaSqm: number;
   computedAreaShotangsho: number;
   currentVersion: number;
+  liveVersionId: number | null;
+  pendingVersionId: number | null;
+  liveReviewStatus: ReviewStatus | null;
+  pendingReviewStatus: ReviewStatus | null;
+  isDisputed: boolean;
   reviewNote: string | null;
+  isDeleted: boolean;
+  deletedReason: string | null;
+  deletedAt: string | null;
   rsDag: string | null;
   csDag: string | null;
   landQuantity: string | null;
@@ -161,12 +203,20 @@ export interface AdminBoundary {
 export interface AdminBoundaryApiModel {
   id: number;
   property_id: number;
-  status: BoundaryStatus;
+  status: BoundaryQueueStatus;
   geometry: PolygonGeometry;
   computed_area_sqm: number;
   computed_area_shotangsho: number;
   current_version: number;
+  live_version_id: number | null;
+  pending_version_id: number | null;
+  live_review_status: ReviewStatus | null;
+  pending_review_status: ReviewStatus | null;
+  is_disputed: boolean;
   review_note: string | null;
+  is_deleted: boolean;
+  deleted_reason: string | null;
+  deleted_at: string | null;
   rs_dag: string | null;
   cs_dag: string | null;
   land_quantity: string | null;
@@ -203,8 +253,9 @@ function toPlotFeature(api: PlotFeatureApiModel): PlotFeature {
     propertyId: api.property_id,
     rsDag: api.rs_dag,
     csDag: api.cs_dag,
-    status: api.status,
+    reviewStatus: api.review_status ?? api.status,
     isMine: api.is_mine,
+    isDisputed: api.is_disputed ?? false,
     geometry: api.geometry,
   };
 }
@@ -229,7 +280,8 @@ export function toBoundaryOwner(api: BoundaryOwnerApiModel): BoundaryOwner {
     landQuantity: api.land_quantity,
     computedAreaSqm: api.computed_area_sqm,
     computedAreaShotangsho: api.computed_area_shotangsho,
-    status: api.status,
+    reviewStatus: api.review_status ?? api.status,
+    isDisputed: api.is_disputed ?? false,
   };
 }
 
@@ -237,12 +289,15 @@ export function toMyBoundary(api: MyBoundaryApiModel): MyBoundary {
   return {
     id: api.id,
     propertyId: api.property_id,
-    status: api.status,
+    hasPending: api.has_pending ?? false,
+    reviewStatus: api.review_status ?? api.status,
     geometry: api.geometry,
     computedAreaSqm: api.computed_area_sqm,
     computedAreaShotangsho: api.computed_area_shotangsho,
     currentVersion: api.current_version,
     reviewNote: api.review_note,
+    liveReviewStatus: api.live_review_status ?? null,
+    liveGeometry: api.live_geometry ?? null,
     rsDag: api.rs_dag,
     csDag: api.cs_dag,
     landQuantity: api.land_quantity,
@@ -256,10 +311,13 @@ export function toBoundaryVersion(api: BoundaryVersionApiModel): BoundaryVersion
     version: api.version,
     geometry: api.geometry,
     computedAreaSqm: api.computed_area_sqm,
-    status: api.status,
+    reviewStatus: api.review_status ?? api.status,
     changeType: api.change_type,
+    submittedByRole: api.submitted_by_role ?? 'member',
     changedByMemberId: api.changed_by_member_id,
     changedByAdminId: api.changed_by_admin_id,
+    reviewedAt: api.reviewed_at ?? null,
+    reviewNote: api.review_note ?? null,
     note: api.note,
     createdAt: api.created_at,
   };
@@ -274,7 +332,15 @@ export function toAdminBoundary(api: AdminBoundaryApiModel): AdminBoundary {
     computedAreaSqm: api.computed_area_sqm,
     computedAreaShotangsho: api.computed_area_shotangsho,
     currentVersion: api.current_version,
+    liveVersionId: api.live_version_id ?? null,
+    pendingVersionId: api.pending_version_id ?? null,
+    liveReviewStatus: api.live_review_status ?? null,
+    pendingReviewStatus: api.pending_review_status ?? null,
+    isDisputed: api.is_disputed ?? false,
     reviewNote: api.review_note,
+    isDeleted: api.is_deleted ?? false,
+    deletedReason: api.deleted_reason ?? null,
+    deletedAt: api.deleted_at ?? null,
     rsDag: api.rs_dag,
     csDag: api.cs_dag,
     landQuantity: api.land_quantity,

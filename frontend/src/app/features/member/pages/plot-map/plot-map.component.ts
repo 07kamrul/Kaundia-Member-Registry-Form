@@ -51,10 +51,11 @@ export type PlotMapMode = 'boundaries' | 'bds' | 'rajuk';
 
 /** Leaflet default marker/icons are unused; polygons only. */
 const STATUS_COLORS: Record<string, string> = {
-  draft: '#4a6fa5',
-  pending_review: '#c9861e',
+  pending: '#c9861e',
   approved: '#2e7d32',
   rejected: '#8a8a8a',
+  superseded: '#b0a37f',
+  withdrawn: '#8a8a8a',
   disputed: '#c0392b',
 };
 const MINE_COLOR = '#1e66d0';
@@ -150,6 +151,9 @@ export class PlotMapComponent implements AfterViewInit {
   // Polygon details sheet ("popup" rendered by Angular so it can be a bottom
   // sheet on touch screens and is fully testable).
   readonly selected = signal<SelectedFeature | null>(null);
+  /** Container point of the clicked location; anchors the sheet on desktop. */
+  readonly sheetPos = signal<{ x: number; y: number } | null>(null);
+  private anchorLatLng: L.LatLng | null = null;
 
   // Draw flow.
   readonly canDraw = computed(() => this.auth.hasPermission('boundary.draw_own'));
@@ -171,8 +175,11 @@ export class PlotMapComponent implements AfterViewInit {
   readonly saving = signal(false);
   readonly saveErrorKey = signal<string | null>(null);
   readonly editingBoundary = signal<MyBoundary | null>(null);
-  readonly deleteTarget = signal<MyBoundary | null>(null);
-  readonly deleting = signal(false);
+  /** Set when saving an edit while a review is already pending — saving replaces it. */
+  readonly replaceTarget = signal<MyBoundary | null>(null);
+  /** Boundary whose pending submission the member is withdrawing. */
+  readonly withdrawTarget = signal<MyBoundary | null>(null);
+  readonly withdrawing = signal(false);
 
   readonly reportOpen = signal(false);
   readonly reportNote = signal('');
@@ -195,7 +202,7 @@ export class PlotMapComponent implements AfterViewInit {
   ];
 
   private map: L.Map | null = null;
-  private readonly featureLayers = new Map<number, L.Polygon>();
+  private readonly featureLayers = new Map<string, L.Polygon>();
   private moveDebounce: ReturnType<typeof setTimeout> | null = null;
   private featuresSub: Subscription | null = null;
   private drawnLayer: L.Polygon | null = null;
@@ -208,9 +215,9 @@ export class PlotMapComponent implements AfterViewInit {
   readonly legendItems: Array<{ status: string; color: string }> = [
     { status: 'approved', color: STATUS_COLORS['approved'] },
     { status: 'mine', color: MINE_COLOR },
-    { status: 'pending_review', color: STATUS_COLORS['pending_review'] },
-    { status: 'disputed', color: STATUS_COLORS['disputed'] },
+    { status: 'pending', color: STATUS_COLORS['pending'] },
     { status: 'rejected', color: STATUS_COLORS['rejected'] },
+    { status: 'disputed', color: STATUS_COLORS['disputed'] },
   ];
 
   ngAfterViewInit(): void {
@@ -248,6 +255,7 @@ export class PlotMapComponent implements AfterViewInit {
       this.moveDebounce = setTimeout(() => this.zone.run(() => this.onViewMoved()), MOVE_DEBOUNCE_MS);
     });
     map.on('zoomend', () => this.zone.runOutsideAngular(() => this.updateBdsLabels()));
+    map.on('move', () => this.updateSheetPos());
 
     map.on('pm:drawmove', () => this.zone.run(() => this.syncDrawnGeometry()));
     map.on('pm:vertexadded', () => this.zone.run(() => this.syncDrawnGeometry()));
@@ -323,14 +331,19 @@ export class PlotMapComponent implements AfterViewInit {
 
     for (const feature of this.features()) {
       if (!this.featureLayerVisible(feature)) continue;
+      // Live shapes are solid; the owner's pending/rejected proposal is dashed.
+      const isProposal = feature.isMine && feature.reviewStatus !== 'approved';
       const layer = L.polygon(this.geoRingToLatLngs(feature.geometry), {
         color: this.featureColor(feature),
         weight: 2,
         fillOpacity: 0.25,
+        dashArray: isProposal ? '6,6' : undefined,
       });
-      layer.on('click', () => this.zone.run(() => this.onFeatureClick(feature)));
+      layer.on('click', (event) =>
+        this.zone.run(() => this.onFeatureClick(feature, (event as L.LeafletMouseEvent).latlng)),
+      );
       layer.addTo(map);
-      this.featureLayers.set(feature.boundaryId, layer);
+      this.featureLayers.set(`${feature.boundaryId}:${feature.reviewStatus}`, layer);
     }
   }
 
@@ -515,8 +528,8 @@ export class PlotMapComponent implements AfterViewInit {
   }
 
   private featureColor(feature: PlotFeature): string {
-    if (feature.isMine) return MINE_COLOR;
-    return STATUS_COLORS[feature.status] ?? STATUS_COLORS['approved'];
+    if (feature.isMine && feature.reviewStatus === 'approved') return MINE_COLOR;
+    return STATUS_COLORS[feature.reviewStatus] ?? STATUS_COLORS['approved'];
   }
 
   private geoRingToLatLngs(geometry: PolygonGeometry): L.LatLngTuple[] {
@@ -527,7 +540,11 @@ export class PlotMapComponent implements AfterViewInit {
 
   // ---- Details sheet ------------------------------------------------------
 
-  onFeatureClick(feature: PlotFeature): void {
+  onFeatureClick(feature: PlotFeature, latlng?: L.LatLng): void {
+    if (latlng) {
+      this.anchorLatLng = latlng;
+      this.updateSheetPos();
+    }
     this.selected.set({ feature, owner: null, loading: true, errorKey: null, reported: false });
     this.plotMapService
       .getOwner(feature.boundaryId)
@@ -550,6 +567,15 @@ export class PlotMapComponent implements AfterViewInit {
 
   closeSheet(): void {
     this.selected.set(null);
+    this.anchorLatLng = null;
+    this.sheetPos.set(null);
+  }
+
+  /** Keeps the anchored sheet glued to the clicked point as the map moves. */
+  private updateSheetPos(): void {
+    if (!this.map || !this.anchorLatLng) return;
+    const point = this.map.latLngToContainerPoint(this.anchorLatLng);
+    this.sheetPos.set({ x: point.x + 12, y: point.y + 12 });
   }
 
   openReport(): void {
@@ -596,7 +622,7 @@ export class PlotMapComponent implements AfterViewInit {
   }
 
   private highlightFeature(feature: PlotFeature): void {
-    const layer = this.featureLayers.get(feature.boundaryId);
+    const layer = this.featureLayers.get(`${feature.boundaryId}:${feature.reviewStatus}`);
     if (!layer || !this.map) return;
     this.map.fitBounds(layer.getBounds().pad(0.5));
     layer.setStyle({ weight: 5, fillOpacity: 0.5 });
@@ -713,12 +739,23 @@ export class PlotMapComponent implements AfterViewInit {
     return this.properties().find((p) => p.id === propertyId)?.landQuantity ?? null;
   }
 
+  /** Save is gated by a confirm when it replaces an already-pending review. */
+  requestSave(): void {
+    const editing = this.editingBoundary();
+    if (editing?.hasPending) {
+      this.replaceTarget.set(editing);
+      return;
+    }
+    this.saveDrawn();
+  }
+
   saveDrawn(): void {
     if (!this.validation().valid || this.saving()) return;
     const geometry = this.drawnGeometry();
     if (!geometry) return;
     this.saving.set(true);
     this.saveErrorKey.set(null);
+    this.replaceTarget.set(null);
     const editing = this.editingBoundary();
     const request$ = editing
       ? this.plotMapService.update(editing.id, geometry)
@@ -737,28 +774,33 @@ export class PlotMapComponent implements AfterViewInit {
     });
   }
 
-  confirmDelete(): void {
-    const target = this.deleteTarget();
-    if (!target || this.deleting()) return;
-    this.deleting.set(true);
+  /** Members cannot delete; they can only withdraw a pending submission. */
+  confirmWithdraw(): void {
+    const target = this.withdrawTarget();
+    if (!target || this.withdrawing()) return;
+    this.withdrawing.set(true);
     this.plotMapService
-      .remove(target.id)
+      .withdraw(target.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.deleting.set(false);
-          this.deleteTarget.set(null);
+          this.withdrawing.set(false);
+          this.withdrawTarget.set(null);
           this.loadFeatures();
+          this.plotMapService
+            .listMine()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({ next: (mine) => this.myBoundaries.set(mine) });
         },
         error: () => {
-          this.deleting.set(false);
-          this.deleteTarget.set(null);
+          this.withdrawing.set(false);
+          this.withdrawTarget.set(null);
         },
       });
   }
 
-  cancelDelete(): void {
-    if (!this.deleting()) this.deleteTarget.set(null);
+  cancelWithdraw(): void {
+    if (!this.withdrawing()) this.withdrawTarget.set(null);
   }
 
   // ---- Template helpers ---------------------------------------------------

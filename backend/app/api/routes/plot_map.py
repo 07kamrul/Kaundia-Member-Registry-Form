@@ -4,21 +4,32 @@ Privacy rules mirror the neighbour directory: the viewport list carries no
 names or phones; owner details are fetched lazily per boundary, rate-limited
 and audited to deter scraping. Phone visibility reuses the
 `show_in_neighbour_directory` opt-out so one setting governs both features.
+
+Visibility: other members see only the LIVE (approved) version of a boundary;
+the owner additionally sees their own pending/rejected version. Anonymous
+access is 401 unless BOUNDARY_MAP_PUBLIC_VIEW is on — and even then anonymous
+callers only ever get dag numbers plus geometry, never names or mobiles.
 """
 
 import logging
 import math
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.core.deps import get_current_member_optional
 from app.core.permissions import require_member_permission
 from app.core.rate_limit import SlidingWindowRateLimiter
 from app.db.session import get_db
 from app.models.member import Member, MemberStatus
-from app.models.plot_boundary import BoundaryDispute, BoundaryStatus, PlotBoundary, PlotBoundaryVersion
+from app.models.plot_boundary import (
+    BoundaryDispute,
+    PlotBoundary,
+    PlotBoundaryVersion,
+    ReviewStatus,
+)
 from app.models.property import Property
 from app.schemas.plot_boundary import version_out as _version_out
 from app.schemas.plot_boundary import (
@@ -26,7 +37,6 @@ from app.schemas.plot_boundary import (
     DISCLAIMER_EN,
     BoundaryCreateRequest,
     BoundaryGeometry,
-    BoundaryOut,
     BoundaryReportRequest,
     BoundaryUpdateRequest,
     BoundaryVersionOut,
@@ -84,44 +94,67 @@ def _parse_bbox(raw: str) -> tuple[float, float, float, float]:
     return min_lng, min_lat, max_lng, max_lat
 
 
-def _in_viewport(boundary: PlotBoundary, bbox: tuple[float, float, float, float]) -> bool:
+def _in_viewport(geometry: dict, bbox: tuple[float, float, float, float]) -> bool:
     min_lng, min_lat, max_lng, max_lat = bbox
-    ring = boundary.geom.get("coordinates", [[]])[0]
+    ring = geometry.get("coordinates", [[]])[0]
     if not ring:
         return False
     return any(min_lng <= lng <= max_lng and min_lat <= lat <= max_lat for lng, lat in ring)
 
 
+async def _load_version(db: AsyncSession, version_id: int | None) -> PlotBoundaryVersion | None:
+    if version_id is None:
+        return None
+    return await db.get(PlotBoundaryVersion, version_id)
+
+
 @router.get("/plot-map", response_model=PlotMapOut)
 async def get_plot_map(
     bbox: str = Query(..., description="minLng,minLat,maxLng,maxLat"),
-    member: Member = Depends(require_member_permission(VIEW_PERMISSION)),
+    member: Member | None = Depends(get_current_member_optional),
     db: AsyncSession = Depends(get_db),
 ) -> PlotMapOut:
-    if member.status != MemberStatus.APPROVED:
+    if member is None:
+        if not get_settings().boundary_map_public_view:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    elif member.status != MemberStatus.APPROVED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "APPROVED_MEMBERS_ONLY", "message": "Approved members only."},
         )
+
     viewport = _parse_bbox(bbox)
     cap = get_settings().boundary_map_result_cap
 
-    result = await db.execute(
-        select(PlotBoundary)
-        .where(
-            PlotBoundary.is_deleted.is_(False),
-            PlotBoundary.status.in_(
-                [BoundaryStatus.APPROVED.value, BoundaryStatus.DISPUTED.value]
+    # Live polygons for everyone; the caller's own pending/rejected version on top.
+    query = select(PlotBoundary).where(PlotBoundary.is_deleted.is_(False))
+    if member is None:
+        query = query.where(PlotBoundary.live_version_id.is_not(None))
+    else:
+        query = query.where(
+            or_(
+                PlotBoundary.live_version_id.is_not(None),
+                PlotBoundary.member_id == member.id,
             )
-            | (PlotBoundary.member_id == member.id),
         )
-        .limit(cap + 1)
-    )
+    result = await db.execute(query.limit(cap + 1))
     rows = list(result.scalars().all())
 
     features: list[MapFeatureOut] = []
     for boundary in rows:
-        if not (boundary.member_id == member.id or _in_viewport(boundary, viewport)):
+        is_mine = member is not None and boundary.member_id == member.id
+        pending = await _load_version(db, boundary.pending_version_id if is_mine else None)
+        if boundary.live_version_id is None:
+            # No live shape: only the owner sees their pending/rejected one.
+            if not (is_mine and pending is not None
+                    and pending.review_status in (ReviewStatus.PENDING.value, ReviewStatus.REJECTED.value)):
+                continue
+            geometry, review_status = pending.geom, pending.review_status
+            live = None
+        else:
+            live = await _load_version(db, boundary.live_version_id)
+            geometry, review_status = live.geom, live.review_status
+        if not _in_viewport(geometry, viewport):
             continue
         if len(features) >= cap:
             break
@@ -132,11 +165,33 @@ async def get_plot_map(
                 property_id=boundary.property_id,
                 rs_dag=property_row.dag_no_rs if property_row else None,
                 cs_dag=property_row.dag_no_cs if property_row else None,
-                status=boundary.status,
-                is_mine=boundary.member_id == member.id,
-                geometry=boundary.geom,
+                review_status=review_status,
+                status=review_status,
+                is_mine=is_mine,
+                geometry=geometry,
             )
         )
+        if is_mine and live is not None and pending is not None and pending.review_status in (
+            ReviewStatus.PENDING.value,
+            ReviewStatus.REJECTED.value,
+        ):
+            # The owner also sees their proposed shape as a dashed overlay.
+            features.append(
+                MapFeatureOut(
+                    boundary_id=boundary.id,
+                    property_id=boundary.property_id,
+                    rs_dag=property_row.dag_no_rs if property_row else None,
+                    cs_dag=property_row.dag_no_cs if property_row else None,
+                    review_status=pending.review_status,
+                    status=pending.review_status,
+                    is_mine=True,
+                    geometry=pending.geom,
+                )
+            )
+
+    flagged = await boundary_service.open_disputes(db, [f.boundary_id for f in features])
+    for feature in features:
+        feature.is_disputed = feature.boundary_id in flagged
     return PlotMapOut(count=len(features), features=features)
 
 
@@ -162,12 +217,9 @@ async def get_boundary_owner(
     if boundary is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Boundary not found")
 
-    # Own boundary: full details. Someone else's: only after review/approval.
+    # Own boundary: full details. Someone else's: only once a shape is live.
     is_mine = boundary.member_id == member.id
-    if not is_mine and boundary.status not in (
-        BoundaryStatus.APPROVED.value,
-        BoundaryStatus.DISPUTED.value,
-    ):
+    if not is_mine and boundary.live_version_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={
@@ -176,9 +228,11 @@ async def get_boundary_owner(
             },
         )
 
+    live = await _load_version(db, boundary.live_version_id)
     property_row = await db.get(Property, boundary.property_id)
     owner = await db.get(Member, boundary.member_id)
     contact_hidden = not owner.show_in_neighbour_directory
+    flagged = await boundary_service.open_disputes(db, [boundary.id])
 
     record_audit(
         db,
@@ -190,6 +244,7 @@ async def get_boundary_owner(
     )
     await db.commit()
 
+    review_status = live.review_status if live else ReviewStatus.REJECTED.value
     return OwnerOut(
         boundary_id=boundary.id,
         owner_name=owner.full_name,
@@ -200,24 +255,55 @@ async def get_boundary_owner(
         land_quantity=property_row.land_quantity if property_row else None,
         computed_area_sqm=float(boundary.computed_area_sqm or 0) or None,
         computed_area_shotangsho=float(boundary.computed_area_shotangsho or 0) or None,
-        status=boundary.status,
+        review_status=review_status,
+        status=review_status,
+        is_disputed=boundary.id in flagged,
     )
 
 
-def _to_out(boundary: PlotBoundary, property_row: Property | None, warnings: list[str]) -> MyBoundaryOut:
+async def _my_boundary_out(db: AsyncSession, boundary: PlotBoundary, property_row: Property | None) -> MyBoundaryOut:
+    versions = await boundary_service.boundary_versions(db, boundary.id)
+    by_id = {v.id: v for v in versions}
+    live = by_id.get(boundary.live_version_id)
+    pending = by_id.get(boundary.pending_version_id)
+
+    # The actionable version: the pending one, else the latest rejected one
+    # when it is newer than the live shape (the owner must see the rejection
+    # note and be able to resubmit), else the live shape.
+    actionable = pending
+    if actionable is None and versions:
+        last = versions[-1]
+        if last.review_status == ReviewStatus.REJECTED.value and (
+            live is None or last.version > live.version
+        ):
+            actionable = last
+    if actionable is None:
+        actionable = live
+
+    review_note = (pending or (actionable if actionable is not live else None))
+    note = review_note.review_note if review_note is not None else None
+    warnings = [note] if note and note.startswith("AREA_MISMATCH") else []
+
     return MyBoundaryOut(
         id=boundary.id,
         property_id=boundary.property_id,
-        status=boundary.status,
-        geometry=boundary.geom,
-        computed_area_sqm=boundary.computed_area_sqm,
-        computed_area_shotangsho=boundary.computed_area_shotangsho,
-        current_version=boundary.current_version,
-        review_note=boundary.review_note,
         rs_dag=property_row.dag_no_rs if property_row else None,
         cs_dag=property_row.dag_no_cs if property_row else None,
         land_quantity=property_row.land_quantity if property_row else None,
+        has_pending=pending is not None,
+        review_status=actionable.review_status if actionable else ReviewStatus.REJECTED.value,
+        status=actionable.review_status if actionable else ReviewStatus.REJECTED.value,
+        geometry=actionable.geom if actionable else None,
+        computed_area_sqm=actionable.computed_area_sqm if actionable else None,
+        computed_area_shotangsho=(
+            round(float(actionable.computed_area_sqm) / 40.47, 2)
+            if actionable and actionable.computed_area_sqm is not None else None
+        ),
+        current_version=boundary.current_version,
+        review_note=note,
         warnings=warnings,
+        live_review_status=live.review_status if live else None,
+        live_geometry=live.geom if live else None,
     )
 
 
@@ -234,12 +320,7 @@ async def list_my_boundaries(
     out: list[MyBoundaryOut] = []
     for boundary in result.scalars().all():
         property_row = await db.get(Property, boundary.property_id)
-        warnings = (
-            [boundary.review_note]
-            if boundary.review_note and boundary.review_note.startswith("AREA_MISMATCH")
-            else []
-        )
-        out.append(_to_out(boundary, property_row, warnings))
+        out.append(await _my_boundary_out(db, boundary, property_row))
     return out
 
 
@@ -254,7 +335,7 @@ async def create_boundary(
     await db.refresh(boundary)
     await _notify_submission(db, boundary)
     property_row = await db.get(Property, boundary.property_id)
-    return _to_out(boundary, property_row, _warnings_of(boundary))
+    return await _my_boundary_out(db, boundary, property_row)
 
 
 @router.put("/plot-boundaries/{boundary_id}", response_model=MyBoundaryOut)
@@ -267,18 +348,22 @@ async def update_boundary(
     boundary = await boundary_service.update_boundary(db, member, boundary_id, payload.geometry.model_dump())
     await db.commit()
     await db.refresh(boundary)
+    await _notify_submission(db, boundary)
     property_row = await db.get(Property, boundary.property_id)
-    return _to_out(boundary, property_row, _warnings_of(boundary))
+    return await _my_boundary_out(db, boundary, property_row)
 
 
-@router.delete("/plot-boundaries/{boundary_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_boundary(
+@router.post("/plot-boundaries/{boundary_id}/withdraw", response_model=MyBoundaryOut)
+async def withdraw_boundary(
     boundary_id: int,
     member: Member = Depends(require_member_permission(DRAW_PERMISSION)),
     db: AsyncSession = Depends(get_db),
-) -> None:
-    await boundary_service.soft_delete_boundary(db, member, boundary_id)
+) -> MyBoundaryOut:
+    await boundary_service.withdraw_pending(db, member, boundary_id)
     await db.commit()
+    await db.refresh(boundary := await db.get(PlotBoundary, boundary_id))
+    property_row = await db.get(Property, boundary.property_id)
+    return await _my_boundary_out(db, boundary, property_row)
 
 
 @router.get("/plot-boundaries/{boundary_id}/versions", response_model=list[BoundaryVersionOut])
@@ -288,12 +373,7 @@ async def my_boundary_versions(
     db: AsyncSession = Depends(get_db),
 ) -> list[PlotBoundaryVersion]:
     boundary = await boundary_service._owned_boundary(db, member, boundary_id)
-    result = await db.execute(
-        select(PlotBoundaryVersion)
-        .where(PlotBoundaryVersion.boundary_id == boundary.id)
-        .order_by(PlotBoundaryVersion.version)
-    )
-    return [_version_out(v) for v in result.scalars().all()]
+    return [_version_out(v) for v in await boundary_service.boundary_versions(db, boundary.id)]
 
 
 @router.post("/plot-boundaries/{boundary_id}/report", status_code=status.HTTP_202_ACCEPTED)
@@ -325,14 +405,9 @@ async def report_boundary(
     return {"received": True, "dispute_id": dispute.id}
 
 
-def _warnings_of(boundary: PlotBoundary) -> list[str]:
-    if boundary.review_note and boundary.review_note.startswith("AREA_MISMATCH"):
-        return [boundary.review_note]
-    return []
-
-
 async def _notify_submission(db: AsyncSession, boundary: PlotBoundary) -> None:
-    """Email the committee on submission. Delivery errors never block the save."""
+    """Email the committee on each new pending submission. Delivery errors
+    never block the save."""
     owner = await db.get(Member, boundary.member_id)
     property_row = await db.get(Property, boundary.property_id)
     dags = " / ".join(filter(None, [property_row.dag_no_rs and f"RS {property_row.dag_no_rs}",
@@ -357,5 +432,4 @@ __all__ = [
     "DISCLAIMER_EN",
     "DISCLAIMER_BN",
     "BoundaryGeometry",
-    "BoundaryOut",
 ]

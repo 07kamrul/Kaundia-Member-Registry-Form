@@ -97,7 +97,9 @@ export function featurePatch(overrides: Record<string, unknown> = {}) {
     rs_dag: '830',
     cs_dag: '412',
     status: 'approved' as const,
+    review_status: 'approved' as const,
     is_mine: false,
+    is_disputed: false,
     geometry: SQUARE_GEOMETRY,
     ...overrides,
   };
@@ -127,6 +129,8 @@ const OWNER_OK = {
   computed_area_sqm: 1234,
   computed_area_shotangsho: 30,
   status: 'approved' as const,
+  review_status: 'approved' as const,
+  is_disputed: false,
 };
 
 export function setup(options: SetupOptions = {}) {
@@ -150,7 +154,7 @@ export function setup(options: SetupOptions = {}) {
     listMine: vi.fn(() => of([])),
     create: vi.fn(() => of({})),
     update: vi.fn(() => of({})),
-    remove: vi.fn(() => of(undefined)),
+    withdraw: vi.fn(() => of({})),
     report: vi.fn(() => of({ received: true, dispute_id: null })),
   };
   const memberService = {
@@ -238,6 +242,8 @@ describe('PlotMapComponent', () => {
         computed_area_sqm: 0,
         computed_area_shotangsho: 0,
         status: 'approved',
+        review_status: 'approved',
+        is_disputed: false,
       }),
     });
     component.onFeatureClick({ boundaryId: 7 } as never);

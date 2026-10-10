@@ -27,7 +27,7 @@ from app.models.resolution_book import (
 )
 from app.models.plot_boundary import (
     BoundaryDispute,
-    BoundaryStatus,
+    ReviewStatus,
     ChangeType,
     PlotBoundary,
     PlotBoundaryVersion,
@@ -70,7 +70,7 @@ __all__ = [
     "RoadmapItem",
     "InstallmentPayment",
     "BoundaryDispute",
-    "BoundaryStatus",
+    "ReviewStatus",
     "ChangeType",
     "PlotBoundary",
     "PlotBoundaryVersion",

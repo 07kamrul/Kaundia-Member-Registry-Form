@@ -75,8 +75,11 @@ export class PlotMapService {
       .pipe(map(toMyBoundary));
   }
 
-  remove(id: number): Observable<void> {
-    return this.http.delete<void>(this.memberUrl(`plot-boundaries/${id}`));
+  /** Withdraw the pending submission; the live shape is untouched. */
+  withdraw(id: number): Observable<MyBoundary> {
+    return this.http
+      .post<MyBoundaryApiModel>(this.memberUrl(`plot-boundaries/${id}/withdraw`), {})
+      .pipe(map(toMyBoundary));
   }
 
   listVersions(id: number): Observable<BoundaryVersion[]> {
@@ -94,26 +97,70 @@ export class PlotMapService {
 
   // ---- Admin (boundary.review; boundary.manage for disputes/evidence) ----
 
-  adminList(status?: string, search?: string): Observable<AdminBoundary[]> {
+  adminList(status?: string, search?: string, includeDeleted = false): Observable<AdminBoundary[]> {
     const params: Record<string, string> = {};
     if (status) params['status'] = status;
     if (search) params['search'] = search;
+    if (includeDeleted) params['include_deleted'] = 'true';
     return this.http
       .get<AdminBoundaryApiModel[]>(this.adminUrl('plot-boundaries'), { params })
       .pipe(map((rows) => rows.map(toAdminBoundary)));
   }
 
-  adminApprove(id: number, note?: string): Observable<AdminBoundary> {
+  adminPendingCount(): Observable<number> {
     return this.http
-      .post<AdminBoundaryApiModel>(this.adminUrl(`plot-boundaries/${id}/approve`), {
+      .get<{ count: number }>(this.adminUrl('plot-boundaries/pending/count'))
+      .pipe(map((body) => body.count));
+  }
+
+  /** Approve/reject a pending VERSION (not the boundary). */
+  adminApprove(versionId: number, note?: string): Observable<AdminBoundary> {
+    return this.http
+      .post<AdminBoundaryApiModel>(this.adminUrl(`plot-boundary-versions/${versionId}/approve`), {
         note: note ?? null,
       })
       .pipe(map(toAdminBoundary));
   }
 
-  adminReject(id: number, note: string): Observable<AdminBoundary> {
+  adminReject(versionId: number, note: string): Observable<AdminBoundary> {
     return this.http
-      .post<AdminBoundaryApiModel>(this.adminUrl(`plot-boundaries/${id}/reject`), { note })
+      .post<AdminBoundaryApiModel>(this.adminUrl(`plot-boundary-versions/${versionId}/reject`), { note })
+      .pipe(map(toAdminBoundary));
+  }
+
+  /** Add a polygon on behalf of a member - goes live immediately. */
+  adminCreate(
+    memberId: number,
+    propertyId: number,
+    geometry: PolygonGeometry,
+    confirmOverlap = false,
+  ): Observable<AdminBoundary> {
+    return this.http
+      .post<AdminBoundaryApiModel>(this.adminUrl('plot-boundaries'), {
+        member_id: memberId,
+        property_id: propertyId,
+        geometry,
+        confirm_overlap: confirmOverlap,
+      })
+      .pipe(map(toAdminBoundary));
+  }
+
+  /** Edit any member's polygon - goes live immediately. */
+  adminEdit(id: number, geometry: PolygonGeometry, confirmOverlap = false): Observable<AdminBoundary> {
+    return this.http
+      .put<AdminBoundaryApiModel>(this.adminUrl(`plot-boundaries/${id}`), {
+        geometry,
+        confirm_overlap: confirmOverlap,
+      })
+      .pipe(map(toAdminBoundary));
+  }
+
+  /** Soft delete with a mandatory reason; the version history is kept. */
+  adminDelete(id: number, reason: string): Observable<AdminBoundary> {
+    return this.http
+      .request<AdminBoundaryApiModel>('DELETE', this.adminUrl(`plot-boundaries/${id}`), {
+        body: { reason },
+      })
       .pipe(map(toAdminBoundary));
   }
 
