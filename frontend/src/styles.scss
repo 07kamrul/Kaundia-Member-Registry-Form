@@ -3402,16 +3402,18 @@ a {
    never reaches it). Mirrors the settlement.gov.bd dag-detail card.
    ========================================================================== */
 
+/* Colors are fixed (not theme tokens): the Leaflet popup wrapper is always
+   white, so dark-mode tokens would render light text on white. */
 .bds-popup {
   font-size: 0.85rem;
-  color: var(--gray-800);
+  color: #1a2a20;
 }
 
 .bds-popup-title {
   margin: 0 0 0.6rem;
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--emerald-800);
+  color: #1f3d2a;
 }
 
 .bds-popup-table {
@@ -3420,7 +3422,7 @@ a {
 
   th,
   td {
-    border: 1px solid var(--gray-200);
+    border: 1px solid #e2dbc5;
     padding: 0.4rem 0.55rem;
     text-align: left;
     vertical-align: top;
@@ -3430,12 +3432,13 @@ a {
   th {
     width: 45%;
     font-weight: 600;
-    color: var(--gray-600);
-    background: var(--gray-50);
+    color: #47564a;
+    background: #faf8f1;
   }
 
   td {
     font-weight: 600;
+    color: #1a2a20;
     font-variant-numeric: tabular-nums;
   }
 }
@@ -3444,9 +3447,9 @@ a {
   margin: 0.6rem 0;
   padding: 0.45rem 0.55rem;
   border-radius: var(--radius-sm);
-  background: var(--amber-50);
-  border: 1px solid var(--amber-200);
-  color: var(--gray-700);
+  background: #f1e4c3;
+  border: 1px solid #c9a34c;
+  color: #47564a;
   font-size: 0.78rem;
   line-height: 1.5;
 }
@@ -3454,5 +3457,5 @@ a {
 .bds-popup-link {
   display: inline-block;
   font-weight: 700;
-  color: var(--emerald-800);
+  color: #1f3d2a;
 }

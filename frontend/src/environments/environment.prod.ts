@@ -6,5 +6,5 @@ export const environment = {
   satelliteTileUrl:
     'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   // Society fence for boundary drawing: "minLng,minLat,maxLng,maxLat".
-  societyBbox: '90.3400,23.7200,90.4400,23.8200',
+  societyBbox: '90.3000,23.7800,90.3470,23.8380',
 };

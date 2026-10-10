@@ -69,6 +69,9 @@ export const L = vi.hoisted(() => {
     tileLayer: vi.fn(() => layerStub()),
     polygon: vi.fn(() => layerStub()),
     geoJSON: vi.fn(() => layerStub()),
+    latLngBounds: vi.fn(() => ({
+      pad: vi.fn(() => ({ getCenter: vi.fn(() => ({ lat: 23.809, lng: 90.323 })) })),
+    })),
     control: { layers: vi.fn(() => ({ addTo: vi.fn() })) },
   };
   return stub;

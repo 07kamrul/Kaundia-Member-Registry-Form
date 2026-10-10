@@ -41,7 +41,9 @@ import { validateDrawing, type DrawValidation } from './boundary-validation';
 import { environment } from '../../../../../environments/environment';
 
 const MOVE_DEBOUNCE_MS = 300;
-const SOCIETY_CENTER: L.LatLngTuple = [23.77, 90.39];
+// Uttar Kaundia mouza (Savar) — the society's actual location. The earlier
+// [23.77, 90.39] pointed at Mirpur and left the mouza data in a corner.
+const SOCIETY_CENTER: L.LatLngTuple = [23.809, 90.323];
 const DISCLAIMER_KEY = 'krmf_boundary_disclaimer_dismissed';
 const MOUZA_CENTER: L.LatLngTuple = [23.7985, 90.3325];
 const BDS_LABEL_MIN_ZOOM = 16;
@@ -251,7 +253,9 @@ export class PlotMapComponent implements AfterViewInit {
       maxBoundsViscosity: 1.0,
       touchZoom: true,
     });
-    map.fitBounds(society);
+    // A natural fitBounds of the mouza bbox lands at ~z13, which reads as
+    // "middle of nowhere" — start at z14 so the mouza fills the view.
+    map.setView(SOCIETY_CENTER, 14);
 
     const street = L.tileLayer(environment.mapTileUrl, {
       maxZoom: 19,
