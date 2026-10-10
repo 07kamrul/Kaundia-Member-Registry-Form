@@ -147,6 +147,20 @@
   border-right: 1px solid var(--gray-200);
 }
 
+/* Desktop: the sidebar stays pinned while the page content scrolls, with its
+   own scroll area for long admin lists on short viewports. */
+@media (min-width: 900px) {
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    max-height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+  }
+}
+
 .sidebar-user-card {
   display: flex;
   flex-direction: column;
@@ -212,42 +226,79 @@
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.15rem;
+}
+
+/* Sectioned navigation: each group gets a small uppercase heading so the
+   member pages and the admin tools stay visually separated. */
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-top: 0.9rem;
+  margin-top: 0.55rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.sidebar-section:first-child {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
+.sidebar-section-title {
+  margin: 0 0 0.3rem;
+  padding-left: 0.9rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  user-select: none;
 }
 
 .sidebar-link {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.6rem 0.9rem;
+  padding: 0.56rem 0.9rem;
   border-radius: 0.56rem;
-  border-right: 2.5px solid transparent;
-  margin-right: -2px;
+  border-left: 2.5px solid transparent;
   color: var(--gray-700);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.885rem;
   font-weight: 600;
-  transition: background-color 0.15s, color 0.15s;
+  line-height: 1.3;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sidebar-link app-icon {
+  flex-shrink: 0;
 }
 
 .sidebar-link:hover:not(.active) {
   background: var(--surface-2);
+  color: var(--emerald-800);
 }
 
 .sidebar-link.active {
   background: var(--emerald-50);
   color: var(--emerald-700);
-  border-right-color: var(--gold);
+  border-left-color: var(--gold);
+  font-weight: 700;
 }
 
 .sidebar-link-admin {
   color: var(--gold-strong);
 }
 
-.sidebar-nav > .sidebar-link-admin:first-of-type {
-  margin-top: 0.6rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid var(--gray-200);
+.sidebar-link-admin:hover:not(.active) {
+  color: var(--gold-strong);
+}
+
+.sidebar-link-admin.active {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  color: var(--gold-strong);
 }
 
 .sidebar-backdrop {
@@ -269,20 +320,24 @@
     inset-block: 0;
     left: 0;
     top: 0;
-    width: 16rem;
-    padding: 1.25rem 1rem;
+    width: min(17rem, 84vw);
+    padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom));
     background: var(--surface);
-    border-right: none;
-    border-bottom: 1px solid var(--gray-200);
+    border-right: 1px solid var(--gray-200);
     box-shadow: 0 0 32px rgba(0, 0, 0, 0.25);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    visibility: hidden;
+    transition: transform 0.22s ease, visibility 0.22s;
     z-index: 40;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
 
   .sidebar.sidebar-open {
     transform: translateX(0);
+    visibility: visible;
   }
 
   :host .site-header-actions {

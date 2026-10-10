@@ -74,10 +74,42 @@ describe('validateDrawing', () => {
     expect(geometryCloseTo(result.areaShotangsho, result.areaSqM! / 40.47)).toBe(true);
   });
 
-  it('warns when the drawn area mismatches the declared shotangsho', () => {
-    const result = validateDrawing(INSIDE_SQUARE, '5', BBOX);
+  it('warns when the drawn area is far smaller than the declared shotangsho', () => {
+    const measured = validateDrawing(INSIDE_SQUARE, null, BBOX);
+    const result = validateDrawing(
+      INSIDE_SQUARE,
+      (measured.areaShotangsho! * 3).toFixed(2),
+      BBOX,
+    );
     expect(result.areaMismatch).toBe(true);
+    expect(result.areaExceeds).toBe(false);
     // Validity survives an area warning - it is advisory only.
+    expect(result.valid).toBe(true);
+  });
+
+  it('blocks saving when the drawn area exceeds the declared shotangsho', () => {
+    const result = validateDrawing(INSIDE_SQUARE, '5', BBOX);
+    expect(result.areaExceeds).toBe(true);
+    expect(result.valid).toBe(false);
+  });
+
+  it('allows the drawn area within a small tolerance above the declared size', () => {
+    const measured = validateDrawing(INSIDE_SQUARE, null, BBOX);
+    const declared = measured.areaShotangsho! * 0.999;
+    const result = validateDrawing(INSIDE_SQUARE, declared.toFixed(3), BBOX);
+    expect(result.areaExceeds).toBe(false);
+    expect(result.valid).toBe(true);
+  });
+
+  it('accepts when the drawn area is less than or equal to the declared size', () => {
+    const measured = validateDrawing(INSIDE_SQUARE, null, BBOX);
+    const result = validateDrawing(
+      INSIDE_SQUARE,
+      (measured.areaShotangsho! * 2).toFixed(2),
+      BBOX,
+    );
+    expect(result.areaExceeds).toBe(false);
+    expect(result.areaMismatch).toBe(true);
     expect(result.valid).toBe(true);
   });
 

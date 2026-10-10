@@ -171,47 +171,54 @@
     "retry": "Retry"
   },
   "nav": {
-    "openMenu": "Open menu",
-    "closeMenu": "Close menu",
-    "logout": "Logout",
-    "lightTheme": "Light theme",
-    "darkTheme": "Dark theme",
-    "changeTheme": "Change theme",
-    "register": "Register",
-    "login": "Login",
-    "dashboard": "Dashboard",
-    "profile": "Profile",
-    "installments": "Installments",
-    "changePassword": "Change Password",
-    "submissions": "Submissions",
-    "membersList": "Members List",
-    "installmentsManagement": "Installments Management",
-    "rolesPermissions": "Roles & Permissions",
-    "feeSettings": "Fee Settings",
-    "auditLog": "Audit Log",
-    "configLists": "Config Lists",
     "admin": "Admin",
-    "notices": "Notices",
+    "auditLog": "Audit Log",
+    "changePassword": "Change Password",
+    "changeTheme": "Change theme",
+    "closeMenu": "Close menu",
+    "configLists": "Config Lists",
+    "costShares": "Cost Shares",
+    "darkTheme": "Dark theme",
+    "dashboard": "Dashboard",
     "events": "Events",
-    "noticesManagement": "Manage Notices",
     "eventsManagement": "Manage Events",
+    "feeSettings": "Fee Settings",
+    "fees": "Fees",
+    "feesManagement": "Fee Payments",
+    "financeManagement": "Finance Management",
+    "fundTransparency": "Fund Transparency",
+    "installments": "Installments",
+    "installmentsManagement": "Installments Management",
+    "lightTheme": "Light theme",
+    "login": "Login",
+    "logout": "Logout",
+    "membersList": "Members List",
+    "moreOptions": "More options",
+    "neighbours": "Neighbours",
+    "notices": "Notices",
+    "noticesManagement": "Manage Notices",
+    "openMenu": "Open menu",
+    "paymentVerifications": "Payment Verifications",
     "picnicPayment": "Picnic Fee",
     "picnicPayments": "Picnic Payments",
-    "moreOptions": "More options",
+    "plotBoundaries": "Plot Boundaries",
+    "plotMap": "Plot Boundary Map",
+    "profile": "Profile",
     "propertyRequests": "Property Requests",
-    "societyCosts": "Society Costs",
-    "costShares": "Cost Shares",
-    "fundTransparency": "Fund Transparency",
-    "financeManagement": "Finance Management",
+    "register": "Register",
     "resolutionBook": "Resolution Book",
     "roadmap": "Our Roadmap",
     "roadmapManagement": "Roadmap Management",
-    "paymentVerifications": "Payment Verifications",
-    "neighbours": "Neighbours",
-    "fees": "Fees",
-    "feesManagement": "Fee Payments",
-    "plotMap": "Plot Boundary Map",
-    "plotBoundaries": "Plot Boundaries"
+    "rolesPermissions": "Roles & Permissions",
+    "section": {
+      "overview": "Overview",
+      "payments": "My Payments",
+      "community": "Community",
+      "management": "Management",
+      "administration": "Administration"
+    },
+    "societyCosts": "Society Costs",
+    "submissions": "Submissions"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -844,6 +851,8 @@
         "pickHint": "Choose one of your properties that has no boundary yet, then draw its outline on the map.",
         "noProperties": "None of your properties is available for drawing - either all have boundaries already or no property is registered.",
         "start": "Draw on map",
+        "khatianShort": "Khatian",
+        "propertyNoShort": "Property no.",
         "myBoundaries": "My boundaries",
         "edit": "Edit",
         "deleteTitle": "Delete boundary",
@@ -867,7 +876,9 @@
       "validation": {
         "selfIntersection": "The outline crosses itself - fix the highlighted overlap.",
         "outsideSociety": "Part of the outline is outside the society area.",
+        "areaExceeds": "The drawn area is larger than your declared land quantity. It cannot exceed it - adjust the outline to fit within your plot.",
         "areaMismatch": "The drawn area differs a lot from your declared land quantity.",
+        "declared": "Declared land",
         "area": "Drawn area",
         "ok": "The outline looks valid."
       },
@@ -1982,12 +1993,17 @@
         "khatian": "Khatian",
         "dag": "Dag",
         "landQuantity": "Declared land",
-        "computedArea": "Computed area"
+        "computedArea": "Computed area",
+        "property": "Property"
       },
       "preview": {
         "title": "Boundary preview",
         "pendingNotice": "A member submission is awaiting review; the approved shape stays live for others until you decide.",
-        "deletedReason": "Deleted — reason"
+        "deletedReason": "Deleted — reason",
+        "rejectionNote": "Rejection note",
+        "backToList": "Back to list",
+        "placeholder": "Pick a boundary from the list to review it here.",
+        "noGeometry": "No shape has been drawn for this boundary yet."
       },
       "actions": {
         "approve": "Approve",
@@ -2038,8 +2054,9 @@
       "add": {
         "memberId": "Member ID",
         "propertyId": "Property ID",
-        "geometryLabel": "GeoJSON Polygon",
-        "geometryPlaceholder": "{\"type\": \"Polygon\", \"coordinates\": [[[90.40, 23.80], ...]]}"
+        "geometryLabel": "Draw the plot boundary on the map",
+        "drawingHint": "Click/tap the map to place points; click the first point (or double-click) to close the shape.",
+        "redrawHint": "This outline will be saved with the boundary - draw again to replace it."
       },
       "edit": {
         "drawNew": "Draw again",
@@ -2047,6 +2064,16 @@
         "drawingHint": "Click/tap the map to place points; click the first point (or double-click) to close the shape.",
         "editHint": "Drag the points to adjust the shape, or draw it again.",
         "geometryAuto": "GeoJSON Polygon (updates automatically from the map)"
+      },
+      "emptyHint": "Try another status filter or clear the search.",
+      "list": {
+        "count": "{{count}} found"
+      },
+      "success": {
+        "approved": "Boundary approved.",
+        "rejected": "Boundary rejected.",
+        "deleted": "Boundary deleted.",
+        "saved": "Boundary saved."
       }
     }
   },

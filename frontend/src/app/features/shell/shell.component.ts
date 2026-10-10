@@ -24,201 +24,236 @@ interface NavItem {
   openAccess?: boolean;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { labelKey: 'nav.dashboard', route: '/dashboard', icon: 'dashboard' },
+interface NavSection {
+  labelKey: string;
+  items: NavItem[];
+}
+
+// Sidebar is rendered section by section (Overview → My Payments → Community →
+// Management → Administration) so the flat 30-item list stays scannable and the
+// member-facing pages always come before the admin tools. Empty sections are
+// dropped at render time, so permission-limited accounts never see a heading
+// with nothing under it.
+const NAV_SECTIONS: NavSection[] = [
   {
-    labelKey: 'nav.resolutionBook',
-    route: '/resolution-book',
-    icon: 'doc',
-    // Members read via profile.view_own; committee/admin tiers hold
-    // member.view_all - the nav shows the item when either key is held.
-    requiredPermission: ['profile.view_own', 'member.view_all'],
+    labelKey: 'nav.section.overview',
+    items: [
+      { labelKey: 'nav.dashboard', route: '/dashboard', icon: 'dashboard' },
+      {
+        labelKey: 'nav.profile',
+        route: '/profile',
+        icon: 'user',
+        requiredPermission: ['profile.view_own'],
+      },
+      {
+        labelKey: 'nav.changePassword',
+        route: '/change-password',
+        icon: 'lock',
+        requiredPermission: ['profile.view_own'],
+      },
+    ],
   },
   {
-    labelKey: 'nav.profile',
-    route: '/profile',
-    icon: 'user',
-    requiredPermission: ['profile.view_own'],
+    labelKey: 'nav.section.payments',
+    items: [
+      {
+        labelKey: 'nav.installments',
+        route: '/installments',
+        icon: 'wallet',
+        requiredPermission: ['profile.view_own'],
+      },
+      {
+        labelKey: 'nav.picnicPayment',
+        route: '/picnic-payment',
+        icon: 'sun',
+        requiredPermission: ['profile.view_own'],
+        requiredRoles: MEMBER_PAYMENT_ROLES,
+      },
+      {
+        labelKey: 'nav.fees',
+        route: '/fees',
+        icon: 'coin',
+        requiredPermission: ['profile.view_own'],
+        requiredRoles: MEMBER_PAYMENT_ROLES,
+      },
+      {
+        labelKey: 'nav.costShares',
+        route: '/cost-shares',
+        icon: 'coin',
+        requiredPermission: ['profile.view_own'],
+      },
+    ],
   },
   {
-    labelKey: 'nav.installments',
-    route: '/installments',
-    icon: 'wallet',
-    requiredPermission: ['profile.view_own'],
+    labelKey: 'nav.section.community',
+    items: [
+      {
+        labelKey: 'nav.resolutionBook',
+        route: '/resolution-book',
+        icon: 'doc',
+        // Members read via profile.view_own; committee/admin tiers hold
+        // member.view_all - the nav shows the item when either key is held.
+        requiredPermission: ['profile.view_own', 'member.view_all'],
+      },
+      {
+        labelKey: 'nav.neighbours',
+        route: '/neighbours',
+        icon: 'pin',
+        requiredPermission: ['neighbour.view'],
+        // Account-type check, not a permission one: /api/member/neighbours only
+        // accepts member tokens, and Super Admin's full catalog includes
+        // neighbour.view without owning any plots.
+        requiredRoles: ['member'],
+      },
+      {
+        labelKey: 'nav.plotMap',
+        route: '/plot-map',
+        icon: 'map',
+        requiredPermission: ['boundary.view'],
+        // /api/member/plot-map only accepts member tokens.
+        requiredRoles: ['member'],
+      },
+      // Fund transparency: every authenticated account (members and committee
+      // alike) can read the society's approved ledger.
+      {
+        labelKey: 'nav.fundTransparency',
+        route: '/fund-transparency',
+        icon: 'chart',
+        openAccess: true,
+      },
+      // Society roadmap: visible to every authenticated account.
+      {
+        labelKey: 'nav.roadmap',
+        route: '/roadmap',
+        icon: 'map',
+        openAccess: true,
+      },
+      // Published notices/events - the same public pages logged-out visitors read.
+      {
+        labelKey: 'nav.notices',
+        route: '/notices',
+        icon: 'doc',
+        requiredPermission: ['notice.view'],
+      },
+      {
+        labelKey: 'nav.events',
+        route: '/events',
+        icon: 'pin',
+        requiredPermission: ['event.view'],
+      },
+    ],
   },
   {
-    labelKey: 'nav.picnicPayment',
-    route: '/picnic-payment',
-    icon: 'sun',
-    requiredPermission: ['profile.view_own'],
-    requiredRoles: MEMBER_PAYMENT_ROLES,
+    labelKey: 'nav.section.management',
+    items: [
+      {
+        labelKey: 'nav.submissions',
+        route: '/submissions',
+        icon: 'inbox',
+        requiredPermission: ['membership.review'],
+      },
+      {
+        labelKey: 'nav.propertyRequests',
+        route: '/property-requests',
+        icon: 'doc',
+        requiredPermission: ['property.review'],
+      },
+      {
+        labelKey: 'nav.membersList',
+        route: '/members',
+        icon: 'users',
+        requiredPermission: ['member.view_all'],
+      },
+      {
+        labelKey: 'nav.picnicPayments',
+        route: '/picnic-payments',
+        icon: 'wallet',
+        requiredPermission: ['member.view_all'],
+      },
+      {
+        labelKey: 'nav.installmentsManagement',
+        route: '/installments-management',
+        icon: 'coin',
+        requiredPermission: ['member.view_all'],
+      },
+      {
+        labelKey: 'nav.feesManagement',
+        route: '/fees-management',
+        icon: 'coin',
+        requiredPermission: ['member.view_all'],
+      },
+      {
+        labelKey: 'nav.paymentVerifications',
+        route: '/payment-verifications',
+        icon: 'check-circle',
+        requiredPermission: ['manage_finance'],
+      },
+      {
+        labelKey: 'nav.plotBoundaries',
+        route: '/plot-boundaries',
+        icon: 'pin',
+        requiredPermission: ['boundary.review'],
+      },
+    ],
   },
   {
-    labelKey: 'nav.fees',
-    route: '/fees',
-    icon: 'coin',
-    requiredPermission: ['profile.view_own'],
-    requiredRoles: MEMBER_PAYMENT_ROLES,
-  },
-  {
-    labelKey: 'nav.costShares',
-    route: '/cost-shares',
-    icon: 'coin',
-    requiredPermission: ['profile.view_own'],
-  },
-  {
-    labelKey: 'nav.neighbours',
-    route: '/neighbours',
-    icon: 'pin',
-    requiredPermission: ['neighbour.view'],
-    // Account-type check, not a permission one: /api/member/neighbours only
-    // accepts member tokens, and Super Admin's full catalog includes
-    // neighbour.view without owning any plots.
-    requiredRoles: ['member'],
-  },
-  // Fund transparency: every authenticated account (members and committee
-  // alike) can read the society's approved ledger.
-  {
-    labelKey: 'nav.fundTransparency',
-    route: '/fund-transparency',
-    icon: 'chart',
-    openAccess: true,
-  },
-  // Society roadmap: visible to every authenticated account.
-  {
-    labelKey: 'nav.roadmap',
-    route: '/roadmap',
-    icon: 'map',
-    openAccess: true,
-  },
-  {
-    labelKey: 'nav.changePassword',
-    route: '/change-password',
-    icon: 'lock',
-    requiredPermission: ['profile.view_own'],
-  },
-  // Published notices/events - the same public pages logged-out visitors read.
-  {
-    labelKey: 'nav.notices',
-    route: '/notices',
-    icon: 'doc',
-    requiredPermission: ['notice.view'],
-  },
-  {
-    labelKey: 'nav.events',
-    route: '/events',
-    icon: 'pin',
-    requiredPermission: ['event.view'],
-  },
-  {
-    labelKey: 'nav.submissions',
-    route: '/submissions',
-    icon: 'inbox',
-    requiredPermission: ['membership.review'],
-  },
-  {
-    labelKey: 'nav.propertyRequests',
-    route: '/property-requests',
-    icon: 'doc',
-    requiredPermission: ['property.review'],
-  },
-  {
-    labelKey: 'nav.membersList',
-    route: '/members',
-    icon: 'users',
-    requiredPermission: ['member.view_all'],
-  },
-  {
-    labelKey: 'nav.picnicPayments',
-    route: '/picnic-payments',
-    icon: 'wallet',
-    requiredPermission: ['member.view_all'],
-  },
-  {
-    labelKey: 'nav.installmentsManagement',
-    route: '/installments-management',
-    icon: 'coin',
-    requiredPermission: ['member.view_all'],
-  },
-  {
-    labelKey: 'nav.feesManagement',
-    route: '/fees-management',
-    icon: 'coin',
-    requiredPermission: ['member.view_all'],
-  },
-  {
-    labelKey: 'nav.rolesPermissions',
-    route: '/roles',
-    icon: 'shield',
-    requiredPermission: ['manage_roles', 'manage_users'],
-  },
-  {
-    labelKey: 'nav.feeSettings',
-    route: '/fee-settings',
-    icon: 'coin',
-    requiredPermission: ['manage_fee_settings'],
-  },
-  {
-    labelKey: 'nav.societyCosts',
-    route: '/society-costs',
-    icon: 'coin',
-    requiredPermission: ['manage_costs'],
-  },
-  {
-    labelKey: 'nav.financeManagement',
-    route: '/finance-management',
-    icon: 'chart',
-    requiredPermission: ['manage_finance'],
-  },
-  {
-    labelKey: 'nav.paymentVerifications',
-    route: '/payment-verifications',
-    icon: 'check-circle',
-    requiredPermission: ['manage_finance'],
-  },
-  {
-    labelKey: 'nav.roadmapManagement',
-    route: '/roadmap-management',
-    icon: 'map',
-    requiredPermission: ['manage_roadmap'],
-  },
-  {
-    labelKey: 'nav.auditLog',
-    route: '/audit-log',
-    icon: 'shield',
-    requiredPermission: ['view_audit_log'],
-  },
-  {
-    labelKey: 'nav.configLists',
-    route: '/config-lists',
-    icon: 'inbox',
-    requiredPermission: ['manage_system_config'],
-  },
-  {
-    labelKey: 'nav.plotMap',
-    route: '/plot-map',
-    icon: 'map',
-    requiredPermission: ['boundary.view'],
-    // /api/member/plot-map only accepts member tokens.
-    requiredRoles: ['member'],
-  },
-  {
-    labelKey: 'nav.plotBoundaries',
-    route: '/plot-boundaries',
-    icon: 'pin',
-    requiredPermission: ['boundary.review'],
-  },
-  {
-    labelKey: 'nav.noticesManagement',
-    route: '/notices-management',
-    icon: 'doc',
-    requiredPermission: ['manage_notices'],
-  },
-  {
-    labelKey: 'nav.eventsManagement',
-    route: '/events-management',
-    icon: 'pin',
-    requiredPermission: ['manage_notices'],
+    labelKey: 'nav.section.administration',
+    items: [
+      {
+        labelKey: 'nav.rolesPermissions',
+        route: '/roles',
+        icon: 'shield',
+        requiredPermission: ['manage_roles', 'manage_users'],
+      },
+      {
+        labelKey: 'nav.feeSettings',
+        route: '/fee-settings',
+        icon: 'coin',
+        requiredPermission: ['manage_fee_settings'],
+      },
+      {
+        labelKey: 'nav.societyCosts',
+        route: '/society-costs',
+        icon: 'coin',
+        requiredPermission: ['manage_costs'],
+      },
+      {
+        labelKey: 'nav.financeManagement',
+        route: '/finance-management',
+        icon: 'chart',
+        requiredPermission: ['manage_finance'],
+      },
+      {
+        labelKey: 'nav.roadmapManagement',
+        route: '/roadmap-management',
+        icon: 'map',
+        requiredPermission: ['manage_roadmap'],
+      },
+      {
+        labelKey: 'nav.auditLog',
+        route: '/audit-log',
+        icon: 'shield',
+        requiredPermission: ['view_audit_log'],
+      },
+      {
+        labelKey: 'nav.configLists',
+        route: '/config-lists',
+        icon: 'inbox',
+        requiredPermission: ['manage_system_config'],
+      },
+      {
+        labelKey: 'nav.noticesManagement',
+        route: '/notices-management',
+        icon: 'doc',
+        requiredPermission: ['manage_notices'],
+      },
+      {
+        labelKey: 'nav.eventsManagement',
+        route: '/events-management',
+        icon: 'pin',
+        requiredPermission: ['manage_notices'],
+      },
+    ],
   },
 ];
 
@@ -299,9 +334,9 @@ export class ShellComponent implements OnInit {
     return this.lang.lang() === 'bn' ? 'প্রশাসক' : 'Admin';
   }
 
-  get navItems(): NavItem[] {
+  get navSections(): NavSection[] {
     const role = this.auth.role;
-    return NAV_ITEMS.filter((item) => {
+    const visible = (item: NavItem): boolean => {
       if (item.requiredPermission && !this.auth.hasAnyPermission(item.requiredPermission)) {
         return false;
       }
@@ -309,7 +344,11 @@ export class ShellComponent implements OnInit {
         return false;
       }
       return true;
-    });
+    };
+    return NAV_SECTIONS.map((section) => ({
+      ...section,
+      items: section.items.filter(visible),
+    })).filter((section) => section.items.length > 0);
   }
 
   toggleSidebar(): void {

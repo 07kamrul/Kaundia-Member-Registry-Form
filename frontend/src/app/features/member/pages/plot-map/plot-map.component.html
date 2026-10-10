@@ -298,6 +298,12 @@
                     (change)="selectedPropertyId.set(property.id)"
                   />
                   <span>{{ propertyLabel(property) }}</span>
+                  <span class="property-meta">
+                    @if (property.khatianNo) {
+                      <span class="property-meta-item">{{ 'member.plotMap.draw.khatianShort' | translate }} {{ digits(property.khatianNo) }}</span>
+                    }
+                    <span class="property-meta-item">{{ 'member.plotMap.draw.propertyNoShort' | translate }} {{ digits(property.id) }}</span>
+                  </span>
                 </label>
               </li>
             }
@@ -395,10 +401,23 @@
                 {{ 'member.plotMap.validation.outsideSociety' | translate }}
               </p>
             }
-            @if (v.areaMismatch) {
+            @if (v.areaExceeds) {
+              <p class="validation-error" role="alert">
+                <app-icon name="alert" [size]="14" />
+                {{ 'member.plotMap.validation.areaExceeds' | translate }}
+              </p>
+            }
+            @if (v.areaMismatch && !v.areaExceeds) {
               <p class="validation-warning">
                 <app-icon name="alert" [size]="14" />
                 {{ 'member.plotMap.validation.areaMismatch' | translate }}
+              </p>
+            }
+            @if (v.declaredShotangsho !== null) {
+              <p class="validation-meta">
+                {{ 'member.plotMap.validation.declared' | translate }}:
+                {{ digits(v.declaredShotangsho) }}
+                {{ 'member.plotMap.details.shotangsho' | translate }}
               </p>
             }
             @if (v.areaSqM !== null) {
@@ -409,7 +428,7 @@
                 {{ 'member.plotMap.details.shotangsho' | translate }}
               </p>
             }
-            @if (!v.selfIntersection && !v.outsideSociety && !v.areaMismatch && v.areaSqM !== null) {
+            @if (!v.selfIntersection && !v.outsideSociety && !v.areaMismatch && !v.areaExceeds && v.areaSqM !== null) {
               <p class="validation-ok">
                 <app-icon name="check-circle" [size]="14" />
                 {{ 'member.plotMap.validation.ok' | translate }}

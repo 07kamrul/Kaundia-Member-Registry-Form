@@ -1712,4 +1712,22 @@ admin.plotBoundaries.disputes.dismissed	বাতিল	Dismissed
 admin.plotBoundaries.disputes.overlap	চেঃ এলাকা	Overlap
 admin.plotBoundaries.disputes.resolve	মীমাংসা	Resolve
 admin.plotBoundaries.disputes.dismiss	উপেক্ষা	Dismiss
+admin.plotBoundaries.table.property	প্রপার্টি	Property
+admin.plotBoundaries.preview.rejectionNote	বাতিলের নোট	Rejection note
+admin.plotBoundaries.preview.backToList	তালিকায় ফিরুন	Back to list
+admin.plotBoundaries.preview.placeholder	পর্যালোচনা করতে তালিকা থেকে একটি সীমানা বেছে নিন।	Pick a boundary from the list to review it here.
+admin.plotBoundaries.preview.noGeometry	এই সীমানার জন্য এখনো কোনো আকৃতি আঁকা হয়নি।	No shape has been drawn for this boundary yet.
+admin.plotBoundaries.add.drawingHint	পয়েন্ট বসাতে ম্যাপে ক্লিক/ট্যাপ করুন; আকৃতি সম্পূর্ণ করতে প্রথম পয়েন্টে ক্লিক (বা ডাবল-ক্লিক) করুন।	Click/tap the map to place points; click the first point (or double-click) to close the shape.
+admin.plotBoundaries.add.redrawHint	এই আউটলাইনটিই সীমানার সাথে সংরক্ষিত হবে - প্রতিস্থাপন করতে আবার আঁকুন।	This outline will be saved with the boundary - draw again to replace it.
+admin.plotBoundaries.emptyHint	অন্য কোনো অবস্থা বেছে নিন অথবা খোঁজা মুছে ফেলুন।	Try another status filter or clear the search.
+admin.plotBoundaries.list.count	{{count}} টি পাওয়া গেছে	{{count}} found
+admin.plotBoundaries.success.approved	সীমানা অনুমোদিত হয়েছে।	Boundary approved.
+admin.plotBoundaries.success.rejected	সীমানা বাতিল করা হয়েছে।	Boundary rejected.
+admin.plotBoundaries.success.deleted	সীমানা মুছে ফেলা হয়েছে।	Boundary deleted.
+admin.plotBoundaries.success.saved	সীমানা সংরক্ষিত হয়েছে।	Boundary saved.
 member.plotMap.outsideSociety	আপনি উত্তর কাউন্দিয়া এলাকার বাইরে আছেন — পরিবর্তে সোসাইটির মানচিত্র দেখানো হচ্ছে।	You are outside the Uttar Kaundia area — showing the society map instead.
+nav.section.overview	সাধারণ	Overview
+nav.section.payments	আমার পেমেন্ট	My Payments
+nav.section.community	সমাজ ও এলাকা	Community
+nav.section.management	ব্যবস্থাপনা	Management
+nav.section.administration	প্রশাসন	Administration

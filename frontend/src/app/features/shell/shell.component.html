@@ -102,18 +102,23 @@
         </div>
       }
 
-      <nav class="sidebar-nav">
-        @for (item of navItems; track item.route) {
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            class="sidebar-link"
-            [class.sidebar-link-admin]="!!item.requiredPermission || !!item.openAccess"
-            (click)="closeSidebar()"
-          >
-            <app-icon [name]="item.icon" [size]="19" />
-            <span>{{ item.labelKey | translate }}</span>
-          </a>
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        @for (section of navSections; track section.labelKey) {
+          <div class="sidebar-section">
+            <p class="sidebar-section-title">{{ section.labelKey | translate }}</p>
+            @for (item of section.items; track item.route) {
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                class="sidebar-link"
+                [class.sidebar-link-admin]="!!item.requiredPermission || !!item.openAccess"
+                (click)="closeSidebar()"
+              >
+                <app-icon [name]="item.icon" [size]="19" />
+                <span>{{ item.labelKey | translate }}</span>
+              </a>
+            }
+          </div>
         }
       </nav>
     </aside>

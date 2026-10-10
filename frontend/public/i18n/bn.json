@@ -171,47 +171,54 @@
     "retry": "আবার চেষ্টা করুন"
   },
   "nav": {
-    "openMenu": "মেনু খুলুন",
-    "closeMenu": "মেনু বন্ধ করুন",
-    "logout": "বের হোন",
-    "lightTheme": "হালকা থিম",
-    "darkTheme": "গাঢ় থিম",
-    "changeTheme": "থিম পরিবর্তন",
-    "register": "আবেদন করুন",
-    "login": "লগইন",
-    "dashboard": "ড্যাশবোর্ড",
-    "profile": "প্রোফাইল",
-    "installments": "কিস্তি",
-    "changePassword": "পাসওয়ার্ড পরিবর্তন",
-    "submissions": "সাবমিশন",
-    "membersList": "সদস্য তালিকা",
-    "installmentsManagement": "চাঁদা ব্যবস্থাপনা",
-    "rolesPermissions": "ভূমিকা ও অনুমতি",
-    "feeSettings": "ফি সেটিংস",
-    "auditLog": "অডিট লগ",
-    "configLists": "কনফিগ তালিকা",
     "admin": "প্রশাসক",
-    "notices": "নোটিশ",
+    "auditLog": "অডিট লগ",
+    "changePassword": "পাসওয়ার্ড পরিবর্তন",
+    "changeTheme": "থিম পরিবর্তন",
+    "closeMenu": "মেনু বন্ধ করুন",
+    "configLists": "কনফিগ তালিকা",
+    "costShares": "খরচের ভাগ",
+    "darkTheme": "গাঢ় থিম",
+    "dashboard": "ড্যাশবোর্ড",
     "events": "অনুষ্ঠান",
-    "noticesManagement": "নোটিশ ব্যবস্থাপনা",
     "eventsManagement": "অনুষ্ঠান ব্যবস্থাপনা",
+    "feeSettings": "ফি সেটিংস",
+    "fees": "ফি",
+    "feesManagement": "ফি পরিশোধ",
+    "financeManagement": "আর্থিক ব্যবস্থাপনা",
+    "fundTransparency": "ফান্ড স্বচ্ছতা",
+    "installments": "কিস্তি",
+    "installmentsManagement": "চাঁদা ব্যবস্থাপনা",
+    "lightTheme": "হালকা থিম",
+    "login": "লগইন",
+    "logout": "বের হোন",
+    "membersList": "সদস্য তালিকা",
+    "moreOptions": "আরও বিকল্প",
+    "neighbours": "প্রতিবেশী তথ্য",
+    "notices": "নোটিশ",
+    "noticesManagement": "নোটিশ ব্যবস্থাপনা",
+    "openMenu": "মেনু খুলুন",
+    "paymentVerifications": "পেমেন্ট যাচাই",
     "picnicPayment": "পিকনিক ফি",
     "picnicPayments": "পিকনিক পরিশোধ",
-    "moreOptions": "আরও বিকল্প",
+    "plotBoundaries": "প্লট সীমানা",
+    "plotMap": "জমির সীমানা ম্যাপ",
+    "profile": "প্রোফাইল",
     "propertyRequests": "সম্পত্তি সংক্রান্ত অনুরোধ",
-    "societyCosts": "সোসাইটি খরচ",
-    "costShares": "খরচের ভাগ",
-    "fundTransparency": "ফান্ড স্বচ্ছতা",
-    "financeManagement": "আর্থিক ব্যবস্থাপনা",
+    "register": "আবেদন করুন",
     "resolutionBook": "রেজোলিউশন বুক",
     "roadmap": "আমাদের পরিকল্পনা",
     "roadmapManagement": "পরিকল্পনা ব্যবস্থাপনা",
-    "paymentVerifications": "পেমেন্ট যাচাই",
-    "neighbours": "প্রতিবেশী তথ্য",
-    "fees": "ফি",
-    "feesManagement": "ফি পরিশোধ",
-    "plotMap": "জমির সীমানা ম্যাপ",
-    "plotBoundaries": "প্লট সীমানা"
+    "rolesPermissions": "ভূমিকা ও অনুমতি",
+    "section": {
+      "overview": "সাধারণ",
+      "payments": "আমার পেমেন্ট",
+      "community": "সমাজ ও এলাকা",
+      "management": "ব্যবস্থাপনা",
+      "administration": "প্রশাসন"
+    },
+    "societyCosts": "সোসাইটি খরচ",
+    "submissions": "সাবমিশন"
   },
   "forbidden": {
     "title": "প্রবেশাধিকার নেই",
@@ -844,6 +851,8 @@
         "pickHint": "যে সম্পত্তিতে এখনো সীমানা নেই সেটি বেছে নিয়ে ম্যাপে সীমানা আঁকুন।",
         "noProperties": "আঁকার জন্য কোনো সম্পত্তি পাওয়া যায়নি - সবগুলোতেই সীমানা আছে অথবা কোনো সম্পত্তি নিবন্ধিত নয়।",
         "start": "ম্যাপে আঁকুন",
+        "khatianShort": "খতিয়ান",
+        "propertyNoShort": "প্রপার্টি নং",
         "myBoundaries": "আমার সীমানাসমূহ",
         "edit": "সম্পাদনা",
         "deleteTitle": "সীমানা মুছুন",
@@ -867,7 +876,9 @@
       "validation": {
         "selfIntersection": "সীমারেখা নিজেকে ছেদ করেছে - ছেদাংশ ঠিক করুন।",
         "outsideSociety": "সীমারেখার কিছু অংশ সোসাইটির সীমার বাইরে।",
+        "areaExceeds": "আঁকা এলাকা আপনার ঘোষিত জমির পরিমাণের চেয়ে বেশি। এটি বেশি হতে পারবে না - আউটলাইনটি ছোট করুন।",
         "areaMismatch": "আঁকা এলাকা আপনার ঘোষিত জমির পরিমাণের সাথে অনেক মিলছে না।",
+        "declared": "ঘোষিত জমি",
         "area": "আঁকা এলাকা",
         "ok": "সীমারেখাটি ঠিক আছে।"
       },
@@ -1982,12 +1993,17 @@
         "khatian": "খতিয়ান",
         "dag": "দাগ",
         "landQuantity": "ঘোষিত জমি",
-        "computedArea": "নির্ধারিত আয়তন"
+        "computedArea": "নির্ধারিত আয়তন",
+        "property": "প্রপার্টি"
       },
       "preview": {
         "title": "সীমানা প্রিভিউ",
         "pendingNotice": "একটি সদস্যের জমা যাচাইয়ের অপেক্ষায় আছে; সিদ্ধান্তের আগ পর্যন্ত অনুমোদিত সীমানা অন্যদের কাছে প্রদর্শিত থাকবে।",
-        "deletedReason": "মুছে ফেলা হয়েছে — কারণ"
+        "deletedReason": "মুছে ফেলা হয়েছে — কারণ",
+        "rejectionNote": "বাতিলের নোট",
+        "backToList": "তালিকায় ফিরুন",
+        "placeholder": "পর্যালোচনা করতে তালিকা থেকে একটি সীমানা বেছে নিন।",
+        "noGeometry": "এই সীমানার জন্য এখনো কোনো আকৃতি আঁকা হয়নি।"
       },
       "actions": {
         "approve": "অনুমোদন",
@@ -2038,8 +2054,9 @@
       "add": {
         "memberId": "সদস্য আইডি",
         "propertyId": "প্রপার্টি আইডি",
-        "geometryLabel": "GeoJSON পলিগন",
-        "geometryPlaceholder": "{\"type\": \"Polygon\", \"coordinates\": [[[90.40, 23.80], ...]]}"
+        "geometryLabel": "ম্যাপে প্লটের সীমানা আঁকুন",
+        "drawingHint": "পয়েন্ট বসাতে ম্যাপে ক্লিক/ট্যাপ করুন; আকৃতি সম্পূর্ণ করতে প্রথম পয়েন্টে ক্লিক (বা ডাবল-ক্লিক) করুন।",
+        "redrawHint": "এই আউটলাইনটিই সীমানার সাথে সংরক্ষিত হবে - প্রতিস্থাপন করতে আবার আঁকুন।"
       },
       "edit": {
         "drawNew": "আবার আঁকুন",
@@ -2047,6 +2064,16 @@
         "drawingHint": "পয়েন্ট বসাতে ম্যাপে ক্লিক/ট্যাপ করুন; আকৃতি সম্পূর্ণ করতে প্রথম পয়েন্টে ক্লিক (বা ডাবল-ক্লিক) করুন।",
         "editHint": "আকৃতি ঠিক করতে পয়েন্টগুলো টেনে সরান, অথবা আবার আঁকুন।",
         "geometryAuto": "GeoJSON পলিগন (ম্যাপ থেকে স্বয়ংক্রিয়ভাবে আপডেট হয়)"
+      },
+      "emptyHint": "অন্য কোনো অবস্থা বেছে নিন অথবা খোঁজা মুছে ফেলুন।",
+      "list": {
+        "count": "{{count}} টি পাওয়া গেছে"
+      },
+      "success": {
+        "approved": "সীমানা অনুমোদিত হয়েছে।",
+        "rejected": "সীমানা বাতিল করা হয়েছে।",
+        "deleted": "সীমানা মুছে ফেলা হয়েছে।",
+        "saved": "সীমানা সংরক্ষিত হয়েছে।"
       }
     }
   },

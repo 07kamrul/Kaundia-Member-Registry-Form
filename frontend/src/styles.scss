@@ -277,7 +277,10 @@ a {
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 30;
+  /* Must sit above the plot-map page's floating controls (map topbar 900,
+     zoom/layer buttons 1000, details sheet 1100) so the 3-dot user menu —
+     which holds logout — is never covered by the map. */
+  z-index: 1200;
   background: var(--surface);
   border-bottom: 1px solid var(--gray-200);
 }

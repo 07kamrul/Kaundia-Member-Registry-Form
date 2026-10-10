@@ -38,6 +38,9 @@ export function reviewErrorKey(error: unknown): string {
 
 const STATUS_TABS = ['pending', 'approved', 'rejected', 'deleted'] as const;
 
+/** Where the add-polygon map starts when there is no shape to fit yet. */
+const SOCIETY_CENTER: L.LatLngTuple = [23.809, 90.323];
+
 const DISPUTE_TABS: DisputeStatus[] = ['open', 'resolved', 'dismissed'];
 
 /** Maps a failed admin save to an i18n key (overlap confirmation vs generic). */
@@ -79,6 +82,8 @@ export class PlotBoundariesComponent implements OnInit {
   readonly disputes = signal<BoundaryDispute[]>([]);
   readonly disputeFilter = signal<DisputeStatus>('open');
   readonly includeDeleted = signal(false);
+  /** Transient success/status banner shown above the tab row. */
+  readonly statusMessage = signal<string | null>(null);
   /** Dashboard/nav badge: submissions awaiting review. */
   readonly pendingCount = signal(0);
 
@@ -88,8 +93,19 @@ export class PlotBoundariesComponent implements OnInit {
   // Detail preview (mini map + declared info + actions).
   readonly selected = signal<AdminBoundary | null>(null);
   private previewMap: L.Map | null = null;
+  /** Keeps the preview map sized right when the panel is shown/hidden. */
+  private previewResize: ResizeObserver | null = null;
+  /** Debounce handle for the dag search box. */
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
   /** Geoman vertex-dragging colors match the preview polygon. */
   private static readonly EDIT_COLOR = '#c9861e';
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      if (this.searchTimer) clearTimeout(this.searchTimer);
+      this.previewResize?.disconnect();
+    });
+  }
 
   readonly approveOpen = signal(false);
   readonly approveNote = signal('');
@@ -119,11 +135,10 @@ export class PlotBoundariesComponent implements OnInit {
   readonly deleting = signal(false);
   readonly deleteConfirmDisabled = computed(() => this.deleteReason().trim().length < 3);
 
-  /** Add polygon on behalf of a member (GeoJSON entry, goes live immediately). */
+  /** Add polygon on behalf of a member (drawn on the map, goes live immediately). */
   readonly addOpen = signal(false);
   readonly addMemberId = signal<number | null>(null);
   readonly addPropertyId = signal<number | null>(null);
-  readonly addGeometry = signal('');
   readonly addSaving = signal(false);
   readonly addErrorKey = signal<string | null>(null);
   readonly addOverlaps = signal<OverlapInfo[]>([]);
@@ -131,15 +146,19 @@ export class PlotBoundariesComponent implements OnInit {
 
   /** Edit the selected polygon by drawing on the map; the JSON mirrors the shape. */
   readonly editOpen = signal(false);
-  readonly editGeometry = signal('');
   readonly editSaving = signal(false);
   readonly editErrorKey = signal<string | null>(null);
   readonly editOverlaps = signal<OverlapInfo[]>([]);
   readonly editConfirmOverlap = signal(false);
+
+  // Shared draw-map for the add + edit modals. Which modal it serves decides
+  // the hint text; the geometry mirror is the same in both.
+  readonly shapeFor = signal<'add' | 'edit' | null>(null);
+  readonly shapeGeometry = signal('');
   /** True while the admin is sketching a fresh polygon instead of dragging vertices. */
-  readonly editDrawing = signal(false);
-  private editMap: L.Map | null = null;
-  private editLayer: L.Polygon | null = null;
+  readonly shapeDrawing = signal(false);
+  private shapeMap: L.Map | null = null;
+  private shapeLayer: L.Polygon | null = null;
 
   ngOnInit(): void {
     this.load();
@@ -166,6 +185,11 @@ export class PlotBoundariesComponent implements OnInit {
       .subscribe({
         next: (rows) => {
           this.boundaries.set(rows);
+          // A selection can outlive its filter entry (approve/delete moved it
+          // out of this queue) - drop it so the panel never shows a stale
+          // record next to "no boundaries found".
+          const sel = this.selected();
+          if (sel && !rows.some((row) => row.id === sel.id)) this.selected.set(null);
           this.loading.set(false);
         },
         error: () => {
@@ -197,28 +221,65 @@ export class PlotBoundariesComponent implements OnInit {
     if (this.tab() === tab) return;
     this.tab.set(tab);
     this.selected.set(null);
+    this.statusMessage.set(null);
     this.load();
+  }
+
+  applyStatusFilter(status: string): void {
+    this.statusFilter.set(status);
+    this.statusMessage.set(null);
+    this.load();
+  }
+
+  applyDisputeFilter(status: DisputeStatus): void {
+    this.disputeFilter.set(status);
+    this.statusMessage.set(null);
+    this.load();
+  }
+
+  clearSelection(): void {
+    this.selected.set(null);
+    this.actionErrorKey.set(null);
   }
 
   onSearch(value: string): void {
     this.search.set(value);
-    this.load();
+    // Debounce: every keystroke re-queries the whole queue otherwise.
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.load(), 350);
   }
 
   select(boundary: AdminBoundary): void {
     this.selected.set(boundary);
+    this.statusMessage.set(null);
     this.actionErrorKey.set(null);
     // Mini preview map - rendered after the panel paints.
     setTimeout(() => this.renderPreview(boundary));
+    // On phones the detail swaps in for the list; bring its top into view.
+    if (
+      typeof document !== 'undefined' &&
+      document.querySelector('.pb-detail-panel') &&
+      window.matchMedia('(max-width: 1023px)').matches
+    ) {
+      setTimeout(() =>
+        document
+          .querySelector('.pb-detail-panel')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      );
+    }
   }
 
   private renderPreview(boundary: AdminBoundary): void {
-    const el = document.querySelector('.preview-map') as HTMLElement | null;
-    if (!el) return;
     if (this.previewMap) {
       this.previewMap.remove();
       this.previewMap = null;
     }
+    this.previewResize?.disconnect();
+    this.previewResize = null;
+    // No shape drawn yet (or wiped) - the placeholder replaces the map.
+    if ((boundary.geometry?.coordinates?.[0]?.length ?? 0) < 3) return;
+    const el = document.querySelector('.preview-map') as HTMLElement | null;
+    if (!el) return;
     const map = L.map(el, { attributionControl: false, dragging: false, touchZoom: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     const layer = L.geoJSON(boundary.geometry as never, {
@@ -226,6 +287,10 @@ export class PlotBoundariesComponent implements OnInit {
     }).addTo(map);
     map.fitBounds(layer.getBounds().pad(0.4));
     this.previewMap = map;
+    // Panels that paint hidden (mobile swap) leave the map zero-width;
+    // observing the container re-measures Leaflet once it settles.
+    this.previewResize = new ResizeObserver(() => map.invalidateSize());
+    this.previewResize.observe(el);
   }
 
   openApprove(): void {
@@ -248,6 +313,7 @@ export class PlotBoundariesComponent implements OnInit {
           this.approving.set(false);
           this.approveOpen.set(false);
           this.selected.set(updated);
+          this.statusMessage.set('admin.plotBoundaries.success.approved');
           this.load();
           this.loadPendingCount();
         },
@@ -279,6 +345,7 @@ export class PlotBoundariesComponent implements OnInit {
           this.rejecting.set(false);
           this.rejectOpen.set(false);
           this.selected.set(updated);
+          this.statusMessage.set('admin.plotBoundaries.success.rejected');
           this.load();
           this.loadPendingCount();
         },
@@ -315,6 +382,7 @@ export class PlotBoundariesComponent implements OnInit {
           this.deleting.set(false);
           this.deleteOpen.set(false);
           this.selected.set(updated);
+          this.statusMessage.set('admin.plotBoundaries.success.deleted');
           this.load();
         },
         error: (err: unknown) => {
@@ -328,10 +396,10 @@ export class PlotBoundariesComponent implements OnInit {
     this.addOpen.set(true);
     this.addMemberId.set(null);
     this.addPropertyId.set(null);
-    this.addGeometry.set('');
     this.addErrorKey.set(null);
     this.addOverlaps.set([]);
     this.addConfirmOverlap.set(false);
+    this.openShapeMap('add', null);
   }
 
   /** Parse and sanity-check the pasted GeoJSON Polygon. */
@@ -358,7 +426,7 @@ export class PlotBoundariesComponent implements OnInit {
   confirmAdd(confirmOverlap = false): void {
     const memberId = this.addMemberId();
     const propertyId = this.addPropertyId();
-    const geometry = this.parseGeometry(this.addGeometry());
+    const geometry = this.parseGeometry(this.shapeGeometry());
     if (!memberId || !propertyId || !geometry || this.addSaving()) return;
     this.addSaving.set(true);
     this.addErrorKey.set(null);
@@ -369,7 +437,9 @@ export class PlotBoundariesComponent implements OnInit {
         next: (created) => {
           this.addSaving.set(false);
           this.addOpen.set(false);
+          this.shapeFor.set(null);
           this.selected.set(created);
+          this.statusMessage.set('admin.plotBoundaries.success.saved');
           this.load();
         },
         error: (err: unknown) => {
@@ -385,17 +455,28 @@ export class PlotBoundariesComponent implements OnInit {
     const boundary = this.selected();
     if (!boundary) return;
     this.editOpen.set(true);
-    this.editGeometry.set(JSON.stringify(boundary.geometry, null, 2));
     this.editErrorKey.set(null);
     this.editOverlaps.set([]);
     this.editConfirmOverlap.set(false);
-    this.editDrawing.set(false);
-    // The modal paints on the next change-detection cycle, which can land
-    // after setTimeout(0) - poll briefly for the map container instead.
+    this.openShapeMap('edit', boundary.geometry);
+  }
+
+  // ---- Shared shape map (add + edit both draw here) ------------------------
+
+  /**
+   * Boots the modal's draw map. With a geometry the shape loads editable;
+   * with null the admin sketches a fresh polygon right away (add mode).
+   * The modal paints on the next change-detection cycle, which can land
+   * after setTimeout(0) - poll briefly for the map container instead.
+   */
+  private openShapeMap(forModal: 'add' | 'edit', geometry: PolygonGeometry | null): void {
+    this.shapeFor.set(forModal);
+    this.shapeDrawing.set(false);
+    this.shapeGeometry.set('');
     const tryInit = (attempt: number): void => {
-      if (!this.editOpen() || this.editMap) return;
-      if (document.querySelector('.edit-shape-map')) {
-        this.initEditMap(boundary);
+      if (this.shapeFor() !== forModal || this.shapeMap) return;
+      if (document.querySelector('.shape-map')) {
+        this.initShapeMap(geometry);
       } else if (attempt < 20) {
         setTimeout(() => tryInit(attempt + 1), 50);
       }
@@ -403,51 +484,58 @@ export class PlotBoundariesComponent implements OnInit {
     setTimeout(() => tryInit(0));
   }
 
-  // ---- Edit-shape map (draw to update the GeoJSON) -------------------------
-
-  private initEditMap(boundary: AdminBoundary): void {
-    this.destroyEditMap();
-    const el = document.querySelector('.edit-shape-map') as HTMLElement | null;
+  private initShapeMap(geometry: PolygonGeometry | null): void {
+    this.destroyShapeMap();
+    const el = document.querySelector('.shape-map') as HTMLElement | null;
     if (!el) return;
     // Scroll-wheel zoom fights the modal's own scrolling, so it stays off.
     const map = L.map(el, { attributionControl: false, scrollWheelZoom: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-    this.editMap = map;
-    this.mountEditLayer(boundary.geometry);
+    this.shapeMap = map;
+    if (geometry) {
+      this.mountShapeLayer(geometry);
+    } else {
+      map.setView(SOCIETY_CENTER, 14);
+      this.startShapeDraw();
+    }
   }
 
   /** Loads a geometry as a geoman-editable polygon and mirrors it to the JSON. */
-  private mountEditLayer(geometry: PolygonGeometry): void {
-    const map = this.editMap;
+  private mountShapeLayer(geometry: PolygonGeometry): void {
+    const map = this.shapeMap;
     if (!map) return;
-    this.editLayer?.remove();
+    this.shapeLayer?.remove();
     const layer = L.polygon(
       geometry.coordinates[0].map((pair) => [pair[1], pair[0]] as L.LatLngTuple),
       { color: PlotBoundariesComponent.EDIT_COLOR, weight: 2, fillOpacity: 0.3 },
     ).addTo(map);
-    this.editLayer = layer;
+    this.shapeLayer = layer;
     // Settle the view before enabling geoman - enabling while the fitBounds
     // zoom animation is in flight leaves the edit handles silently disabled.
     map.fitBounds(layer.getBounds().pad(0.3), { animate: false });
+    this.watchShapeLayer(layer);
     layer.pm.enable({
       allowSelfIntersection: false,
       allowRemoval: false,
     } as never);
+    this.syncShapeGeometry();
+  }
+
+  /** Mirrors a finished polygon to the JSON and switches to vertex-dragging. */
+  private watchShapeLayer(layer: L.Polygon): void {
     layer.on('pm:edit pm:vertexadded pm:vertexremoved', () =>
-      this.zone.run(() => this.syncEditGeometry()),
+      this.zone.run(() => this.syncShapeGeometry()),
     );
-    this.syncEditGeometry();
   }
 
   /** Wipes the shape so the admin can sketch a fresh polygon on the map. */
-  startEditDraw(): void {
-    const map = this.editMap;
+  startShapeDraw(): void {
+    const map = this.shapeMap;
     if (!map) return;
-    this.editLayer?.remove();
-    this.editLayer = null;
-    this.editGeometry.set('');
-    this.editErrorKey.set(null);
-    this.editDrawing.set(true);
+    this.shapeLayer?.remove();
+    this.shapeLayer = null;
+    this.shapeGeometry.set('');
+    this.shapeDrawing.set(true);
     map.pm.enableDraw('Polygon', {
       allowSelfIntersection: false,
       templineStyle: { color: PlotBoundariesComponent.EDIT_COLOR, weight: 3 },
@@ -463,56 +551,61 @@ export class PlotBoundariesComponent implements OnInit {
     map.once('pm:create', (event) => {
       (map.pm as unknown as { disable: () => void }).disable();
       this.zone.run(() => {
-        this.editDrawing.set(false);
+        this.shapeDrawing.set(false);
         const layer = (event as unknown as { layer: L.Polygon }).layer;
-        this.editLayer = layer;
+        this.shapeLayer = layer;
+        this.watchShapeLayer(layer);
         layer.pm.enable({ allowSelfIntersection: false, allowRemoval: false } as never);
-        layer.on('pm:edit pm:vertexadded pm:vertexremoved', () =>
-          this.zone.run(() => this.syncEditGeometry()),
-        );
-        this.syncEditGeometry();
+        this.syncShapeGeometry();
       });
     });
   }
 
-  /** Back to dragging the boundary's original shape after an aborted sketch. */
-  cancelEditDraw(): void {
-    const map = this.editMap;
-    const boundary = this.selected();
+  /** Back to the previous shape after an aborted sketch (no-op in add mode). */
+  cancelShapeDraw(): void {
+    const map = this.shapeMap;
     (map?.pm as unknown as { disable?: () => void } | undefined)?.disable?.();
-    this.editDrawing.set(false);
-    if (map && boundary) this.mountEditLayer(boundary.geometry);
+    this.shapeDrawing.set(false);
+    if (this.shapeFor() === 'edit') {
+      const boundary = this.selected();
+      if (map && boundary) this.mountShapeLayer(boundary.geometry);
+    } else {
+      // Add mode has no previous shape - go straight back to drawing.
+      this.startShapeDraw();
+    }
   }
 
   private mirrorRing(layer: L.Polygon): void {
     const latlngs = layer.getLatLngs()[0] as L.LatLng[];
     if (!latlngs || latlngs.length < 3) return;
     const ring = latlngs.map((ll) => [ll.lat, ll.lng] as [number, number]);
-    this.editGeometry.set(JSON.stringify(latLngsToGeometry(ring), null, 2));
+    this.shapeGeometry.set(JSON.stringify(latLngsToGeometry(ring), null, 2));
   }
 
-  private syncEditGeometry(): void {
-    if (this.editLayer) this.mirrorRing(this.editLayer);
+  private syncShapeGeometry(): void {
+    if (this.shapeLayer) this.mirrorRing(this.shapeLayer);
   }
 
-  private destroyEditMap(): void {
-    if (this.editMap) {
-      this.editMap.remove();
-      this.editMap = null;
+  private destroyShapeMap(): void {
+    if (this.shapeMap) {
+      this.shapeMap.remove();
+      this.shapeMap = null;
     }
-    this.editLayer = null;
+    this.shapeLayer = null;
   }
 
-  /** Closes the modal and tears the draw map down with it. */
-  closeEdit(): void {
-    this.destroyEditMap();
-    this.editDrawing.set(false);
-    this.editOpen.set(false);
+  /** Closes either modal and tears the draw map down with it. */
+  closeShapeModal(): void {
+    this.destroyShapeMap();
+    this.shapeDrawing.set(false);
+    this.shapeFor.set(null);
+    if (this.editOpen()) this.editOpen.set(false);
+    if (this.addOpen()) this.addOpen.set(false);
   }
 
   confirmEdit(confirmOverlap = false): void {
     const boundary = this.selected();
-    const geometry = this.parseGeometry(this.editGeometry());
+    const geometry = this.parseGeometry(this.shapeGeometry());
     if (!boundary || !geometry || this.editSaving()) return;
     this.editSaving.set(true);
     this.editErrorKey.set(null);
@@ -522,10 +615,13 @@ export class PlotBoundariesComponent implements OnInit {
       .subscribe({
         next: (updated) => {
           this.editSaving.set(false);
-          this.closeEdit();
+          this.closeShapeModal();
           this.selected.set(updated);
-          this.renderPreview(updated);
+          this.statusMessage.set('admin.plotBoundaries.success.saved');
           this.load();
+          // The preview container may need a paint cycle first (geometry
+          // presence can flip between the placeholder and the map).
+          setTimeout(() => this.renderPreview(updated));
         },
         error: (err: unknown) => {
           this.editSaving.set(false);
@@ -622,5 +718,16 @@ export class PlotBoundariesComponent implements OnInit {
     if (boundary.rsDag) parts.push(`RS ${boundary.rsDag}`);
     if (boundary.csDag) parts.push(`CS ${boundary.csDag}`);
     return parts.join(' · ') || '—';
+  }
+
+  /** A map can only render from a closed ring - anything less shows a placeholder. */
+  hasGeometry(boundary: AdminBoundary): boolean {
+    return (boundary.geometry?.coordinates?.[0]?.length ?? 0) >= 3;
+  }
+
+  /** Up to two leading initials for the list avatar. */
+  initials(name: string): string {
+    const parts = name.trim().split(/\s+/).slice(0, 2);
+    return parts.map((part) => part.charAt(0).toUpperCase()).join('') || '?';
   }
 }

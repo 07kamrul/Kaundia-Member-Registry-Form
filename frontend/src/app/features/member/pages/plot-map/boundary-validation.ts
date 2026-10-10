@@ -18,6 +18,10 @@ export interface DrawValidation {
   selfIntersection: boolean;
   outsideSociety: boolean;
   areaMismatch: boolean;
+  /** Drawn area exceeds the declared land quantity - hard blocker. */
+  areaExceeds: boolean;
+  /** Declared quantity parsed to shotangsho, when it is a clean number. */
+  declaredShotangsho: number | null;
   areaSqM: number | null;
   areaShotangsho: number | null;
   valid: boolean;
@@ -26,6 +30,8 @@ export interface DrawValidation {
 const NUMERIC_QUANTITY = /^\d+(\.\d+)?$/;
 /** Areas differing by more than this fraction trigger the warning. */
 const AREA_MISMATCH_TOLERANCE = 0.35;
+/** Fraction above the declared quantity still accepted - GPS noise grace. */
+const AREA_EXCEED_TOLERANCE = 0.01;
 /** Rough backend limit for vertices per ring. */
 export const MAX_VERTICES = 100;
 
@@ -48,6 +54,8 @@ export function validateDrawing(
     selfIntersection: false,
     outsideSociety: false,
     areaMismatch: false,
+    areaExceeds: false,
+    declaredShotangsho: null,
     areaSqM: null,
     areaShotangsho: null,
     valid: false,
@@ -66,9 +74,14 @@ export function validateDrawing(
   const areaSqM = polygonAreaSqM(geometry);
   const shotangsho = sqmToShotangsho(areaSqM);
   const declared = parseDeclaredShotangsho(declaredQuantity);
+  const areaExceeds =
+    declared !== null &&
+    declared > 0 &&
+    shotangsho > declared * (1 + AREA_EXCEED_TOLERANCE);
   const areaMismatch =
     declared !== null &&
     declared > 0 &&
+    !areaExceeds &&
     Math.abs(shotangsho - declared) / declared > AREA_MISMATCH_TOLERANCE;
 
   const vertexCount = geometry.coordinates[0].length - 1; // closing point repeats
@@ -78,8 +91,11 @@ export function validateDrawing(
     selfIntersection: kinkList.length > 0,
     outsideSociety: outside,
     areaMismatch,
+    areaExceeds,
+    declaredShotangsho: declared,
     areaSqM,
     areaShotangsho: shotangsho,
-    valid: kinkList.length === 0 && !outside && areaSqM > 0 && !tooManyVertices,
+    valid:
+      kinkList.length === 0 && !outside && areaSqM > 0 && !tooManyVertices && !areaExceeds,
   };
 }

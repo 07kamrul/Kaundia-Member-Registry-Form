@@ -650,6 +650,16 @@
     background: color-mix(in srgb, var(--emerald-700) 8%, var(--surface));
   }
 
+  .property-meta {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--gray-500);
+    white-space: nowrap;
+  }
+
   input {
     accent-color: var(--emerald-700);
     width: 1rem;
