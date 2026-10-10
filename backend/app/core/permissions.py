@@ -101,6 +101,11 @@ PERMISSION_CATALOG: tuple[PermissionDef, ...] = (
     PermissionDef(
         "neighbour.view", "neighbour", "view", "View owners of own and nearest neighbouring plots"
     ),
+    # Plot boundaries (member-drawn polygons on the map)
+    PermissionDef("boundary.draw_own", "boundary", "draw_own", "Draw and edit own plot boundaries"),
+    PermissionDef("boundary.view", "boundary", "view", "View the plot map and boundary popups"),
+    PermissionDef("boundary.review", "boundary", "review", "Review and approve/reject plot boundaries"),
+    PermissionDef("boundary.manage", "boundary", "manage", "Manage boundary disputes and evidence"),
 )
 
 PERMISSION_KEYS: frozenset[str] = frozenset(p.key for p in PERMISSION_CATALOG)
@@ -124,6 +129,9 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "manage_finance",
         "manage_roadmap",
         "manage_resolution_book",
+        "boundary.view",
+        "boundary.review",
+        "boundary.manage",
     ),
     AdminRole.ADMINISTRATOR.value: (
         "member.register",
@@ -151,6 +159,8 @@ ROLE_DEFAULT_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "complaint.create",
         "request.create",
         "neighbour.view",
+        "boundary.view",
+        "boundary.draw_own",
     ),
 }
 

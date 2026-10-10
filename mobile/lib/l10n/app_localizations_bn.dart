@@ -5606,4 +5606,190 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get memberProfileNeighbourDirectoryHint =>
       'বন্ধ করলে প্রতিবেশীরা শুধু আপনার নাম, জমির পরিমাণ ও দাগ দেখবেন।';
+
+  @override
+  String get navPlotMap => 'জমির সীমানা';
+
+  @override
+  String get boundaryTitle => 'জমির সীমানা';
+
+  @override
+  String get boundarySubtitle =>
+      'ম্যাপে প্লটের সীমানা দেখুন ও নিজের সীমানা আঁকুন';
+
+  @override
+  String get boundaryViewOnMap => 'ম্যাপে দেখুন';
+
+  @override
+  String get boundaryDraw => 'সীমানা আঁকুন';
+
+  @override
+  String get boundaryDisclaimer =>
+      'এটি সদস্য-চিহ্নিত আনুমানিক সীমানা; সরকারি জরিপ বা দলিলের বিকল্প নয়।';
+
+  @override
+  String get boundaryStatusDraft => 'খসড়া';
+
+  @override
+  String get boundaryStatusPendingReview => 'অনুমোদনের অপেক্ষায়';
+
+  @override
+  String get boundaryStatusApproved => 'অনুমোদিত';
+
+  @override
+  String get boundaryStatusRejected => 'প্রত্যাখ্যাত';
+
+  @override
+  String get boundaryStatusDisputed => 'মতবিরোধ';
+
+  @override
+  String get boundaryStatusMine => 'আমার সীমানা';
+
+  @override
+  String get boundaryOwnerTitle => 'মালিকের তথ্য';
+
+  @override
+  String get boundaryOwnerContactHidden => 'যোগাযোগ গোপন রাখা হয়েছে';
+
+  @override
+  String get boundaryCall => 'কল';
+
+  @override
+  String get boundaryWhatsapp => 'হোয়াটসঅ্যাপ';
+
+  @override
+  String get boundaryRsDag => 'আরএস দাগ';
+
+  @override
+  String get boundaryCsDag => 'সিএস দাগ';
+
+  @override
+  String get boundaryLandQuantity => 'জমির পরিমাণ';
+
+  @override
+  String get boundaryAreaLabel => 'এলাকা';
+
+  @override
+  String boundaryAreaValues(Object sqm, Object shotangsho) {
+    return '$sqm বর্গমিটার · $shotangsho শতাংশ';
+  }
+
+  @override
+  String get boundaryAreaEstimateTag => 'আনুমানিক';
+
+  @override
+  String get boundaryOwnerLoadError => 'মালিকের তথ্য আনা যায়নি।';
+
+  @override
+  String get boundaryLoadError => 'ম্যাপের তথ্য আনা যায়নি।';
+
+  @override
+  String get boundarySearchDagHint => 'দাগ নম্বর দিয়ে খুঁজুন';
+
+  @override
+  String get boundarySearchNoMatch =>
+      'এই দাগ নম্বরে কোনো সীমানা পাওয়া যায়নি।';
+
+  @override
+  String get boundaryMyLocation => 'আমার অবস্থান';
+
+  @override
+  String get boundaryLayerStreet => 'স্ট্রিট';
+
+  @override
+  String get boundaryLayerSatellite => 'স্যাটেলাইট';
+
+  @override
+  String get boundaryReport => 'রিপোর্ট করুন';
+
+  @override
+  String get boundaryReportNoteHint => 'সমস্যাটি লিখুন';
+
+  @override
+  String get boundaryReportSubmit => 'রিপোর্ট পাঠান';
+
+  @override
+  String get boundaryReportSent => 'রিপোর্ট গৃহীত হয়েছে।';
+
+  @override
+  String get boundaryReportError => 'রিপোর্ট পাঠানো যায়নি।';
+
+  @override
+  String get boundaryEditorTitle => 'সীমানা আঁকুন';
+
+  @override
+  String get boundaryEditorAddHint =>
+      'ম্যাপে ট্যাপ করে পয়েন্ট যোগ করুন; পয়েন্ট ড্র্যাগ করে সরান।';
+
+  @override
+  String get boundaryEditorUndo => 'আনডু';
+
+  @override
+  String get boundaryEditorClear => 'মুছুন';
+
+  @override
+  String get boundaryEditorSave => 'জমা দিন';
+
+  @override
+  String get boundaryEditorPropertyLabel => 'নিজের প্লট';
+
+  @override
+  String get boundaryEditorNoProperty =>
+      'সীমানা ছাড়া কোনো প্লট পাওয়া যায়নি।';
+
+  @override
+  String boundaryEditorVertices(Object count) {
+    return 'পয়েন্ট: $count';
+  }
+
+  @override
+  String get boundarySaveSuccess =>
+      'সীমানা জমা হয়েছে; এখন অনুমোদনের অপেক্ষায় আছে।';
+
+  @override
+  String get boundaryEditExisting => 'সীমানা সম্পাদনা';
+
+  @override
+  String get boundaryErrorTooFewPoints => 'কমপক্ষে ৩টি পয়েন্ট প্রয়োজন।';
+
+  @override
+  String get boundaryErrorSelfIntersecting => 'সীমানার রেখা নিজেকে ছেদ করছে।';
+
+  @override
+  String get boundaryErrorOutsideSociety =>
+      'সীমানা সমিতির এলাকার বাইরে চলে গেছে।';
+
+  @override
+  String get boundaryErrorZeroArea =>
+      'এলাকা প্রায় শূন্য; পয়েন্টগুলো আরও ছড়িয়ে দিন।';
+
+  @override
+  String get boundaryErrorTooManyVertices =>
+      'সর্বোচ্চ পয়েন্ট সংখ্যা অতিক্রম হয়েছে।';
+
+  @override
+  String get boundaryErrorInvalidGeometry => 'সীমানার আকার অবৈধ।';
+
+  @override
+  String get boundaryErrorNotYourProperty =>
+      'অন্যের প্লটের সীমানা আঁকা যাবে না।';
+
+  @override
+  String get boundaryErrorBoundaryExists => 'এই প্লটের সীমানা আগেই আছে।';
+
+  @override
+  String get boundaryErrorRateLimited =>
+      'অনেকবার চেষ্টা হয়েছে; কিছুক্ষণ পর আবার চেষ্টা করুন।';
+
+  @override
+  String get boundaryErrorNotApproved => 'এই সীমানা এখনো অনুমোদিত হয়নি।';
+
+  @override
+  String get boundaryErrorGeneric => 'সীমানা সংরক্ষণ করা যায়নি।';
+
+  @override
+  String get boundaryReviewNote => 'পর্যালোচনার মন্তব্য';
+
+  @override
+  String get boundaryMobile => 'মোবাইল';
 }

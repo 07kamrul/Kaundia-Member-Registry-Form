@@ -10399,6 +10399,348 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'বন্ধ করলে প্রতিবেশীরা শুধু আপনার নাম, জমির পরিমাণ ও দাগ দেখবেন।'**
   String get memberProfileNeighbourDirectoryHint;
+
+  /// No description provided for @navPlotMap.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমির সীমানা'**
+  String get navPlotMap;
+
+  /// No description provided for @boundaryTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমির সীমানা'**
+  String get boundaryTitle;
+
+  /// No description provided for @boundarySubtitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'ম্যাপে প্লটের সীমানা দেখুন ও নিজের সীমানা আঁকুন'**
+  String get boundarySubtitle;
+
+  /// No description provided for @boundaryViewOnMap.
+  ///
+  /// In bn, this message translates to:
+  /// **'ম্যাপে দেখুন'**
+  String get boundaryViewOnMap;
+
+  /// No description provided for @boundaryDraw.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা আঁকুন'**
+  String get boundaryDraw;
+
+  /// No description provided for @boundaryDisclaimer.
+  ///
+  /// In bn, this message translates to:
+  /// **'এটি সদস্য-চিহ্নিত আনুমানিক সীমানা; সরকারি জরিপ বা দলিলের বিকল্প নয়।'**
+  String get boundaryDisclaimer;
+
+  /// No description provided for @boundaryStatusDraft.
+  ///
+  /// In bn, this message translates to:
+  /// **'খসড়া'**
+  String get boundaryStatusDraft;
+
+  /// No description provided for @boundaryStatusPendingReview.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনুমোদনের অপেক্ষায়'**
+  String get boundaryStatusPendingReview;
+
+  /// No description provided for @boundaryStatusApproved.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনুমোদিত'**
+  String get boundaryStatusApproved;
+
+  /// No description provided for @boundaryStatusRejected.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্রত্যাখ্যাত'**
+  String get boundaryStatusRejected;
+
+  /// No description provided for @boundaryStatusDisputed.
+  ///
+  /// In bn, this message translates to:
+  /// **'মতবিরোধ'**
+  String get boundaryStatusDisputed;
+
+  /// No description provided for @boundaryStatusMine.
+  ///
+  /// In bn, this message translates to:
+  /// **'আমার সীমানা'**
+  String get boundaryStatusMine;
+
+  /// No description provided for @boundaryOwnerTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'মালিকের তথ্য'**
+  String get boundaryOwnerTitle;
+
+  /// No description provided for @boundaryOwnerContactHidden.
+  ///
+  /// In bn, this message translates to:
+  /// **'যোগাযোগ গোপন রাখা হয়েছে'**
+  String get boundaryOwnerContactHidden;
+
+  /// No description provided for @boundaryCall.
+  ///
+  /// In bn, this message translates to:
+  /// **'কল'**
+  String get boundaryCall;
+
+  /// No description provided for @boundaryWhatsapp.
+  ///
+  /// In bn, this message translates to:
+  /// **'হোয়াটসঅ্যাপ'**
+  String get boundaryWhatsapp;
+
+  /// No description provided for @boundaryRsDag.
+  ///
+  /// In bn, this message translates to:
+  /// **'আরএস দাগ'**
+  String get boundaryRsDag;
+
+  /// No description provided for @boundaryCsDag.
+  ///
+  /// In bn, this message translates to:
+  /// **'সিএস দাগ'**
+  String get boundaryCsDag;
+
+  /// No description provided for @boundaryLandQuantity.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমির পরিমাণ'**
+  String get boundaryLandQuantity;
+
+  /// No description provided for @boundaryAreaLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'এলাকা'**
+  String get boundaryAreaLabel;
+
+  /// No description provided for @boundaryAreaValues.
+  ///
+  /// In bn, this message translates to:
+  /// **'{sqm} বর্গমিটার · {shotangsho} শতাংশ'**
+  String boundaryAreaValues(Object sqm, Object shotangsho);
+
+  /// No description provided for @boundaryAreaEstimateTag.
+  ///
+  /// In bn, this message translates to:
+  /// **'আনুমানিক'**
+  String get boundaryAreaEstimateTag;
+
+  /// No description provided for @boundaryOwnerLoadError.
+  ///
+  /// In bn, this message translates to:
+  /// **'মালিকের তথ্য আনা যায়নি।'**
+  String get boundaryOwnerLoadError;
+
+  /// No description provided for @boundaryLoadError.
+  ///
+  /// In bn, this message translates to:
+  /// **'ম্যাপের তথ্য আনা যায়নি।'**
+  String get boundaryLoadError;
+
+  /// No description provided for @boundarySearchDagHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'দাগ নম্বর দিয়ে খুঁজুন'**
+  String get boundarySearchDagHint;
+
+  /// No description provided for @boundarySearchNoMatch.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই দাগ নম্বরে কোনো সীমানা পাওয়া যায়নি।'**
+  String get boundarySearchNoMatch;
+
+  /// No description provided for @boundaryMyLocation.
+  ///
+  /// In bn, this message translates to:
+  /// **'আমার অবস্থান'**
+  String get boundaryMyLocation;
+
+  /// No description provided for @boundaryLayerStreet.
+  ///
+  /// In bn, this message translates to:
+  /// **'স্ট্রিট'**
+  String get boundaryLayerStreet;
+
+  /// No description provided for @boundaryLayerSatellite.
+  ///
+  /// In bn, this message translates to:
+  /// **'স্যাটেলাইট'**
+  String get boundaryLayerSatellite;
+
+  /// No description provided for @boundaryReport.
+  ///
+  /// In bn, this message translates to:
+  /// **'রিপোর্ট করুন'**
+  String get boundaryReport;
+
+  /// No description provided for @boundaryReportNoteHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'সমস্যাটি লিখুন'**
+  String get boundaryReportNoteHint;
+
+  /// No description provided for @boundaryReportSubmit.
+  ///
+  /// In bn, this message translates to:
+  /// **'রিপোর্ট পাঠান'**
+  String get boundaryReportSubmit;
+
+  /// No description provided for @boundaryReportSent.
+  ///
+  /// In bn, this message translates to:
+  /// **'রিপোর্ট গৃহীত হয়েছে।'**
+  String get boundaryReportSent;
+
+  /// No description provided for @boundaryReportError.
+  ///
+  /// In bn, this message translates to:
+  /// **'রিপোর্ট পাঠানো যায়নি।'**
+  String get boundaryReportError;
+
+  /// No description provided for @boundaryEditorTitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা আঁকুন'**
+  String get boundaryEditorTitle;
+
+  /// No description provided for @boundaryEditorAddHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'ম্যাপে ট্যাপ করে পয়েন্ট যোগ করুন; পয়েন্ট ড্র্যাগ করে সরান।'**
+  String get boundaryEditorAddHint;
+
+  /// No description provided for @boundaryEditorUndo.
+  ///
+  /// In bn, this message translates to:
+  /// **'আনডু'**
+  String get boundaryEditorUndo;
+
+  /// No description provided for @boundaryEditorClear.
+  ///
+  /// In bn, this message translates to:
+  /// **'মুছুন'**
+  String get boundaryEditorClear;
+
+  /// No description provided for @boundaryEditorSave.
+  ///
+  /// In bn, this message translates to:
+  /// **'জমা দিন'**
+  String get boundaryEditorSave;
+
+  /// No description provided for @boundaryEditorPropertyLabel.
+  ///
+  /// In bn, this message translates to:
+  /// **'নিজের প্লট'**
+  String get boundaryEditorPropertyLabel;
+
+  /// No description provided for @boundaryEditorNoProperty.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা ছাড়া কোনো প্লট পাওয়া যায়নি।'**
+  String get boundaryEditorNoProperty;
+
+  /// No description provided for @boundaryEditorVertices.
+  ///
+  /// In bn, this message translates to:
+  /// **'পয়েন্ট: {count}'**
+  String boundaryEditorVertices(Object count);
+
+  /// No description provided for @boundarySaveSuccess.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা জমা হয়েছে; এখন অনুমোদনের অপেক্ষায় আছে।'**
+  String get boundarySaveSuccess;
+
+  /// No description provided for @boundaryEditExisting.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা সম্পাদনা'**
+  String get boundaryEditExisting;
+
+  /// No description provided for @boundaryErrorTooFewPoints.
+  ///
+  /// In bn, this message translates to:
+  /// **'কমপক্ষে ৩টি পয়েন্ট প্রয়োজন।'**
+  String get boundaryErrorTooFewPoints;
+
+  /// No description provided for @boundaryErrorSelfIntersecting.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানার রেখা নিজেকে ছেদ করছে।'**
+  String get boundaryErrorSelfIntersecting;
+
+  /// No description provided for @boundaryErrorOutsideSociety.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা সমিতির এলাকার বাইরে চলে গেছে।'**
+  String get boundaryErrorOutsideSociety;
+
+  /// No description provided for @boundaryErrorZeroArea.
+  ///
+  /// In bn, this message translates to:
+  /// **'এলাকা প্রায় শূন্য; পয়েন্টগুলো আরও ছড়িয়ে দিন।'**
+  String get boundaryErrorZeroArea;
+
+  /// No description provided for @boundaryErrorTooManyVertices.
+  ///
+  /// In bn, this message translates to:
+  /// **'সর্বোচ্চ পয়েন্ট সংখ্যা অতিক্রম হয়েছে।'**
+  String get boundaryErrorTooManyVertices;
+
+  /// No description provided for @boundaryErrorInvalidGeometry.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানার আকার অবৈধ।'**
+  String get boundaryErrorInvalidGeometry;
+
+  /// No description provided for @boundaryErrorNotYourProperty.
+  ///
+  /// In bn, this message translates to:
+  /// **'অন্যের প্লটের সীমানা আঁকা যাবে না।'**
+  String get boundaryErrorNotYourProperty;
+
+  /// No description provided for @boundaryErrorBoundaryExists.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই প্লটের সীমানা আগেই আছে।'**
+  String get boundaryErrorBoundaryExists;
+
+  /// No description provided for @boundaryErrorRateLimited.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনেকবার চেষ্টা হয়েছে; কিছুক্ষণ পর আবার চেষ্টা করুন।'**
+  String get boundaryErrorRateLimited;
+
+  /// No description provided for @boundaryErrorNotApproved.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই সীমানা এখনো অনুমোদিত হয়নি।'**
+  String get boundaryErrorNotApproved;
+
+  /// No description provided for @boundaryErrorGeneric.
+  ///
+  /// In bn, this message translates to:
+  /// **'সীমানা সংরক্ষণ করা যায়নি।'**
+  String get boundaryErrorGeneric;
+
+  /// No description provided for @boundaryReviewNote.
+  ///
+  /// In bn, this message translates to:
+  /// **'পর্যালোচনার মন্তব্য'**
+  String get boundaryReviewNote;
+
+  /// No description provided for @boundaryMobile.
+  ///
+  /// In bn, this message translates to:
+  /// **'মোবাইল'**
+  String get boundaryMobile;
 }
 
 class _AppLocalizationsDelegate

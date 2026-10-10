@@ -32,6 +32,9 @@ import '../../features/member/pages/resolution_book_form_page.dart';
 import '../../features/member/pages/resolution_book_page.dart';
 import '../../features/member/pages/roadmap_page.dart';
 import '../../features/neighbours/presentation/pages/neighbours_page.dart';
+import '../../features/plot_boundary/presentation/pages/boundary_editor_page.dart';
+import '../../features/plot_boundary/domain/plot_boundary_entities.dart';
+import '../../features/plot_boundary/presentation/pages/plot_map_page.dart';
 import '../../features/public_content/event_detail_page.dart';
 import '../../features/public_content/events_page.dart';
 import '../../features/public_content/notice_detail_page.dart';
@@ -73,6 +76,22 @@ GoRouter buildRouter() {
           GoRoute(path: '/installments', builder: (_, __) => const InstallmentsPage()),
           GoRoute(path: '/cost-shares', builder: (_, __) => const CostSharesPage()),
           GoRoute(path: '/neighbours', builder: (_, __) => const NeighboursPage()),
+          GoRoute(
+            path: PlotMapPage.pageRoute,
+            builder: (_, __) => const PlotMapPage(),
+            routes: [
+              GoRoute(
+                path: 'draw',
+                builder: (_, s) {
+                  // An own boundary to edit (PUT) can be passed as `extra`.
+                  final extra = s.extra;
+                  final editing =
+                      extra is PlotBoundary ? extra : null;
+                  return BoundaryEditorPage(editing: editing);
+                },
+              ),
+            ],
+          ),
           GoRoute(path: '/change-password', builder: (_, __) => const ChangePasswordPage()),
           GoRoute(path: '/fund-transparency', builder: (_, __) => const FundTransparencyPage()),
           GoRoute(path: '/roadmap', builder: (_, __) => const RoadmapPage()),

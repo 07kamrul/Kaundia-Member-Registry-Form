@@ -56,6 +56,7 @@ const _areaPermissions = <String, List<String>>{
   '/audit-log': ['view_audit_log'],
   '/property-requests': ['property.review'],
   '/neighbours': [AppPermissions.neighbourView],
+  '/plot-map': ['boundary.view'],
 };
 
 /// Prefix-matched areas (list + detail routes).

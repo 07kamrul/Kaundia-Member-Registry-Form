@@ -2,12 +2,14 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
+
+from app.services.plot_boundary import ValidationIssue
 
 from app.api.routes import (
     admin,
@@ -18,6 +20,8 @@ from app.api.routes import (
     member,
     neighbours,
     notices,
+    plot_boundary_admin,
+    plot_map,
     public,
     rbac,
     resolution_book,
@@ -108,6 +112,13 @@ app.add_middleware(
 # everything smaller is compressed inline on the event loop.
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=6)
 
+
+@app.exception_handler(ValidationIssue)
+async def _validation_issue_handler(request: Request, exc: ValidationIssue) -> JSONResponse:
+    """Polygon validation failures are 400s with a machine-readable code the
+    clients can translate into inline messages."""
+    return JSONResponse(status_code=400, content={"detail": {"code": exc.code, "message": exc.message}})
+
 api_router_prefix = "/api"
 app.include_router(submissions.router, prefix=api_router_prefix)
 app.include_router(auth.router, prefix=api_router_prefix)
@@ -123,6 +134,8 @@ app.include_router(roadmap.router, prefix=api_router_prefix)
 app.include_router(resolution_book.router, prefix=api_router_prefix)
 app.include_router(installment_payments.router, prefix=api_router_prefix)
 app.include_router(fee_payments.router, prefix=api_router_prefix)
+app.include_router(plot_map.router, prefix=api_router_prefix)
+app.include_router(plot_boundary_admin.router, prefix=api_router_prefix)
 
 app.mount("/uploads", UploadStaticFiles(), name="uploads")
 

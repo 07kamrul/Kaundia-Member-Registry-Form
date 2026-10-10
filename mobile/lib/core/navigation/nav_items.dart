@@ -66,6 +66,14 @@ class AppNav {
       requiredPermission: AppPermissions.neighbourView,
       tier: LandingTierFilter.member,
     ),
+    // 6th member entry: lands under "More", primary tabs stay unchanged.
+    NavItem(
+      labelKey: _t((l) => l.navPlotMap),
+      route: '/plot-map',
+      icon: Icons.map_outlined,
+      requiredPermission: 'boundary.view',
+      tier: LandingTierFilter.member,
+    ),
     NavItem(
       labelKey: _t((l) => l.navNotices),
       route: '/notices',

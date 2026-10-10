@@ -195,6 +195,20 @@ const NAV_ITEMS: NavItem[] = [
     requiredPermission: ['manage_system_config'],
   },
   {
+    labelKey: 'nav.plotMap',
+    route: '/plot-map',
+    icon: 'map',
+    requiredPermission: ['boundary.view'],
+    // /api/member/plot-map only accepts member tokens.
+    requiredRoles: ['member'],
+  },
+  {
+    labelKey: 'nav.plotBoundaries',
+    route: '/plot-boundaries',
+    icon: 'pin',
+    requiredPermission: ['boundary.review'],
+  },
+  {
     labelKey: 'nav.noticesManagement',
     route: '/notices-management',
     icon: 'doc',

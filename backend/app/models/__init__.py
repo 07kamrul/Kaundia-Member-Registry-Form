@@ -25,6 +25,13 @@ from app.models.resolution_book import (
     MeetingRecording,
     Resolution,
 )
+from app.models.plot_boundary import (
+    BoundaryDispute,
+    BoundaryStatus,
+    ChangeType,
+    PlotBoundary,
+    PlotBoundaryVersion,
+)
 
 __all__ = [
     "Meeting",
@@ -62,4 +69,9 @@ __all__ = [
     "RoadmapTimeframe",
     "RoadmapItem",
     "InstallmentPayment",
+    "BoundaryDispute",
+    "BoundaryStatus",
+    "ChangeType",
+    "PlotBoundary",
+    "PlotBoundaryVersion",
 ]

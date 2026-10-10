@@ -1622,3 +1622,93 @@ registration.validation.propertyLabel	সম্পত্তি #{{number}}	Prope
 registration.validation.propertyTypeRequired	সম্পত্তির ধরন আবশ্যক	Property type is required
 registration.validation.urgentContactLabel	জরুরি যোগাযোগ	Urgent Contact
 welcome	স্বাগতম, {{name}}	Welcome, {{name}}
+nav.plotMap	জমির সীমানা ম্যাপ	Plot Boundary Map
+nav.plotBoundaries	প্লট সীমানা	Plot Boundaries
+member.plotMap.title	জমির সীমানা ম্যাপ	Plot Boundary Map
+member.plotMap.subtitle		
+member.plotMap.searchPlaceholder	আরএস/সিএস দাগ নম্বর দিয়ে খুঁজুন	Search by RS/CS dag number
+member.plotMap.myLocation	আমার অবস্থান	My location
+member.plotMap.locationError	আপনার অবস্থান নির্ধারণ করা যায়নি।	Could not determine your location.
+member.plotMap.legend	রংয়ের নির্দেশ	Legend
+member.plotMap.disclaimer	এটি সদস্য-চিহ্নিত আনুমানিক সীমানা; সরকারি জরিপ বা দলিলের বিকল্প নয়।	This is a member-marked approximate boundary; it is not a substitute for an official survey or legal documents.
+member.plotMap.status.draft	খসড়া	Draft
+member.plotMap.status.pending_review	পর্যালোচনার অপেক্ষায়	Pending review
+member.plotMap.status.approved	অনুমোদিত	Approved
+member.plotMap.status.mine	আমার	Mine
+member.plotMap.status.rejected	বাতিল	Rejected
+member.plotMap.status.disputed	মতবিরোধ	Disputed
+member.plotMap.details.title	প্লটের বিবরণ	Plot details
+member.plotMap.details.landQuantity	ঘোষিত জমি	Declared land
+member.plotMap.details.area	নির্ধারিত আয়তন	Computed area
+member.plotMap.details.shotangsho	শতাংশ	শতাংশ
+member.plotMap.details.contactHidden	যোগাযোগ গোপন	Contact hidden
+member.plotMap.owner.rateLimited	অনেক বেশি অনুরোধ - কিছুক্ষণ পর আবার চেষ্টা করুন।	Too many lookups - please wait a moment and try again.
+member.plotMap.owner.notApproved	এই সীমানা এখনো অনুমোদিত নয়, তাই মালিকের তথ্য দেখা যাচ্ছে না।	This boundary is not approved yet, so owner details are unavailable.
+member.plotMap.owner.loadError	মালিকের তথ্য লোড করা যায়নি।	Could not load owner details.
+member.plotMap.report.open	সমস্যা রিপোর্ট করুন	Report a problem
+member.plotMap.report.note	সমস্যাটি লিখুন	Describe the problem
+member.plotMap.report.send	রিপোর্ট পাঠান	Send report
+member.plotMap.report.thanks	ধন্যবাদ - আপনার রিপোর্ট গ্রহণ করা হয়েছে।	Thank you - your report has been received.
+member.plotMap.report.error	রিপোর্ট পাঠানো যায়নি। আবার চেষ্টা করুন।	Could not send the report. Please try again.
+member.plotMap.draw.open	সীমানা আঁকুন	Draw boundary
+member.plotMap.draw.title	আপনার প্লটের সীমানা আঁকুন	Draw your plot boundary
+member.plotMap.draw.editTitle	আমার সীমানা সম্পাদনা	Edit my boundary
+member.plotMap.draw.pickHint	যে সম্পত্তিতে এখনো সীমানা নেই সেটি বেছে নিয়ে ম্যাপে সীমানা আঁকুন।	Choose one of your properties that has no boundary yet, then draw its outline on the map.
+member.plotMap.draw.noProperties	আঁকার জন্য কোনো সম্পত্তি পাওয়া যায়নি - সবগুলোতেই সীমানা আছে অথবা কোনো সম্পত্তি নিবন্ধিত নয়।	None of your properties is available for drawing - either all have boundaries already or no property is registered.
+member.plotMap.draw.start	ম্যাপে আঁকুন	Draw on map
+member.plotMap.draw.myBoundaries	আমার সীমানাসমূহ	My boundaries
+member.plotMap.draw.edit	সম্পাদনা	Edit
+member.plotMap.draw.deleteTitle	সীমানা মুছুন	Delete boundary
+member.plotMap.draw.deleteMessage	আপনার সীমানা মুছে ফেলা হবে; পরে আবার এঁকে জমা দিলে নতুন পর্যালোচনায় যাবে। চালিয়ে যাবেন?	Your boundary will be removed and sent back for review if redrawn. Continue?
+member.plotMap.draw.errors.INVALID_GEOMETRY	আঁকা আকৃতিটি বৈধ বহুভুজ নয়।	The drawn shape is not a valid polygon.
+member.plotMap.draw.errors.SELF_INTERSECTING	সীমারেখা নিজেকে ছেদ করেছে - ছেদাংশ ঠিক করে আবার চেষ্টা করুন।	The outline crosses itself - fix the overlapping part and try again.
+member.plotMap.draw.errors.OUTSIDE_SOCIETY_AREA	সীমারেখার কিছু অংশ সোসাইটির সীমার বাইরে চলে গেছে।	The outline goes outside the society area.
+member.plotMap.draw.errors.ZERO_AREA	আঁকা আকৃতির ক্ষেত্রফল শূন্য - আরও পয়েন্ট যোগ করুন।	The drawn shape has no area - add more points.
+member.plotMap.draw.errors.TOO_MANY_VERTICES	অনেক বেশি পয়েন্ট - সীমারেখা সরল করুন।	Too many points - simplify the outline.
+member.plotMap.draw.errors.NOT_YOUR_PROPERTY	এই সম্পত্তিটি আপনার অ্যাকাউন্টের নয়।	This property does not belong to your account.
+member.plotMap.draw.errors.BOUNDARY_EXISTS	এই সম্পত্তিতে ইতিমধ্যে একটি সীমানা আছে।	This property already has a boundary.
+member.plotMap.draw.errors.generic	সীমানা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।	Could not save the boundary. Please try again.
+member.plotMap.validation.selfIntersection	সীমারেখা নিজেকে ছেদ করেছে - ছেদাংশ ঠিক করুন।	The outline crosses itself - fix the highlighted overlap.
+member.plotMap.validation.outsideSociety	সীমারেখার কিছু অংশ সোসাইটির সীমার বাইরে।	Part of the outline is outside the society area.
+member.plotMap.validation.areaMismatch	আঁকা এলাকা আপনার ঘোষিত জমির পরিমাণের সাথে অনেক মিলছে না।	The drawn area differs a lot from your declared land quantity.
+member.plotMap.validation.area	আঁকা এলাকা	Drawn area
+member.plotMap.validation.ok	সীমারেখাটি ঠিক আছে।	The outline looks valid.
+admin.plotBoundaries.title	প্লট সীমানা	Plot Boundaries
+admin.plotBoundaries.subtitle	সদস্যদের আঁকা প্লট সীমানা পর্যালোচনা করুন	Review member-drawn plot boundaries
+admin.plotBoundaries.searchPlaceholder	দাগ নম্বর দিয়ে খুঁজুন	Search by dag number
+admin.plotBoundaries.empty	এই ফিল্টারে কোনো সীমানা পাওয়া যায়নি।	No boundaries found for this filter.
+admin.plotBoundaries.tabs.queue	পর্যালোচনার তালিকা	Review queue
+admin.plotBoundaries.tabs.disputes	মতবিরোধ	Disputes
+admin.plotBoundaries.table.member	সদস্য	Member
+admin.plotBoundaries.table.mobile	মোবাইল	Mobile
+admin.plotBoundaries.table.khatian	খতিয়ান	Khatian
+admin.plotBoundaries.table.dag	দাগ	Dag
+admin.plotBoundaries.table.landQuantity	ঘোষিত জমি	Declared land
+admin.plotBoundaries.table.computedArea	নির্ধারিত আয়তন	Computed area
+admin.plotBoundaries.preview.title	সীমানা প্রিভিউ	Boundary preview
+admin.plotBoundaries.actions.approve	অনুমোদন	Approve
+admin.plotBoundaries.actions.reject	বাতিল	Reject
+admin.plotBoundaries.actions.versions	সংস্করণ ইতিহাস	Version history
+admin.plotBoundaries.actions.evidence	প্রমাণ ডাউনলোড	Evidence export
+admin.plotBoundaries.modal.noteOptional	নোট (ঐচ্ছিক)	Note (optional)
+admin.plotBoundaries.modal.noteRequired	নোট (আবশ্যক)	Note (required)
+admin.plotBoundaries.errors.loadFailed	সীমানা লোড করা যায়নি।	Could not load boundaries.
+admin.plotBoundaries.errors.generic	কাজটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।	Could not complete the action. Please try again.
+admin.plotBoundaries.errors.forbidden	এই কাজের অনুমতি আপনার নেই।	You do not have permission for this action.
+admin.plotBoundaries.errors.noteRequired	বাতিল করতে নোট দেওয়া আবশ্যক।	A note is required to reject.
+admin.plotBoundaries.versions.title	সংস্করণ ইতিহাস	Version history
+admin.plotBoundaries.versions.empty	এখনো কোনো সংস্করণ নেই।	No versions recorded yet.
+admin.plotBoundaries.versions.version	সংস্করণ	Version
+admin.plotBoundaries.versions.changeType	পরিবর্তন	Change
+admin.plotBoundaries.versions.status	অবস্থা	Status
+admin.plotBoundaries.versions.actor	সম্পাদক	By
+admin.plotBoundaries.versions.note	নোট	Note
+admin.plotBoundaries.versions.time	সময়	Time
+admin.plotBoundaries.disputes.subtitle	সীমানা মতবিরোধ - মীমাংসায় boundary.manage অনুমতি প্রয়োজন	Overlapping boundary disputes - resolving needs the boundary.manage permission
+admin.plotBoundaries.disputes.empty	এই ফিল্টারে কোনো মতবিরোধ নেই।	No disputes found for this filter.
+admin.plotBoundaries.disputes.open	খোলা	Open
+admin.plotBoundaries.disputes.resolved	মীমাংসা হয়েছে	Resolved
+admin.plotBoundaries.disputes.dismissed	বাতিল	Dismissed
+admin.plotBoundaries.disputes.overlap	চেঃ এলাকা	Overlap
+admin.plotBoundaries.disputes.resolve	মীমাংসা	Resolve
+admin.plotBoundaries.disputes.dismiss	উপেক্ষা	Dismiss

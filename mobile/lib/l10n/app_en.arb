@@ -2214,5 +2214,79 @@
   "memberNeighboursDialerUnavailable": "Calling isn't available on this device.",
   "memberNeighboursWhatsappUnavailable": "WhatsApp couldn't be opened.",
   "memberProfileNeighbourDirectoryLabel": "Show my mobile number to neighbours",
-  "memberProfileNeighbourDirectoryHint": "When off, neighbours see only your name, land quantity and dags."
+  "memberProfileNeighbourDirectoryHint": "When off, neighbours see only your name, land quantity and dags.",
+  "navPlotMap": "Plot Boundaries",
+  "boundaryTitle": "Plot Boundaries",
+  "boundarySubtitle": "View plot boundaries on the map and draw your own",
+  "boundaryViewOnMap": "View on map",
+  "boundaryDraw": "Draw boundary",
+  "boundaryDisclaimer": "This is a member-marked approximate boundary; it is not a substitute for an official survey or legal documents.",
+  "boundaryStatusDraft": "Draft",
+  "boundaryStatusPendingReview": "Pending review",
+  "boundaryStatusApproved": "Approved",
+  "boundaryStatusRejected": "Rejected",
+  "boundaryStatusDisputed": "Disputed",
+  "boundaryStatusMine": "My boundary",
+  "boundaryOwnerTitle": "Owner details",
+  "boundaryOwnerContactHidden": "Contact hidden",
+  "boundaryCall": "Call",
+  "boundaryWhatsapp": "WhatsApp",
+  "boundaryRsDag": "RS dag",
+  "boundaryCsDag": "CS dag",
+  "boundaryLandQuantity": "Land quantity",
+  "boundaryAreaLabel": "Area",
+  "boundaryAreaValues": "{sqm} m² · {shotangsho} shotangsho",
+  "@boundaryAreaValues": {
+    "placeholders": {
+      "sqm": {
+        "type": "Object"
+      },
+      "shotangsho": {
+        "type": "Object"
+      }
+    }
+  },
+  "boundaryAreaEstimateTag": "estimate",
+  "boundaryOwnerLoadError": "Could not load the owner details.",
+  "boundaryLoadError": "Could not load the map data.",
+  "boundarySearchDagHint": "Search by dag number",
+  "boundarySearchNoMatch": "No boundary matches this dag number.",
+  "boundaryMyLocation": "My location",
+  "boundaryLayerStreet": "Street",
+  "boundaryLayerSatellite": "Satellite",
+  "boundaryReport": "Report a problem",
+  "boundaryReportNoteHint": "Describe the problem",
+  "boundaryReportSubmit": "Send report",
+  "boundaryReportSent": "Report received.",
+  "boundaryReportError": "Could not send the report.",
+  "boundaryEditorTitle": "Draw boundary",
+  "boundaryEditorAddHint": "Tap the map to add points; drag a point to move it.",
+  "boundaryEditorUndo": "Undo",
+  "boundaryEditorClear": "Clear",
+  "boundaryEditorSave": "Submit",
+  "boundaryEditorPropertyLabel": "Your plot",
+  "boundaryEditorNoProperty": "None of your plots are without a boundary.",
+  "boundaryEditorVertices": "Points: {count}",
+  "@boundaryEditorVertices": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "boundarySaveSuccess": "Boundary submitted; it is now pending review.",
+  "boundaryEditExisting": "Edit boundary",
+  "boundaryErrorTooFewPoints": "At least 3 points are required.",
+  "boundaryErrorSelfIntersecting": "The boundary line crosses itself.",
+  "boundaryErrorOutsideSociety": "The boundary goes outside the society area.",
+  "boundaryErrorZeroArea": "The area is nearly zero; spread the points out.",
+  "boundaryErrorTooManyVertices": "Too many points.",
+  "boundaryErrorInvalidGeometry": "The boundary shape is invalid.",
+  "boundaryErrorNotYourProperty": "You cannot draw a boundary for someone else's plot.",
+  "boundaryErrorBoundaryExists": "This plot already has a boundary.",
+  "boundaryErrorRateLimited": "Too many attempts; please try again later.",
+  "boundaryErrorNotApproved": "This boundary is not approved yet.",
+  "boundaryErrorGeneric": "Could not save the boundary.",
+  "boundaryReviewNote": "Review note",
+  "boundaryMobile": "Mobile"
 }

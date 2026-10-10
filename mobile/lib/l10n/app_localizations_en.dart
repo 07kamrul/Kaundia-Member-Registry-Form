@@ -5618,4 +5618,189 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get memberProfileNeighbourDirectoryHint =>
       'When off, neighbours see only your name, land quantity and dags.';
+
+  @override
+  String get navPlotMap => 'Plot Boundaries';
+
+  @override
+  String get boundaryTitle => 'Plot Boundaries';
+
+  @override
+  String get boundarySubtitle =>
+      'View plot boundaries on the map and draw your own';
+
+  @override
+  String get boundaryViewOnMap => 'View on map';
+
+  @override
+  String get boundaryDraw => 'Draw boundary';
+
+  @override
+  String get boundaryDisclaimer =>
+      'This is a member-marked approximate boundary; it is not a substitute for an official survey or legal documents.';
+
+  @override
+  String get boundaryStatusDraft => 'Draft';
+
+  @override
+  String get boundaryStatusPendingReview => 'Pending review';
+
+  @override
+  String get boundaryStatusApproved => 'Approved';
+
+  @override
+  String get boundaryStatusRejected => 'Rejected';
+
+  @override
+  String get boundaryStatusDisputed => 'Disputed';
+
+  @override
+  String get boundaryStatusMine => 'My boundary';
+
+  @override
+  String get boundaryOwnerTitle => 'Owner details';
+
+  @override
+  String get boundaryOwnerContactHidden => 'Contact hidden';
+
+  @override
+  String get boundaryCall => 'Call';
+
+  @override
+  String get boundaryWhatsapp => 'WhatsApp';
+
+  @override
+  String get boundaryRsDag => 'RS dag';
+
+  @override
+  String get boundaryCsDag => 'CS dag';
+
+  @override
+  String get boundaryLandQuantity => 'Land quantity';
+
+  @override
+  String get boundaryAreaLabel => 'Area';
+
+  @override
+  String boundaryAreaValues(Object sqm, Object shotangsho) {
+    return '$sqm m² · $shotangsho shotangsho';
+  }
+
+  @override
+  String get boundaryAreaEstimateTag => 'estimate';
+
+  @override
+  String get boundaryOwnerLoadError => 'Could not load the owner details.';
+
+  @override
+  String get boundaryLoadError => 'Could not load the map data.';
+
+  @override
+  String get boundarySearchDagHint => 'Search by dag number';
+
+  @override
+  String get boundarySearchNoMatch => 'No boundary matches this dag number.';
+
+  @override
+  String get boundaryMyLocation => 'My location';
+
+  @override
+  String get boundaryLayerStreet => 'Street';
+
+  @override
+  String get boundaryLayerSatellite => 'Satellite';
+
+  @override
+  String get boundaryReport => 'Report a problem';
+
+  @override
+  String get boundaryReportNoteHint => 'Describe the problem';
+
+  @override
+  String get boundaryReportSubmit => 'Send report';
+
+  @override
+  String get boundaryReportSent => 'Report received.';
+
+  @override
+  String get boundaryReportError => 'Could not send the report.';
+
+  @override
+  String get boundaryEditorTitle => 'Draw boundary';
+
+  @override
+  String get boundaryEditorAddHint =>
+      'Tap the map to add points; drag a point to move it.';
+
+  @override
+  String get boundaryEditorUndo => 'Undo';
+
+  @override
+  String get boundaryEditorClear => 'Clear';
+
+  @override
+  String get boundaryEditorSave => 'Submit';
+
+  @override
+  String get boundaryEditorPropertyLabel => 'Your plot';
+
+  @override
+  String get boundaryEditorNoProperty =>
+      'None of your plots are without a boundary.';
+
+  @override
+  String boundaryEditorVertices(Object count) {
+    return 'Points: $count';
+  }
+
+  @override
+  String get boundarySaveSuccess =>
+      'Boundary submitted; it is now pending review.';
+
+  @override
+  String get boundaryEditExisting => 'Edit boundary';
+
+  @override
+  String get boundaryErrorTooFewPoints => 'At least 3 points are required.';
+
+  @override
+  String get boundaryErrorSelfIntersecting =>
+      'The boundary line crosses itself.';
+
+  @override
+  String get boundaryErrorOutsideSociety =>
+      'The boundary goes outside the society area.';
+
+  @override
+  String get boundaryErrorZeroArea =>
+      'The area is nearly zero; spread the points out.';
+
+  @override
+  String get boundaryErrorTooManyVertices => 'Too many points.';
+
+  @override
+  String get boundaryErrorInvalidGeometry => 'The boundary shape is invalid.';
+
+  @override
+  String get boundaryErrorNotYourProperty =>
+      'You cannot draw a boundary for someone else\'s plot.';
+
+  @override
+  String get boundaryErrorBoundaryExists => 'This plot already has a boundary.';
+
+  @override
+  String get boundaryErrorRateLimited =>
+      'Too many attempts; please try again later.';
+
+  @override
+  String get boundaryErrorNotApproved => 'This boundary is not approved yet.';
+
+  @override
+  String get boundaryErrorGeneric => 'Could not save the boundary.';
+
+  @override
+  String get boundaryReviewNote => 'Review note';
+
+  @override
+  String get boundaryMobile => 'Mobile';
 }

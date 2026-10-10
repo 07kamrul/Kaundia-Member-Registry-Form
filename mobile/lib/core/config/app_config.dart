@@ -25,4 +25,22 @@ class AppConfig {
         .join('/');
     return '$uploadsBaseUrl$encoded';
   }
+  /// Street basemap tiles (default: OpenStreetMap). Supply via --dart-define
+  /// in production to respect the tile provider's usage policy.
+  static const String mapTileUrl = String.fromEnvironment(
+    'MAP_TILE_URL',
+    defaultValue: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  );
+
+  /// Satellite basemap tiles (default: Esri World Imagery).
+  static const String satelliteTileUrl = String.fromEnvironment(
+    'SATELLITE_TILE_URL',
+    defaultValue:
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  );
+
+  /// Society extent as `minLng,minLat,maxLng,maxLat` (plot-map initial camera
+  /// and client-side inside-society validation). Empty when not configured.
+  static const String societyBboxRaw =
+      String.fromEnvironment('SOCIETY_BBOX', defaultValue: '');
 }

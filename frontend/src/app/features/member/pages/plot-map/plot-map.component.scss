@@ -1,0 +1,473 @@
+@use 'leaflet/dist/leaflet.css';
+@use '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+
+:host {
+  display: block;
+}
+
+.plot-map-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  min-height: 480px;
+  gap: 0.5rem;
+}
+
+.map-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.dag-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1 1 220px;
+  max-width: 340px;
+  padding: 0.35rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+}
+
+.dag-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--gray-800);
+  font: inherit;
+  min-width: 0;
+}
+
+.locate-error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--red-600);
+}
+
+.disclaimer-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  background: var(--amber-50);
+  border: 1px solid var(--amber-200);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--gray-800);
+}
+
+.disclaimer-text {
+  flex: 1;
+}
+
+.disclaimer-dismiss {
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  cursor: pointer;
+  padding: 0.15rem;
+  display: inline-flex;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  color: var(--gray-700);
+}
+
+.legend-swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.map-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  background: var(--surface-2);
+}
+
+.details-sheet {
+  position: absolute;
+  z-index: 1000;
+  inset-inline: 0.5rem;
+  bottom: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 0.9rem 1rem;
+  max-height: 60%;
+  overflow-y: auto;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--gray-800);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sheet-close {
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  cursor: pointer;
+  display: inline-flex;
+  padding: 0.25rem;
+}
+
+.mine-chip {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(30, 102, 208, 0.12);
+  color: #1e66d0;
+}
+
+.owner-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.owner-name {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.owner-meta,
+.dag-row {
+  margin: 0.15rem 0;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--surface-2);
+  border-radius: 999px;
+  color: var(--gray-700);
+}
+
+.contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.contact-hidden {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  padding: 0.3rem 0.6rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+.report-row {
+  margin-top: 0.6rem;
+}
+
+.report-done {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--emerald-600);
+}
+
+.draw-panel {
+  max-height: 75%;
+}
+
+.draw-hint,
+.draw-empty {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+}
+
+.property-list,
+.mine-list {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.property-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--gray-800);
+  cursor: pointer;
+}
+
+.mine-heading {
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mine-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+
+.mine-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.mine-dag {
+  font-size: 0.82rem;
+  color: var(--gray-700);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mine-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.status-chip {
+  font-size: 0.68rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &.status-approved {
+    background: rgba(46, 125, 50, 0.15);
+    color: #2e7d32;
+  }
+  &.status-pending_review,
+  &.status-draft {
+    background: rgba(201, 134, 30, 0.15);
+    color: var(--amber-200);
+  }
+  &.status-disputed {
+    background: rgba(192, 57, 43, 0.15);
+    color: #c0392b;
+  }
+  &.status-rejected {
+    background: rgba(138, 138, 138, 0.18);
+    color: var(--gray-600);
+  }
+}
+
+.validation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.validation-error,
+.validation-warning,
+.validation-ok,
+.validation-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.83rem;
+}
+
+.validation-error {
+  color: var(--red-600);
+}
+
+.validation-warning {
+  color: var(--gold-strong);
+}
+
+.validation-ok {
+  color: var(--emerald-600);
+}
+
+.validation-meta {
+  color: var(--gray-700);
+}
+
+.draw-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(18, 39, 24, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--modal-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 1rem 1.1rem;
+}
+
+.modal-title {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  color: var(--gray-800);
+}
+
+.report-label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--gray-700);
+  margin-bottom: 0.3rem;
+}
+
+.report-textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--gray-800);
+  font: inherit;
+  padding: 0.5rem;
+}
+
+// Leaflet controls on the society palette + dark-mode legibility.
+.map-canvas {
+  .leaflet-bar,
+  .leaflet-control-layers {
+    border: 1px solid var(--gray-200);
+    background: var(--surface);
+    color: var(--gray-800);
+  }
+
+  .leaflet-control-layers-list label {
+    color: var(--gray-800);
+  }
+
+  .leaflet-control-attribution {
+    background: var(--surface);
+    color: var(--gray-600);
+    font-size: 0.65rem;
+  }
+}
+
+// Geoman toolbar: touch-friendly spacing.
+.map-canvas {
+  .pm-toolbar-container {
+    z-index: 800;
+  }
+
+  .leaflet-geoman-draw-toolbar a {
+    min-width: 34px;
+    min-height: 34px;
+    line-height: 34px;
+  }
+}
+
+/* Tablet: sheet becomes a left-side card. */
+@media (min-width: 768px) {
+  .details-sheet {
+    inset-inline: unset;
+    left: 0.75rem;
+    right: auto;
+    top: 0.75rem;
+    bottom: auto;
+    width: 360px;
+    max-height: calc(100% - 1.5rem);
+  }
+}
+
+/* Wide desktop: taller map, roomier sheet. */
+@media (min-width: 1280px) {
+  .plot-map-page {
+    height: calc(100vh - 72px);
+  }
+
+  .details-sheet {
+    width: 400px;
+  }
+}

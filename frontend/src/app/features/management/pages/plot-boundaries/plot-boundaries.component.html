@@ -1,0 +1,409 @@
+<div class="pb-page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'admin.plotBoundaries.title' | translate }}</h1>
+      <p class="page-subtitle">
+        @if (tab() === 'disputes') {
+          {{ 'admin.plotBoundaries.disputes.subtitle' | translate }}
+        } @else {
+          {{ 'admin.plotBoundaries.subtitle' | translate }}
+        }
+      </p>
+    </div>
+  </header>
+
+  <div class="tab-row" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      class="tab-btn"
+      [class.tab-active]="tab() === 'queue'"
+      [attr.aria-selected]="tab() === 'queue'"
+      (click)="selectTab('queue')"
+    >
+      {{ 'admin.plotBoundaries.tabs.queue' | translate }}
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="tab-btn"
+      [class.tab-active]="tab() === 'disputes'"
+      [attr.aria-selected]="tab() === 'disputes'"
+      (click)="selectTab('disputes')"
+    >
+      {{ 'admin.plotBoundaries.tabs.disputes' | translate }}
+    </button>
+  </div>
+
+  @if (tab() === 'queue') {
+    <div class="filter-row">
+      <div class="status-tabs" role="group">
+        @for (status of statusTabs; track status) {
+          <button
+            type="button"
+            class="status-tab"
+            [class.status-tab-active]="statusFilter() === status"
+            [attr.aria-pressed]="statusFilter() === status"
+            (click)="statusFilter.set(status); load()"
+          >
+            {{ 'member.plotMap.status.' + status | translate }}
+          </button>
+        }
+      </div>
+      <div class="pb-search">
+        <app-icon name="pin" [size]="16" />
+        <input
+          type="search"
+          class="pb-search-input"
+          [placeholder]="'admin.plotBoundaries.searchPlaceholder' | translate"
+          [value]="search()"
+          (input)="onSearch($any($event.target).value)"
+        />
+      </div>
+    </div>
+  } @else {
+    <div class="filter-row">
+      <div class="status-tabs" role="group">
+        @for (status of disputeTabs; track status) {
+          <button
+            type="button"
+            class="status-tab"
+            [class.status-tab-active]="disputeFilter() === status"
+            [attr.aria-pressed]="disputeFilter() === status"
+            (click)="disputeFilter.set(status); load()"
+          >
+            {{ 'admin.plotBoundaries.disputes.' + status | translate }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="pb-skeletons" aria-hidden="true">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="card pb-skeleton">
+          <div class="skeleton-line skeleton-lg"></div>
+          <div class="skeleton-line"></div>
+        </div>
+      }
+    </div>
+  } @else if (loadErrorKey(); as key) {
+    <div class="error-box" role="alert">
+      <p class="error-text">{{ key | translate }}</p>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (tab() === 'queue') {
+    @if (boundaries().length === 0) {
+      <p class="pb-empty">{{ 'admin.plotBoundaries.empty' | translate }}</p>
+    }
+    <ul class="pb-list">
+      @for (boundary of boundaries(); track boundary.id) {
+        <li class="card pb-item" [class.pb-item-selected]="selected()?.id === boundary.id">
+          <button type="button" class="pb-item-main" (click)="select(boundary)">
+            <span class="pb-item-title">
+              {{ dagSummary(boundary) }}
+              <span class="status-chip" [class]="'status-' + boundary.status">
+                {{ 'member.plotMap.status.' + boundary.status | translate }}
+              </span>
+            </span>
+            <span class="pb-item-sub">
+              {{ 'admin.plotBoundaries.table.member' | translate }}: {{ boundary.memberName }}
+              · v{{ digits(boundary.currentVersion) }}
+              · {{ digits(boundary.computedAreaSqm) }} m²
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+
+    @if (selected(); as sel) {
+      <section class="card preview-panel" role="region">
+        <h2 class="preview-title">
+          {{ 'admin.plotBoundaries.preview.title' | translate }}
+          <span class="status-chip" [class]="'status-' + sel.status">
+            {{ 'member.plotMap.status.' + sel.status | translate }}
+          </span>
+        </h2>
+        <div class="preview-map" aria-hidden="true"></div>
+        <dl class="preview-facts">
+          <div class="fact">
+            <dt>{{ 'admin.plotBoundaries.table.member' | translate }}</dt>
+            <dd>{{ sel.memberName }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ 'admin.plotBoundaries.table.mobile' | translate }}</dt>
+            <dd>{{ digits(sel.memberMobile) }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ 'admin.plotBoundaries.table.khatian' | translate }}</dt>
+            <dd>{{ digits(sel.khatianNo) }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ 'admin.plotBoundaries.table.dag' | translate }}</dt>
+            <dd>{{ dagSummary(sel) }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ 'admin.plotBoundaries.table.landQuantity' | translate }}</dt>
+            <dd>{{ digits(sel.landQuantity) }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ 'admin.plotBoundaries.table.computedArea' | translate }}</dt>
+            <dd>
+              {{ digits(sel.computedAreaSqm) }} m² ·
+              {{ digits(sel.computedAreaShotangsho) }}
+              {{ 'member.plotMap.details.shotangsho' | translate }}
+            </dd>
+          </div>
+        </dl>
+
+        @if (actionErrorKey(); as key) {
+          <div class="error-box" role="alert">
+            <p class="error-text">{{ key | translate }}</p>
+          </div>
+        }
+
+        <div class="preview-actions">
+          @if (sel.status === 'pending_review') {
+            <button type="button" class="btn btn-primary btn-sm" (click)="openApprove()">
+              <app-icon name="check-circle" [size]="16" />
+              {{ 'admin.plotBoundaries.actions.approve' | translate }}
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="openReject()">
+              {{ 'admin.plotBoundaries.actions.reject' | translate }}
+            </button>
+          }
+          <button type="button" class="btn btn-secondary btn-sm" (click)="openVersions()">
+            {{ 'admin.plotBoundaries.actions.versions' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            [disabled]="evidenceExporting()"
+            (click)="exportEvidence()"
+          >
+            <app-icon name="download" [size]="16" />
+            {{ 'admin.plotBoundaries.actions.evidence' | translate }}
+          </button>
+        </div>
+      </section>
+    }
+  } @else {
+    @if (disputes().length === 0) {
+      <p class="pb-empty">{{ 'admin.plotBoundaries.disputes.empty' | translate }}</p>
+    }
+    <ul class="pb-list">
+      @for (dispute of disputes(); track dispute.id) {
+        <li class="card pb-item">
+          <div class="dispute-row">
+            <div class="dispute-info">
+              <span class="pb-item-title">
+                #{{ digits(dispute.boundaryId) }}
+                @if (dispute.otherBoundaryId) {
+                  ↔ #{{ digits(dispute.otherBoundaryId) }}
+                }
+              </span>
+              <span class="pb-item-sub">
+                {{ 'admin.plotBoundaries.disputes.overlap' | translate }}:
+                {{ digits(dispute.overlapAreaSqm) }} m²
+                @if (dispute.note) {
+                  · {{ dispute.note }}
+                }
+              </span>
+            </div>
+            @if (dispute.status === 'open') {
+              <div class="dispute-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  (click)="openDisputeResolve(dispute, false)"
+                >
+                  {{ 'admin.plotBoundaries.disputes.resolve' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  (click)="openDisputeResolve(dispute, true)"
+                >
+                  {{ 'admin.plotBoundaries.disputes.dismiss' | translate }}
+                </button>
+              </div>
+            } @else {
+              <span class="pb-item-sub">
+                {{ 'admin.plotBoundaries.disputes.' + dispute.status | translate }}
+                @if (dispute.resolutionNote) {
+                  · {{ dispute.resolutionNote }}
+                }
+              </span>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- Approve modal (note optional) -->
+  @if (approveOpen()) {
+    <div class="modal-backdrop" (click)="approveOpen.set(false)">
+      <div class="modal-card" role="dialog" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'admin.plotBoundaries.actions.approve' | translate }}</h3>
+        <label class="modal-label" for="approve-note">
+          {{ 'admin.plotBoundaries.modal.noteOptional' | translate }}
+        </label>
+        <textarea
+          id="approve-note"
+          class="modal-textarea"
+          rows="3"
+          [value]="approveNote()"
+          (input)="approveNote.set($any($event.target).value)"
+        ></textarea>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="approveOpen.set(false)">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            [disabled]="approving()"
+            (click)="confirmApprove()"
+          >
+            {{ 'admin.plotBoundaries.actions.approve' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Reject modal (note required) -->
+  @if (rejectOpen()) {
+    <div class="modal-backdrop" (click)="rejectOpen.set(false)">
+      <div class="modal-card" role="dialog" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'admin.plotBoundaries.actions.reject' | translate }}</h3>
+        <label class="modal-label" for="reject-note">
+          {{ 'admin.plotBoundaries.modal.noteRequired' | translate }}
+        </label>
+        <textarea
+          id="reject-note"
+          class="modal-textarea"
+          rows="3"
+          [value]="rejectNote()"
+          (input)="rejectNote.set($any($event.target).value)"
+        ></textarea>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="rejectOpen.set(false)">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            [disabled]="rejectConfirmDisabled() || rejecting()"
+            (click)="confirmReject()"
+          >
+            {{ 'admin.plotBoundaries.actions.reject' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Version history modal -->
+  @if (versionsOpen()) {
+    <div class="modal-backdrop" (click)="versionsOpen.set(false)">
+      <div class="modal-card modal-wide" role="dialog" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'admin.plotBoundaries.versions.title' | translate }}</h3>
+        @if (versionsLoading()) {
+          <div class="skeleton-line"></div>
+        } @else if (versions().length === 0) {
+          <p class="pb-empty">{{ 'admin.plotBoundaries.versions.empty' | translate }}</p>
+        } @else {
+          <table class="versions-table">
+            <thead>
+              <tr>
+                <th>{{ 'admin.plotBoundaries.versions.version' | translate }}</th>
+                <th>{{ 'admin.plotBoundaries.versions.changeType' | translate }}</th>
+                <th>{{ 'admin.plotBoundaries.versions.status' | translate }}</th>
+                <th>{{ 'admin.plotBoundaries.versions.actor' | translate }}</th>
+                <th>{{ 'admin.plotBoundaries.versions.note' | translate }}</th>
+                <th>{{ 'admin.plotBoundaries.versions.time' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (version of versions(); track version.id) {
+                <tr>
+                  <td>{{ digits(version.version) }}</td>
+                  <td>{{ version.changeType }}</td>
+                  <td>{{ 'member.plotMap.status.' + version.status | translate }}</td>
+                  <td>
+                    @if (version.changedByAdminId) {
+                      admin #{{ digits(version.changedByAdminId) }}
+                    } @else {
+                      member #{{ digits(version.changedByMemberId) }}
+                    }
+                  </td>
+                  <td>{{ version.note ?? '—' }}</td>
+                  <td>{{ version.createdAt | date: 'short' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="versionsOpen.set(false)">
+            {{ 'common.close' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Dispute resolve/dismiss modal -->
+  @if (disputeResolveTarget(); as dispute) {
+    <div class="modal-backdrop" (click)="disputeResolveTarget.set(null)">
+      <div class="modal-card" role="dialog" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">
+          {{
+            (disputeDismiss()
+              ? 'admin.plotBoundaries.disputes.dismiss'
+              : 'admin.plotBoundaries.disputes.resolve'
+            ) | translate
+          }}
+          #{{ digits(dispute.boundaryId) }}
+        </h3>
+        <label class="modal-label" for="dispute-note">
+          {{ 'admin.plotBoundaries.modal.noteRequired' | translate }}
+        </label>
+        <textarea
+          id="dispute-note"
+          class="modal-textarea"
+          rows="3"
+          [value]="disputeNote()"
+          (input)="disputeNote.set($any($event.target).value)"
+        ></textarea>
+        @if (disputeErrorKey(); as key) {
+          <div class="error-box" role="alert">
+            <p class="error-text">{{ key | translate }}</p>
+          </div>
+        }
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            (click)="disputeResolveTarget.set(null)"
+          >
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            [disabled]="!disputeNote().trim() || disputeSaving()"
+            (click)="confirmDisputeResolve()"
+          >
+            {{ 'common.confirmModal.confirmButton' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

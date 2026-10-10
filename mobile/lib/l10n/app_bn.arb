@@ -1715,5 +1715,79 @@
   "memberNeighboursDialerUnavailable": "এই ডিভাইসে কল করা যাচ্ছে না।",
   "memberNeighboursWhatsappUnavailable": "হোয়াটসঅ্যাপ খোলা যাচ্ছে না।",
   "memberProfileNeighbourDirectoryLabel": "প্রতিবেশী তথ্যে আমার মোবাইল নম্বর দেখান",
-  "memberProfileNeighbourDirectoryHint": "বন্ধ করলে প্রতিবেশীরা শুধু আপনার নাম, জমির পরিমাণ ও দাগ দেখবেন।"
+  "memberProfileNeighbourDirectoryHint": "বন্ধ করলে প্রতিবেশীরা শুধু আপনার নাম, জমির পরিমাণ ও দাগ দেখবেন।",
+  "navPlotMap": "জমির সীমানা",
+  "boundaryTitle": "জমির সীমানা",
+  "boundarySubtitle": "ম্যাপে প্লটের সীমানা দেখুন ও নিজের সীমানা আঁকুন",
+  "boundaryViewOnMap": "ম্যাপে দেখুন",
+  "boundaryDraw": "সীমানা আঁকুন",
+  "boundaryDisclaimer": "এটি সদস্য-চিহ্নিত আনুমানিক সীমানা; সরকারি জরিপ বা দলিলের বিকল্প নয়।",
+  "boundaryStatusDraft": "খসড়া",
+  "boundaryStatusPendingReview": "অনুমোদনের অপেক্ষায়",
+  "boundaryStatusApproved": "অনুমোদিত",
+  "boundaryStatusRejected": "প্রত্যাখ্যাত",
+  "boundaryStatusDisputed": "মতবিরোধ",
+  "boundaryStatusMine": "আমার সীমানা",
+  "boundaryOwnerTitle": "মালিকের তথ্য",
+  "boundaryOwnerContactHidden": "যোগাযোগ গোপন রাখা হয়েছে",
+  "boundaryCall": "কল",
+  "boundaryWhatsapp": "হোয়াটসঅ্যাপ",
+  "boundaryRsDag": "আরএস দাগ",
+  "boundaryCsDag": "সিএস দাগ",
+  "boundaryLandQuantity": "জমির পরিমাণ",
+  "boundaryAreaLabel": "এলাকা",
+  "boundaryAreaValues": "{sqm} বর্গমিটার · {shotangsho} শতাংশ",
+  "@boundaryAreaValues": {
+    "placeholders": {
+      "sqm": {
+        "type": "Object"
+      },
+      "shotangsho": {
+        "type": "Object"
+      }
+    }
+  },
+  "boundaryAreaEstimateTag": "আনুমানিক",
+  "boundaryOwnerLoadError": "মালিকের তথ্য আনা যায়নি।",
+  "boundaryLoadError": "ম্যাপের তথ্য আনা যায়নি।",
+  "boundarySearchDagHint": "দাগ নম্বর দিয়ে খুঁজুন",
+  "boundarySearchNoMatch": "এই দাগ নম্বরে কোনো সীমানা পাওয়া যায়নি।",
+  "boundaryMyLocation": "আমার অবস্থান",
+  "boundaryLayerStreet": "স্ট্রিট",
+  "boundaryLayerSatellite": "স্যাটেলাইট",
+  "boundaryReport": "রিপোর্ট করুন",
+  "boundaryReportNoteHint": "সমস্যাটি লিখুন",
+  "boundaryReportSubmit": "রিপোর্ট পাঠান",
+  "boundaryReportSent": "রিপোর্ট গৃহীত হয়েছে।",
+  "boundaryReportError": "রিপোর্ট পাঠানো যায়নি।",
+  "boundaryEditorTitle": "সীমানা আঁকুন",
+  "boundaryEditorAddHint": "ম্যাপে ট্যাপ করে পয়েন্ট যোগ করুন; পয়েন্ট ড্র্যাগ করে সরান।",
+  "boundaryEditorUndo": "আনডু",
+  "boundaryEditorClear": "মুছুন",
+  "boundaryEditorSave": "জমা দিন",
+  "boundaryEditorPropertyLabel": "নিজের প্লট",
+  "boundaryEditorNoProperty": "সীমানা ছাড়া কোনো প্লট পাওয়া যায়নি।",
+  "boundaryEditorVertices": "পয়েন্ট: {count}",
+  "@boundaryEditorVertices": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "boundarySaveSuccess": "সীমানা জমা হয়েছে; এখন অনুমোদনের অপেক্ষায় আছে।",
+  "boundaryEditExisting": "সীমানা সম্পাদনা",
+  "boundaryErrorTooFewPoints": "কমপক্ষে ৩টি পয়েন্ট প্রয়োজন।",
+  "boundaryErrorSelfIntersecting": "সীমানার রেখা নিজেকে ছেদ করছে।",
+  "boundaryErrorOutsideSociety": "সীমানা সমিতির এলাকার বাইরে চলে গেছে।",
+  "boundaryErrorZeroArea": "এলাকা প্রায় শূন্য; পয়েন্টগুলো আরও ছড়িয়ে দিন।",
+  "boundaryErrorTooManyVertices": "সর্বোচ্চ পয়েন্ট সংখ্যা অতিক্রম হয়েছে।",
+  "boundaryErrorInvalidGeometry": "সীমানার আকার অবৈধ।",
+  "boundaryErrorNotYourProperty": "অন্যের প্লটের সীমানা আঁকা যাবে না।",
+  "boundaryErrorBoundaryExists": "এই প্লটের সীমানা আগেই আছে।",
+  "boundaryErrorRateLimited": "অনেকবার চেষ্টা হয়েছে; কিছুক্ষণ পর আবার চেষ্টা করুন।",
+  "boundaryErrorNotApproved": "এই সীমানা এখনো অনুমোদিত হয়নি।",
+  "boundaryErrorGeneric": "সীমানা সংরক্ষণ করা যায়নি।",
+  "boundaryReviewNote": "পর্যালোচনার মন্তব্য",
+  "boundaryMobile": "মোবাইল"
 }

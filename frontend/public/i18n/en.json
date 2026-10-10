@@ -209,7 +209,9 @@
     "paymentVerifications": "Payment Verifications",
     "neighbours": "Neighbours",
     "fees": "Fees",
-    "feesManagement": "Fee Payments"
+    "feesManagement": "Fee Payments",
+    "plotMap": "Plot Boundary Map",
+    "plotBoundaries": "Plot Boundaries"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -793,6 +795,71 @@
         "Nagad": "Nagad",
         "Bank Transfer": "Bank Transfer",
         "Other": "Other"
+      }
+    },
+    "plotMap": {
+      "title": "Plot Boundary Map",
+      "subtitle": "",
+      "searchPlaceholder": "Search by RS/CS dag number",
+      "myLocation": "My location",
+      "locationError": "Could not determine your location.",
+      "legend": "Legend",
+      "disclaimer": "This is a member-marked approximate boundary; it is not a substitute for an official survey or legal documents.",
+      "status": {
+        "draft": "Draft",
+        "pending_review": "Pending review",
+        "approved": "Approved",
+        "mine": "Mine",
+        "rejected": "Rejected",
+        "disputed": "Disputed"
+      },
+      "details": {
+        "title": "Plot details",
+        "landQuantity": "Declared land",
+        "area": "Computed area",
+        "shotangsho": "শতাংশ",
+        "contactHidden": "Contact hidden"
+      },
+      "owner": {
+        "rateLimited": "Too many lookups - please wait a moment and try again.",
+        "notApproved": "This boundary is not approved yet, so owner details are unavailable.",
+        "loadError": "Could not load owner details."
+      },
+      "report": {
+        "open": "Report a problem",
+        "note": "Describe the problem",
+        "send": "Send report",
+        "thanks": "Thank you - your report has been received.",
+        "error": "Could not send the report. Please try again."
+      },
+      "draw": {
+        "open": "Draw boundary",
+        "title": "Draw your plot boundary",
+        "editTitle": "Edit my boundary",
+        "pickHint": "Choose one of your properties that has no boundary yet, then draw its outline on the map.",
+        "noProperties": "None of your properties is available for drawing - either all have boundaries already or no property is registered.",
+        "start": "Draw on map",
+        "myBoundaries": "My boundaries",
+        "edit": "Edit",
+        "deleteTitle": "Delete boundary",
+        "deleteMessage": "Your boundary will be removed and sent back for review if redrawn. Continue?",
+        "errors": {
+          "INVALID_GEOMETRY": "The drawn shape is not a valid polygon.",
+          "SELF_INTERSECTING": "The outline crosses itself - fix the overlapping part and try again.",
+          "OUTSIDE_SOCIETY_AREA": "The outline goes outside the society area.",
+          "ZERO_AREA": "The drawn shape has no area - add more points.",
+          "TOO_MANY_VERTICES": "Too many points - simplify the outline.",
+          "NOT_YOUR_PROPERTY": "This property does not belong to your account.",
+          "BOUNDARY_EXISTS": "This property already has a boundary.",
+          "generic": "Could not save the boundary. Please try again."
+        }
+      },
+      "validation": {
+        "selfIntersection": "The outline crosses itself - fix the highlighted overlap.",
+        "outsideSociety": "Part of the outline is outside the society area.",
+        "areaMismatch": "The drawn area differs a lot from your declared land quantity.",
+        "area": "Drawn area",
+        "ok": "The outline looks valid."
       }
     }
   },
@@ -1829,6 +1896,63 @@
       "receiptColumn": "Receipt no.",
       "noteColumn": "Note",
       "emptyState": "No fee payments found for this filter."
+    },
+    "plotBoundaries": {
+      "title": "Plot Boundaries",
+      "subtitle": "Review member-drawn plot boundaries",
+      "searchPlaceholder": "Search by dag number",
+      "empty": "No boundaries found for this filter.",
+      "tabs": {
+        "queue": "Review queue",
+        "disputes": "Disputes"
+      },
+      "table": {
+        "member": "Member",
+        "mobile": "Mobile",
+        "khatian": "Khatian",
+        "dag": "Dag",
+        "landQuantity": "Declared land",
+        "computedArea": "Computed area"
+      },
+      "preview": {
+        "title": "Boundary preview"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "versions": "Version history",
+        "evidence": "Evidence export"
+      },
+      "modal": {
+        "noteOptional": "Note (optional)",
+        "noteRequired": "Note (required)"
+      },
+      "errors": {
+        "loadFailed": "Could not load boundaries.",
+        "generic": "Could not complete the action. Please try again.",
+        "forbidden": "You do not have permission for this action.",
+        "noteRequired": "A note is required to reject."
+      },
+      "versions": {
+        "title": "Version history",
+        "empty": "No versions recorded yet.",
+        "version": "Version",
+        "changeType": "Change",
+        "status": "Status",
+        "actor": "By",
+        "note": "Note",
+        "time": "Time"
+      },
+      "disputes": {
+        "subtitle": "Overlapping boundary disputes - resolving needs the boundary.manage permission",
+        "empty": "No disputes found for this filter.",
+        "open": "Open",
+        "resolved": "Resolved",
+        "dismissed": "Dismissed",
+        "overlap": "Overlap",
+        "resolve": "Resolve",
+        "dismiss": "Dismiss"
+      }
     }
   },
   "registration": {

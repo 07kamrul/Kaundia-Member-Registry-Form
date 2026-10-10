@@ -1,0 +1,341 @@
+<div class="plot-map-page">
+  <div class="map-toolbar">
+    <div class="toolbar-row">
+      <div class="dag-search">
+        <app-icon name="pin" [size]="16" />
+        <input
+          type="search"
+          class="dag-search-input"
+          [placeholder]="'member.plotMap.searchPlaceholder' | translate"
+          [value]="search()"
+          (input)="onSearchInput($any($event.target).value)"
+          [attr.aria-label]="'member.plotMap.searchPlaceholder' | translate"
+        />
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm locate-btn" (click)="locateMe()">
+        <app-icon name="pin" [size]="16" />
+        {{ 'member.plotMap.myLocation' | translate }}
+      </button>
+      @if (canDraw()) {
+        <button
+          type="button"
+          class="btn btn-primary btn-sm draw-btn"
+          (click)="openDrawPanel()"
+        >
+          <app-icon name="edit" [size]="16" />
+          {{ 'member.plotMap.draw.open' | translate }}
+        </button>
+      }
+    </div>
+    @if (myLocationError()) {
+      <p class="locate-error" role="alert">{{ 'member.plotMap.locationError' | translate }}</p>
+    }
+  </div>
+
+  <div class="disclaimer-banner" role="note">
+    <app-icon name="alert" [size]="16" />
+    <span class="disclaimer-text">{{ disclaimerText() }}</span>
+    @if (!disclaimerDismissed()) {
+      <button
+        type="button"
+        class="disclaimer-dismiss"
+        (click)="dismissDisclaimer()"
+        [attr.aria-label]="'common.close' | translate"
+      >
+        <app-icon name="close" [size]="14" />
+      </button>
+    }
+  </div>
+
+  <div class="legend" role="list" [attr.aria-label]="'member.plotMap.legend' | translate">
+    @for (item of legendItems; track item.status) {
+      <span class="legend-chip" role="listitem">
+        <span class="legend-swatch" [style.background]="item.color"></span>
+        {{ 'member.plotMap.status.' + item.status | translate }}
+      </span>
+    }
+  </div>
+
+  <div class="map-wrap">
+    <div #mapEl class="map-canvas" [attr.aria-label]="'member.plotMap.title' | translate"></div>
+    @if (mapLoading()) {
+      <div class="map-loading" aria-hidden="true">
+        <div class="skeleton-line skeleton-lg"></div>
+        <div class="skeleton-line"></div>
+      </div>
+    }
+  </div>
+
+  <!-- Polygon details sheet (bottom sheet on mobile, side card on desktop) -->
+  @if (selected(); as sel) {
+    <section class="details-sheet" role="dialog" [attr.aria-label]="'member.plotMap.details.title' | translate">
+      <header class="sheet-head">
+        <h2 class="sheet-title">
+          {{ 'member.plotMap.details.title' | translate }}
+          @if (sel.feature.isMine) {
+            <span class="mine-chip">{{ 'member.plotMap.status.mine' | translate }}</span>
+          }
+        </h2>
+        <button type="button" class="sheet-close" (click)="closeSheet()">
+          <app-icon name="close" [size]="16" />
+        </button>
+      </header>
+
+      @if (sel.loading) {
+        <div class="owner-skeleton" aria-hidden="true">
+          <div class="skeleton-line skeleton-lg"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+        </div>
+      } @else if (sel.errorKey; as key) {
+        <div class="error-box" role="alert">
+          <p class="error-text">{{ key | translate }}</p>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="onFeatureClick(sel.feature)">
+            {{ 'common.retry' | translate }}
+          </button>
+        </div>
+      } @else if (sel.owner; as owner) {
+        <p class="owner-name">{{ owner.ownerName }}</p>
+        <div class="dag-row">
+          <span class="meta-chip">
+            RS: {{ digits(owner.rsDag) }} · CS: {{ digits(owner.csDag) }}
+          </span>
+        </div>
+        <p class="owner-meta">
+          {{ 'member.plotMap.details.landQuantity' | translate }}:
+          {{ digits(owner.landQuantity) }}
+        </p>
+        <p class="owner-meta">
+          {{ 'member.plotMap.details.area' | translate }}:
+          {{ digits(owner.computedAreaSqm) }} m² ·
+          {{ digits(owner.computedAreaShotangsho) }}
+          {{ 'member.plotMap.details.shotangsho' | translate }}
+        </p>
+        <div class="contact-row">
+          @if (owner.contactHidden || !owner.mobile) {
+            <span class="contact-hidden">
+              {{ 'member.plotMap.details.contactHidden' | translate }}
+            </span>
+          } @else {
+            @if (ownerContactLinks(owner).tel; as telHrefValue) {
+              <a class="btn btn-secondary btn-sm call-link" [href]="telHrefValue">
+                <app-icon name="phone" [size]="16" />
+                {{ digits(owner.mobile) }}
+              </a>
+            }
+            @if (ownerContactLinks(owner).wa; as waHrefValue) {
+              <a
+                class="btn btn-secondary btn-sm whatsapp-link"
+                [href]="waHrefValue"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                WhatsApp
+              </a>
+            }
+          }
+        </div>
+        <div class="report-row">
+          @if (sel.reported) {
+            <p class="report-done">
+              <app-icon name="check-circle" [size]="16" />
+              {{ 'member.plotMap.report.thanks' | translate }}
+            </p>
+          } @else {
+            <button type="button" class="btn btn-secondary btn-sm" (click)="openReport()">
+              <app-icon name="alert" [size]="16" />
+              {{ 'member.plotMap.report.open' | translate }}
+            </button>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Draw panel -->
+  @if (showDrawPanel()) {
+    <section class="details-sheet draw-panel" role="dialog" [attr.aria-label]="'member.plotMap.draw.open' | translate">
+      <header class="sheet-head">
+        <h2 class="sheet-title">
+          {{ (editingBoundary() ? 'member.plotMap.draw.editTitle' : 'member.plotMap.draw.title') | translate }}
+        </h2>
+        <button type="button" class="sheet-close" (click)="closeDrawPanel()">
+          <app-icon name="close" [size]="16" />
+        </button>
+      </header>
+
+      @if (drawStep() === 'pick') {
+        @if (availableProperties().length === 0) {
+          <p class="draw-empty">{{ 'member.plotMap.draw.noProperties' | translate }}</p>
+        } @else {
+          <p class="draw-hint">{{ 'member.plotMap.draw.pickHint' | translate }}</p>
+          <ul class="property-list">
+            @for (property of availableProperties(); track property.id) {
+              <li>
+                <label class="property-option">
+                  <input
+                    type="radio"
+                    name="draw-property"
+                    [checked]="selectedPropertyId() === property.id"
+                    (change)="selectedPropertyId.set(property.id)"
+                  />
+                  <span>{{ propertyLabel(property) }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!selectedPropertyId()"
+            (click)="startDrawing()"
+          >
+            {{ 'member.plotMap.draw.start' | translate }}
+          </button>
+        }
+
+        @if (myBoundaries().length) {
+          <h3 class="mine-heading">{{ 'member.plotMap.draw.myBoundaries' | translate }}</h3>
+          <ul class="mine-list">
+            @for (boundary of myBoundaries(); track boundary.id) {
+              <li class="mine-item">
+                <div class="mine-info">
+                  <span class="status-chip" [class]="'status-' + boundary.status">
+                    {{ 'member.plotMap.status.' + boundary.status | translate }}
+                  </span>
+                  <span class="mine-dag">{{ boundaryLabel(boundary) }}</span>
+                </div>
+                <div class="mine-actions">
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    (click)="startEditing(boundary)"
+                  >
+                    {{ 'member.plotMap.draw.edit' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    (click)="deleteTarget.set(boundary)"
+                  >
+                    {{ 'common.delete' | translate }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      } @else {
+        <div class="validation-panel" aria-live="polite">
+          @if (validation(); as v) {
+            @if (v.selfIntersection) {
+              <p class="validation-error">
+                <app-icon name="alert" [size]="14" />
+                {{ 'member.plotMap.validation.selfIntersection' | translate }}
+              </p>
+            }
+            @if (v.outsideSociety) {
+              <p class="validation-error">
+                <app-icon name="alert" [size]="14" />
+                {{ 'member.plotMap.validation.outsideSociety' | translate }}
+              </p>
+            }
+            @if (v.areaMismatch) {
+              <p class="validation-warning">
+                <app-icon name="alert" [size]="14" />
+                {{ 'member.plotMap.validation.areaMismatch' | translate }}
+              </p>
+            }
+            @if (v.areaSqM !== null) {
+              <p class="validation-meta">
+                {{ 'member.plotMap.validation.area' | translate }}:
+                {{ digits(v.areaSqM) }} m² ·
+                {{ digits(v.areaShotangsho) }}
+                {{ 'member.plotMap.details.shotangsho' | translate }}
+              </p>
+            }
+            @if (!v.selfIntersection && !v.outsideSociety && !v.areaMismatch && v.areaSqM !== null) {
+              <p class="validation-ok">
+                <app-icon name="check-circle" [size]="14" />
+                {{ 'member.plotMap.validation.ok' | translate }}
+              </p>
+            }
+          }
+        </div>
+        @if (saveErrorKey(); as key) {
+          <div class="error-box" role="alert">
+            <p class="error-text">{{ key | translate }}</p>
+          </div>
+        }
+        <div class="draw-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="cancelDraw()">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            [disabled]="!validation().valid || saving()"
+            (click)="saveDrawn()"
+          >
+            {{ 'common.save' | translate }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Report modal -->
+  @if (reportOpen()) {
+    <div class="modal-backdrop" (click)="reportOpen.set(false)">
+      <div class="modal-card" role="dialog" [attr.aria-label]="'member.plotMap.report.open' | translate" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ 'member.plotMap.report.open' | translate }}</h3>
+        @if (reportSent()) {
+          <p class="report-done">
+            <app-icon name="check-circle" [size]="16" />
+            {{ 'member.plotMap.report.thanks' | translate }}
+          </p>
+        } @else {
+          <label class="report-label" for="report-note">{{ 'member.plotMap.report.note' | translate }}</label>
+          <textarea
+            id="report-note"
+            class="report-textarea"
+            rows="4"
+            [value]="reportNote()"
+            (input)="reportNote.set($any($event.target).value)"
+          ></textarea>
+          @if (reportErrorKey(); as key) {
+            <div class="error-box" role="alert">
+              <p class="error-text">{{ key | translate }}</p>
+            </div>
+          }
+          <div class="draw-actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="reportOpen.set(false)">
+              {{ 'common.cancel' | translate }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              [disabled]="!reportNote().trim() || reportSending()"
+              (click)="sendReport()"
+            >
+              {{ 'member.plotMap.report.send' | translate }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Delete confirm -->
+  <app-confirm-modal
+    [open]="deleteTarget() !== null"
+    [title]="'member.plotMap.draw.deleteTitle' | translate"
+    [message]="'member.plotMap.draw.deleteMessage' | translate"
+    [confirmLabel]="'common.delete' | translate"
+    [cancelLabel]="'common.cancel' | translate"
+    [danger]="true"
+    [loading]="deleting()"
+    (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()"
+  />
+</div>

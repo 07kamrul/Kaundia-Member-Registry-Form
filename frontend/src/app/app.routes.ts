@@ -159,6 +159,14 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'plot-map',
+            canActivate: [permissionGuard(['boundary.view'])],
+            loadComponent: () =>
+              import('./features/member/pages/plot-map/plot-map.component').then(
+                (m) => m.PlotMapComponent,
+              ),
+          },
+          {
             path: 'change-password',
             loadComponent: () =>
               import('./features/member/pages/change-password/change-password.component').then(
@@ -328,6 +336,14 @@ export const routes: Routes = [
               import('./features/management/pages/roadmap-management/roadmap-management.component').then(
                 (m) => m.RoadmapManagementComponent,
               ),
+          },
+          {
+            path: 'plot-boundaries',
+            canActivate: [permissionGuard(['boundary.review'])],
+            loadComponent: () =>
+              import(
+                './features/management/pages/plot-boundaries/plot-boundaries.component'
+              ).then((m) => m.PlotBoundariesComponent),
           },
           {
             path: 'config-lists',

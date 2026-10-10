@@ -47,6 +47,7 @@ export const MANAGEMENT_AREA_PERMISSIONS = [
   'complaint.view_assigned',
   'complaint.process',
   'report.view_operational',
+  'boundary.review',
   'manage_costs',
   'manage_finance',
   'manage_roadmap',

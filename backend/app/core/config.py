@@ -65,6 +65,32 @@ class Settings(BaseSettings):
         default=600, ge=1, validation_alias="NEIGHBOUR_LOOKUP_RATE_WINDOW_SECONDS"
     )
 
+    # Plot boundaries (member-drawn polygons).
+    # Society bounding box as "minLng,minLat,maxLng,maxLat" — polygons outside
+    # it are rejected. Defaults to Bangladesh; tighten to the society area.
+    boundary_society_bbox: str = Field(
+        default="88.0,20.5,92.7,26.7", validation_alias="BOUNDARY_SOCIETY_BBOX"
+    )
+    boundary_max_vertices: int = Field(default=200, ge=3, validation_alias="BOUNDARY_MAX_VERTICES")
+    # Computed area vs declared land quantity: a warning (not an error) beyond
+    # this percentage difference, shown to the member and the reviewer.
+    boundary_area_tolerance_pct: float = Field(
+        default=25, ge=0, validation_alias="BOUNDARY_AREA_TOLERANCE_PCT"
+    )
+    # Overlaps smaller than this are treated as edge-touching, not a dispute.
+    boundary_min_overlap_sqm: float = Field(
+        default=1.0, ge=0, validation_alias="BOUNDARY_MIN_OVERLAP_SQM"
+    )
+    boundary_map_result_cap: int = Field(
+        default=500, ge=1, validation_alias="BOUNDARY_MAP_RESULT_CAP"
+    )
+    boundary_owner_lookup_rate_limit: int = Field(
+        default=30, ge=1, validation_alias="BOUNDARY_OWNER_LOOKUP_RATE_LIMIT"
+    )
+    boundary_owner_lookup_rate_window_seconds: int = Field(
+        default=600, ge=1, validation_alias="BOUNDARY_OWNER_LOOKUP_RATE_WINDOW_SECONDS"
+    )
+
     @model_validator(mode="after")
     def _reject_insecure_secret_in_production(self) -> "Settings":
         if self.app_env == "production" and self.jwt_secret_key == _INSECURE_JWT_DEFAULT:
