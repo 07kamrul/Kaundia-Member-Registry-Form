@@ -655,3 +655,20 @@
   font-size: 0.72rem;
   color: #c0392b;
 }
+
+/* Pulsing dot marking the member's live position (Leaflet divIcon). */
+:host ::ng-deep .my-location-dot {
+  background: none;
+  border: none;
+
+  .my-location-dot-inner {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #1a73e8;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.35);
+    box-sizing: border-box;
+  }
+}

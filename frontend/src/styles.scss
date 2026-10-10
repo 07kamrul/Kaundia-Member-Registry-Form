@@ -3395,3 +3395,64 @@ a {
     animation: none;
   }
 }
+
+/* ==========================================================================
+   BDS dag info popup (Leaflet popup content is built at runtime, so the
+   styles must live here next to the global Leaflet CSS — component scoping
+   never reaches it). Mirrors the settlement.gov.bd dag-detail card.
+   ========================================================================== */
+
+.bds-popup {
+  font-size: 0.85rem;
+  color: var(--gray-800);
+}
+
+.bds-popup-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--emerald-800);
+}
+
+.bds-popup-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    border: 1px solid var(--gray-200);
+    padding: 0.4rem 0.55rem;
+    text-align: left;
+    vertical-align: top;
+    word-break: break-word;
+  }
+
+  th {
+    width: 45%;
+    font-weight: 600;
+    color: var(--gray-600);
+    background: var(--gray-50);
+  }
+
+  td {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.bds-popup-note {
+  margin: 0.6rem 0;
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--radius-sm);
+  background: var(--amber-50);
+  border: 1px solid var(--amber-200);
+  color: var(--gray-700);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.bds-popup-link {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--emerald-800);
+}

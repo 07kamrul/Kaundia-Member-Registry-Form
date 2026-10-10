@@ -1712,3 +1712,4 @@ admin.plotBoundaries.disputes.dismissed	বাতিল	Dismissed
 admin.plotBoundaries.disputes.overlap	চেঃ এলাকা	Overlap
 admin.plotBoundaries.disputes.resolve	মীমাংসা	Resolve
 admin.plotBoundaries.disputes.dismiss	উপেক্ষা	Dismiss
+member.plotMap.outsideSociety	আপনি উত্তর কাউন্দিয়া এলাকার বাইরে আছেন — পরিবর্তে সোসাইটির মানচিত্র দেখানো হচ্ছে।	You are outside the Uttar Kaundia area — showing the society map instead.

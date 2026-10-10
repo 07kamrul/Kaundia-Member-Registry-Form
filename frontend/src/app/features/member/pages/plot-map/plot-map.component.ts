@@ -145,6 +145,7 @@ export class PlotMapComponent implements AfterViewInit {
   readonly disclaimerDismissed = signal(this.readDisclaimerDismissed());
   readonly search = signal('');
   readonly myLocationError = signal(false);
+  readonly outsideSociety = signal(false);
 
   // Polygon details sheet ("popup" rendered by Angular so it can be a bottom
   // sheet on touch screens and is fully testable).
@@ -224,12 +225,33 @@ export class PlotMapComponent implements AfterViewInit {
     this.loadFeatures();
   }
 
+  /** Society bbox as Leaflet bounds — the only area this map may show. */
+  private societyBounds(): L.LatLngBounds {
+    const [minLng, minLat, maxLng, maxLat] = parseSocietyBbox(environment.societyBbox);
+    return L.latLngBounds([minLat, minLng], [maxLat, maxLng]);
+  }
+
+  /** True when a lat/lng point falls inside (a slightly padded) society bbox. */
+  private insideSociety(lat: number, lng: number): boolean {
+    const [minLng, minLat, maxLng, maxLat] = parseSocietyBbox(environment.societyBbox);
+    const pad = 0.004; // ~400 m tolerance around the society edge
+    return (
+      lat >= minLat - pad && lat <= maxLat + pad && lng >= minLng - pad && lng <= maxLng + pad
+    );
+  }
+
   private initMap(): void {
+    const society = this.societyBounds();
     const map = L.map(this.mapContainer().nativeElement, {
       center: SOCIETY_CENTER,
       zoom: 15,
+      minZoom: 12,
+      maxZoom: 19,
+      maxBounds: society.pad(0.05),
+      maxBoundsViscosity: 1.0,
       touchZoom: true,
     });
+    map.fitBounds(society);
 
     const street = L.tileLayer(environment.mapTileUrl, {
       maxZoom: 19,
@@ -406,7 +428,10 @@ export class PlotMapComponent implements AfterViewInit {
           this.bdsLayer = L.geoJSON(collection as never, {
             style: { color: '#1a3fd4', weight: 2, fillColor: '#2b50e0', fillOpacity: 0.2 },
             onEachFeature: (feature, layer) =>
-              layer.bindPopup(this.bdsPopupHtml(feature as LandPlotFeature, layer as L.Polygon)),
+              layer.bindPopup(
+                this.bdsPopupHtml(feature as LandPlotFeature, layer as L.Polygon),
+                { maxWidth: 340, minWidth: 250 },
+              ),
           }).addTo(this.map);
           this.updateBdsLabels();
         },
@@ -453,17 +478,35 @@ export class PlotMapComponent implements AfterViewInit {
     this.bdsLayer = null;
   }
 
+  /** Settlement-portal style dag information card (mirrors settlement.gov.bd). */
   private bdsPopupHtml(feature: LandPlotFeature, layer: L.Polygon): string {
-    const dag = this.digits(feature.properties?.dag ?? feature.properties?.label_bn ?? '');
+    const props = feature.properties ?? {};
+    const dag = this.digits(props.dag ?? props.label_bn ?? '');
+    const sheet = this.digits(props.sheet ?? '');
+    const t = (key: string) => this.translate.instant(`member.plotMap.views.${key}`);
+    const areaHectare =
+      typeof props.area_sqm === 'number' && props.area_sqm > 0
+        ? this.digits((props.area_sqm / 10_000).toFixed(4))
+        : '—';
     const center = layer.getBounds().getCenter();
     const streetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${center.lat},${center.lng}`;
+    const row = (labelKey: string, value: string) => `
+      <tr><th scope="row">${t(labelKey)}</th><td>${value}</td></tr>`;
     return `
       <div class="bds-popup">
-        <strong>${this.translate.instant('member.plotMap.views.bdsDag')} ${dag}</strong>
-        <p>${this.translate.instant('member.plotMap.views.bdsSurvey')}</p>
-        <p>${this.translate.instant('member.plotMap.views.mouzaLabel')}</p>
-        <a href="${streetView}" target="_blank" rel="noopener noreferrer">
-          ${this.translate.instant('member.plotMap.views.streetView')}
+        <h3 class="bds-popup-title">${t('bdsInfoTitle')}</h3>
+        <table class="bds-popup-table">
+          <tbody>
+            ${row('dagNoLabel', dag)}
+            ${row('surveyTypeLabel', t('surveyTypeValue'))}
+            ${row('mouzaNameLabel', t('mouzaNameValue'))}
+            ${row('sheetNoLabel', sheet)}
+            ${row('areaLabel', areaHectare)}
+          </tbody>
+        </table>
+        <p class="bds-popup-note">${t('khatianNote')}</p>
+        <a class="bds-popup-link" href="${streetView}" target="_blank" rel="noopener noreferrer">
+          ${t('streetView')}
         </a>
       </div>`;
   }
@@ -627,6 +670,8 @@ export class PlotMapComponent implements AfterViewInit {
     setTimeout(() => layer.setStyle({ weight: 2, fillOpacity: 0.25 }), 2500);
   }
 
+  private myLocationMarker: L.Marker | null = null;
+
   locateMe(): void {
     if (!navigator.geolocation) {
       this.myLocationError.set(true);
@@ -636,7 +681,27 @@ export class PlotMapComponent implements AfterViewInit {
       (position) =>
         this.zone.run(() => {
           this.myLocationError.set(false);
-          this.map?.setView([position.coords.latitude, position.coords.longitude], 17);
+          if (!this.map) return;
+          const { latitude, longitude } = position.coords;
+          if (this.insideSociety(latitude, longitude)) {
+            this.outsideSociety.set(false);
+            this.map.setView([latitude, longitude], 17);
+            const icon = L.divIcon({
+              className: 'my-location-dot',
+              html: '<span class="my-location-dot-inner"></span>',
+              iconSize: [16, 16],
+              iconAnchor: [8, 8],
+            });
+            if (this.myLocationMarker) {
+              this.myLocationMarker.setLatLng([latitude, longitude]);
+            } else {
+              this.myLocationMarker = L.marker([latitude, longitude], { icon }).addTo(this.map);
+            }
+          } else {
+            // Member is away from the society — show the society instead.
+            this.outsideSociety.set(true);
+            this.map.fitBounds(this.societyBounds());
+          }
         }),
       () => this.zone.run(() => this.myLocationError.set(true)),
     );

@@ -32,6 +32,9 @@
     @if (myLocationError()) {
       <p class="locate-error" role="alert">{{ 'member.plotMap.locationError' | translate }}</p>
     }
+    @if (outsideSociety()) {
+      <p class="locate-error" role="alert">{{ 'member.plotMap.outsideSociety' | translate }}</p>
+    }
   </div>
 
   <div class="disclaimer-banner" role="note">
