@@ -180,7 +180,9 @@ class _OrgHeader extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.12),
                   border: Border.all(color: AppColors.amber200, width: 2),
                 ),
-                child: const Icon(Icons.groups_rounded, color: Colors.white, size: 28),
+                child: ClipOval(
+                  child: Image.asset('assets/images/logo.jpeg', fit: BoxFit.cover),
+                ),
               ),
             ),
             const SizedBox(width: 12),

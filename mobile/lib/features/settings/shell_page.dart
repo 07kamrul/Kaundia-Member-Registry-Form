@@ -357,7 +357,15 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
     final themeMode = context.select<SettingsBloc, String>((b) => b.state.themeMode);
     return AppBar(
       automaticallyImplyLeading: showMenu,
-      title: Text(loc.brandOrgName, overflow: TextOverflow.ellipsis),
+      title: Row(
+        children: [
+          ClipOval(
+            child: Image.asset('assets/images/logo.jpeg', width: 32, height: 32),
+          ),
+          const SizedBox(width: 10),
+          Expanded(child: Text(loc.brandOrgName, overflow: TextOverflow.ellipsis)),
+        ],
+      ),
       actions: [
         // Language toggle beside the theme toggle, mirroring the web app bar.
         IconButton(
