@@ -84,10 +84,12 @@ GoRouter buildRouter() {
                 path: 'draw',
                 builder: (_, s) {
                   // An own boundary to edit (PUT) can be passed as `extra`.
+                  // A property id to preselect (new boundary) can be passed too.
                   final extra = s.extra;
-                  final editing =
-                      extra is PlotBoundary ? extra : null;
-                  return BoundaryEditorPage(editing: editing);
+                  return BoundaryEditorPage(
+                    editing: extra is PlotBoundary ? extra : null,
+                    initialPropertyId: extra is String ? extra : null,
+                  );
                 },
               ),
             ],

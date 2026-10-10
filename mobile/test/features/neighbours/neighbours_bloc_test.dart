@@ -15,7 +15,9 @@ void main() {
   late _MockRepo repo;
   NeighboursBloc build() => NeighboursBloc(getNeighbours: GetNeighbours(repo));
 
-  final full = directory([ownGroup('12', same: [rahim], near: [karim])]);
+  final full = directory([
+    ownGroup('12', same: [rahim], near: [karim])
+  ]);
   final multi = directory([
     ownGroup('12', dagNumber: null),
     ownGroup('13', near: [karim]),
@@ -28,7 +30,8 @@ void main() {
           .thenAnswer((_) async => d);
 
   void fail(ApiException e) =>
-      when(() => repo.getNeighbours(dagType: any(named: 'dagType'))).thenThrow(e);
+      when(() => repo.getNeighbours(dagType: any(named: 'dagType')))
+          .thenThrow(e);
 
   blocTest<NeighboursBloc, NeighboursState>(
     'load success emits [loading, loaded] with server dag type + selection',
@@ -75,18 +78,32 @@ void main() {
   );
 
   for (final (name, error, kind) in [
-    ('network', const ApiException(type: ApiExceptionType.network),
-        NeighboursFailureKind.network),
-    ('rate limited', const ApiException(
-            type: ApiExceptionType.server, statusCode: 429,
-            errorCode: neighbourRateLimitedCode),
-        NeighboursFailureKind.rateLimited),
-    ('approved only', const ApiException(
-            type: ApiExceptionType.server, statusCode: 403,
-            errorCode: neighbourApprovedOnlyCode),
-        NeighboursFailureKind.approvedOnly),
-    ('server', const ApiException(type: ApiExceptionType.server, statusCode: 500),
-        NeighboursFailureKind.other),
+    (
+      'network',
+      const ApiException(type: ApiExceptionType.network),
+      NeighboursFailureKind.network
+    ),
+    (
+      'rate limited',
+      const ApiException(
+          type: ApiExceptionType.server,
+          statusCode: 429,
+          errorCode: neighbourRateLimitedCode),
+      NeighboursFailureKind.rateLimited
+    ),
+    (
+      'approved only',
+      const ApiException(
+          type: ApiExceptionType.server,
+          statusCode: 403,
+          errorCode: neighbourApprovedOnlyCode),
+      NeighboursFailureKind.approvedOnly
+    ),
+    (
+      'server',
+      const ApiException(type: ApiExceptionType.server, statusCode: 500),
+      NeighboursFailureKind.other
+    ),
   ]) {
     blocTest<NeighboursBloc, NeighboursState>(
       '$name error -> failure($kind)',
@@ -102,7 +119,9 @@ void main() {
 
   blocTest<NeighboursBloc, NeighboursState>(
     'DagTypeChanged re-requests with that type',
-    setUp: () => answer(directory([ownGroup('12', near: [karim])], type: DagType.cs)),
+    setUp: () => answer(directory([
+      ownGroup('12', near: [karim])
+    ], type: DagType.cs)),
     build: build,
     seed: () => NeighboursState(
       status: NeighboursStatus.loaded,
@@ -115,12 +134,14 @@ void main() {
       isA<NeighboursState>()
           .having((s) => s.dagType, 'dagType', DagType.cs)
           .having((s) => s.status, 'status', NeighboursStatus.loaded),
-      isA<NeighboursState>().having((s) => s.status, 's', NeighboursStatus.loading),
+      isA<NeighboursState>()
+          .having((s) => s.status, 's', NeighboursStatus.loading),
       isA<NeighboursState>()
           .having((s) => s.status, 'status', NeighboursStatus.loaded)
           .having((s) => s.directory?.dagType, 'type', DagType.cs),
     ],
-    verify: (_) => verify(() => repo.getNeighbours(dagType: DagType.cs)).called(1),
+    verify: (_) =>
+        verify(() => repo.getNeighbours(dagType: DagType.cs)).called(1),
   );
 
   blocTest<NeighboursBloc, NeighboursState>(
@@ -167,6 +188,7 @@ void main() {
           .having((s) => s.status, 'status', NeighboursStatus.loaded)
           .having((s) => s.failureKind, 'failure', isNull),
     ],
-    verify: (_) => verify(() => repo.getNeighbours(dagType: DagType.cs)).called(1),
+    verify: (_) =>
+        verify(() => repo.getNeighbours(dagType: DagType.cs)).called(1),
   );
 }

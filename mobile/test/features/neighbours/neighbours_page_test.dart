@@ -28,7 +28,8 @@ class _FakeLauncher implements ExternalLinkLauncher {
   }
 }
 
-Widget _harness(NeighbourDirectory d, ExternalLinkLauncher launcher) => MaterialApp(
+Widget _harness(NeighbourDirectory d, ExternalLinkLauncher launcher) =>
+    MaterialApp(
       locale: const Locale('en'),
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -38,14 +39,16 @@ Widget _harness(NeighbourDirectory d, ExternalLinkLauncher launcher) => Material
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       home: NeighboursPage(
-        createBloc: () => NeighboursBloc(getNeighbours: GetNeighbours(_FakeRepo(d))),
+        createBloc: () =>
+            NeighboursBloc(getNeighbours: GetNeighbours(_FakeRepo(d))),
         launcher: launcher,
       ),
     );
 
 void main() {
   setUp(() {
-    final view = TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+    final view =
+        TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
     view.physicalSize = const Size(400, 1600);
     view.devicePixelRatio = 1;
   });
@@ -55,9 +58,12 @@ void main() {
       ..resetDevicePixelRatio();
   });
 
-  final data = directory([ownGroup('12', same: [rahim], near: [karim])]);
+  final data = directory([
+    ownGroup('12', same: [rahim], near: [karim])
+  ]);
 
-  testWidgets('renders same-dag owner first with labels; hidden contact has no buttons',
+  testWidgets(
+      'renders same-dag owner first with labels; hidden contact has no buttons',
       (tester) async {
     await tester.pumpWidget(_harness(data, _FakeLauncher()));
     await tester.pumpAndSettle();
@@ -68,7 +74,8 @@ void main() {
     expect(find.text('On your dag'), findsOneWidget);
     expect(find.text('Adjacent dag'), findsOneWidget);
     expect(find.text('Number kept private'), findsOneWidget);
-    expect(find.text('Call'), findsOneWidget, reason: 'only the visible contact');
+    expect(find.text('Call'), findsOneWidget,
+        reason: 'only the visible contact');
     expect(find.text('WhatsApp'), findsOneWidget);
     expect(find.textContaining('Your dag: 830'), findsWidgets);
   });
@@ -91,8 +98,10 @@ void main() {
   });
 
   testWidgets('empty state text when no owners', (tester) async {
-    await tester.pumpWidget(_harness(directory([ownGroup('12')]), _FakeLauncher()));
+    await tester
+        .pumpWidget(_harness(directory([ownGroup('12')]), _FakeLauncher()));
     await tester.pumpAndSettle();
-    expect(find.text('No registered members were found around your dag'), findsOneWidget);
+    expect(find.text('No registered members were found around your dag'),
+        findsOneWidget);
   });
 }

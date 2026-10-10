@@ -43,8 +43,8 @@ void main() {
 
   test('PATCH body carries the boolean', () async {
     final api = _MockApiClient();
-    when(() => api.patch('/member/profile', any()))
-        .thenAnswer((_) async => _profile({'show_in_neighbour_directory': false}));
+    when(() => api.patch('/member/profile', any())).thenAnswer(
+        (_) async => _profile({'show_in_neighbour_directory': false}));
     final updated = await MemberRepository(apiClient: api).updateProfile(
         const MemberProfileUpdate(showInNeighbourDirectory: false));
     final body = verify(() => api.patch('/member/profile', captureAny()))

@@ -70,6 +70,8 @@ class PlotBoundary extends Equatable {
     this.areaShotangsho,
     this.currentVersion,
     this.reviewNote,
+    this.hasPending = false,
+    this.liveStatus,
     this.warnings = const [],
   });
 
@@ -89,6 +91,13 @@ class PlotBoundary extends Equatable {
   final double? areaShotangsho;
   final int? currentVersion;
   final String? reviewNote;
+
+  /// A submission of this boundary is awaiting review (it can be withdrawn,
+  /// and saving an edit replaces it).
+  final bool hasPending;
+
+  /// Review status of the version everyone sees; null until first approval.
+  final BoundaryStatus? liveStatus;
   final List<String> warnings;
 
   @override
@@ -105,6 +114,8 @@ class PlotBoundary extends Equatable {
         areaShotangsho,
         currentVersion,
         reviewNote,
+        hasPending,
+        liveStatus,
         warnings,
       ];
 }

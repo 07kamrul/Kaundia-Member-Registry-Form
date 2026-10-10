@@ -62,12 +62,12 @@ void main() {
     test('sends bbox query and maps features', () async {
       when(() => api.getUri('/member/plot-map', query: any(named: 'query')))
           .thenAnswer((_) async => _plotMapPayload);
-      final features = await repo.getPlotMap(SocietyBbox.parse(
-          '90.30,23.70,90.50,23.90'));
+      final features =
+          await repo.getPlotMap(SocietyBbox.parse('90.30,23.70,90.50,23.90'));
       expect(features, hasLength(1));
       expect(features.single.status, BoundaryStatus.approved);
-      final q = verify(() => api.getUri('/member/plot-map',
-              query: captureAny(named: 'query')))
+      final q = verify(() =>
+              api.getUri('/member/plot-map', query: captureAny(named: 'query')))
           .captured
           .single as Map<String, dynamic>;
       expect(q['bbox'], '90.3,23.7,90.5,23.9');
@@ -100,13 +100,11 @@ void main() {
                   ],
                 },
               });
-      final b = await repo.createBoundary(
-          propertyId: 'p2',
-          points: const [
-            LatLng(23.81, 90.41),
-            LatLng(23.82, 90.42),
-            LatLng(23.83, 90.43),
-          ]);
+      final b = await repo.createBoundary(propertyId: 'p2', points: const [
+        LatLng(23.81, 90.41),
+        LatLng(23.82, 90.42),
+        LatLng(23.83, 90.43),
+      ]);
       expect(b.status, BoundaryStatus.pendingReview);
       final body =
           verify(() => api.post('/member/plot-boundaries', captureAny()))
@@ -125,33 +123,30 @@ void main() {
                 'status': 'pending_review',
                 'geometry': {'coordinates': []},
               });
-      await repo.updateBoundary(
-          id: 'b2',
-          points: const [
-            LatLng(23.81, 90.41),
-            LatLng(23.82, 90.42),
-            LatLng(23.83, 90.83),
-          ]);
+      await repo.updateBoundary(id: 'b2', points: const [
+        LatLng(23.81, 90.41),
+        LatLng(23.82, 90.42),
+        LatLng(23.83, 90.83),
+      ]);
       verify(() => api.put('/member/plot-boundaries/b2', any())).called(1);
     });
   });
 
   group('getMyProperties', () {
     test('extracts the `own` plots from /member/neighbours', () async {
-      when(() => api.getUri('/member/neighbours'))
-          .thenAnswer((_) async => {
-                'properties': [
-                  {
-                    'own': {
-                      'property_id': 'p1',
-                      'rs_dag': '120',
-                      'cs_dag': '55',
-                      'land_quantity': '10',
-                    }
-                  },
-                  {'own': null},
-                ],
-              });
+      when(() => api.getUri('/member/neighbours')).thenAnswer((_) async => {
+            'properties': [
+              {
+                'own': {
+                  'property_id': 'p1',
+                  'rs_dag': '120',
+                  'cs_dag': '55',
+                  'land_quantity': '10',
+                }
+              },
+              {'own': null},
+            ],
+          });
       final props = await repo.getMyProperties();
       expect(props, hasLength(1));
       expect(props.single.propertyId, 'p1');
@@ -196,9 +191,8 @@ void main() {
 
     test('network failure maps to network', () async {
       final options = RequestOptions(path: '/member/plot-map');
-      final e = ApiException.fromDio(
-          DioException.connectionError(
-              requestOptions: options, reason: 'offline'));
+      final e = ApiException.fromDio(DioException.connectionError(
+          requestOptions: options, reason: 'offline'));
       expect(plotBoundaryFailureKindOf(e), PlotBoundaryFailureKind.network);
     });
   });

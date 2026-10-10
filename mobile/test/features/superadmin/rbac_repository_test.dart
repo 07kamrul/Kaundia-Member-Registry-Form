@@ -16,14 +16,15 @@ void main() {
   });
 
   test('listPermissions GETs /admin/rbac/permissions and maps rows', () async {
-    when(() => client.getUri('/admin/rbac/permissions')).thenAnswer((_) async => [
-          {
-            'key': 'manage_roles',
-            'resource': 'roles',
-            'action': 'manage',
-            'description': 'Manage roles',
-          },
-        ]);
+    when(() => client.getUri('/admin/rbac/permissions'))
+        .thenAnswer((_) async => [
+              {
+                'key': 'manage_roles',
+                'resource': 'roles',
+                'action': 'manage',
+                'description': 'Manage roles',
+              },
+            ]);
     final result = await repo.listPermissions();
     expect(result, hasLength(1));
     expect(result.first.key, 'manage_roles');
@@ -45,8 +46,12 @@ void main() {
     expect(result.single.permissionKeys, ['view_audit_log']);
   });
 
-  test('updateRolePermissions PUTs snake_case permission_keys payload', () async {
-    when(() => client.put('/admin/rbac/roles/2/permissions', any(that: equals({
+  test('updateRolePermissions PUTs snake_case permission_keys payload',
+      () async {
+    when(() => client.put(
+        '/admin/rbac/roles/2/permissions',
+        any(
+            that: equals({
           'permission_keys': ['a', 'b'],
         })))).thenAnswer((_) async => {
           'id': 2,
@@ -85,14 +90,17 @@ void main() {
   });
 
   test('setUserOverrides PUTs the snake_case override list', () async {
-    when(() => client.put('/admin/rbac/users/7/overrides', any(that: equals([
+    when(() => client.put(
+        '/admin/rbac/users/7/overrides',
+        any(
+            that: equals([
           {
             'permission_key': 'manage_users',
             'granted': false,
           },
         ])))).thenAnswer((_) async => [
-              {'permission_key': 'manage_users', 'granted': false},
-            ]);
+          {'permission_key': 'manage_users', 'granted': false},
+        ]);
     final result = await repo.setUserOverrides(
       '7',
       const [PermissionOverride(permissionKey: 'manage_users', granted: false)],
@@ -101,7 +109,10 @@ void main() {
   });
 
   test('createUser POSTs snake_case body with null role_id', () async {
-    when(() => client.post('/admin/rbac/users', any(that: equals({
+    when(() => client.post(
+        '/admin/rbac/users',
+        any(
+            that: equals({
           'name': 'New Admin',
           'email': 'new@example.com',
           'password': 'secret',
@@ -125,7 +136,10 @@ void main() {
   });
 
   test('updateUserRole PATCHes role and numeric role_id', () async {
-    when(() => client.patch('/admin/rbac/users/7/role', any(that: equals({
+    when(() => client.patch(
+        '/admin/rbac/users/7/role',
+        any(
+            that: equals({
           'role': 'super_admin',
           'role_id': null,
         })))).thenAnswer((_) async => {

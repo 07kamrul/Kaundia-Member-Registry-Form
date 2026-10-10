@@ -64,10 +64,18 @@ void main() {
           'my_share_quantity': '0.5',
           'ownership': 'যৌথ',
           'co_owners': [
-            {'id': 11, 'owner_name': 'মালিক ১', 'owner_phone': '+8801700000000'},
+            {
+              'id': 11,
+              'owner_name': 'মালিক ১',
+              'owner_phone': '+8801700000000'
+            },
           ],
           'applicable_docs': [
-            {'id': 21, 'doc_type': 'khatian', 'file_path': '/uploads/docs/k.jpg'},
+            {
+              'id': 21,
+              'doc_type': 'khatian',
+              'file_path': '/uploads/docs/k.jpg'
+            },
           ],
         },
       ],
@@ -288,18 +296,32 @@ void main() {
   group('finance mappers', () {
     test('summary maps nested totals, breakdowns and series', () {
       final s = financeSummaryFromApi({
-        'period': {'type': 'custom', 'date_from': '2026-01-01', 'date_to': '2026-01-31'},
+        'period': {
+          'type': 'custom',
+          'date_from': '2026-01-01',
+          'date_to': '2026-01-31'
+        },
         'totals': {'income': '1000', 'expense': '400.25', 'net': '599.75'},
         'balance': '9999',
         'previous': {'income': '800', 'expense': '300', 'net': '500'},
         'income_by_category': [
-          {'category_id': 1, 'category': 'চাঁদা', 'amount': '1000', 'share': '100'},
+          {
+            'category_id': 1,
+            'category': 'চাঁদা',
+            'amount': '1000',
+            'share': '100'
+          },
         ],
         'expense_by_category': const [],
         'previous_income_by_category': const [],
         'previous_expense_by_category': const [],
         'series': [
-          {'label': '2026-01', 'income': '1000', 'expense': '400.25', 'net': '599.75'},
+          {
+            'label': '2026-01',
+            'income': '1000',
+            'expense': '400.25',
+            'net': '599.75'
+          },
         ],
         'granularity': 'month',
         'transaction_count': 3,
@@ -356,7 +378,13 @@ void main() {
     test('roadmapFromApi maps timeframes and items', () {
       final r = roadmapFromApi({
         'last_updated': '2026-01-01',
-        'totals': {'total': 2, 'done': 1, 'in_progress': 1, 'planned': 0, 'percent': 50},
+        'totals': {
+          'total': 2,
+          'done': 1,
+          'in_progress': 1,
+          'planned': 0,
+          'percent': 50
+        },
         'timeframes': [
           {
             'id': 1,
@@ -544,14 +572,19 @@ void main() {
         nominees: [],
       );
       // Core change (fullName) -> re-queue.
-      expect(const MemberProfileUpdate(fullName: 'X').touchesCoreFields(current), isTrue);
+      expect(
+          const MemberProfileUpdate(fullName: 'X').touchesCoreFields(current),
+          isTrue);
       // Contact-only change (mobile) -> no re-queue.
       expect(
-        const MemberProfileUpdate(mobile: '+8801800000000').touchesCoreFields(current),
+        const MemberProfileUpdate(mobile: '+8801800000000')
+            .touchesCoreFields(current),
         isFalse,
       );
       // Identical core values -> no re-queue.
-      expect(const MemberProfileUpdate(fullName: 'A').touchesCoreFields(current), isFalse);
+      expect(
+          const MemberProfileUpdate(fullName: 'A').touchesCoreFields(current),
+          isFalse);
     });
   });
 

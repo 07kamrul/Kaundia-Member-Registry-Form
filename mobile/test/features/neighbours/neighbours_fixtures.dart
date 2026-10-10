@@ -79,8 +79,10 @@ const karim = NeighbourOwner(
   position: NeighbourPosition.adjacent,
 );
 
-NeighbourGroup ownGroup(String id, {List<NeighbourOwner> same = const [],
-    List<NeighbourOwner> near = const [], int? dagNumber = 830}) =>
+NeighbourGroup ownGroup(String id,
+        {List<NeighbourOwner> same = const [],
+        List<NeighbourOwner> near = const [],
+        int? dagNumber = 830}) =>
     NeighbourGroup(
       own: OwnPlot(
         propertyId: id,

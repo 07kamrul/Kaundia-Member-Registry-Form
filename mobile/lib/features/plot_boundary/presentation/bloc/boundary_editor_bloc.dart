@@ -7,6 +7,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../data/plot_boundary_repository_impl.dart';
 import '../../domain/boundary_validation.dart';
+import '../../domain/geo.dart';
 import '../../domain/plot_boundary_entities.dart';
 import '../../domain/plot_boundary_failure.dart';
 import '../../domain/plot_boundary_repository.dart';
@@ -16,15 +17,17 @@ part 'boundary_editor_state.dart';
 
 enum EditorStatus { loading, ready, saving, saved, failure }
 
-class BoundaryEditorBloc extends Bloc<BoundaryEditorEvent, BoundaryEditorState> {
+class BoundaryEditorBloc
+    extends Bloc<BoundaryEditorEvent, BoundaryEditorState> {
   BoundaryEditorBloc({
     GetMyProperties? getMyProperties,
     GetMyBoundaries? getMyBoundaries,
     SaveBoundary? saveBoundary,
+    SocietyBbox? society,
   })  : _injectedProperties = getMyProperties,
         _injectedBoundaries = getMyBoundaries,
         _injectedSave = saveBoundary,
-        super(const BoundaryEditorState()) {
+        super(BoundaryEditorState(society: society)) {
     on<EditorStarted>(_onStarted);
     on<EditorVertexAdded>(_onVertexAdded);
     on<EditorVertexMoved>(_onVertexMoved);
@@ -58,8 +61,7 @@ class BoundaryEditorBloc extends Bloc<BoundaryEditorEvent, BoundaryEditorState> 
           await Future.wait([_getMyProperties(), _getMyBoundaries()]);
       final properties = results[0] as List<OwnProperty>;
       final boundaries = results[1] as List<PlotBoundary>;
-      final withBoundary =
-          boundaries.map((b) => b.propertyId).toSet();
+      final withBoundary = boundaries.map((b) => b.propertyId).toSet();
       final available = [
         for (final p in properties)
           if (!withBoundary.contains(p.propertyId)) p,
@@ -67,6 +69,8 @@ class BoundaryEditorBloc extends Bloc<BoundaryEditorEvent, BoundaryEditorState> 
       String? selected;
       if (event.editing != null) {
         selected = event.editing!.propertyId;
+      } else if (available.any((p) => p.propertyId == event.propertyId)) {
+        selected = event.propertyId;
       } else if (available.isNotEmpty) {
         selected = available.first.propertyId;
       }
@@ -104,6 +108,7 @@ class BoundaryEditorBloc extends Bloc<BoundaryEditorEvent, BoundaryEditorState> 
       editingId: b.id,
       selectedPropertyId: b.propertyId,
       clearVertices: false,
+      editingHasPending: b.hasPending,
     ));
   }
 
@@ -126,7 +131,8 @@ class BoundaryEditorBloc extends Bloc<BoundaryEditorEvent, BoundaryEditorState> 
     if (event.index < 0 || event.index >= state.vertices.length) return;
     final next = [...state.vertices];
     next[event.index] = event.point;
-    emit(state.copyWith(vertices: next, undoStack: [...state.undoStack, state.vertices]));
+    emit(state.copyWith(
+        vertices: next, undoStack: [...state.undoStack, state.vertices]));
   }
 
   void _onVertexRemoved(
@@ -135,7 +141,8 @@ class BoundaryEditorBloc extends Bloc<BoundaryEditorEvent, BoundaryEditorState> 
   ) {
     if (event.index < 0 || event.index >= state.vertices.length) return;
     final next = [...state.vertices]..removeAt(event.index);
-    emit(state.copyWith(vertices: next, undoStack: [...state.undoStack, state.vertices]));
+    emit(state.copyWith(
+        vertices: next, undoStack: [...state.undoStack, state.vertices]));
   }
 
   void _onUndo(

@@ -9,10 +9,13 @@ sealed class BoundaryEditorEvent extends Equatable {
 /// Loads the property picker inputs; optionally starts editing a saved
 /// boundary (its vertices are preloaded).
 final class EditorStarted extends BoundaryEditorEvent {
-  const EditorStarted({this.editing});
+  const EditorStarted({this.editing, this.propertyId});
   final PlotBoundary? editing;
+
+  /// Property to preselect when drawing a new boundary (from the draw panel).
+  final String? propertyId;
   @override
-  List<Object?> get props => [editing];
+  List<Object?> get props => [editing, propertyId];
 }
 
 /// Preloads the vertices of an existing boundary for editing.

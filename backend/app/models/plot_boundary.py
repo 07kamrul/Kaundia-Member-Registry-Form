@@ -17,7 +17,7 @@ import enum
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, func
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -112,6 +112,9 @@ class PlotBoundaryVersion(Base):
     written, once, at decision time; rows are never removed."""
 
     __tablename__ = "plot_boundary_versions"
+    __table_args__ = (
+        UniqueConstraint("boundary_id", "version", name="uq_plot_boundary_versions_boundary_version"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     boundary_id: Mapped[int] = mapped_column(

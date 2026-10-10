@@ -4,7 +4,8 @@ import 'package:kaundia_app/features/registration/domain/submission_error_mapper
 
 void main() {
   test('network failure maps to networkError with no step', () {
-    final mapped = mapSubmissionError(const ApiException(type: ApiExceptionType.network));
+    final mapped =
+        mapSubmissionError(const ApiException(type: ApiExceptionType.network));
     expect(mapped.items.single.kind, SubmitErrorKind.network);
     expect(mapped.step, isNull);
   });
@@ -23,7 +24,8 @@ void main() {
         type: ApiExceptionType.server,
         statusCode: status,
       ));
-      expect(mapped.items.single.kind, SubmitErrorKind.server, reason: '$status');
+      expect(mapped.items.single.kind, SubmitErrorKind.server,
+          reason: '$status');
     }
   });
 

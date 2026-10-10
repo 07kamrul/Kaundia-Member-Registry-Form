@@ -501,18 +501,39 @@
     </div>
   }
 
-  <!-- Edit polygon modal (goes live immediately) -->
+  <!-- Edit polygon modal (draw on the map; the JSON mirrors the drawing) -->
   @if (editOpen()) {
-    <div class="modal-backdrop" (click)="editOpen.set(false)">
-      <div class="modal-card" role="dialog" (click)="$event.stopPropagation()">
+    <div class="modal-backdrop" (click)="closeEdit()">
+      <div class="modal-card modal-wide" role="dialog" (click)="$event.stopPropagation()">
         <h3 class="modal-title">{{ 'admin.plotBoundaries.actions.edit' | translate }}</h3>
-        <label class="modal-label" for="edit-geometry">{{ 'admin.plotBoundaries.add.geometryLabel' | translate }}</label>
+        <div class="edit-shape-map" aria-hidden="true"></div>
+        <div class="edit-map-toolbar">
+          @if (editDrawing()) {
+            <span class="edit-map-hint">
+              {{ 'admin.plotBoundaries.edit.drawingHint' | translate }}
+            </span>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="cancelEditDraw()">
+              {{ 'admin.plotBoundaries.edit.cancelDraw' | translate }}
+            </button>
+          } @else {
+            <span class="edit-map-hint">
+              {{ 'admin.plotBoundaries.edit.editHint' | translate }}
+            </span>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="startEditDraw()">
+              <app-icon name="edit" [size]="14" />
+              {{ 'admin.plotBoundaries.edit.drawNew' | translate }}
+            </button>
+          }
+        </div>
+        <label class="modal-label" for="edit-geometry">
+          {{ 'admin.plotBoundaries.edit.geometryAuto' | translate }}
+        </label>
         <textarea
           id="edit-geometry"
           class="modal-textarea"
-          rows="8"
+          rows="7"
+          readonly
           [value]="editGeometry()"
-          (input)="editGeometry.set($any($event.target).value)"
         ></textarea>
         @if (editErrorKey(); as key) {
           <div class="error-box" role="alert">
@@ -538,7 +559,7 @@
           </div>
         }
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary btn-sm" (click)="editOpen.set(false)">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="closeEdit()">
             {{ 'common.cancel' | translate }}
           </button>
           <button

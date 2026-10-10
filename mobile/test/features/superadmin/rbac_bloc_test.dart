@@ -10,9 +10,21 @@ import 'package:mocktail/mocktail.dart';
 class _MockApiClient extends Mock implements ApiClient {}
 
 const _permissions = [
-  PermissionDef(key: 'members_view', resource: 'members', action: 'view', description: 'View members'),
-  PermissionDef(key: 'members_edit', resource: 'members', action: 'edit', description: 'Edit members'),
-  PermissionDef(key: 'roles_view', resource: 'roles', action: 'view', description: 'View roles'),
+  PermissionDef(
+      key: 'members_view',
+      resource: 'members',
+      action: 'view',
+      description: 'View members'),
+  PermissionDef(
+      key: 'members_edit',
+      resource: 'members',
+      action: 'edit',
+      description: 'Edit members'),
+  PermissionDef(
+      key: 'roles_view',
+      resource: 'roles',
+      action: 'view',
+      description: 'View roles'),
 ];
 
 RoleDef _role(String id, String name, List<String> keys) =>
@@ -34,8 +46,8 @@ void _stubBase(
   List<AdminUser> users = const [],
   List<Map<String, dynamic>> overrides = const [],
 }) {
-  when(() => client.getUri('/admin/rbac/permissions'))
-      .thenAnswer((_) async => [for (final p in _permissions) _permissionJson(p)]);
+  when(() => client.getUri('/admin/rbac/permissions')).thenAnswer(
+      (_) async => [for (final p in _permissions) _permissionJson(p)]);
   when(() => client.getUri('/admin/rbac/roles')).thenAnswer((_) async => [
         _roleJson(_roleSuperAdmin),
         _roleJson(_roleAdministrator),
@@ -88,10 +100,14 @@ void main() {
       'loads data, toggles a draft permission and saves via PUT',
       setUp: () {
         _stubBase(client);
-        when(() => client.put('/admin/rbac/roles/2/permissions', any(that: equals({
-              'permission_keys': ['members_view', 'roles_view'],
-            })))).thenAnswer(
-            (_) async => _roleJson(_role('2', 'administrator', ['members_view', 'roles_view'])));
+        when(() => client.put(
+                '/admin/rbac/roles/2/permissions',
+                any(
+                    that: equals({
+                  'permission_keys': ['members_view', 'roles_view'],
+                }))))
+            .thenAnswer((_) async => _roleJson(
+                _role('2', 'administrator', ['members_view', 'roles_view'])));
       },
       build: () => RbacBloc(RbacRepository(client)),
       act: (bloc) async {
@@ -109,7 +125,8 @@ void main() {
             .having((s) => s.selectedRoleId, 'selectedRoleId', '2')
             .having((s) => s.draftKeys, 'draftKeys', {'members_view'}),
         // toggle
-        isA<RbacState>().having((s) => s.draftKeys, 'draftKeys', {'members_view', 'roles_view'}),
+        isA<RbacState>().having(
+            (s) => s.draftKeys, 'draftKeys', {'members_view', 'roles_view'}),
         // saving
         isA<RbacState>().having((s) => s.savingMatrix, 'savingMatrix', true),
         // saved: roles list updated, saving flag cleared
@@ -122,7 +139,10 @@ void main() {
                 ['members_view', 'roles_view']),
       ],
       verify: (_) {
-        verify(() => client.put('/admin/rbac/roles/2/permissions', any(that: equals({
+        verify(() => client.put(
+            '/admin/rbac/roles/2/permissions',
+            any(
+                that: equals({
               'permission_keys': ['members_view', 'roles_view'],
             })))).called(1);
       },
@@ -170,7 +190,8 @@ void main() {
       expect: () => [
         ..._startStates,
         isA<RbacState>().having((s) => s.selectedRoleId, 'selectedRoleId', '2'),
-        isA<RbacState>().having((s) => s.draftKeys, 'draftKeys', {'members_view', 'roles_view'}),
+        isA<RbacState>().having(
+            (s) => s.draftKeys, 'draftKeys', {'members_view', 'roles_view'}),
         isA<RbacState>().having((s) => s.savingMatrix, 'savingMatrix', true),
         isA<RbacState>()
             .having((s) => s.savingMatrix, 'savingMatrix', false)
@@ -193,14 +214,16 @@ void main() {
         isA<RbacState>().having((s) => s.status, 'status', RbacStatus.loading),
         isA<RbacState>()
             .having((s) => s.status, 'status', RbacStatus.failure)
-            .having((s) => s.errorKind, 'errorKind', RbacErrorKind.loadPermissions),
+            .having(
+                (s) => s.errorKind, 'errorKind', RbacErrorKind.loadPermissions),
       ],
     );
 
     blocTest<RbacBloc, RbacState>(
       'role load failure sets failure status with loadRoles kind',
       setUp: () {
-        when(() => client.getUri('/admin/rbac/permissions')).thenAnswer((_) async => const []);
+        when(() => client.getUri('/admin/rbac/permissions'))
+            .thenAnswer((_) async => const []);
         when(() => client.getUri('/admin/rbac/roles'))
             .thenThrow(const ApiException(type: ApiExceptionType.server));
       },
@@ -217,8 +240,10 @@ void main() {
     blocTest<RbacBloc, RbacState>(
       'user load failure keeps the page usable and flags loadUsers',
       setUp: () {
-        when(() => client.getUri('/admin/rbac/permissions')).thenAnswer((_) async => const []);
-        when(() => client.getUri('/admin/rbac/roles')).thenAnswer((_) async => const []);
+        when(() => client.getUri('/admin/rbac/permissions'))
+            .thenAnswer((_) async => const []);
+        when(() => client.getUri('/admin/rbac/roles'))
+            .thenAnswer((_) async => const []);
         when(() => client.getUri('/admin/rbac/users'))
             .thenThrow(const ApiException(type: ApiExceptionType.network));
       },
@@ -229,7 +254,8 @@ void main() {
         isA<RbacState>()
             .having((s) => s.status, 'status', RbacStatus.ready)
             .having((s) => s.hasUsers, 'hasUsers', false),
-        isA<RbacState>().having((s) => s.errorKind, 'errorKind', RbacErrorKind.loadUsers),
+        isA<RbacState>()
+            .having((s) => s.errorKind, 'errorKind', RbacErrorKind.loadUsers),
       ],
     );
   });
@@ -239,7 +265,10 @@ void main() {
       'assign role PATCHes and replaces the user in the list',
       setUp: () {
         _stubBase(client, users: [_user]);
-        when(() => client.patch('/admin/rbac/users/7/role', any(that: equals({
+        when(() => client.patch(
+            '/admin/rbac/users/7/role',
+            any(
+                that: equals({
               'role': 'super_admin',
               'role_id': null,
             })))).thenAnswer((_) async => _userJson(const AdminUser(
@@ -261,10 +290,14 @@ void main() {
       expect: () => [
         ..._startStates,
         // overrides loading + ready for the first user
-        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.loading),
-        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.ready),
-        isA<RbacState>().having((s) => s.roleAssignDraft, 'roleAssignDraft', 'super_admin'),
-        isA<RbacState>().having((s) => s.savingRoleAssign, 'savingRoleAssign', true),
+        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus',
+            OverridesStatus.loading),
+        isA<RbacState>().having(
+            (s) => s.overridesStatus, 'overridesStatus', OverridesStatus.ready),
+        isA<RbacState>()
+            .having((s) => s.roleAssignDraft, 'roleAssignDraft', 'super_admin'),
+        isA<RbacState>()
+            .having((s) => s.savingRoleAssign, 'savingRoleAssign', true),
         isA<RbacState>()
             .having((s) => s.savingRoleAssign, 'savingRoleAssign', false)
             .having((s) => s.users.single.role, 'updated role', 'super_admin'),
@@ -275,7 +308,10 @@ void main() {
       'create user appends to the list and reports the email',
       setUp: () {
         _stubBase(client, users: [_user]);
-        when(() => client.post('/admin/rbac/users', any(that: equals({
+        when(() => client.post(
+            '/admin/rbac/users',
+            any(
+                that: equals({
               'name': 'New Admin',
               'email': 'new@example.com',
               'password': 'secret',
@@ -303,12 +339,15 @@ void main() {
       },
       expect: () => [
         ..._startStates,
-        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.loading),
-        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.ready),
+        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus',
+            OverridesStatus.loading),
+        isA<RbacState>().having(
+            (s) => s.overridesStatus, 'overridesStatus', OverridesStatus.ready),
         isA<RbacState>().having((s) => s.creatingUser, 'creatingUser', true),
         isA<RbacState>()
             .having((s) => s.creatingUser, 'creatingUser', false)
-            .having((s) => s.createUserSuccess, 'createUserSuccess', 'new@example.com')
+            .having((s) => s.createUserSuccess, 'createUserSuccess',
+                'new@example.com')
             .having((s) => s.users.length, 'users.length', 2),
       ],
     );
@@ -337,22 +376,30 @@ void main() {
       },
       expect: () => [
         ..._startStates,
-        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.loading),
-        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.ready),
+        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus',
+            OverridesStatus.loading),
+        isA<RbacState>().having(
+            (s) => s.overridesStatus, 'overridesStatus', OverridesStatus.ready),
         isA<RbacState>().having((s) => s.creatingUser, 'creatingUser', true),
         isA<RbacState>()
             .having((s) => s.creatingUser, 'creatingUser', false)
-            .having((s) => s.createUserError, 'createUserError', 'Email already exists'),
+            .having((s) => s.createUserError, 'createUserError',
+                'Email already exists'),
       ],
     );
 
     blocTest<RbacBloc, RbacState>(
       'apply override replaces same-key entries and PUTs the full list',
       setUp: () {
-        _stubBase(client, users: [_user], overrides: [
+        _stubBase(client, users: [
+          _user
+        ], overrides: [
           {'permission_key': 'roles_view', 'granted': true},
         ]);
-        when(() => client.put('/admin/rbac/users/7/overrides', any(that: equals([
+        when(() => client.put(
+            '/admin/rbac/users/7/overrides',
+            any(
+                that: equals([
               {
                 'permission_key': 'roles_view',
                 'granted': false,
@@ -365,34 +412,46 @@ void main() {
       act: (bloc) async {
         bloc.add(const RbacStarted());
         await pumpEventQueue();
-        bloc.add(const RbacOverrideDraftChanged(permissionKey: 'roles_view', granted: false));
-        bloc.add(const RbacOverrideApplied(permissionKey: 'roles_view', granted: false));
+        bloc.add(const RbacOverrideDraftChanged(
+            permissionKey: 'roles_view', granted: false));
+        bloc.add(const RbacOverrideApplied(
+            permissionKey: 'roles_view', granted: false));
         await pumpEventQueue();
       },
       expect: () => [
         ..._startStates,
-        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.loading),
+        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus',
+            OverridesStatus.loading),
         isA<RbacState>()
-            .having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.ready)
-            .having((s) => s.overrides.single.permissionKey, 'override key', 'roles_view')
-            .having((s) => s.overrideDraftKey, 'overrideDraftKey', 'members_view'),
+            .having((s) => s.overridesStatus, 'overridesStatus',
+                OverridesStatus.ready)
+            .having((s) => s.overrides.single.permissionKey, 'override key',
+                'roles_view')
+            .having(
+                (s) => s.overrideDraftKey, 'overrideDraftKey', 'members_view'),
         isA<RbacState>()
             .having((s) => s.overrideDraftKey, 'overrideDraftKey', 'roles_view')
-            .having((s) => s.overrideDraftGranted, 'overrideDraftGranted', false),
-        isA<RbacState>().having((s) => s.savingOverrides, 'savingOverrides', true),
+            .having(
+                (s) => s.overrideDraftGranted, 'overrideDraftGranted', false),
+        isA<RbacState>()
+            .having((s) => s.savingOverrides, 'savingOverrides', true),
         isA<RbacState>()
             .having((s) => s.savingOverrides, 'savingOverrides', false)
-            .having((s) => s.overrides.single.granted, 'override granted', false),
+            .having(
+                (s) => s.overrides.single.granted, 'override granted', false),
       ],
     );
 
     blocTest<RbacBloc, RbacState>(
       'remove override deletes the entry via PUT',
       setUp: () {
-        _stubBase(client, users: [_user], overrides: [
+        _stubBase(client, users: [
+          _user
+        ], overrides: [
           {'permission_key': 'roles_view', 'granted': true},
         ]);
-        when(() => client.put('/admin/rbac/users/7/overrides', any(that: equals([]))))
+        when(() => client.put(
+                '/admin/rbac/users/7/overrides', any(that: equals([]))))
             .thenAnswer((_) async => []);
       },
       build: () => RbacBloc(RbacRepository(client)),
@@ -404,11 +463,15 @@ void main() {
       },
       expect: () => [
         ..._startStates,
-        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.loading),
+        isA<RbacState>().having((s) => s.overridesStatus, 'overridesStatus',
+            OverridesStatus.loading),
         isA<RbacState>()
-            .having((s) => s.overridesStatus, 'overridesStatus', OverridesStatus.ready)
-            .having((s) => s.overrides.single.granted, 'override granted', true),
-        isA<RbacState>().having((s) => s.savingOverrides, 'savingOverrides', true),
+            .having((s) => s.overridesStatus, 'overridesStatus',
+                OverridesStatus.ready)
+            .having(
+                (s) => s.overrides.single.granted, 'override granted', true),
+        isA<RbacState>()
+            .having((s) => s.savingOverrides, 'savingOverrides', true),
         isA<RbacState>()
             .having((s) => s.savingOverrides, 'savingOverrides', false)
             .having((s) => s.overrides, 'overrides', isEmpty),

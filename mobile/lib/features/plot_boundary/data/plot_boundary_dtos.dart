@@ -27,11 +27,19 @@ DateTime? _dateTime(dynamic v) {
   return DateTime.tryParse(s)?.toLocal();
 }
 
-List<Map<dynamic, dynamic>> _maps(dynamic v) =>
-    v is List ? [for (final e in v) if (e is Map) e] : const [];
+List<Map<dynamic, dynamic>> _maps(dynamic v) => v is List
+    ? [
+        for (final e in v)
+          if (e is Map) e
+      ]
+    : const [];
 
-List<String> _strings(dynamic v) =>
-    v is List ? [for (final e in v) if (e != null) e.toString()] : const [];
+List<String> _strings(dynamic v) => v is List
+    ? [
+        for (final e in v)
+          if (e != null) e.toString()
+      ]
+    : const [];
 
 /// `geometry` block of a GeoJSON polygon feature (or the full feature when
 /// `geometry` is absent — the mine endpoint returns `geometry` inline).
@@ -70,10 +78,8 @@ class MapFeatureDto {
         isMine: json['is_mine'] == true,
         rsDag: _str(json['rs_dag']),
         csDag: _str(json['cs_dag']),
-        geometry:
-            PolygonGeometryDto.fromJson(json['geometry'] is Map
-                ? json['geometry']
-                : json),
+        geometry: PolygonGeometryDto.fromJson(
+            json['geometry'] is Map ? json['geometry'] : json),
       );
 
   final String boundaryId;
@@ -98,7 +104,9 @@ class PlotMapResponseDto {
         disclaimerEn: _str(json['disclaimer_en']),
         disclaimerBn: _str(json['disclaimer_bn']),
         count: _int(json['count']) ?? 0,
-        features: [for (final m in _maps(json['features'])) MapFeatureDto.fromJson(m)],
+        features: [
+          for (final m in _maps(json['features'])) MapFeatureDto.fromJson(m)
+        ],
       );
 
   final String? disclaimerEn;
@@ -160,6 +168,8 @@ class MyBoundaryDto {
     this.areaShotangsho,
     this.currentVersion,
     this.reviewNote,
+    this.hasPending = false,
+    this.liveStatus,
     this.rsDag,
     this.csDag,
     this.landQuantity,
@@ -170,14 +180,15 @@ class MyBoundaryDto {
         id: _str(json['id']) ?? _str(json['boundary_id']) ?? '',
         propertyId: _str(json['property_id']) ?? '',
         status: _str(json['review_status'] ?? json['status']),
-        geometry: PolygonGeometryDto.fromJson(json['geometry'] is Map
-            ? json['geometry']
-            : json),
+        geometry: PolygonGeometryDto.fromJson(
+            json['geometry'] is Map ? json['geometry'] : json),
         isMine: true,
         areaSqm: _double(json['computed_area_sqm']),
         areaShotangsho: _double(json['computed_area_shotangsho']),
         currentVersion: _int(json['current_version']),
         reviewNote: _str(json['review_note']),
+        hasPending: json['has_pending'] == true,
+        liveStatus: _str(json['live_review_status']),
         rsDag: _str(json['rs_dag']),
         csDag: _str(json['cs_dag']),
         landQuantity: _str(json['land_quantity']),
@@ -186,6 +197,8 @@ class MyBoundaryDto {
 
   final String id;
   final String propertyId;
+  final bool hasPending;
+  final String? liveStatus;
   final String? status;
   final PolygonGeometryDto? geometry;
   final bool isMine;
@@ -218,9 +231,8 @@ class BoundaryVersionDto {
         version: _int(json['version']) ?? 0,
         status: _str(json['review_status'] ?? json['status']),
         createdAt: _dateTime(json['created_at']),
-        geometry: PolygonGeometryDto.fromJson(json['geometry'] is Map
-            ? json['geometry']
-            : json),
+        geometry: PolygonGeometryDto.fromJson(
+            json['geometry'] is Map ? json['geometry'] : json),
         areaSqm: _double(json['computed_area_sqm']),
         changeType: _str(json['change_type']),
         note: _str(json['note']),
@@ -259,8 +271,7 @@ class OwnPropertyDto {
     this.landQuantity,
   });
 
-  factory OwnPropertyDto.fromJson(Map<dynamic, dynamic> json) =>
-      OwnPropertyDto(
+  factory OwnPropertyDto.fromJson(Map<dynamic, dynamic> json) => OwnPropertyDto(
         propertyId: _str(json['property_id']) ?? '',
         rsDag: _str(json['rs_dag']),
         csDag: _str(json['cs_dag']),

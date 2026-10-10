@@ -42,7 +42,8 @@ void main() {
     });
 
     test('updateProfile sends snake_case sparse body', () async {
-      when(() => api.patch('/member/profile', any(that: isA<Map<String, Object?>>())))
+      when(() => api.patch(
+              '/member/profile', any(that: isA<Map<String, Object?>>())))
           .thenAnswer((_) async => {
                 'member_id': 1,
                 'status': 'pending',
@@ -54,11 +55,12 @@ void main() {
                 'properties': [],
                 'nominees': [],
               });
-      await repo.updateProfile(const MemberProfileUpdate(fullName: 'X', mobile: '+8801800000000'));
-      final captured =
-          verify(() => api.patch('/member/profile', captureAny(that: isA<Map<String, Object?>>())))
-              .captured
-              .single as Map<String, Object?>;
+      await repo.updateProfile(
+          const MemberProfileUpdate(fullName: 'X', mobile: '+8801800000000'));
+      final captured = verify(() => api.patch(
+              '/member/profile', captureAny(that: isA<Map<String, Object?>>())))
+          .captured
+          .single as Map<String, Object?>;
       expect(captured, {
         'full_name': 'X',
         'mobile': '+8801800000000',
@@ -78,9 +80,8 @@ void main() {
       expect(rates.headFee, 500);
       expect(rates.additionalHeadFee, 250);
       final query = verify(() => api.getUri('/member/picnic-rates',
-              query: captureAny(named: 'query')))
-          .captured
-          .single as Map<String, dynamic>;
+              query: captureAny(named: 'query'))).captured.single
+          as Map<String, dynamic>;
       expect(query, {'payment_date': '2026-03-01'});
     });
 
@@ -110,9 +111,10 @@ void main() {
         paymentMethod: 'Cash',
       ));
       expect(payment.total, 750);
-      final body = verify(() => api.post('/member/picnic-payments', captureAny()))
-          .captured
-          .single as Map<String, dynamic>;
+      final body =
+          verify(() => api.post('/member/picnic-payments', captureAny()))
+              .captured
+              .single as Map<String, dynamic>;
       expect(body['additional_heads'], 1);
       expect(body['additional_people'], [
         {'name': 'A', 'relation': 'guest'},
@@ -123,11 +125,13 @@ void main() {
     });
 
     test('changePassword posts snake_case payload', () async {
-      when(() => api.post('/member/change-password', any())).thenAnswer((_) async => null);
+      when(() => api.post('/member/change-password', any()))
+          .thenAnswer((_) async => null);
       await repo.changePassword(currentPassword: 'old', newPassword: 'new');
-      final body = verify(() => api.post('/member/change-password', captureAny()))
-          .captured
-          .single as Map<String, dynamic>;
+      final body =
+          verify(() => api.post('/member/change-password', captureAny()))
+              .captured
+              .single as Map<String, dynamic>;
       expect(body, {'current_password': 'old', 'new_password': 'new'});
     });
   });

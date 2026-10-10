@@ -76,7 +76,8 @@ void main() {
   });
 
   group('PublicStatsRepositoryImpl', () {
-    test('getStats maps snake_case fields to camelCase with defaults', () async {
+    test('getStats maps snake_case fields to camelCase with defaults',
+        () async {
       when(() => api.getUri('/public/stats')).thenAnswer(
         (_) async => {
           'pending_count': 4,

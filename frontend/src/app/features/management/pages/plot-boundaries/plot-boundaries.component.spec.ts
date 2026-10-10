@@ -32,6 +32,9 @@ const L = vi.hoisted(() => {
 });
 
 vi.mock('leaflet', () => L);
+// The edit-shape modal pulls geoman in for its side effect; nothing in these
+// tests opens that modal, so an empty mock is enough.
+vi.mock('@geoman-io/leaflet-geoman-free', () => ({}));
 
 const BOUNDARY = {
   id: 11,

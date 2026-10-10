@@ -12,9 +12,18 @@ class BoundaryEditorState extends Equatable {
     this.editingId,
     this.saved,
     this.failureKind,
+    this.society,
+    this.editingHasPending = false,
   });
 
   final EditorStatus status;
+
+  /// Society extent used by the live validation; null disables that check.
+  final SocietyBbox? society;
+
+  /// The boundary being edited has a submission awaiting review, so saving
+  /// replaces it (the page asks for confirmation first).
+  final bool editingHasPending;
 
   /// Drawn vertices (open ring; closed on save by the mapper).
   final List<LatLng> vertices;
@@ -45,12 +54,19 @@ class BoundaryEditorState extends Equatable {
   }
 
   /// Live client-side validation + area estimate for the current vertices.
-  BoundaryValidation get validation => validate(vertices);
+  BoundaryValidation get validation => validate(
+        vertices,
+        bbox: society,
+        declaredShotangsho:
+            parseDeclaredShotangsho(selectedProperty?.landQuantity),
+      );
 
   bool get canUndo => undoStack.isNotEmpty;
 
   bool get canSave =>
-      selectedPropertyId != null && validation.canSave && status != EditorStatus.saving;
+      selectedPropertyId != null &&
+      validation.canSave &&
+      status != EditorStatus.saving;
 
   BoundaryEditorState copyWith({
     EditorStatus? status,
@@ -65,6 +81,7 @@ class BoundaryEditorState extends Equatable {
     PlotBoundary? saved,
     PlotBoundaryFailureKind? failureKind,
     bool clearFailure = false,
+    bool? editingHasPending,
   }) {
     return BoundaryEditorState(
       status: status ?? this.status,
@@ -77,6 +94,8 @@ class BoundaryEditorState extends Equatable {
       editingId: editingId ?? this.editingId,
       saved: saved ?? this.saved,
       failureKind: clearFailure ? null : (failureKind ?? this.failureKind),
+      society: society,
+      editingHasPending: editingHasPending ?? this.editingHasPending,
     );
   }
 
@@ -92,5 +111,7 @@ class BoundaryEditorState extends Equatable {
         editingId,
         saved,
         failureKind,
+        society,
+        editingHasPending,
       ];
 }

@@ -11221,6 +11221,18 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'অ্যাডমিনের মন্তব্য'**
   String get plotMapTimelineRejectionNote;
+
+  /// No description provided for @plotMapDrawLoadError.
+  ///
+  /// In bn, this message translates to:
+  /// **'আপনার প্লট ও সীমানা লোড করা যায়নি।'**
+  String get plotMapDrawLoadError;
+
+  /// No description provided for @plotMapSearchClear.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনুসন্ধান মুছুন'**
+  String get plotMapSearchClear;
 }
 
 class _AppLocalizationsDelegate

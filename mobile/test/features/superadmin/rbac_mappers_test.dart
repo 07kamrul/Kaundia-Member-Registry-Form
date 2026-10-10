@@ -22,7 +22,8 @@ void main() {
     expect(entity.description, 'Manage roles');
   });
 
-  test('RoleDefDto maps id to String and permission_keys to permissionKeys', () {
+  test('RoleDefDto maps id to String and permission_keys to permissionKeys',
+      () {
     final dto = RoleDefDto.fromApi(const {
       'id': 3,
       'name': 'administrator',
@@ -108,8 +109,10 @@ void main() {
   });
 
   test('AdminRoleNameX maps role strings both ways', () {
-    expect(AdminRoleNameX.fromApi('administrator'), AdminRoleName.administrator);
-    expect(AdminRoleNameX.fromApi('executive_committee'), AdminRoleName.executiveCommittee);
+    expect(
+        AdminRoleNameX.fromApi('administrator'), AdminRoleName.administrator);
+    expect(AdminRoleNameX.fromApi('executive_committee'),
+        AdminRoleName.executiveCommittee);
     expect(AdminRoleNameX.fromApi('super_admin'), AdminRoleName.superAdmin);
     expect(AdminRoleNameX.fromApi('unknown'), AdminRoleName.administrator);
     expect(AdminRoleName.executiveCommittee.apiValue, 'executive_committee');

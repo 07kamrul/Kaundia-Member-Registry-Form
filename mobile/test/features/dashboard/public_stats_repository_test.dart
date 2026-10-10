@@ -44,7 +44,8 @@ void main() {
     );
     await expectLater(
       repo.getStats(),
-      throwsA(isA<ApiException>().having((e) => e.isServer, 'isServer', isTrue)),
+      throwsA(
+          isA<ApiException>().having((e) => e.isServer, 'isServer', isTrue)),
     );
   });
 }

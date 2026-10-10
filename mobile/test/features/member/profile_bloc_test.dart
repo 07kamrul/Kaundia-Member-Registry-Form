@@ -8,7 +8,9 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockRepo extends Mock implements MemberRepository {}
 
-MemberProfile _profile({String status = 'approved', String fullName = 'রহিম'}) => MemberProfile(
+MemberProfile _profile(
+        {String status = 'approved', String fullName = 'রহিম'}) =>
+    MemberProfile(
       memberId: 'MBR-1',
       status: status,
       fullName: fullName,
@@ -47,8 +49,8 @@ void main() {
         predicate<ProfileState>((s) =>
             s.status == ProfileStatus.loaded && s.profile?.fullName == 'রহিম'),
         predicate<ProfileState>((s) => s.requestsLoading),
-        predicate<ProfileState>((s) =>
-            s.status == ProfileStatus.loaded && !s.requestsLoading),
+        predicate<ProfileState>(
+            (s) => s.status == ProfileStatus.loaded && !s.requestsLoading),
       ],
       verify: (_) => verify(() => repo.getPropertyRequests()).called(1),
     );
@@ -67,7 +69,8 @@ void main() {
       ],
     );
 
-    test('core-field draft change sets willRequeue for an approved profile', () async {
+    test('core-field draft change sets willRequeue for an approved profile',
+        () async {
       when(() => repo.getProfile()).thenAnswer((_) async => _profile());
       final bloc = ProfileBloc(repository: repo);
       bloc.add(const ProfileLoaded());
@@ -76,12 +79,14 @@ void main() {
       await bloc.stream.firstWhere((s) => s.editing);
 
       // Contact-only change: no re-queue warning.
-      bloc.add(const ProfileDraftChanged(MemberProfileUpdate(mobile: '+8801800000000')));
+      bloc.add(const ProfileDraftChanged(
+          MemberProfileUpdate(mobile: '+8801800000000')));
       final contactOnly = await bloc.stream.first;
       expect(contactOnly.willRequeue, isFalse);
 
       // Core-field change: re-queue warning on.
-      bloc.add(const ProfileDraftChanged(MemberProfileUpdate(fullName: 'নতুন')));
+      bloc.add(
+          const ProfileDraftChanged(MemberProfileUpdate(fullName: 'নতুন')));
       final coreChanged = await bloc.stream.first;
       expect(coreChanged.willRequeue, isTrue);
 
@@ -89,14 +94,16 @@ void main() {
     });
 
     test('pending profile never triggers willRequeue', () async {
-      when(() => repo.getProfile()).thenAnswer((_) async => _profile(status: 'pending'));
+      when(() => repo.getProfile())
+          .thenAnswer((_) async => _profile(status: 'pending'));
       final bloc = ProfileBloc(repository: repo);
       bloc.add(const ProfileLoaded());
       await bloc.stream.firstWhere((s) => s.status == ProfileStatus.loaded);
       bloc.add(const ProfileEditStarted());
       final editing = await bloc.stream.firstWhere((s) => s.editing);
       expect(editing.willRequeue, isFalse);
-      bloc.add(const ProfileDraftChanged(MemberProfileUpdate(fullName: 'নতুন')));
+      bloc.add(
+          const ProfileDraftChanged(MemberProfileUpdate(fullName: 'নতুন')));
       final changed = await bloc.stream.first;
       expect(changed.willRequeue, isFalse);
       await bloc.close();
@@ -123,17 +130,24 @@ void main() {
         bloc.add(const ProfileLoaded());
         await bloc.stream.firstWhere((s) => s.status == ProfileStatus.loaded);
         bloc.add(const ProfileEditStarted());
-        bloc.add(const ProfileDraftChanged(MemberProfileUpdate(fullName: 'নতুন')));
-        bloc.add(const ProfileSaved(update: MemberProfileUpdate(fullName: 'নতুন')));
+        bloc.add(
+            const ProfileDraftChanged(MemberProfileUpdate(fullName: 'নতুন')));
+        bloc.add(
+            const ProfileSaved(update: MemberProfileUpdate(fullName: 'নতুন')));
         await bloc.stream.first; // failure state
-        bloc.add(const ProfileSaved(update: MemberProfileUpdate(fullName: 'নতুন')));
+        bloc.add(
+            const ProfileSaved(update: MemberProfileUpdate(fullName: 'নতুন')));
       },
-      skip: 7, // loading, loaded, requestsLoading, requestsLoaded, editing, draftChanged, saving
+      skip:
+          7, // loading, loaded, requestsLoading, requestsLoaded, editing, draftChanged, saving
       expect: () => [
         predicate<ProfileState>((s) => !s.saving && s.saveError == 'too short'),
         predicate<ProfileState>((s) => s.saving && s.saveError == null),
         predicate<ProfileState>((s) =>
-            !s.saving && !s.editing && s.saveError == null && s.profile?.fullName == 'রহিম সাহেব'),
+            !s.saving &&
+            !s.editing &&
+            s.saveError == null &&
+            s.profile?.fullName == 'রহিম সাহেব'),
       ],
     );
   });

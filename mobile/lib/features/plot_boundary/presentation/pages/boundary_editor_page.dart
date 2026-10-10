@@ -15,14 +15,29 @@ import '../../domain/plot_boundary_entities.dart';
 import '../../domain/plot_boundary_failure.dart';
 import '../bloc/boundary_editor_bloc.dart';
 import '../widgets/boundary_disclaimer_banner.dart';
+import '../widgets/draw_panel_sheet.dart' show confirmAction;
+import '../widgets/map/plot_map_canvas.dart'
+    show kMapBoundsPadding, kMapMaxZoom, kMapMinZoom;
 
 /// Tap-to-draw polygon editor: vertices are added by tapping the map, moved
 /// by dragging their markers, removed via long-press / list. Save POSTs (or
 /// PUTs when editing) and the boundary goes to pending_review.
 class BoundaryEditorPage extends StatelessWidget {
-  const BoundaryEditorPage({super.key, this.createBloc, this.editing});
+  const BoundaryEditorPage({
+    super.key,
+    this.createBloc,
+    this.editing,
+    this.initialPropertyId,
+    this.tileProvider,
+  });
 
   final BoundaryEditorBloc Function()? createBloc;
+
+  /// Plot to preselect when drawing a new boundary (from the draw panel).
+  final String? initialPropertyId;
+
+  /// Overrides the network tile provider (tests).
+  final TileProvider? tileProvider;
 
   /// Existing boundary to edit (PUT instead of POST).
   final PlotBoundary? editing;
@@ -32,16 +47,17 @@ class BoundaryEditorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          (createBloc?.call() ?? BoundaryEditorBloc())
-            ..add(EditorStarted(editing: editing)),
-      child: const _EditorView(),
+      create: (_) => (createBloc?.call() ?? BoundaryEditorBloc())
+        ..add(EditorStarted(editing: editing)),
+      child: _EditorView(tileProvider: tileProvider),
     );
   }
 }
 
 class _EditorView extends StatefulWidget {
-  const _EditorView();
+  const _EditorView({this.tileProvider});
+
+  final TileProvider? tileProvider;
 
   @override
   State<_EditorView> createState() => _EditorViewState();
@@ -76,9 +92,8 @@ class _EditorViewState extends State<_EditorView> {
               state.properties.isEmpty) {
             return InlineError(
               message: _failureMessage(state.failureKind, loc),
-              onRetry: () => context
-                  .read<BoundaryEditorBloc>()
-                  .add(const EditorStarted()),
+              onRetry: () =>
+                  context.read<BoundaryEditorBloc>().add(const EditorStarted()),
             );
           }
           return Column(
@@ -88,7 +103,12 @@ class _EditorViewState extends State<_EditorView> {
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
                 child: _PropertyPicker(state: state),
               ),
-              Expanded(child: _EditorMap(mapController: _mapController)),
+              Expanded(
+                child: _EditorMap(
+                  mapController: _mapController,
+                  tileProvider: widget.tileProvider,
+                ),
+              ),
               _EditorToolbar(state: state),
             ],
           );
@@ -106,10 +126,10 @@ class _PropertyPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final options = state.availableProperties.isEmpty &&
-            state.selectedProperty != null
-        ? [state.selectedProperty!]
-        : state.availableProperties;
+    final options =
+        state.availableProperties.isEmpty && state.selectedProperty != null
+            ? [state.selectedProperty!]
+            : state.availableProperties;
     if (options.isEmpty) {
       return Row(
         children: [
@@ -147,9 +167,7 @@ class _PropertyPicker extends StatelessWidget {
           ],
           onChanged: (id) {
             if (id != null) {
-              context
-                  .read<BoundaryEditorBloc>()
-                  .add(EditorPropertyChanged(id));
+              context.read<BoundaryEditorBloc>().add(EditorPropertyChanged(id));
             }
           },
         ),
@@ -159,27 +177,40 @@ class _PropertyPicker extends StatelessWidget {
 }
 
 class _EditorMap extends StatelessWidget {
-  const _EditorMap({required this.mapController});
+  const _EditorMap({required this.mapController, this.tileProvider});
 
   final MapController mapController;
+  final TileProvider? tileProvider;
 
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<BoundaryEditorBloc>();
-    final bbox = _societyBbox();
+    final area =
+        SocietyBbox.tryParse(AppConfig.societyBboxRaw)?.padded(kMapBoundsPadding);
     return FlutterMap(
       mapController: mapController,
       options: MapOptions(
-        initialCenter: bbox != null
-            ? LatLng((bbox.minLat + bbox.maxLat) / 2,
-                (bbox.minLng + bbox.maxLng) / 2)
-            : const LatLng(23.8103, 90.4125),
-        initialZoom: 16,
+        initialCenter: const LatLng(
+          AppConfig.societyCenterLat,
+          AppConfig.societyCenterLng,
+        ),
+        initialZoom: 17,
+        minZoom: kMapMinZoom,
+        maxZoom: kMapMaxZoom,
+        cameraConstraint: area == null
+            ? const CameraConstraint.unconstrained()
+            : CameraConstraint.containCenter(
+                bounds: LatLngBounds(
+                  LatLng(area.minLat, area.minLng),
+                  LatLng(area.maxLat, area.maxLng),
+                ),
+              ),
         onTap: (_, latLng) => bloc.add(EditorVertexAdded(latLng)),
       ),
       children: [
         TileLayer(
           urlTemplate: AppConfig.mapTileUrl,
+          tileProvider: tileProvider,
           userAgentPackageName: 'bd.kaundia.app',
         ),
         BlocBuilder<BoundaryEditorBloc, BoundaryEditorState>(
@@ -266,16 +297,6 @@ class _EditorMap extends StatelessWidget {
       ),
     );
   }
-
-  SocietyBbox? _societyBbox() {
-    final raw = AppConfig.societyBboxRaw;
-    if (raw.isEmpty) return null;
-    try {
-      return SocietyBbox.parse(raw);
-    } on FormatException {
-      return null;
-    }
-  }
 }
 
 class _EditorToolbar extends StatelessWidget {
@@ -296,8 +317,8 @@ class _EditorToolbar extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          border: Border(
-              top: BorderSide(color: theme.colorScheme.outlineVariant)),
+          border:
+              Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -312,8 +333,8 @@ class _EditorToolbar extends StatelessWidget {
                     )} · '
                     '${loc.boundaryAreaValues(
                       _digits(context, validation.areaSqm.toStringAsFixed(1)),
-                      _digits(
-                          context, validation.areaShotangsho.toStringAsFixed(2)),
+                      _digits(context,
+                          validation.areaShotangsho.toStringAsFixed(2)),
                     )} '
                     '(${loc.boundaryAreaEstimateTag})',
                     style: theme.textTheme.bodySmall,
@@ -335,9 +356,10 @@ class _EditorToolbar extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 FilledButton(
-                  onPressed: state.canSave && state.status != EditorStatus.saving
-                      ? () => bloc.add(const EditorSaveRequested())
-                      : null,
+                  onPressed:
+                      state.canSave && state.status != EditorStatus.saving
+                          ? () => _save(context, bloc, state)
+                          : null,
                   child: state.status == EditorStatus.saving
                       ? const SizedBox(
                           width: 16,
@@ -365,6 +387,42 @@ class _EditorToolbar extends StatelessWidget {
                   ],
                 ),
               ),
+            if (validation.areaMismatch)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber_outlined,
+                        size: 16, color: theme.colorScheme.tertiary),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        loc.plotMapValidationAreaMismatch,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.tertiary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (validation.error == null && state.vertices.length >= 3)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle,
+                        size: 16, color: Color(0xFF2E7D32)),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        loc.plotMapValidationOk,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: const Color(0xFF2E7D32)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             if (state.status == EditorStatus.failure &&
                 state.failureKind != null)
               Padding(
@@ -387,6 +445,25 @@ class _EditorToolbar extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Saving over a pending review replaces it, so ask first.
+  Future<void> _save(
+    BuildContext context,
+    BoundaryEditorBloc bloc,
+    BoundaryEditorState state,
+  ) async {
+    if (state.editingHasPending) {
+      final loc = AppLocalizations.of(context);
+      final confirmed = await confirmAction(
+        context,
+        title: loc.plotMapDrawReplaceTitle,
+        message: loc.plotMapDrawReplaceMessage,
+        confirmLabel: loc.commonSave,
+      );
+      if (!confirmed) return;
+    }
+    bloc.add(const EditorSaveRequested());
   }
 
   String _digits(BuildContext context, String text) =>

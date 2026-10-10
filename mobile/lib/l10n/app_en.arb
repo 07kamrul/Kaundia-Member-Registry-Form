@@ -2368,5 +2368,7 @@
   "plotMapTimelineUnderReview": "Under review",
   "plotMapTimelineApproved": "Approved",
   "plotMapTimelinePendingHint": "Others will see this after the admin verifies it.",
-  "plotMapTimelineRejectionNote": "Admin's note"
+  "plotMapTimelineRejectionNote": "Admin's note",
+  "plotMapDrawLoadError": "Could not load your plots and boundaries.",
+  "plotMapSearchClear": "Clear search"
 }

@@ -31,25 +31,23 @@ BoundaryFeature get _feature => const BoundaryFeature(
     );
 
 void main() {
-  testWidgets('disclaimer banner shows the standing text (en)',
-      (tester) async {
-    await tester.pumpWidget(
-        _harness(const BoundaryDisclaimerBanner()));
+  testWidgets('disclaimer banner shows the standing text (en)', (tester) async {
+    await tester.pumpWidget(_harness(const BoundaryDisclaimerBanner()));
     expect(
         find.text(
             'This is a member-marked approximate boundary; it is not a substitute for an official survey or legal documents.'),
         findsOneWidget);
   });
 
-  testWidgets('disclaimer banner shows the standing text (bn)',
-      (tester) async {
-    await tester.pumpWidget(_harness(const BoundaryDisclaimerBanner(),
-        locale: const Locale('bn')));
-    expect(find.textContaining('সদস্য-চিহ্নিত আনুমানিক সীমানা'),
-        findsOneWidget);
+  testWidgets('disclaimer banner shows the standing text (bn)', (tester) async {
+    await tester.pumpWidget(
+        _harness(const BoundaryDisclaimerBanner(), locale: const Locale('bn')));
+    expect(
+        find.textContaining('সদস্য-চিহ্নিত আনুমানিক সীমানা'), findsOneWidget);
   });
 
-  testWidgets('owner sheet shows owner, area in m² + shotangsho, contact buttons',
+  testWidgets(
+      'owner sheet shows owner, area in m² + shotangsho, contact buttons',
       (tester) async {
     await tester.pumpWidget(_harness(
       SingleChildScrollView(

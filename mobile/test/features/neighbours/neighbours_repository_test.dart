@@ -35,8 +35,10 @@ void main() {
         .thenAnswer((_) async => neighboursJson());
     final d = await repo.getNeighbours();
     expect(d.properties, hasLength(2));
-    final q = verify(() => api.getUri('/member/neighbours',
-        query: captureAny(named: 'query'))).captured.single;
+    final q = verify(() =>
+            api.getUri('/member/neighbours', query: captureAny(named: 'query')))
+        .captured
+        .single;
     expect(q, isNull);
   });
 
@@ -44,8 +46,10 @@ void main() {
     when(() => api.getUri('/member/neighbours', query: any(named: 'query')))
         .thenAnswer((_) async => neighboursJson());
     await GetNeighbours(repo)(dagType: DagType.cs);
-    final q = verify(() => api.getUri('/member/neighbours',
-        query: captureAny(named: 'query'))).captured.single;
+    final q = verify(() =>
+            api.getUri('/member/neighbours', query: captureAny(named: 'query')))
+        .captured
+        .single;
     expect(q, {'dag_type': 'cs'});
   });
 
@@ -88,7 +92,8 @@ void main() {
 
     test('network and business errors', () {
       expect(
-        neighboursFailureKindOf(const ApiException(type: ApiExceptionType.network)),
+        neighboursFailureKindOf(
+            const ApiException(type: ApiExceptionType.network)),
         NeighboursFailureKind.network,
       );
       final business = _dioError(400, {'detail': 'nope'});

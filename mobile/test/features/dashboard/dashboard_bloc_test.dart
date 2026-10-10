@@ -47,13 +47,15 @@ void main() {
   blocTest<DashboardBloc, DashboardState>(
     'emits [failure] on network error from empty state',
     build: () {
-      when(() => repo.getStats()).thenThrow(const ApiException(type: ApiExceptionType.network));
+      when(() => repo.getStats())
+          .thenThrow(const ApiException(type: ApiExceptionType.network));
       return DashboardBloc(repository: repo);
     },
     act: (bloc) => bloc.add(const DashboardStarted()),
     expect: () => [
       const DashboardLoading(),
-      const DashboardFailure(error: ApiException(type: ApiExceptionType.network)),
+      const DashboardFailure(
+          error: ApiException(type: ApiExceptionType.network)),
     ],
   );
 

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  NgZone,
   OnInit,
   computed,
   inject,
@@ -13,11 +14,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import * as L from 'leaflet';
+import '@geoman-io/leaflet-geoman-free';
 import { IconComponent } from '../../../../shared/icon/icon.component';
 import { PlotMapService } from '../../../../core/services/plot-map.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { localizeDigits } from '../../../../core/services/roadmap.service';
 import { toAsciiDigits } from '../../../../core/services/digits.helper';
+import { latLngsToGeometry } from '../../../../core/services/geo.helper';
 import type {
   AdminBoundary,
   BoundaryDispute,
@@ -64,6 +67,7 @@ export class PlotBoundariesComponent implements OnInit {
   private readonly plotMapService = inject(PlotMapService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly zone = inject(NgZone);
   readonly lang = inject(LanguageService).lang;
 
   readonly tab = signal<'queue' | 'disputes'>('queue');
@@ -84,6 +88,8 @@ export class PlotBoundariesComponent implements OnInit {
   // Detail preview (mini map + declared info + actions).
   readonly selected = signal<AdminBoundary | null>(null);
   private previewMap: L.Map | null = null;
+  /** Geoman vertex-dragging colors match the preview polygon. */
+  private static readonly EDIT_COLOR = '#c9861e';
 
   readonly approveOpen = signal(false);
   readonly approveNote = signal('');
@@ -123,13 +129,17 @@ export class PlotBoundariesComponent implements OnInit {
   readonly addOverlaps = signal<OverlapInfo[]>([]);
   readonly addConfirmOverlap = signal(false);
 
-  /** Edit the selected polygon's shape (GeoJSON entry, goes live immediately). */
+  /** Edit the selected polygon by drawing on the map; the JSON mirrors the shape. */
   readonly editOpen = signal(false);
   readonly editGeometry = signal('');
   readonly editSaving = signal(false);
   readonly editErrorKey = signal<string | null>(null);
   readonly editOverlaps = signal<OverlapInfo[]>([]);
   readonly editConfirmOverlap = signal(false);
+  /** True while the admin is sketching a fresh polygon instead of dragging vertices. */
+  readonly editDrawing = signal(false);
+  private editMap: L.Map | null = null;
+  private editLayer: L.Polygon | null = null;
 
   ngOnInit(): void {
     this.load();
@@ -379,6 +389,114 @@ export class PlotBoundariesComponent implements OnInit {
     this.editErrorKey.set(null);
     this.editOverlaps.set([]);
     this.editConfirmOverlap.set(false);
+    this.editDrawing.set(false);
+    // The edit map renders after the modal paints.
+    setTimeout(() => this.initEditMap(boundary));
+  }
+
+  // ---- Edit-shape map (draw to update the GeoJSON) -------------------------
+
+  private initEditMap(boundary: AdminBoundary): void {
+    this.destroyEditMap();
+    const el = document.querySelector('.edit-shape-map') as HTMLElement | null;
+    if (!el) return;
+    // Scroll-wheel zoom fights the modal's own scrolling, so it stays off.
+    const map = L.map(el, { attributionControl: false, scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    this.editMap = map;
+    this.mountEditLayer(boundary.geometry);
+  }
+
+  /** Loads a geometry as a geoman-editable polygon and mirrors it to the JSON. */
+  private mountEditLayer(geometry: PolygonGeometry): void {
+    const map = this.editMap;
+    if (!map) return;
+    this.editLayer?.remove();
+    const layer = L.polygon(
+      geometry.coordinates[0].map((pair) => [pair[1], pair[0]] as L.LatLngTuple),
+      { color: PlotBoundariesComponent.EDIT_COLOR, weight: 2, fillOpacity: 0.3 },
+    ).addTo(map);
+    this.editLayer = layer;
+    layer.pm.enable({
+      allowSelfIntersection: false,
+      allowRemoval: false,
+    } as never);
+    layer.on('pm:edit pm:vertexadded pm:vertexremoved', () =>
+      this.zone.run(() => this.syncEditGeometry()),
+    );
+    map.fitBounds(layer.getBounds().pad(0.3));
+    this.syncEditGeometry();
+  }
+
+  /** Wipes the shape so the admin can sketch a fresh polygon on the map. */
+  startEditDraw(): void {
+    const map = this.editMap;
+    if (!map) return;
+    this.editLayer?.remove();
+    this.editLayer = null;
+    this.editGeometry.set('');
+    this.editErrorKey.set(null);
+    this.editDrawing.set(true);
+    map.pm.enableDraw('Polygon', {
+      allowSelfIntersection: false,
+      templineStyle: { color: PlotBoundariesComponent.EDIT_COLOR, weight: 3 },
+      hintlineStyle: { color: PlotBoundariesComponent.EDIT_COLOR, dashArray: '6,6' },
+    } as never);
+    // The JSON fills in live while the sketch is drawn, then the finished
+    // polygon switches back to vertex-dragging.
+    map.on('pm:drawmove', (event) => {
+      const working = (event as unknown as { workingLayer?: L.Polygon }).workingLayer;
+      if (!working) return;
+      this.zone.run(() => this.mirrorRing(working));
+    });
+    map.once('pm:create', (event) => {
+      (map.pm as unknown as { disable: () => void }).disable();
+      this.zone.run(() => {
+        this.editDrawing.set(false);
+        const layer = (event as unknown as { layer: L.Polygon }).layer;
+        this.editLayer = layer;
+        layer.pm.enable({ allowSelfIntersection: false, allowRemoval: false } as never);
+        layer.on('pm:edit pm:vertexadded pm:vertexremoved', () =>
+          this.zone.run(() => this.syncEditGeometry()),
+        );
+        this.syncEditGeometry();
+      });
+    });
+  }
+
+  /** Back to dragging the boundary's original shape after an aborted sketch. */
+  cancelEditDraw(): void {
+    const map = this.editMap;
+    const boundary = this.selected();
+    (map?.pm as unknown as { disable?: () => void } | undefined)?.disable?.();
+    this.editDrawing.set(false);
+    if (map && boundary) this.mountEditLayer(boundary.geometry);
+  }
+
+  private mirrorRing(layer: L.Polygon): void {
+    const latlngs = layer.getLatLngs()[0] as L.LatLng[];
+    if (!latlngs || latlngs.length < 3) return;
+    const ring = latlngs.map((ll) => [ll.lat, ll.lng] as [number, number]);
+    this.editGeometry.set(JSON.stringify(latLngsToGeometry(ring), null, 2));
+  }
+
+  private syncEditGeometry(): void {
+    if (this.editLayer) this.mirrorRing(this.editLayer);
+  }
+
+  private destroyEditMap(): void {
+    if (this.editMap) {
+      this.editMap.remove();
+      this.editMap = null;
+    }
+    this.editLayer = null;
+  }
+
+  /** Closes the modal and tears the draw map down with it. */
+  closeEdit(): void {
+    this.destroyEditMap();
+    this.editDrawing.set(false);
+    this.editOpen.set(false);
   }
 
   confirmEdit(confirmOverlap = false): void {
@@ -393,7 +511,7 @@ export class PlotBoundariesComponent implements OnInit {
       .subscribe({
         next: (updated) => {
           this.editSaving.set(false);
-          this.editOpen.set(false);
+          this.closeEdit();
           this.selected.set(updated);
           this.renderPreview(updated);
           this.load();

@@ -71,8 +71,9 @@ class PlotMapState extends Equatable {
           : (highlightedBoundaryId ?? this.highlightedBoundaryId),
       ownerStatus: ownerStatus ?? this.ownerStatus,
       owner: clearOwner ? null : (owner ?? this.owner),
-      ownerFailureKind:
-          clearOwnerFailure ? null : (ownerFailureKind ?? this.ownerFailureKind),
+      ownerFailureKind: clearOwnerFailure
+          ? null
+          : (ownerFailureKind ?? this.ownerFailureKind),
       failureKind: clearFailure ? null : (failureKind ?? this.failureKind),
     );
   }

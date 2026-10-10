@@ -7,6 +7,7 @@ import '../../../../core/di/injector.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../data/plot_boundary_repository_impl.dart';
+import '../../domain/dag_number.dart';
 import '../../domain/geo.dart';
 import '../../domain/plot_boundary_entities.dart';
 import '../../domain/plot_boundary_failure.dart';
@@ -72,9 +73,7 @@ class PlotMapBloc extends Bloc<PlotMapEvent, PlotMapState> {
     if (bbox == null) return;
     final ticket = ++_ticket;
     emit(state.copyWith(
-      status: state.features == null
-          ? PlotMapStatus.loading
-          : state.status,
+      status: state.features == null ? PlotMapStatus.loading : state.status,
       clearFailure: true,
     ));
     try {
@@ -154,21 +153,24 @@ class PlotMapBloc extends Bloc<PlotMapEvent, PlotMapState> {
     PlotMapSearchRequested event,
     Emitter<PlotMapState> emit,
   ) async {
-    final query = event.query.trim();
-    if (query.isEmpty) return;
+    final query = toAsciiDigits(event.query).replaceAll(RegExp(r'\s'), '');
+    if (query.isEmpty) {
+      emit(state.copyWith(clearHighlighted: true));
+      return;
+    }
     final features = state.features ?? const <BoundaryFeature>[];
-    final normalised = query.replaceAll(RegExp(r'\s'), '');
     for (final f in features) {
-      final rs = f.rsDag?.replaceAll(RegExp(r'\s'), '');
-      final cs = f.csDag?.replaceAll(RegExp(r'\s'), '');
-      if ((rs != null && rs.contains(query)) ||
-          (cs != null && cs.contains(query)) ||
-          (rs != null && rs == normalised) ||
-          (cs != null && cs == normalised)) {
-        emit(state.copyWith(highlightedBoundaryId: f.boundaryId, clearSelectedBoundary: true));
+      final dags = [f.rsDag, f.csDag]
+          .whereType<String>()
+          .map((d) => toAsciiDigits(d).replaceAll(RegExp(r'\s'), ''));
+      if (dags.any((d) => d.contains(query))) {
+        emit(state.copyWith(
+          highlightedBoundaryId: f.boundaryId,
+          clearSelectedBoundary: true,
+        ));
         return;
       }
     }
-    emit(state.copyWith(highlightedBoundaryId: null, clearHighlighted: true));
+    emit(state.copyWith(clearHighlighted: true));
   }
 }

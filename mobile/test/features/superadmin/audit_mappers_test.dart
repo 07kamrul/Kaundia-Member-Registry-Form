@@ -47,7 +47,8 @@ void main() {
     expect(entity.detail, isNull);
   });
 
-  test('actionVerb extracts the first segment like the Angular actionClass()', () {
+  test('actionVerb extracts the first segment like the Angular actionClass()',
+      () {
     AuditLogEntry entry(String action) => AuditLogEntry(
           id: '1',
           actorAdminId: null,
@@ -68,7 +69,8 @@ void main() {
   });
 
   test('parseAuditDetail parses JSON objects into pairs', () {
-    final pairs = parseAuditDetail('{"status":"approved","count":2,"nested":{"a":1}}');
+    final pairs =
+        parseAuditDetail('{"status":"approved","count":2,"nested":{"a":1}}');
     expect(pairs, const [
       AuditDetailPair(key: 'status', value: 'approved'),
       AuditDetailPair(key: 'count', value: '2'),
@@ -76,7 +78,8 @@ void main() {
     ]);
   });
 
-  test('parseAuditDetail falls back to raw for non-JSON and non-object JSON', () {
+  test('parseAuditDetail falls back to raw for non-JSON and non-object JSON',
+      () {
     expect(parseAuditDetail('plain text'), const [
       AuditDetailPair(key: 'detail', value: 'plain text'),
     ]);

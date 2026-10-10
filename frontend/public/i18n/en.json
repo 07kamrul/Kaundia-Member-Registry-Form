@@ -2024,6 +2024,13 @@
         "propertyId": "Property ID",
         "geometryLabel": "GeoJSON Polygon",
         "geometryPlaceholder": "{\"type\": \"Polygon\", \"coordinates\": [[[90.40, 23.80], ...]]}"
+      },
+      "edit": {
+        "drawNew": "Draw again",
+        "cancelDraw": "Cancel drawing",
+        "drawingHint": "Click/tap the map to place points; click the first point (or double-click) to close the shape.",
+        "editHint": "Drag the points to adjust the shape, or draw it again.",
+        "geometryAuto": "GeoJSON Polygon (updates automatically from the map)"
       }
     }
   },

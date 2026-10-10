@@ -19,10 +19,20 @@ void main() {
     gender: Gender.male,
     email: 'kamrul@example.com',
     permanentAddress: const AddressDetail(
-      house: '১', road: '২', postOffice: 'ক', upazila: 'খ', district: 'গ', division: 'ঘ',
+      house: '১',
+      road: '২',
+      postOffice: 'ক',
+      upazila: 'খ',
+      district: 'গ',
+      division: 'ঘ',
     ),
     currentAddress: const AddressDetail(
-      house: '৫', road: '৬', postOffice: 'চ', upazila: 'ছ', district: 'জ', division: 'ঝ',
+      house: '৫',
+      road: '৬',
+      postOffice: 'চ',
+      upazila: 'ছ',
+      district: 'জ',
+      division: 'ঝ',
     ),
     urgentContactName: 'Urgent Uddin',
     urgentContactRelation: 'ভাই',
@@ -57,8 +67,16 @@ void main() {
       ),
     ],
     nominees: [
-      const Nominee(name: 'Nominee One', relation: 'স্ত্রী', mobile: '+8801912345678', address: 'ঢাকা'),
-      const Nominee(name: 'Nominee Two', relation: 'ছেলে', mobile: '+8801612345678', address: 'গাজীপুর'),
+      const Nominee(
+          name: 'Nominee One',
+          relation: 'স্ত্রী',
+          mobile: '+8801912345678',
+          address: 'ঢাকা'),
+      const Nominee(
+          name: 'Nominee Two',
+          relation: 'ছেলে',
+          mobile: '+8801612345678',
+          address: 'গাজীপুর'),
     ],
     receiptNo: 'RCPT-9',
     paymentMethod: PaymentMethod.bank,
@@ -66,7 +84,8 @@ void main() {
   );
 
   test('payload carries every snake_case field with correct spelling', () {
-    final p = buildRegistrationPayload(form, admissionFee: '500', subscription: '120');
+    final p = buildRegistrationPayload(form,
+        admissionFee: '500', subscription: '120');
 
     expect(p['full_name'], 'Md Kamrul Hasan');
     expect(p['father_or_husband'], 'Abdul Karim');
@@ -81,10 +100,20 @@ void main() {
 
     // Address blocks: permanent_address / current_address with post_office.
     expect(p['permanent_address'], {
-      'house': '১', 'road': '২', 'post_office': 'ক', 'upazila': 'খ', 'district': 'গ', 'division': 'ঘ',
+      'house': '১',
+      'road': '২',
+      'post_office': 'ক',
+      'upazila': 'খ',
+      'district': 'গ',
+      'division': 'ঘ',
     });
     expect(p['current_address'], {
-      'house': '৫', 'road': '৬', 'post_office': 'চ', 'upazila': 'ছ', 'district': 'জ', 'division': 'ঝ',
+      'house': '৫',
+      'road': '৬',
+      'post_office': 'চ',
+      'upazila': 'ছ',
+      'district': 'জ',
+      'division': 'ঝ',
     });
 
     expect(p['urgent_contact_name'], 'Urgent Uddin');
@@ -112,7 +141,8 @@ void main() {
     expect(single['my_share_quantity'], '5');
     expect(single['ownership'], 'একক');
     expect(single['joint_owner_count'], isNull);
-    expect((single['applicable_docs'] as List).single, {'doc_type': 'খতিয়ান/পর্চা'});
+    expect((single['applicable_docs'] as List).single,
+        {'doc_type': 'খতিয়ান/পর্চা'});
 
     final joint = props[1] as Map;
     expect(joint['ownership'], 'যৌথ');
@@ -122,12 +152,23 @@ void main() {
     // Nominees verbatim.
     final nominees = p['nominees'] as List;
     expect(nominees, [
-      {'name': 'Nominee One', 'relation': 'স্ত্রী', 'mobile': '+8801912345678', 'address': 'ঢাকা'},
-      {'name': 'Nominee Two', 'relation': 'ছেলে', 'mobile': '+8801612345678', 'address': 'গাজীপুর'},
+      {
+        'name': 'Nominee One',
+        'relation': 'স্ত্রী',
+        'mobile': '+8801912345678',
+        'address': 'ঢাকা'
+      },
+      {
+        'name': 'Nominee Two',
+        'relation': 'ছেলে',
+        'mobile': '+8801612345678',
+        'address': 'গাজীপুর'
+      },
     ]);
   });
 
-  test('joint_owner_count is null for single ownership even when count set', () {
+  test('joint_owner_count is null for single ownership even when count set',
+      () {
     final p = buildRegistrationPayload(
       form.copyWith(
         properties: [

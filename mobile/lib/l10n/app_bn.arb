@@ -1869,5 +1869,7 @@
   "plotMapTimelineUnderReview": "যাচাই চলছে",
   "plotMapTimelineApproved": "অনুমোদিত",
   "plotMapTimelinePendingHint": "অ্যাডমিন যাচাই করার পর অন্যরা এটি দেখতে পারবেন।",
-  "plotMapTimelineRejectionNote": "অ্যাডমিনের মন্তব্য"
+  "plotMapTimelineRejectionNote": "অ্যাডমিনের মন্তব্য",
+  "plotMapDrawLoadError": "আপনার প্লট ও সীমানা লোড করা যায়নি।",
+  "plotMapSearchClear": "অনুসন্ধান মুছুন"
 }

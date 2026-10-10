@@ -66,8 +66,7 @@ void main() {
     verify(() => repo.login('member01', 'secret123')).called(1);
   });
 
-  testWidgets('shows the generic login failed message on 401',
-      (tester) async {
+  testWidgets('shows the generic login failed message on 401', (tester) async {
     when(() => repo.login(any(), any())).thenThrow(
       const ApiException(type: ApiExceptionType.unauthorized, statusCode: 401),
     );
@@ -79,8 +78,8 @@ void main() {
     await tester.tap(find.text('Enter'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Login failed. Information is incorrect.'),
-        findsOneWidget);
+    expect(
+        find.text('Login failed. Information is incorrect.'), findsOneWidget);
   });
 
   testWidgets('shows required-field errors without calling the repository',
@@ -90,8 +89,8 @@ void main() {
     await tester.tap(find.text('Enter'));
     await tester.pump();
 
-    expect(find.text('Username / email / member ID is required'),
-        findsOneWidget);
+    expect(
+        find.text('Username / email / member ID is required'), findsOneWidget);
     expect(find.text('Password is required'), findsOneWidget);
     verifyNever(() => repo.login(any(), any()));
   });

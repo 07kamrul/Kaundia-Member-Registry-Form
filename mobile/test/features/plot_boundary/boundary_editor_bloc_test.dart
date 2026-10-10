@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:kaundia_app/core/network/api_exception.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/boundary_validation.dart';
+import 'package:kaundia_app/features/plot_boundary/domain/geo.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/plot_boundary_entities.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/plot_boundary_failure.dart';
 import 'package:kaundia_app/features/plot_boundary/domain/plot_boundary_repository.dart';
@@ -37,9 +38,8 @@ void main() {
         ]);
     when(() => repo.getMyBoundaries()).thenAnswer((_) async => []);
     when(() => repo.createBoundary(
-            propertyId: any(named: 'propertyId'),
-            points: any(named: 'points')))
-        .thenAnswer((_) async => _saved());
+        propertyId: any(named: 'propertyId'),
+        points: any(named: 'points'))).thenAnswer((_) async => _saved());
   });
 
   BoundaryEditorBloc build() => BoundaryEditorBloc(
@@ -69,8 +69,7 @@ void main() {
             .having((s) => s.status, 'status', EditorStatus.loading),
         isA<BoundaryEditorState>()
             .having((s) => s.status, 'status', EditorStatus.ready)
-            .having((s) => s.availableProperties, 'available',
-                hasLength(1))
+            .having((s) => s.availableProperties, 'available', hasLength(1))
             .having((s) => s.selectedPropertyId, 'selected', 'p1'),
       ],
     );
@@ -78,8 +77,8 @@ void main() {
     blocTest<BoundaryEditorBloc, BoundaryEditorState>(
       'reports failure kind when the load fails',
       build: () {
-        when(() => repo.getMyProperties()).thenThrow(const ApiException(
-            type: ApiExceptionType.network));
+        when(() => repo.getMyProperties())
+            .thenThrow(const ApiException(type: ApiExceptionType.network));
         return build();
       },
       act: (b) => b.add(const EditorStarted()),
@@ -113,8 +112,8 @@ void main() {
         // One state per added vertex.
         ...List.generate(
             4,
-            (i) => isA<BoundaryEditorState>().having(
-                (s) => s.vertices.length, 'vertices.length', i + 1)),
+            (i) => isA<BoundaryEditorState>()
+                .having((s) => s.vertices.length, 'vertices.length', i + 1)),
       ],
       verify: (b) {
         expect(b.state.validation.areaSqm, greaterThan(0));
@@ -134,8 +133,7 @@ void main() {
       },
       skip: 4,
       expect: () => [
-        isA<BoundaryEditorState>().having(
-            (s) => s.vertices, 'vertices', const [
+        isA<BoundaryEditorState>().having((s) => s.vertices, 'vertices', const [
           LatLng(23.80, 90.40),
           LatLng(23.81, 90.41),
         ]),
@@ -157,12 +155,12 @@ void main() {
       expect: () => [
         isA<BoundaryEditorState>()
             .having((s) => s.vertices.length, 'length', 1)
-            .having((s) => s.vertices.first, 'vertex',
-                const LatLng(23.80, 90.40)),
+            .having(
+                (s) => s.vertices.first, 'vertex', const LatLng(23.80, 90.40)),
         isA<BoundaryEditorState>()
             .having((s) => s.vertices.length, 'length', 2)
-            .having((s) => s.vertices.last, 'vertex',
-                const LatLng(23.81, 90.40)),
+            .having(
+                (s) => s.vertices.last, 'vertex', const LatLng(23.81, 90.40)),
       ],
     );
 
@@ -230,8 +228,9 @@ void main() {
             .having((s) => s.editingId, 'editingId', 'b1'),
       ],
       verify: (b) {
-        verify(() => repo.createBoundary(
-            propertyId: 'p1', points: b.state.vertices)).called(1);
+        verify(() =>
+                repo.createBoundary(propertyId: 'p1', points: b.state.vertices))
+            .called(1);
       },
     );
 
@@ -277,6 +276,66 @@ void main() {
                 PlotBoundaryFailureKind.selfIntersecting),
       ],
     );
+  });
+
+  group('draw panel hand-off', () {
+    blocTest<BoundaryEditorBloc, BoundaryEditorState>(
+      'preselects the plot chosen in the draw panel',
+      build: build,
+      act: (b) => b.add(const EditorStarted(propertyId: 'p2')),
+      verify: (b) => expect(b.state.selectedPropertyId, 'p2'),
+    );
+
+    blocTest<BoundaryEditorBloc, BoundaryEditorState>(
+      'falls back to the first free plot for an unknown property id',
+      build: build,
+      act: (b) => b.add(const EditorStarted(propertyId: 'nope')),
+      verify: (b) => expect(b.state.selectedPropertyId, 'p1'),
+    );
+
+    blocTest<BoundaryEditorBloc, BoundaryEditorState>(
+      'editing a boundary with a pending review flags the replace warning',
+      build: build,
+      act: (b) => b.add(EditorStarted(
+        editing: PlotBoundary(
+          id: 'b1',
+          propertyId: 'p1',
+          status: BoundaryStatus.pendingReview,
+          points: _square,
+          isMine: true,
+          hasPending: true,
+        ),
+      )),
+      verify: (b) {
+        expect(b.state.editingHasPending, isTrue);
+        expect(b.state.editingId, 'b1');
+      },
+    );
+
+    test('with a society configured, a ring outside it cannot be saved', () {
+      const society = SocietyBbox(
+        minLng: 90.30,
+        minLat: 23.78,
+        maxLng: 90.35,
+        maxLat: 23.84,
+      );
+      final bloc = BoundaryEditorBloc(
+        getMyProperties: GetMyProperties(repo),
+        getMyBoundaries: GetMyBoundaries(repo),
+        saveBoundary: SaveBoundary(repo),
+        society: society,
+      );
+      addTearDown(bloc.close);
+
+      // _square sits at lng 90.40+, outside the society bbox above.
+      bloc.emit(bloc.state.copyWith(
+        selectedPropertyId: 'p1',
+        vertices: _square,
+      ));
+
+      expect(bloc.state.validation.error, BoundaryError.outsideSociety);
+      expect(bloc.state.canSave, isFalse);
+    });
   });
 }
 

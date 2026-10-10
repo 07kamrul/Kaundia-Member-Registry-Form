@@ -520,6 +520,22 @@ export class PlotMapComponent implements AfterViewInit {
       });
   }
 
+  /** Shared popup options for the BDS / RAJUK layers. The popup must never
+   * slide under (or tower over) the floating top bar: cap its height so long
+   * khatian tables scroll, and make Leaflet's auto-pan keep the popup below
+   * the top bar instead of butting against the map edge. */
+  private externalPopupOptions(): L.PopupOptions {
+    const bar = document.querySelector<HTMLElement>('.map-topbar');
+    const topClearance = bar ? bar.offsetTop + bar.offsetHeight + 12 : 24;
+    return {
+      maxWidth: 460,
+      minWidth: 280,
+      maxHeight: 340,
+      autoPanPaddingTopLeft: L.point(20, topClearance),
+      autoPanPaddingBottomRight: L.point(20, 20),
+    };
+  }
+
   private renderBds(collection: LandFeatureCollection): void {
     const map = this.map;
     if (!map) return;
@@ -530,7 +546,7 @@ export class PlotMapComponent implements AfterViewInit {
       onEachFeature: (feature, layer) =>
         layer.bindPopup(
           this.bdsPopupHtml(feature as LandPlotFeature, layer as L.Polygon),
-          { maxWidth: 460, minWidth: 280 },
+          this.externalPopupOptions(),
         ),
     }).addTo(map);
     this.updateBdsLabels();
@@ -701,7 +717,10 @@ export class PlotMapComponent implements AfterViewInit {
       style: (feature) =>
         this.externalStyle('rajuk', (feature as LandPlotFeature | undefined)?.properties),
       onEachFeature: (feature, layer) =>
-        layer.bindPopup(this.rajukPopupHtml(feature as LandPlotFeature, layer as L.Polygon)),
+        layer.bindPopup(
+          this.rajukPopupHtml(feature as LandPlotFeature, layer as L.Polygon),
+          this.externalPopupOptions(),
+        ),
     }).addTo(map);
   }
 

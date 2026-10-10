@@ -13,7 +13,8 @@ import 'package:kaundia_app/features/registration/domain/submission_error_mapper
 import 'package:kaundia_app/features/registration/presentation/bloc/registration_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockRegistrationRepository extends Mock implements RegistrationRepository {}
+class MockRegistrationRepository extends Mock
+    implements RegistrationRepository {}
 
 class MockFeeRepository extends Mock implements FeeRepository {}
 
@@ -51,12 +52,26 @@ RegistrationForm validForm({int properties = 1}) => RegistrationForm(
       email: 'a@b.com',
       memberPhoto: const FileRef(fileName: 'p.jpg', path: '/tmp/p.jpg'),
       paymentMethod: PaymentMethod.bank,
-      currentAddress: const AddressDetail(house: '1', road: '2', postOffice: 'p', upazila: 'u', district: 'd', division: 'v'),
-      permanentAddress: const AddressDetail(house: '1', road: '2', postOffice: 'p', upazila: 'u', district: 'd', division: 'v'),
+      currentAddress: const AddressDetail(
+          house: '1',
+          road: '2',
+          postOffice: 'p',
+          upazila: 'u',
+          district: 'd',
+          division: 'v'),
+      permanentAddress: const AddressDetail(
+          house: '1',
+          road: '2',
+          postOffice: 'p',
+          upazila: 'u',
+          district: 'd',
+          division: 'v'),
       urgentContactName: 'Urgent',
       urgentContactMobile: '+8801812345678',
       propertyCount: properties,
-      nominees: const [Nominee(name: 'N', relation: '', mobile: '+8801912345678', address: '')],
+      nominees: const [
+        Nominee(name: 'N', relation: '', mobile: '+8801912345678', address: '')
+      ],
       properties: [
         for (var i = 0; i < properties; i++)
           PropertyItem(
@@ -68,7 +83,10 @@ RegistrationForm validForm({int properties = 1}) => RegistrationForm(
             myShareQuantity: '5',
             ownership: OwnershipType.single,
             applicableDocs: const [
-              ApplicableDoc(type: 'খতিয়ান/পর্চা', fileName: 'doc.pdf', path: '/tmp/doc.pdf'),
+              ApplicableDoc(
+                  type: 'খতিয়ান/পর্চা',
+                  fileName: 'doc.pdf',
+                  path: '/tmp/doc.pdf'),
             ],
           ),
       ],
@@ -82,7 +100,12 @@ RegistrationState submitReadyState() => RegistrationState(
       admissionFee: 500,
       quoteStatus: QuoteStatus.loaded,
       quote: const SubscriptionQuote(
-        base: 100, extraUnits: 0, extraRate: 0, extraAmount: 0, total: 120, unit: 'শতাংশ',
+        base: 100,
+        extraUnits: 0,
+        extraRate: 0,
+        extraAmount: 0,
+        total: 120,
+        unit: 'শতাংশ',
       ),
     );
 
@@ -108,11 +131,16 @@ void main() {
     when(() => feeRepo.getAdmissionFee()).thenAnswer((_) async => 500.0);
     when(() => geoRepo.load()).thenAnswer((_) async => GeoData(
           divisions: [GeoDivision(id: '1', name: 'Dhaka', bnName: 'ঢাকা')],
-          districts: [GeoDistrict(id: '10', divisionId: '1', name: 'Cumilla', bnName: 'কুমিল্লা')],
-          upazilas: [GeoUpazila(districtId: '10', name: 'Sadarpur', bnName: 'সদর')],
+          districts: [
+            GeoDistrict(
+                id: '10', divisionId: '1', name: 'Cumilla', bnName: 'কুমিল্লা')
+          ],
+          upazilas: [
+            GeoUpazila(districtId: '10', name: 'Sadarpur', bnName: 'সদর')
+          ],
         ));
-    when(() => configRepo.getValues(any(), any()))
-        .thenAnswer((inv) async => (inv.positionalArguments[1] as List<String>));
+    when(() => configRepo.getValues(any(), any())).thenAnswer(
+        (inv) async => (inv.positionalArguments[1] as List<String>));
     when(() => prefs.registrationDraft).thenReturn(null);
     when(() => prefs.setRegistrationDraft(any())).thenAnswer((_) async {});
     when(() => prefs.clearRegistrationDraft()).thenAnswer((_) async {});
@@ -121,39 +149,56 @@ void main() {
   blocTest<RegistrationBloc, RegistrationState>(
     'Started loads fee/geo/config lists and reaches ready on step 1',
     build: () => buildBloc(
-      submitRepo: submitRepo, feeRepo: feeRepo, geoRepo: geoRepo,
-      configRepo: configRepo, prefs: prefs,
+      submitRepo: submitRepo,
+      feeRepo: feeRepo,
+      geoRepo: geoRepo,
+      configRepo: configRepo,
+      prefs: prefs,
     ),
     act: (bloc) => bloc.add(RegistrationStarted()),
     // Consecutive equal states are deduped by Bloc: the config-list emit (same
     // defaults) is not a separate emission.
     expect: () => [
-      predicate<RegistrationState>((s) => s.status == RegistrationStatus.ready && s.currentStep == 1 && s.draftRestored == false),
-      predicate<RegistrationState>((s) => s.feeStatus == FeeStatus.loaded && s.admissionFee == 500.0),
-      predicate<RegistrationState>((s) => s.propertyTypes == defaultPropertyTypes && s.geoData != null && s.geoError == false),
+      predicate<RegistrationState>((s) =>
+          s.status == RegistrationStatus.ready &&
+          s.currentStep == 1 &&
+          s.draftRestored == false),
+      predicate<RegistrationState>(
+          (s) => s.feeStatus == FeeStatus.loaded && s.admissionFee == 500.0),
+      predicate<RegistrationState>((s) =>
+          s.propertyTypes == defaultPropertyTypes &&
+          s.geoData != null &&
+          s.geoError == false),
     ],
   );
 
   blocTest<RegistrationBloc, RegistrationState>(
     'next is blocked while step 1 is invalid and errors stay on step 1',
     build: () => buildBloc(
-      submitRepo: submitRepo, feeRepo: feeRepo, geoRepo: geoRepo,
-      configRepo: configRepo, prefs: prefs,
+      submitRepo: submitRepo,
+      feeRepo: feeRepo,
+      geoRepo: geoRepo,
+      configRepo: configRepo,
+      prefs: prefs,
     ),
     act: (bloc) async {
       bloc.add(StepNextRequested());
     },
     seed: () => const RegistrationState(status: RegistrationStatus.ready),
     expect: () => [
-      predicate<RegistrationState>((s) => s.submitAttempted == true && s.stepErrors.isNotEmpty),
+      predicate<RegistrationState>(
+          (s) => s.submitAttempted == true && s.stepErrors.isNotEmpty),
     ],
   );
 
   blocTest<RegistrationBloc, RegistrationState>(
     'goToStep saves the draft with the new current step (saveNow on nav)',
     build: () => buildBloc(
-      submitRepo: submitRepo, feeRepo: feeRepo, geoRepo: geoRepo,
-      configRepo: configRepo, prefs: prefs,
+      submitRepo: submitRepo,
+      feeRepo: feeRepo,
+      geoRepo: geoRepo,
+      configRepo: configRepo,
+      prefs: prefs,
     ),
     act: (bloc) async {
       bloc.add(StepGoToRequested(2));
@@ -165,25 +210,33 @@ void main() {
       admissionFee: 500,
     ),
     verify: (_) {
-      verify(() => prefs.setRegistrationDraft(any(that: contains('"currentStep":2')))).called(1);
+      verify(() => prefs.setRegistrationDraft(
+          any(that: contains('"currentStep":2')))).called(1);
     },
   );
 
   blocTest<RegistrationBloc, RegistrationState>(
     'successful submit clears the draft and carries the reference id',
     build: () => buildBloc(
-      submitRepo: submitRepo, feeRepo: feeRepo, geoRepo: geoRepo,
-      configRepo: configRepo, prefs: prefs,
+      submitRepo: submitRepo,
+      feeRepo: feeRepo,
+      geoRepo: geoRepo,
+      configRepo: configRepo,
+      prefs: prefs,
     ),
     act: (bloc) async {
-      when(() => submitRepo.submit(any(), admissionFee: any(named: 'admissionFee'), subscription: any(named: 'subscription')))
+      when(() => submitRepo.submit(any(),
+              admissionFee: any(named: 'admissionFee'),
+              subscription: any(named: 'subscription')))
           .thenAnswer((_) async => const SubmissionResult(id: '42'));
       bloc.add(SubmitRequested());
     },
     seed: submitReadyState,
     expect: () => [
-      predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.submitting),
-      predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.success && s.successId == '42'),
+      predicate<RegistrationState>(
+          (s) => s.submitStatus == SubmitStatus.submitting),
+      predicate<RegistrationState>(
+          (s) => s.submitStatus == SubmitStatus.success && s.successId == '42'),
     ],
     verify: (_) {
       // The draft is cleared only when the success dialog is acknowledged.
@@ -194,11 +247,15 @@ void main() {
   blocTest<RegistrationBloc, RegistrationState>(
     'draft is cleared when submit success is acknowledged',
     build: () => buildBloc(
-      submitRepo: submitRepo, feeRepo: feeRepo, geoRepo: geoRepo,
-      configRepo: configRepo, prefs: prefs,
+      submitRepo: submitRepo,
+      feeRepo: feeRepo,
+      geoRepo: geoRepo,
+      configRepo: configRepo,
+      prefs: prefs,
     ),
     act: (bloc) => bloc.add(SubmitSuccessAcknowledged()),
-    seed: () => const RegistrationState(status: RegistrationStatus.ready, submitStatus: SubmitStatus.success),
+    seed: () => const RegistrationState(
+        status: RegistrationStatus.ready, submitStatus: SubmitStatus.success),
     verify: (_) {
       verify(() => prefs.clearRegistrationDraft()).called(1);
     },
@@ -207,11 +264,16 @@ void main() {
   blocTest<RegistrationBloc, RegistrationState>(
     '422 field errors jump to the offending step and surface items',
     build: () => buildBloc(
-      submitRepo: submitRepo, feeRepo: feeRepo, geoRepo: geoRepo,
-      configRepo: configRepo, prefs: prefs,
+      submitRepo: submitRepo,
+      feeRepo: feeRepo,
+      geoRepo: geoRepo,
+      configRepo: configRepo,
+      prefs: prefs,
     ),
     act: (bloc) async {
-      when(() => submitRepo.submit(any(), admissionFee: any(named: 'admissionFee'), subscription: any(named: 'subscription')))
+      when(() => submitRepo.submit(any(),
+              admissionFee: any(named: 'admissionFee'),
+              subscription: any(named: 'subscription')))
           .thenThrow(const ApiException(
         type: ApiExceptionType.validation,
         statusCode: 422,
@@ -222,26 +284,37 @@ void main() {
     seed: submitReadyState,
     // failure lands first (still on step 1), then the bloc jumps to step 2.
     expect: () => [
-      predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.submitting),
-      predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.failure && s.submitErrors.isNotEmpty),
-      predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.failure && s.currentStep == 2 && s.submitErrors.isNotEmpty),
+      predicate<RegistrationState>(
+          (s) => s.submitStatus == SubmitStatus.submitting),
+      predicate<RegistrationState>((s) =>
+          s.submitStatus == SubmitStatus.failure && s.submitErrors.isNotEmpty),
+      predicate<RegistrationState>((s) =>
+          s.submitStatus == SubmitStatus.failure &&
+          s.currentStep == 2 &&
+          s.submitErrors.isNotEmpty),
     ],
   );
 
   blocTest<RegistrationBloc, RegistrationState>(
     'network failure keeps the current step and yields a generic network item',
     build: () => buildBloc(
-      submitRepo: submitRepo, feeRepo: feeRepo, geoRepo: geoRepo,
-      configRepo: configRepo, prefs: prefs,
+      submitRepo: submitRepo,
+      feeRepo: feeRepo,
+      geoRepo: geoRepo,
+      configRepo: configRepo,
+      prefs: prefs,
     ),
     act: (bloc) async {
-      when(() => submitRepo.submit(any(), admissionFee: any(named: 'admissionFee'), subscription: any(named: 'subscription')))
+      when(() => submitRepo.submit(any(),
+              admissionFee: any(named: 'admissionFee'),
+              subscription: any(named: 'subscription')))
           .thenThrow(const ApiException(type: ApiExceptionType.network));
       bloc.add(SubmitRequested());
     },
     seed: submitReadyState,
     expect: () => [
-      predicate<RegistrationState>((s) => s.submitStatus == SubmitStatus.submitting),
+      predicate<RegistrationState>(
+          (s) => s.submitStatus == SubmitStatus.submitting),
       predicate<RegistrationState>((s) =>
           s.submitStatus == SubmitStatus.failure &&
           s.currentStep == 1 &&
@@ -252,15 +325,19 @@ void main() {
   blocTest<RegistrationBloc, RegistrationState>(
     'Started restores a saved draft (schema v1) at its last step without fee values',
     setUp: () {
-      final draftJson = '{"schemaVersion":1,"currentStep":4,"lastSaved":"2026-10-07T10:00:00Z","formValue":{'
+      final draftJson =
+          '{"schemaVersion":1,"currentStep":4,"lastSaved":"2026-10-07T10:00:00Z","formValue":{'
           '"fullName":"Md Kamrul","admissionFee":999,"subscription":123,'
           '"nominees":[{"name":"N","relation":"","mobile":"","address":""}],'
           '"properties":[]}}';
       when(() => prefs.registrationDraft).thenReturn(draftJson);
     },
     build: () => buildBloc(
-      submitRepo: submitRepo, feeRepo: feeRepo, geoRepo: geoRepo,
-      configRepo: configRepo, prefs: prefs,
+      submitRepo: submitRepo,
+      feeRepo: feeRepo,
+      geoRepo: geoRepo,
+      configRepo: configRepo,
+      prefs: prefs,
     ),
     act: (bloc) => bloc.add(RegistrationStarted()),
     expect: () => [
@@ -276,7 +353,8 @@ void main() {
 
   test('draft encode/decode drops fee fields and keeps file metadata only', () {
     final service = RegistrationDraftService(preferences: prefs);
-    final form = validForm(properties: 1).copyWith(receiptFile: const FileRef(fileName: 'r.pdf', path: '/tmp/r.pdf'));
+    final form = validForm(properties: 1).copyWith(
+        receiptFile: const FileRef(fileName: 'r.pdf', path: '/tmp/r.pdf'));
     final encoded = service.encodeForm(form);
     expect(encoded.containsKey('admissionFee'), isFalse);
     expect(encoded.containsKey('subscription'), isFalse);
@@ -286,7 +364,8 @@ void main() {
 
     final decoded = service.decodeForm(Map<String, dynamic>.from(encoded));
     expect(decoded.fullName, 'Md Kamrul');
-    expect(decoded.properties.single.applicableDocs.single.type, 'খতিয়ান/পর্চা');
+    expect(
+        decoded.properties.single.applicableDocs.single.type, 'খতিয়ান/পর্চা');
     // Restored files are metadata-only: no path until re-attached.
     expect(decoded.properties.single.applicableDocs.single.hasFile, isFalse);
     expect(decoded.memberSignature, isEmpty);

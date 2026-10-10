@@ -6055,4 +6055,10 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get plotMapTimelineRejectionNote => 'অ্যাডমিনের মন্তব্য';
+
+  @override
+  String get plotMapDrawLoadError => 'আপনার প্লট ও সীমানা লোড করা যায়নি।';
+
+  @override
+  String get plotMapSearchClear => 'অনুসন্ধান মুছুন';
 }

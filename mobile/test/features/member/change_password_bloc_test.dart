@@ -50,12 +50,13 @@ void main() {
     blocTest<ChangePasswordBloc, ChangePasswordState>(
       'emits success when the API call succeeds',
       build: () {
-        when(() => repo.changePassword(currentPassword: any(named: 'currentPassword'),
-                newPassword: any(named: 'newPassword')))
-            .thenAnswer((_) async {});
+        when(() => repo.changePassword(
+            currentPassword: any(named: 'currentPassword'),
+            newPassword: any(named: 'newPassword'))).thenAnswer((_) async {});
         return ChangePasswordBloc(repository: repo);
       },
-      act: (bloc) => bloc.add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
+      act: (bloc) => bloc
+          .add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
       expect: () => [
         predicate<ChangePasswordState>((s) => s.submitting && !s.success),
         predicate<ChangePasswordState>((s) => !s.submitting && s.success),
@@ -65,7 +66,8 @@ void main() {
     blocTest<ChangePasswordBloc, ChangePasswordState>(
       'maps 422 field errors to camelCase controls (current_password/new_password)',
       build: () {
-        when(() => repo.changePassword(currentPassword: any(named: 'currentPassword'),
+        when(() => repo.changePassword(
+                currentPassword: any(named: 'currentPassword'),
                 newPassword: any(named: 'newPassword')))
             .thenThrow(const ApiException(
           type: ApiExceptionType.validation,
@@ -76,7 +78,8 @@ void main() {
         ));
         return ChangePasswordBloc(repository: repo);
       },
-      act: (bloc) => bloc.add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
+      act: (bloc) => bloc
+          .add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
       expect: () => [
         predicate<ChangePasswordState>((s) => s.submitting),
         predicate<ChangePasswordState>((s) =>
@@ -89,16 +92,18 @@ void main() {
     blocTest<ChangePasswordBloc, ChangePasswordState>(
       'maps network failure to the generic error state',
       build: () {
-        when(() => repo.changePassword(currentPassword: any(named: 'currentPassword'),
+        when(() => repo.changePassword(
+                currentPassword: any(named: 'currentPassword'),
                 newPassword: any(named: 'newPassword')))
             .thenThrow(const ApiException(type: ApiExceptionType.network));
         return ChangePasswordBloc(repository: repo);
       },
-      act: (bloc) => bloc.add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
+      act: (bloc) => bloc
+          .add(const ChangePasswordSubmitted(current: 'old', next: 'Newpass1')),
       expect: () => [
         predicate<ChangePasswordState>((s) => s.submitting),
-        predicate<ChangePasswordState>((s) =>
-            !s.submitting && s.generalError && !s.success),
+        predicate<ChangePasswordState>(
+            (s) => !s.submitting && s.generalError && !s.success),
       ],
     );
   });

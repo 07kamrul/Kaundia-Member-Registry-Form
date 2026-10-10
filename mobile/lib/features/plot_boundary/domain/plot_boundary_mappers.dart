@@ -24,7 +24,8 @@ extension MapFeatureDtoX on MapFeatureDto {
 }
 
 extension PlotMapResponseDtoX on PlotMapResponseDto {
-  ({String? en, String? bn}) get disclaimers => (en: disclaimerEn, bn: disclaimerBn);
+  ({String? en, String? bn}) get disclaimers =>
+      (en: disclaimerEn, bn: disclaimerBn);
 
   List<BoundaryFeature> toEntities() =>
       [for (final f in features) f.toEntity()];
@@ -56,6 +57,10 @@ extension MyBoundaryDtoX on MyBoundaryDto {
         areaShotangsho: areaShotangsho,
         currentVersion: currentVersion,
         reviewNote: reviewNote,
+        hasPending: hasPending,
+        liveStatus: liveStatus == null
+            ? null
+            : BoundaryStatusX.fromName(liveStatus),
         rsDag: rsDag,
         csDag: csDag,
         landQuantity: landQuantity,

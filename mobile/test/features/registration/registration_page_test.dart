@@ -50,7 +50,8 @@ void main() {
     );
   }
 
-  testWidgets('payment step shows the admission fee read-only from the live fee setting',
+  testWidgets(
+      'payment step shows the admission fee read-only from the live fee setting',
       (tester) async {
     await tester.pumpWidget(host(const RegistrationState(
       status: RegistrationStatus.ready,
@@ -69,8 +70,10 @@ void main() {
     expect(textField.controller!.text, '500');
   });
 
-  testWidgets('fee is never restored from a draft: the field renders only the '
-      'live setting, and a restored-looking form carries no fee value', (tester) async {
+  testWidgets(
+      'fee is never restored from a draft: the field renders only the '
+      'live setting, and a restored-looking form carries no fee value',
+      (tester) async {
     // The form value below pretends it came from a draft that (incorrectly)
     // carried a fee; the payment step must not read any fee from the form.
     await tester.pumpWidget(host(const RegistrationState(

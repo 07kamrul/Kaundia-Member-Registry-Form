@@ -6065,4 +6065,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plotMapTimelineRejectionNote => 'Admin\'s note';
+
+  @override
+  String get plotMapDrawLoadError =>
+      'Could not load your plots and boundaries.';
+
+  @override
+  String get plotMapSearchClear => 'Clear search';
 }

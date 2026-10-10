@@ -73,7 +73,8 @@ void main() {
   });
 
   test('enum names round-trip', () {
-    for (final p in NeighbourPosition.values.where((p) => p != NeighbourPosition.unknown)) {
+    for (final p in NeighbourPosition.values
+        .where((p) => p != NeighbourPosition.unknown)) {
       expect(NeighbourPositionX.fromName(p.apiName), p);
     }
     expect(DagTypeX.fromName('cs'), DagType.cs);

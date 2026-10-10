@@ -101,8 +101,7 @@ void main() {
         isA<PlotMapState>().having((s) => s.bbox, 'bbox', bbox),
         isA<PlotMapState>()
             .having((s) => s.status, 'status', PlotMapStatus.loading),
-        isA<PlotMapState>()
-            .having((s) => s.bbox?.minLng, 'bbox.minLng', 90.31),
+        isA<PlotMapState>().having((s) => s.bbox?.minLng, 'bbox.minLng', 90.31),
         isA<PlotMapState>()
             .having((s) => s.status, 'status', PlotMapStatus.loaded),
       ],
@@ -137,8 +136,8 @@ void main() {
       expect: () => [
         isA<PlotMapState>()
             .having((s) => s.selectedBoundaryId, 'selected', 'b1'),
-        isA<PlotMapState>()
-            .having((s) => s.ownerStatus, 'ownerStatus', OwnerLoadStatus.loading),
+        isA<PlotMapState>().having(
+            (s) => s.ownerStatus, 'ownerStatus', OwnerLoadStatus.loading),
         isA<PlotMapState>()
             .having((s) => s.ownerStatus, 'ownerStatus', OwnerLoadStatus.loaded)
             .having((s) => s.owner?.ownerName, 'owner', 'Rahim')
@@ -149,14 +148,14 @@ void main() {
     blocTest<PlotMapBloc, PlotMapState>(
       'hidden contact stays in the entity; the UI decides what to show',
       build: () {
-        when(() => repo.getOwner(any())).thenAnswer((_) async =>
-            const BoundaryOwner(
-              boundaryId: 'b1',
-              ownerName: 'Rahim',
-              mobile: null,
-              contactHidden: true,
-              status: BoundaryStatus.approved,
-            ));
+        when(() => repo.getOwner(any()))
+            .thenAnswer((_) async => const BoundaryOwner(
+                  boundaryId: 'b1',
+                  ownerName: 'Rahim',
+                  mobile: null,
+                  contactHidden: true,
+                  status: BoundaryStatus.approved,
+                ));
         return build();
       },
       act: (b) => b.add(const PlotMapOwnerRequested('b1')),
@@ -183,7 +182,8 @@ void main() {
       skip: 1,
       expect: () => [
         isA<PlotMapState>()
-            .having((s) => s.ownerStatus, 'ownerStatus', OwnerLoadStatus.failure)
+            .having(
+                (s) => s.ownerStatus, 'ownerStatus', OwnerLoadStatus.failure)
             .having((s) => s.ownerFailureKind, 'ownerFailureKind',
                 PlotBoundaryFailureKind.rateLimited),
       ],

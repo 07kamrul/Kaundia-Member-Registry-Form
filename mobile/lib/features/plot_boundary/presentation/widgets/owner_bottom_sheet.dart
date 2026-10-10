@@ -26,9 +26,13 @@ class BoundaryOwnerSheet extends StatelessWidget {
     required this.onWhatsApp,
     required this.onReport,
     required this.onRetry,
+    this.reported = false,
   });
 
   final OwnerLoadStatus status;
+
+  /// The member already reported this plot in this session.
+  final bool reported;
   final BoundaryOwner? owner;
 
   /// Message shown when the lookup failed.
@@ -70,17 +74,55 @@ class BoundaryOwnerSheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: theme.colorScheme.primaryContainer,
                 child: Text(
-                  o?.ownerName ?? '—',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  _initial(o?.ownerName),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
                 ),
               ),
-              if (feature != null)
-                StatusBadge(kind: _badgeKind(feature!), label: _badgeLabel(context, feature!)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      o?.ownerName ?? '—',
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      'RS: ${orDash(o?.rsDag)} · CS: ${orDash(o?.csDag)}',
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
+          if (feature != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  if (feature!.isMine)
+                    StatusBadge(
+                      kind: StatusKind.pending,
+                      label: loc.boundaryStatusMine,
+                    ),
+                  StatusBadge(
+                    kind: _statusKind(feature!.status),
+                    label: _statusLabel(context, feature!.status),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 8),
           if (showContact) ...[
             _line(context, Icons.phone_outlined, loc.boundaryMobile,
@@ -118,21 +160,28 @@ class BoundaryOwnerSheet extends StatelessWidget {
             ),
           const SizedBox(height: 8),
           if (o != null && (o.areaSqm != null || o.areaShotangsho != null))
-            _line(
-                context,
-                Icons.square_foot_outlined,
-                loc.boundaryAreaLabel,
+            _line(context, Icons.square_foot_outlined, loc.boundaryAreaLabel,
                 _areaText(context, loc, o)),
           _line(context, Icons.square_foot_outlined, loc.boundaryLandQuantity,
               orDash(o?.landQuantity)),
           _line(context, Icons.tag, loc.boundaryRsDag, orDash(o?.rsDag)),
           _line(context, Icons.tag, loc.boundaryCsDag, orDash(o?.csDag)),
           const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: onReport,
-            icon: const Icon(Icons.flag_outlined),
-            label: Text(loc.boundaryReport),
-          ),
+          if (reported)
+            Row(
+              children: [
+                const Icon(Icons.check_circle,
+                    size: 18, color: Color(0xFF2E7D32)),
+                const SizedBox(width: 8),
+                Expanded(child: Text(loc.boundaryReportSent)),
+              ],
+            )
+          else
+            OutlinedButton.icon(
+              onPressed: onReport,
+              icon: const Icon(Icons.flag_outlined),
+              label: Text(loc.boundaryReport),
+            ),
         ],
       );
     }
@@ -154,29 +203,34 @@ class BoundaryOwnerSheet extends StatelessWidget {
     );
   }
 
-  StatusKind _badgeKind(BoundaryFeature f) {
-    if (f.isMine) return StatusKind.pending;
-    return switch (f.status) {
-      BoundaryStatus.approved => StatusKind.approved,
-      BoundaryStatus.disputed => StatusKind.rejected,
-      BoundaryStatus.rejected => StatusKind.neutral,
-      BoundaryStatus.pendingReview || BoundaryStatus.draft => StatusKind.pending,
-    };
+  static String _initial(String? name) {
+    final trimmed = name?.trim() ?? '';
+    return trimmed.isEmpty ? '?' : String.fromCharCode(trimmed.runes.first);
   }
 
-  String _badgeLabel(BuildContext context, BoundaryFeature f) {
+  StatusKind _statusKind(BoundaryStatus status) => switch (status) {
+        BoundaryStatus.approved => StatusKind.approved,
+        BoundaryStatus.disputed => StatusKind.rejected,
+        BoundaryStatus.rejected => StatusKind.neutral,
+        BoundaryStatus.pendingReview ||
+        BoundaryStatus.draft =>
+          StatusKind.pending,
+      };
+
+  String _statusLabel(BuildContext context, BoundaryStatus status) {
     final loc = AppLocalizations.of(context);
-    if (f.isMine) return loc.boundaryStatusMine;
-    return switch (f.status) {
+    return switch (status) {
       BoundaryStatus.approved => loc.boundaryStatusApproved,
       BoundaryStatus.disputed => loc.boundaryStatusDisputed,
       BoundaryStatus.rejected => loc.boundaryStatusRejected,
-      BoundaryStatus.pendingReview || BoundaryStatus.draft =>
+      BoundaryStatus.pendingReview ||
+      BoundaryStatus.draft =>
         loc.boundaryStatusPendingReview,
     };
   }
 
-  String _areaText(BuildContext context, AppLocalizations loc, BoundaryOwner o) {
+  String _areaText(
+      BuildContext context, AppLocalizations loc, BoundaryOwner o) {
     final sqm = o.areaSqm != null
         ? formatDigits(context, o.areaSqm!.toStringAsFixed(1))
         : '—';

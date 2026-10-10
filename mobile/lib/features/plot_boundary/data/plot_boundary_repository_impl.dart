@@ -70,7 +70,8 @@ class PlotBoundaryRepositoryImpl implements PlotBoundaryRepository {
 
   @override
   Future<void> withdrawBoundary(String id) async {
-    await _api.post('/member/plot-boundaries/$id/withdraw', <String, dynamic>{});
+    await _api
+        .post('/member/plot-boundaries/$id/withdraw', <String, dynamic>{});
   }
 
   @override
@@ -88,7 +89,8 @@ class PlotBoundaryRepositoryImpl implements PlotBoundaryRepository {
 
   @override
   Future<void> reportProblem(String boundaryId, String note) async {
-    await _api.post('/member/plot-boundaries/$boundaryId/report', {'note': note});
+    await _api
+        .post('/member/plot-boundaries/$boundaryId/report', {'note': note});
   }
 
   @override

@@ -517,6 +517,7 @@ async def admin_delete_boundary(
     boundary.deleted_at = _now_iso()
     boundary.pending_version_id = None
     boundary.status = ReviewStatus.REJECTED.value  # historical marker; row is kept
+    boundary.current_version += 1  # unique (boundary_id, version) — must not collide
     db.add(
         _new_version(
             boundary,

@@ -34,7 +34,8 @@ void main() {
   final entries = [
     _entry('1', 'submission.approve', 'submission', '2026-01-10T05:00:00Z'),
     _entry('2', 'submission.reject', 'submission', '2026-01-20T05:00:00Z'),
-    _entry('3', 'member.create', 'member', '2026-02-05T05:00:00Z', actorId: '4'),
+    _entry('3', 'member.create', 'member', '2026-02-05T05:00:00Z',
+        actorId: '4'),
     _entry('4', 'role.update', 'role', '2026-02-06T05:00:00Z', actorId: null),
   ];
 
@@ -44,7 +45,8 @@ void main() {
           for (final e in entries)
             {
               'id': int.parse(e.id),
-              'actor_admin_id': e.actorAdminId == null ? null : int.parse(e.actorAdminId!),
+              'actor_admin_id':
+                  e.actorAdminId == null ? null : int.parse(e.actorAdminId!),
               'action': e.action,
               'entity_type': e.entityType,
               'entity_id': e.entityId,
@@ -69,14 +71,15 @@ void main() {
     build: () => bloc,
     act: (bloc) => bloc.add(const AuditLogStarted()),
     expect: () => [
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.loading),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.loading),
       isA<AuditLogState>()
           .having((s) => s.status, 'status', AuditLogStatus.ready)
           .having((s) => s.entries.length, 'entries.length', 4)
           .having((s) => s.total, 'total', 4)
           .having((s) => s.loadFailed, 'loadFailed', false),
-      isA<AuditLogState>()
-          .having((s) => s.actorLabels['3'], 'actor label', 'Karim (administrator)'),
+      isA<AuditLogState>().having(
+          (s) => s.actorLabels['3'], 'actor label', 'Karim (administrator)'),
     ],
   );
 
@@ -89,12 +92,14 @@ void main() {
     build: () => bloc,
     act: (bloc) => bloc.add(const AuditLogStarted()),
     expect: () => [
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.loading),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.loading),
       isA<AuditLogState>()
           .having((s) => s.status, 'status', AuditLogStatus.failure)
           .having((s) => s.loadFailed, 'loadFailed', true),
       // actor enrichment still attempted and applied
-      isA<AuditLogState>().having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
+      isA<AuditLogState>()
+          .having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
     ],
   );
 
@@ -108,11 +113,15 @@ void main() {
       await pumpEventQueue();
     },
     expect: () => [
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.loading),
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.ready),
-      isA<AuditLogState>().having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
       isA<AuditLogState>()
-          .having((s) => s.filters.action, 'filters.action', 'submission.approve')
+          .having((s) => s.status, 'status', AuditLogStatus.loading),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.ready),
+      isA<AuditLogState>()
+          .having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
+      isA<AuditLogState>()
+          .having(
+              (s) => s.filters.action, 'filters.action', 'submission.approve')
           .having((s) => s.total, 'total', 1)
           .having((s) => s.page, 'page', 1),
     ],
@@ -131,9 +140,12 @@ void main() {
       await pumpEventQueue();
     },
     expect: () => [
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.loading),
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.ready),
-      isA<AuditLogState>().having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.loading),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.ready),
+      isA<AuditLogState>()
+          .having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
       isA<AuditLogState>().having((s) => s.total, 'total', 1),
     ],
   );
@@ -149,9 +161,12 @@ void main() {
       await pumpEventQueue();
     },
     expect: () => [
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.loading),
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.ready),
-      isA<AuditLogState>().having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.loading),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.ready),
+      isA<AuditLogState>()
+          .having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
       isA<AuditLogState>()
           .having((s) => s.pageSize, 'pageSize', 2)
           .having((s) => s.page, 'page', 1)
@@ -177,9 +192,12 @@ void main() {
       await pumpEventQueue();
     },
     expect: () => [
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.loading),
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.ready),
-      isA<AuditLogState>().having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.loading),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.ready),
+      isA<AuditLogState>()
+          .having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
       isA<AuditLogState>()
           .having((s) => s.filters.entityType, 'filters.entityType', 'member')
           .having((s) => s.total, 'total', 1),
@@ -200,16 +218,24 @@ void main() {
       await pumpEventQueue();
     },
     expect: () => [
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.loading),
-      isA<AuditLogState>().having((s) => s.status, 'status', AuditLogStatus.ready),
-      isA<AuditLogState>().having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.loading),
+      isA<AuditLogState>()
+          .having((s) => s.status, 'status', AuditLogStatus.ready),
+      isA<AuditLogState>()
+          .having((s) => s.actorLabels, 'actorLabels', isNotEmpty),
     ],
   );
 
   test('distinct lists are sorted and de-duplicated', () async {
     bloc.add(const AuditLogStarted());
     await pumpEventQueue();
-    expect(bloc.state.distinctActions, ['member.create', 'role.update', 'submission.approve', 'submission.reject']);
+    expect(bloc.state.distinctActions, [
+      'member.create',
+      'role.update',
+      'submission.approve',
+      'submission.reject'
+    ]);
     expect(bloc.state.distinctActors, ['3', '4']);
     expect(bloc.state.distinctEntityTypes, ['member', 'role', 'submission']);
     expect(bloc.state.actorLabel('3'), 'Karim (administrator)');
