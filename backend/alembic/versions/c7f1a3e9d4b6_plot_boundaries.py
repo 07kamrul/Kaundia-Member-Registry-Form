@@ -70,6 +70,7 @@ def upgrade() -> None:
         sa.Column("changed_by_member_id", sa.Integer(), sa.ForeignKey("members.id", ondelete="SET NULL")),
         sa.Column("changed_by_admin_id", sa.Integer(), sa.ForeignKey("admin_users.id", ondelete="SET NULL")),
         sa.Column("note", sa.Text(), nullable=True),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
     op.create_index("ix_plot_boundary_versions_boundary_id", "plot_boundary_versions", ["boundary_id"])
     op.create_index(
