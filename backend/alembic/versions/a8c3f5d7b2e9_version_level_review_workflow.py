@@ -108,7 +108,7 @@ def upgrade() -> None:
     op.execute(
         """
         UPDATE plot_boundaries SET status = CASE
-            WHEN is_deleted = 1 THEN 'rejected'
+            WHEN is_deleted THEN 'rejected'
             WHEN pending_version_id IS NOT NULL THEN 'pending'
             WHEN live_version_id IS NOT NULL THEN 'approved'
             ELSE 'rejected'
