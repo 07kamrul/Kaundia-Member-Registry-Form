@@ -11,7 +11,7 @@ One-time migration for the KAM-YYYY-NNNN -> UKAMKS-N change:
 - rewrites old ids appearing in audit_logs detail strings,
 - records every old->new pair in member_id_migrations for support lookups.
 
-Idempotence: a member whose id already matches ^UKAMKS-\d+$ is left alone.
+Idempotence: a member whose id already matches ^UKAMKS-\\d+$ is left alone.
 
 Revision ID: b8e2c4a6d9f1
 Revises: e7a9c1d3f5b2

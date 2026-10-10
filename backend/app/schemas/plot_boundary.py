@@ -9,6 +9,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.models.plot_boundary import PlotBoundaryVersion
+
 DISCLAIMER_EN = (
     "This is a member-marked approximate boundary; it is not a substitute for "
     "an official survey or legal documents."
@@ -101,7 +103,7 @@ class BoundaryVersionOut(BaseModel):
     created_at: datetime
 
 
-def version_out(v: PlotBoundaryVersionLike) -> BoundaryVersionOut:
+def version_out(v: PlotBoundaryVersion) -> BoundaryVersionOut:
     return BoundaryVersionOut(
         id=v.id,
         version=v.version,
