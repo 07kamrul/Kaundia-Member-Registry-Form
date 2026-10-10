@@ -104,6 +104,7 @@ class Settings(BaseSettings):
     # Must stay above the dataset size (6.8k BDS dags + 2.5k RAJUK RS plots):
     # the whole mouza is visible in one viewport, and a lower cap silently
     # drops sheets from the map (the client only gets `truncated: true`).
+    shared_data_dir: str = Field(default="data/shared", validation_alias="SHARED_DATA_DIR")
     land_map_result_cap: int = Field(default=10_000, ge=1, validation_alias="LAND_MAP_RESULT_CAP")
 
     @model_validator(mode="after")

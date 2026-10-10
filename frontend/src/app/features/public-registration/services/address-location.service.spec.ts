@@ -5,6 +5,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { AddressLocationService } from './address-location.service';
+import { environment } from '../../../../environments/environment';
 import { RegistrationService } from '../../../core/services/registration.service';
 
 describe('AddressLocationService', () => {
@@ -30,7 +31,7 @@ describe('AddressLocationService', () => {
   it('streams divisions and filters districts by division name (bn or en)', () => {
     let divisions: unknown[] = [];
     service.getDivisions().subscribe((d) => (divisions = d));
-    http.expectOne('/data/bd-geo.json').flush(GEO);
+    http.expectOne(`${environment.apiBaseUrl}/data/bd-geo.json`).flush(GEO);
     expect(divisions).toEqual([GEO.divisions[0]]);
 
     let byBnName: unknown[] = ['sentinel'];
@@ -53,7 +54,7 @@ describe('AddressLocationService', () => {
   it('caches the geo JSON: later lookups reuse the same request', () => {
     let divisions: unknown[] = [];
     service.getDivisions().subscribe((d) => (divisions = d));
-    const req = http.expectOne('/data/bd-geo.json');
+    const req = http.expectOne(`${environment.apiBaseUrl}/data/bd-geo.json`);
     req.flush(GEO);
     expect(divisions).toEqual(GEO.divisions);
     http.verify(); // no second request for a re-subscription

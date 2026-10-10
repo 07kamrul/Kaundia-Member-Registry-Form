@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Fetch khatian (ownership) data for every Uttar Kaundia BDS dag from
-settlement.gov.bd and build frontend/public/data/khatians.json.
+settlement.gov.bd and build backend/data/shared/khatians.json.
 
 Dev-only companion to ingest.py. Raw responses are cached line-by-line in
 data/_raw/khatians_raw.jsonl, so the run is resumable and reviewable:
@@ -24,7 +24,7 @@ except ImportError:
 
 REPO = Path(__file__).resolve().parents[2]
 RAW_PATH = REPO / "data" / "_raw" / "khatians_raw.jsonl"
-OUT_PATH = REPO / "frontend" / "public" / "data" / "khatians.json"
+OUT_PATH = REPO / "backend" / "data" / "shared" / "khatians.json"
 INDEX_PATH = REPO / "backend" / "data" / "uttar-kaundia" / "dag-index.json"
 
 BASE = "https://settlement.gov.bd"

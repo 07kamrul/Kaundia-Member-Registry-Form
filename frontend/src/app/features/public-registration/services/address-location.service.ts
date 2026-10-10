@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map, shareReplay } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface Division {
   id: string;
@@ -32,7 +33,7 @@ export class AddressLocationService {
   private readonly http = inject(HttpClient);
 
   private readonly geoData$: Observable<BdGeoData> = this.http
-    .get<BdGeoData>('/data/bd-geo.json')
+    .get<BdGeoData>(`${environment.apiBaseUrl}/data/bd-geo.json`)
     .pipe(shareReplay(1));
 
   getDivisions(): Observable<Division[]> {

@@ -32,8 +32,8 @@ class GeoData {
 }
 
 /// Port of Angular AddressLocationService. The Angular app fetches
-/// `/data/bd-geo.json` from its own web origin; the mobile app loads the same
-/// file from the API origin with the `/api` suffix stripped (uploadsBaseUrl).
+/// `bd-geo.json`; both clients now load it from the shared
+/// `/api/data/bd-geo.json` endpoint (backend/data/shared/).
 /// Data is cached in memory for the session.
 class GeoRepository {
   GeoRepository({required ApiClient apiClient}) : _apiClient = apiClient;

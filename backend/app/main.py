@@ -16,6 +16,7 @@ from app.api.routes import (
     admin,
     auth,
     land_data,
+    shared_data,
     fee_payments,
     finance,
     installment_payments,
@@ -149,6 +150,7 @@ app.include_router(installment_payments.router, prefix=api_router_prefix)
 app.include_router(fee_payments.router, prefix=api_router_prefix)
 app.include_router(plot_map.router, prefix=api_router_prefix)
 app.include_router(land_data.router, prefix=api_router_prefix)
+app.include_router(shared_data.router, prefix=api_router_prefix)
 app.include_router(plot_boundary_admin.router, prefix=api_router_prefix)
 
 app.mount("/uploads", UploadStaticFiles(), name="uploads")

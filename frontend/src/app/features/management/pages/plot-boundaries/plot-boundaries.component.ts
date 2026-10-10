@@ -390,8 +390,17 @@ export class PlotBoundariesComponent implements OnInit {
     this.editOverlaps.set([]);
     this.editConfirmOverlap.set(false);
     this.editDrawing.set(false);
-    // The edit map renders after the modal paints.
-    setTimeout(() => this.initEditMap(boundary));
+    // The modal paints on the next change-detection cycle, which can land
+    // after setTimeout(0) - poll briefly for the map container instead.
+    const tryInit = (attempt: number): void => {
+      if (!this.editOpen() || this.editMap) return;
+      if (document.querySelector('.edit-shape-map')) {
+        this.initEditMap(boundary);
+      } else if (attempt < 20) {
+        setTimeout(() => tryInit(attempt + 1), 50);
+      }
+    };
+    setTimeout(() => tryInit(0));
   }
 
   // ---- Edit-shape map (draw to update the GeoJSON) -------------------------
@@ -417,6 +426,9 @@ export class PlotBoundariesComponent implements OnInit {
       { color: PlotBoundariesComponent.EDIT_COLOR, weight: 2, fillOpacity: 0.3 },
     ).addTo(map);
     this.editLayer = layer;
+    // Settle the view before enabling geoman - enabling while the fitBounds
+    // zoom animation is in flight leaves the edit handles silently disabled.
+    map.fitBounds(layer.getBounds().pad(0.3), { animate: false });
     layer.pm.enable({
       allowSelfIntersection: false,
       allowRemoval: false,
@@ -424,7 +436,6 @@ export class PlotBoundariesComponent implements OnInit {
     layer.on('pm:edit pm:vertexadded pm:vertexremoved', () =>
       this.zone.run(() => this.syncEditGeometry()),
     );
-    map.fitBounds(layer.getBounds().pad(0.3));
     this.syncEditGeometry();
   }
 

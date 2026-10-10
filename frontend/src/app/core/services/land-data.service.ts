@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-/** One khatian record of a dag, as stored in public/data/khatians.json. */
+/** One khatian record of a dag, as stored in backend/data/shared/khatians.json. */
 export interface KhatianEntry {
   /** Khatian number (ASCII digits). */
   no: string;
@@ -58,7 +58,7 @@ export class LandDataService {
    */
   khatians(): Observable<KhatianCatalog> {
     this.khatianCatalog$ ??= this.http
-      .get<KhatianCatalog>('data/khatians.json')
+      .get<KhatianCatalog>(`${environment.apiBaseUrl}/data/khatians.json`)
       .pipe(shareReplay(1));
     return this.khatianCatalog$;
   }

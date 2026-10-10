@@ -167,6 +167,12 @@ export class PlotMapComponent implements AfterViewInit {
   readonly search = signal('');
   readonly myLocationError = signal(false);
   readonly outsideSociety = signal(false);
+  /** Dag of the currently open BDS popup; lets a bbox re-render re-open it on
+   * the freshly created polygon instead of dropping the user's card. */
+  private openBdsDag: string | null = null;
+  /** True while a re-render re-opens the carried-over popup, so the close
+   * handler doesn't mistake it for a user dismiss. */
+  private reopeningPopup = false;
 
   // Polygon details sheet ("popup" rendered by Angular so it can be a bottom
   // sheet on touch screens and is fully testable).
@@ -352,6 +358,22 @@ export class PlotMapComponent implements AfterViewInit {
     map.on('moveend', () => {
       if (this.moveDebounce) clearTimeout(this.moveDebounce);
       this.moveDebounce = setTimeout(() => this.zone.run(() => this.onViewMoved()), MOVE_DEBOUNCE_MS);
+    });
+    // Leaflet auto-pans once when a popup opens, but the BDS card grows after
+    // the khatian rows stream in and can end up sliding under the floating top
+    // bar. Re-running the layout after the open settles (and again next frame
+    // for async content) keeps the card fully below the bar.
+    map.on('popupopen', (event: L.PopupEvent) => {
+      const popup = event.popup;
+      const dag = popup.getElement()?.querySelector<HTMLElement>('.bds-popup')?.dataset['dag'];
+      this.openBdsDag = dag ?? null;
+      setTimeout(() => popup.update(), MOVE_DEBOUNCE_MS + 50);
+      requestAnimationFrame(() => popup.update());
+    });
+    map.on('popupclose', () => {
+      // Only an explicit user close should forget the card; re-renders close
+      // the popup as a side effect and immediately re-open it.
+      if (!this.reopeningPopup) this.openBdsDag = null;
     });
     map.on('zoomend', () => this.zone.runOutsideAngular(() => this.updateBdsLabels()));
     map.on('move', () => this.updateSheetPos());
@@ -539,6 +561,9 @@ export class PlotMapComponent implements AfterViewInit {
   private renderBds(collection: LandFeatureCollection): void {
     const map = this.map;
     if (!map) return;
+    // The open popup belongs to a polygon that is about to be replaced; carry
+    // it over so a background data refresh doesn't slam the card shut.
+    const reopenDag = this.openBdsDag;
     this.removeBdsLayer();
     this.bdsLayer = L.geoJSON(collection as never, {
       style: (feature) =>
@@ -549,6 +574,15 @@ export class PlotMapComponent implements AfterViewInit {
           this.externalPopupOptions(),
         ),
     }).addTo(map);
+    if (reopenDag) {
+      this.reopeningPopup = true;
+      this.bdsLayer.eachLayer((child: L.Layer) => {
+        const dag = (child as { feature?: { properties?: { dag?: string } } }).feature?.properties
+          ?.dag;
+        if (dag === reopenDag) (child as L.Polygon).openPopup();
+      });
+      this.reopeningPopup = false;
+    }
     this.updateBdsLabels();
   }
 
@@ -594,7 +628,7 @@ export class PlotMapComponent implements AfterViewInit {
 
   /** Settlement-portal style dag information card (mirrors settlement.gov.bd):
    * blue title bar, orange section headings, a land info table and a khatian
-   * table whose rows come from public/data/khatians.json. */
+   * table whose rows come from backend/data/shared/khatians.json. */
   private bdsPopupHtml(feature: LandPlotFeature, layer: L.Polygon): HTMLElement {
     const props = feature.properties ?? {};
     const dagRaw = String(props.dag ?? props.label_bn ?? '');
@@ -610,6 +644,7 @@ export class PlotMapComponent implements AfterViewInit {
 
     const root = document.createElement('div');
     root.className = 'bds-popup';
+    root.dataset['dag'] = dagRaw;
     root.innerHTML = `
       <div class="bds-popup-header">${escapeHtml(t('bdsHeader', { dag }))}</div>
       <div class="bds-popup-body">
@@ -657,22 +692,27 @@ export class PlotMapComponent implements AfterViewInit {
           if (!entries?.length) {
             tbody.innerHTML = `
               <tr><td colspan="3" class="bds-khatian-note">${escapeHtml(t('khatianNote'))}</td></tr>`;
-            return;
+          } else {
+            tbody.innerHTML = entries
+              .map((entry) => {
+                const owners = entry.owners.length ? entry.owners : [''];
+                const span = owners.length;
+                const noCell = `<td rowspan="${span}" class="bds-khatian-no">${escapeHtml(this.digits(entry.no))}</td>`;
+                const statusCell = `<td rowspan="${span}" class="bds-khatian-status">${escapeHtml(entry.status)}</td>`;
+                const rows = owners.map(
+                  (name) => `<tr><td>${escapeHtml(name)}</td></tr>`,
+                );
+                rows[0] = rows[0].replace('<tr>', `<tr>${noCell}`);
+                rows[0] = rows[0].replace('</tr>', `${statusCell}</tr>`);
+                return rows.join('');
+              })
+              .join('');
           }
-          tbody.innerHTML = entries
-            .map((entry) => {
-              const owners = entry.owners.length ? entry.owners : [''];
-              const span = owners.length;
-              const noCell = `<td rowspan="${span}" class="bds-khatian-no">${escapeHtml(this.digits(entry.no))}</td>`;
-              const statusCell = `<td rowspan="${span}" class="bds-khatian-status">${escapeHtml(entry.status)}</td>`;
-              const rows = owners.map(
-                (name) => `<tr><td>${escapeHtml(name)}</td></tr>`,
-              );
-              rows[0] = rows[0].replace('<tr>', `<tr>${noCell}`);
-              rows[0] = rows[0].replace('</tr>', `${statusCell}</tr>`);
-              return rows.join('');
-            })
-            .join('');
+          // The popup opened with the short loading placeholder, so Leaflet
+          // auto-panned for that smaller card; the filled khatian table makes
+          // it taller, so re-run layout + auto-pan or it slides under the
+          // floating top bar.
+          layer.getPopup()?.update();
         },
       });
     return root;
