@@ -253,20 +253,31 @@ export class PlotBoundariesComponent implements OnInit {
     this.selected.set(boundary);
     this.statusMessage.set(null);
     this.actionErrorKey.set(null);
-    // Mini preview map - rendered after the panel paints.
-    setTimeout(() => this.renderPreview(boundary));
-    // On phones the detail swaps in for the list; bring its top into view.
-    if (
-      typeof document !== 'undefined' &&
-      document.querySelector('.pb-detail-panel') &&
-      window.matchMedia('(max-width: 1023px)').matches
-    ) {
-      setTimeout(() =>
-        document
-          .querySelector('.pb-detail-panel')
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-      );
-    }
+    this.schedulePreviewRender(boundary);
+  }
+
+  /**
+   * Renders the preview panel's mini map. The panel paints with change
+   * detection, which event coalescing can defer past setTimeout(0) - so
+   * poll briefly for the map container instead of assuming it is there.
+   */
+  private schedulePreviewRender(boundary: AdminBoundary): void {
+    const tryRender = (attempt: number): void => {
+      // A newer selection supersedes this pending render.
+      if (this.selected()?.id !== boundary.id) return;
+      if (document.querySelector('.preview-map')) {
+        this.renderPreview(boundary);
+        // On phones the detail swaps in for the list; bring its top into view.
+        if (window.matchMedia('(max-width: 1023px)').matches) {
+          document
+            .querySelector('.pb-detail-panel')
+            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else if (attempt < 20) {
+        setTimeout(() => tryRender(attempt + 1), 50);
+      }
+    };
+    setTimeout(() => tryRender(0));
   }
 
   private renderPreview(boundary: AdminBoundary): void {
@@ -280,7 +291,18 @@ export class PlotBoundariesComponent implements OnInit {
     if ((boundary.geometry?.coordinates?.[0]?.length ?? 0) < 3) return;
     const el = document.querySelector('.preview-map') as HTMLElement | null;
     if (!el) return;
-    const map = L.map(el, { attributionControl: false, dragging: false, touchZoom: false });
+    // A passive preview: no panning/zooming - wheel events pass through so
+    // the page (or the panel's own scroll) behaves normally over the map.
+    const map = L.map(el, {
+      attributionControl: false,
+      dragging: false,
+      touchZoom: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      zoomControl: false,
+    });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     const layer = L.geoJSON(boundary.geometry as never, {
       style: { color: '#c9861e', weight: 2, fillOpacity: 0.3 },
@@ -619,9 +641,7 @@ export class PlotBoundariesComponent implements OnInit {
           this.selected.set(updated);
           this.statusMessage.set('admin.plotBoundaries.success.saved');
           this.load();
-          // The preview container may need a paint cycle first (geometry
-          // presence can flip between the placeholder and the map).
-          setTimeout(() => this.renderPreview(updated));
+          this.schedulePreviewRender(updated);
         },
         error: (err: unknown) => {
           this.editSaving.set(false);
