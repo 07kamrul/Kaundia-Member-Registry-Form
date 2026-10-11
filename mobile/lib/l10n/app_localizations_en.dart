@@ -2712,7 +2712,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'From membership applications to monthly subscription payments — the whole process is now online. No hassle of paper applications, no need to visit the office repeatedly.';
 
   @override
-  String get homeHeroTitle => 'Uttar Kaundia<br />Landowners\' Welfare Council';
+  String get homeHeroTitle => 'Uttar Kaundia<br />Abashon Malik Kalyan Society';
 
   @override
   String get homeStepsApplyDesc =>

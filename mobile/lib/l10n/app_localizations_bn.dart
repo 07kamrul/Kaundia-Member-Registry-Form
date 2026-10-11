@@ -2707,7 +2707,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get homeHeroTitle =>
-      'উত্তর কাউন্দিয়ার<br />জমির মালিকদের কল্যাণ পরিষদ';
+      'উত্তর কাউন্দিয়ার<br />আবাসন মালিক কল্যাণ সোসাইটি';
 
   @override
   String get homeStepsApplyDesc =>

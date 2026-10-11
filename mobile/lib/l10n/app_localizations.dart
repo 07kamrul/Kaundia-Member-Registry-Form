@@ -5120,7 +5120,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeHeroTitle.
   ///
   /// In bn, this message translates to:
-  /// **'উত্তর কাউন্দিয়ার<br />জমির মালিকদের কল্যাণ পরিষদ'**
+  /// **'উত্তর কাউন্দিয়ার<br />আবাসন মালিক কল্যাণ সোসাইটি'**
   String get homeHeroTitle;
 
   /// No description provided for @homeStepsApplyDesc.
