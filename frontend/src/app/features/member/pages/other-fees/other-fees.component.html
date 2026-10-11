@@ -1,0 +1,260 @@
+<div style="max-width:52rem;margin:0 auto">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'member.otherFees.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'member.otherFees.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  @if (typesError === 'not_configured') {
+    <div class="error-box"><p style="margin:0">{{ 'member.otherFees.notConfigured' | translate }}</p></div>
+  } @else if (typesError === 'access') {
+    <div class="error-box"><p style="margin:0">{{ 'member.otherFees.accessDenied' | translate }}</p></div>
+  } @else if (typesError === 'generic') {
+    <div class="error-box">
+      <p style="margin:0">{{ 'member.otherFees.feeLoadFailed' | translate }}</p>
+      <button type="button" class="btn btn-secondary" style="margin-top:0.5rem" (click)="retryRates()">
+        {{ 'member.otherFees.retry' | translate }}
+      </button>
+    </div>
+  }
+
+  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+    <div class="field">
+      <label for="feeTypeSelect">{{ 'member.otherFees.typeLabel' | translate }} <span class="required">*</span></label>
+      <select id="feeTypeSelect" [ngModel]="selectedType()" (ngModelChange)="selectType($event)" [disabled]="feeLoading">
+        @for (type of feeTypes(); track type.key) {
+          <option [value]="type.key" [disabled]="type.payOnce && type.alreadyPaid">
+            {{ feeTypeLabel(type.key) }}{{ type.payOnce && type.alreadyPaid ? ' — ' + ('member.otherFees.paidSuffix' | translate) : '' }}
+          </option>
+        }
+      </select>
+      @if (feeLoading) {
+        <p class="field-hint">{{ 'member.otherFees.loadingRates' | translate }}</p>
+      }
+    </div>
+
+    @if (selectedTypeInfo(); as type) {
+      <!-- Pay-once fee already settled: status card instead of the form. -->
+      @if (isPayOncePaid()) {
+        <div class="paid-card">
+          <app-icon name="check-circle" [size]="20"></app-icon>
+          <span>{{ 'member.otherFees.alreadyPaid' | translate: { type: feeTypeLabel(type.key) } }}</span>
+        </div>
+      } @else {
+        <div class="grid-2" style="margin-top:0.75rem">
+          <div class="field">
+            <label for="otherFeesDate">{{ 'member.otherFees.dateLabel' | translate }} <span class="required">*</span></label>
+            <app-date-picker
+              inputId="otherFeesDate"
+              [value]="paymentDate"
+              (valueChange)="onDateChange($event)"
+              [max]="paymentDate"
+            ></app-date-picker>
+          </div>
+
+          @if (type.calculation === 'picnic') {
+            <div class="field">
+              <label for="otherFeesHeads">{{ 'member.otherFees.additionalHeadsLabel' | translate }}</label>
+              <div class="count-stepper" role="group" [attr.aria-label]="'member.otherFees.additionalHeadsLabel' | translate">
+                <button type="button" class="count-stepper-btn" (click)="decrementHeads()" [disabled]="additionalHeads() <= 0 || feeLoading">−</button>
+                <input
+                  id="otherFeesHeads"
+                  class="count-stepper-input"
+                  type="number"
+                  min="0"
+                  [max]="maxAdditionalHeads"
+                  step="1"
+                  [ngModel]="additionalHeads()"
+                  (ngModelChange)="onHeadsInput($event)"
+                />
+                <button type="button" class="count-stepper-btn" (click)="incrementHeads()" [disabled]="additionalHeads() >= maxAdditionalHeads || feeLoading">+</button>
+              </div>
+              <p class="field-hint">{{ 'member.otherFees.additionalHeadsHint' | translate: { max: maxAdditionalHeads } }}</p>
+            </div>
+          } @else if (type.calculation === 'fixed') {
+            <div class="field">
+              <label for="otherFeesAmount">{{ 'member.otherFees.amountLabel' | translate }}</label>
+              <input id="otherFeesAmount" type="text" [value]="type.amount != null ? ('৳ ' + type.amount) : '—'" readonly class="readonly-input" />
+              <p class="field-hint">{{ 'member.otherFees.fixedAmountHint' | translate }}</p>
+            </div>
+          } @else {
+            <div class="field">
+              <label for="otherFeesAmount">{{ 'member.otherFees.amountLabel' | translate }} <span class="required">*</span></label>
+              <input id="otherFeesAmount" type="number" min="1" [(ngModel)]="amount" [disabled]="feeLoading" />
+              <p class="field-hint">{{ 'member.otherFees.variableAmountHint' | translate }}</p>
+            </div>
+          }
+        </div>
+
+        @if (type.calculation === 'picnic') {
+          @for (label of labels; track $index) {
+            <div class="grid-2" style="margin-top:0.25rem">
+              <div class="field">
+                <label [for]="'headName' + $index">{{ 'member.otherFees.headNameLabel' | translate: { n: $index + 1 } }}</label>
+                <input [id]="'headName' + $index" type="text" [(ngModel)]="label.name" [maxlength]="255" />
+              </div>
+              <div class="field">
+                <label [for]="'headRelation' + $index">{{ 'member.otherFees.headRelationLabel' | translate: { n: $index + 1 } }}</label>
+                <select [id]="'headRelation' + $index" [(ngModel)]="label.relation">
+                  @for (relation of relations; track relation) {
+                    <option [value]="relation">{{ 'member.otherFees.relations.' + relation | translate }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- Live breakdown, display-only: totals come from server-side rates. -->
+        @if (breakdown(); as b) {
+          <div class="breakdown" style="margin-top:0.75rem;border:1px solid #d1d5db;border-radius:0.5rem;padding:0.75rem">
+            @if (b.mode === 'picnic') {
+              <div class="breakdown-row" style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+                <span>{{ 'member.otherFees.memberHead' | translate }}</span>
+                <span style="white-space:nowrap">1 × ৳ {{ b.headFee }} = ৳ {{ b.headFee }}</span>
+              </div>
+              @if (b.count > 0) {
+                <div class="breakdown-row" style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+                  <span>{{ 'member.otherFees.additionalHeads' | translate }}</span>
+                  <span style="white-space:nowrap">{{ b.count }} × ৳ {{ b.additionalHeadFee }} = ৳ {{ b.additionalAmount }}</span>
+                </div>
+              }
+            } @else {
+              <div class="breakdown-row" style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+                <span>{{ feeTypeLabel(type.key) }}</span>
+                <span style="white-space:nowrap">1 × ৳ {{ b.total }}</span>
+              </div>
+            }
+            <div class="breakdown-row" style="display:flex;justify-content:space-between;gap:1rem;border-top:1px solid #d1d5db;margin-top:0.5rem;padding-top:0.5rem">
+              <strong>{{ 'member.otherFees.total' | translate }}</strong>
+              <strong style="white-space:nowrap">৳ {{ b.total }} {{ 'member.otherFees.taka' | translate }}</strong>
+            </div>
+          </div>
+        }
+
+        <div class="grid-2" style="margin-top:0.75rem">
+          <div class="field">
+            <label for="otherFeesMethod">{{ 'member.otherFees.methodLabel' | translate }}</label>
+            <select id="otherFeesMethod" [(ngModel)]="paymentMethod">
+              @for (method of paymentMethodOptions; track method) {
+                <option [value]="method">{{ 'member.otherFees.methods.' + method | translate }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="otherFeesReceipt">{{ 'member.otherFees.receiptNoLabel' | translate }}</label>
+            <input id="otherFeesReceipt" type="text" [(ngModel)]="receiptNo" [maxlength]="64" />
+          </div>
+        </div>
+
+        @if (type.calculation === 'variable') {
+          <div class="field" style="margin-top:0.5rem">
+            <label for="otherFeesNote">{{ 'member.otherFees.noteLabel' | translate }}</label>
+            <input id="otherFeesNote" type="text" [(ngModel)]="note" [maxlength]="500" />
+          </div>
+        }
+
+        @if (formError) {
+          <div class="error-box"><p style="margin:0">{{ formError }}</p></div>
+        }
+        @if (success) {
+          <div class="success-box"><p style="margin:0">{{ success }}</p></div>
+        }
+
+        <button type="button" class="btn btn-primary" style="margin-top:1rem" [disabled]="!canSubmit" (click)="submit()">
+          @if (saving) {
+            <span class="spinner" style="width:1rem;height:1rem"></span>
+          }
+          {{ (saving ? 'member.otherFees.saving' : 'member.otherFees.submit') | translate }}
+        </button>
+      }
+    }
+  </div>
+
+  <div class="history-header">
+    <h2 class="section-title" style="margin:0">{{ 'member.otherFees.historyTitle' | translate }}</h2>
+    <div class="history-filters">
+      <select [ngModel]="filterFeeType" (ngModelChange)="filterFeeType = $event" [attr.aria-label]="'member.otherFees.filterType' | translate">
+        <option value="">{{ 'member.otherFees.filterAll' | translate }}</option>
+        @for (type of feeTypes(); track type.key) {
+          <option [value]="type.key">{{ feeTypeLabel(type.key) }}</option>
+        }
+      </select>
+      <app-date-picker [value]="filterFrom" (valueChange)="filterFrom = $event" [max]="filterTo" [clearable]="true"></app-date-picker>
+      <app-date-picker [value]="filterTo" (valueChange)="filterTo = $event" [min]="filterFrom" [clearable]="true"></app-date-picker>
+      <button type="button" class="btn btn-secondary" (click)="applyFilters()">{{ 'member.otherFees.filterApply' | translate }}</button>
+      <button type="button" class="btn btn-secondary" (click)="resetFilters()">{{ 'member.otherFees.filterReset' | translate }}</button>
+    </div>
+  </div>
+
+  @if (summary(); as s) {
+    <div class="summary-strip">
+      <span class="summary-chip summary-chip-total">
+        {{ 'member.otherFees.summaryTotal' | translate }}: ৳ {{ s.totalPaid }}
+      </span>
+      @for (entry of s.byType | keyvalue; track entry.key) {
+        <span class="summary-chip">{{ feeTypeLabel(entry.key) }}: ৳ {{ entry.value }}</span>
+      }
+    </div>
+  }
+
+  @if (loading) {
+    <div class="card" style="padding:1rem" aria-hidden="true">
+      @for (row of [1, 2, 3]; track row) {
+        <div class="fee-skeleton-row"></div>
+      }
+    </div>
+  } @else if (historyError) {
+    <div class="error-box"><p style="margin:0">{{ historyError }}</p></div>
+  } @else {
+    <div class="data-table-wrap">
+      <table class="data-table data-table-cards">
+        <thead>
+          <tr>
+            <th>{{ 'member.otherFees.dateColumn' | translate }}</th>
+            <th>{{ 'member.otherFees.typeColumn' | translate }}</th>
+            <th>{{ 'member.otherFees.detailsColumn' | translate }}</th>
+            <th>{{ 'member.otherFees.totalColumn' | translate }}</th>
+            <th>{{ 'member.otherFees.receiptColumn' | translate }}</th>
+            <th>{{ 'member.otherFees.methodColumn' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of history()?.items; track payment.id) {
+            <tr>
+              <td [attr.data-label]=" 'member.otherFees.dateColumn' | translate ">{{ payment.paymentDate }}</td>
+              <td [attr.data-label]=" 'member.otherFees.typeColumn' | translate ">
+                <span class="fee-type-chip" [class.fee-type-chip-picnic]="payment.feeType === 'picnic'">
+                  {{ feeTypeLabel(payment.feeType) }}
+                </span>
+              </td>
+              <td [attr.data-label]=" 'member.otherFees.detailsColumn' | translate ">{{ detailsText(payment) }}</td>
+              <td [attr.data-label]=" 'member.otherFees.totalColumn' | translate ">৳ {{ payment.amount }}</td>
+              <td [attr.data-label]=" 'member.otherFees.receiptColumn' | translate ">{{ payment.receiptNo || '—' }}</td>
+              <td [attr.data-label]=" 'member.otherFees.methodColumn' | translate ">{{ payment.paymentMethod || '—' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-state">
+                {{ (filterFeeType || filterFrom || filterTo ? 'member.otherFees.emptyStateFiltered' : 'member.otherFees.emptyState') | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if ((history()?.total ?? 0) > 0) {
+      <div class="pagination" style="display:flex;gap:0.5rem;align-items:center;justify-content:center;margin-top:0.75rem">
+        <button type="button" class="btn btn-secondary" [disabled]="historyPage <= 1" (click)="goToPage(historyPage - 1)">
+          {{ 'member.otherFees.prevPage' | translate }}
+        </button>
+        <span>{{ historyPage }} / {{ totalPages() }}</span>
+        <button type="button" class="btn btn-secondary" [disabled]="historyPage >= totalPages()" (click)="goToPage(historyPage + 1)">
+          {{ 'member.otherFees.nextPage' | translate }}
+        </button>
+      </div>
+    }
+  }
+</div>

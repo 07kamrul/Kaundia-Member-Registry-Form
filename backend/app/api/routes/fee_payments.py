@@ -10,6 +10,7 @@ from app.core.permissions import require_permission
 from app.db.session import get_db
 from app.models.admin import AdminUser
 from app.models.fee_payment import FeePayment
+from app.models.picnic_payment import PicnicPayment
 from app.schemas.fee_payment import FeePaymentIn, FeePaymentOut, FeeTypeOut
 from app.services.fee_calculation import resolve_active_fee_versions
 from app.services.fee_catalog import FEE_TYPES
@@ -139,19 +140,68 @@ async def list_fee_payments(
         .order_by(FeePayment.payment_date.desc(), FeePayment.id.desc())
     )
     payments = result.scalars().all()
-    summary_query = select(
-        func.count(FeePayment.id), func.coalesce(func.sum(FeePayment.amount), 0)
-    ).where(*conditions)
-    count, total_collected = (await db.execute(summary_query)).one()
+    items = [
+        {
+            **FeePaymentOut.model_validate(payment).model_dump(mode="json"),
+            "member_name": payment.member.full_name if payment.member else None,
+            "source": "fee_payment",
+        }
+        for payment in payments
+    ]
+
+    # The structured picnic ledger (per-head breakdown rows) is merged in so
+    # this single endpoint replaces the old standalone Picnic Payments page.
+    include_picnic = fee_type is None or fee_type == "picnic"
+    if include_picnic:
+        picnic_conditions = [
+            condition
+            for condition in (
+                PicnicPayment.member_id == member_id if member_id is not None else None,
+                PicnicPayment.payment_date >= date_from if date_from is not None else None,
+                PicnicPayment.payment_date <= date_to if date_to is not None else None,
+            )
+            if condition is not None
+        ]
+        picnic_result = await db.execute(
+            select(PicnicPayment)
+            .where(*picnic_conditions)
+            .order_by(PicnicPayment.payment_date.desc(), PicnicPayment.id.desc())
+        )
+        for row in picnic_result.scalars():
+            items.append(
+                {
+                    # Negative ids keep picnic-ledger rows from colliding with
+                    # fee_payments ids in the client's trackBy keys.
+                    "id": -row.id,
+                    "member_id": row.member_id,
+                    "fee_type": "picnic",
+                    "amount": row.total,
+                    "payment_date": row.payment_date,
+                    "receipt_no": row.receipt_no,
+                    "payment_method": row.payment_method,
+                    "note": (
+                        f"Head ৳{row.head_price:g} + {row.additional_count}"
+                        f" additional × ৳{row.additional_price:g}"
+                    ),
+                    "created_at": row.created_at,
+                    "member_name": row.member.full_name if row.member else None,
+                    "additional_heads": row.additional_count,
+                    "source": "picnic_payment",
+                }
+            )
+        # payment_date is a string on fee_payment rows (JSON schema dump) and a
+        # date on picnic rows; ISO strings and dates sort identically.
+        items.sort(key=lambda item: (str(item["payment_date"]), item["id"]), reverse=True)
+        count = len(items)
+        total_collected = sum(float(item["amount"] or 0) for item in items)
+    else:
+        summary_query = select(
+            func.count(FeePayment.id), func.coalesce(func.sum(FeePayment.amount), 0)
+        ).where(*conditions)
+        count, total_collected = (await db.execute(summary_query)).one()
 
     return {
-        "items": [
-            {
-                **FeePaymentOut.model_validate(payment).model_dump(mode="json"),
-                "member_name": payment.member.full_name if payment.member else None,
-            }
-            for payment in payments
-        ],
+        "items": items,
         "total_collected": float(total_collected),
         "count": count,
     }

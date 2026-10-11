@@ -278,15 +278,81 @@ describe('AdminService route coverage', () => {
     expect(eventGone).toBeNull();
   });
 
-  it('getPicnicPayments maps the summary page and query params', () => {
-    let page: unknown;
+  it('getFeeTypes maps the catalog and createFeeTypeVersion posts snake_case', () => {
+    let types: unknown;
+    service.getFeeTypes().subscribe((t) => (types = t));
+    http
+      .expectOne((r) => r.url.endsWith('/admin/fee-types'))
+      .flush([
+        {
+          key: 'development_fee',
+          label_bn: 'উন্নয়ন ফি',
+          label_en: 'Development Fee',
+          calculation_type: 'fixed',
+          unit: 'taka',
+          is_recurring: false,
+          is_pay_once: true,
+          fee_category: 'other',
+          is_active: true,
+          sort_order: 3,
+          created_at: '2026-10-11T00:00:00Z',
+          current_version: {
+            values: { development_fee: 500 },
+            unit: 'taka',
+            start_date: '2026-10-01',
+          },
+          payment_count: 2,
+        },
+      ]);
+    expect(types).toEqual([
+      {
+        key: 'development_fee',
+        labelBn: 'উন্নয়ন ফি',
+        labelEn: 'Development Fee',
+        calculationType: 'fixed',
+        unit: 'taka',
+        isRecurring: false,
+        isPayOnce: true,
+        feeCategory: 'other',
+        isActive: true,
+        sortOrder: 3,
+        createdAt: '2026-10-11T00:00:00Z',
+        currentVersion: {
+          values: { development_fee: 500 },
+          unit: 'taka',
+          startDate: '2026-10-01',
+        },
+        paymentCount: 2,
+      },
+    ]);
+
+    let versions: unknown;
     service
-      .getPicnicPayments({ dateFrom: '2026-01-01', memberId: 9 })
-      .subscribe((p) => (page = p));
-    const req = http.expectOne(
-      (r) => r.url.includes('/admin/picnic-payments') && r.params.get('member_id') === '9',
-    );
-    req.flush({ count: 0, total_collected: 0, items: [] });
-    expect(page).toEqual({ count: 0, totalCollected: 0, items: [] });
+      .createFeeTypeVersion('development_fee', { value: 600, startDate: '2026-11-01' })
+      .subscribe((v) => (versions = v));
+    const req = http.expectOne((r) => r.url.endsWith('/admin/fee-types/development_fee/versions'));
+    expect(req.request.body).toEqual({
+      value: 600,
+      base_amount: undefined,
+      additional_rate: undefined,
+      base_threshold: undefined,
+      head_fee: undefined,
+      additional_head_fee: undefined,
+      min_amount: undefined,
+      max_amount: undefined,
+      unit: undefined,
+      start_date: '2026-11-01',
+    });
+    req.flush([
+      {
+        start_date: '2026-11-01',
+        end_date: null,
+        status: 1,
+        values: { development_fee: 600 },
+      },
+    ]);
+    expect(versions).toEqual([
+      { startDate: '2026-11-01', endDate: null, status: 1, values: { development_fee: 600 } },
+    ]);
   });
 });

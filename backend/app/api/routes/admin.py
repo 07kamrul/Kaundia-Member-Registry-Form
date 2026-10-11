@@ -897,6 +897,13 @@ async def create_fee_setting_version(
         key=payload.key,
         value=payload.value,
         unit=payload.unit,
+        # New fee types default to 'other' (the Other Fees page) unless the
+        # committee marks them 'installment'; unspecified keeps the previous
+        # version's category so a routine rate update never re-categorizes.
+        fee_category=(
+            payload.fee_category
+            or (current.fee_category if current is not None else "other")
+        ),
         start_date=new_start_date,
         end_date=None,
         status=1,

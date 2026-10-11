@@ -1,0 +1,42 @@
+// Fee Payments (unified ledger) — small page-specific pieces.
+
+.fee-type-chip {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--gray-300);
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+.fee-type-chip-picnic {
+  background: var(--amber-50);
+  border-color: var(--amber-200);
+  color: var(--gold-strong);
+}
+
+.fee-skeleton-row {
+  height: 2.6rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.6rem;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--gray-200) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: fee-payments-skeleton 1.3s ease infinite;
+}
+
+@keyframes fee-payments-skeleton {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}

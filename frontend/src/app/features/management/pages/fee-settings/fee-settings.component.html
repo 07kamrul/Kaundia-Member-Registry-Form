@@ -1,20 +1,31 @@
-<div>
+<div class="fee-settings-page">
   <div class="page-header">
     <div>
       <h1 class="page-title">{{ 'admin.feeSettings.title' | translate }}</h1>
       <p class="page-subtitle">{{ 'admin.feeSettings.subtitle' | translate }}</p>
     </div>
+    @if (canManage) {
+      <button type="button" class="btn btn-primary" (click)="openNewFeeDialog()">
+        <app-icon name="plus" [size]="16" />
+        {{ 'admin.feeSettings.newFee.button' | translate }}
+      </button>
+    }
   </div>
 
   @if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   }
+  @if (successMessage) {
+    <div class="success-banner" role="status">
+      <app-icon name="check-circle" [size]="16" />
+      {{ successMessage }}
+    </div>
+  }
 
-  <div class="card card-pad" style="margin-bottom:1.5rem">
-    <h2 style="font-size:1rem;margin-top:0;margin-bottom:1rem">
-      {{ 'admin.feeSettings.addVersion' | translate }}
-    </h2>
-    <form (ngSubmit)="openConfirm()">
+  <!-- ============ Add New Version ============ -->
+  <div class="card card-pad section-card">
+    <h2 class="section-title">{{ 'admin.feeSettings.addVersion' | translate }}</h2>
+    <form (ngSubmit)="openVersionConfirm()">
       <div class="form-grid">
         <div class="field">
           <label for="draftKey">{{ 'admin.feeSettings.form.key' | translate }}</label>
@@ -22,326 +33,443 @@
             id="draftKey"
             name="draftKey"
             [(ngModel)]="draftKey"
-            (ngModelChange)="onKeyChange()"
-            [disabled]="!auth.hasPermission('manage_fee_settings')"
+            (ngModelChange)="onDraftKeyChange()"
+            [disabled]="!canManage"
             required
           >
             <option value="" disabled hidden></option>
-            @for (k of feeKeys; track k) {
-              <option [value]="k">{{ 'admin.feeSettings.keys.' + k | translate }}</option>
+            @for (ft of activeFeeTypes; track ft.key) {
+              <option [value]="ft.key">{{ feeLabel(ft) }}</option>
             }
           </select>
+          @if (selectedFeeType) {
+            <p class="field-hint">
+              {{ selectedFeeType.key }}
+              ·
+              {{ 'admin.feeSettings.calcTypes.' + selectedFeeType.calculationType | translate }}
+            </p>
+          }
         </div>
-        @if (isTieredKey) {
+
+        @switch (selectedCalc) {
+          @case ('tiered') {
+            <div class="field">
+              <label for="draftBaseAmount">{{ 'admin.feeSettings.form.baseAmount' | translate }}</label>
+              <input type="number" min="0" step="0.01" id="draftBaseAmount" name="draftBaseAmount"
+                [(ngModel)]="draftBaseAmount" [disabled]="!canManage" required />
+            </div>
+            <div class="field">
+              <label for="draftAdditionalRate">{{ 'admin.feeSettings.form.additionalRate' | translate }}</label>
+              <input type="number" min="0" step="0.01" id="draftAdditionalRate" name="draftAdditionalRate"
+                [(ngModel)]="draftAdditionalRate" [disabled]="!canManage" required />
+              <p class="field-hint">{{ 'admin.feeSettings.form.additionalRateHint' | translate }}</p>
+            </div>
+            <div class="field">
+              <label for="draftBaseThreshold">{{ 'admin.feeSettings.form.baseThreshold' | translate }}</label>
+              <input type="number" min="0.01" step="0.01" id="draftBaseThreshold" name="draftBaseThreshold"
+                [(ngModel)]="draftBaseThreshold" [disabled]="!canManage" required />
+            </div>
+          }
+          @case ('head_additional') {
+            <div class="field">
+              <label for="draftHeadFee">{{ 'admin.feeSettings.form.headFee' | translate }}</label>
+              <input type="number" min="0" step="0.01" id="draftHeadFee" name="draftHeadFee"
+                [(ngModel)]="draftHeadFee" [disabled]="!canManage" required />
+            </div>
+            <div class="field">
+              <label for="draftAdditionalHeadFee">{{ 'admin.feeSettings.form.additionalHeadFee' | translate }}</label>
+              <input type="number" min="0" step="0.01" id="draftAdditionalHeadFee" name="draftAdditionalHeadFee"
+                [(ngModel)]="draftAdditionalHeadFee" [disabled]="!canManage" required />
+              <p class="field-hint">{{ 'admin.feeSettings.form.additionalHeadFeeHint' | translate }}</p>
+            </div>
+          }
+          @case ('variable') {
+            <div class="field">
+              <label for="draftMinAmount">{{ 'admin.feeSettings.calc.min' | translate }}</label>
+              <input type="number" min="0" step="0.01" id="draftMinAmount" name="draftMinAmount"
+                [(ngModel)]="draftMinAmount" [disabled]="!canManage" />
+              <p class="field-hint">{{ 'admin.feeSettings.form.boundsHint' | translate }}</p>
+            </div>
+            <div class="field">
+              <label for="draftMaxAmount">{{ 'admin.feeSettings.calc.max' | translate }}</label>
+              <input type="number" min="0" step="0.01" id="draftMaxAmount" name="draftMaxAmount"
+                [(ngModel)]="draftMaxAmount" [disabled]="!canManage" />
+            </div>
+          }
+          @default {
+            @if (selectedFeeType) {
+              <div class="field">
+                <label for="draftValue">{{ 'admin.feeSettings.form.value' | translate }}</label>
+                <input type="number" min="0" step="0.01" id="draftValue" name="draftValue"
+                  [(ngModel)]="draftValue" [disabled]="!canManage" required />
+              </div>
+            }
+          }
+        }
+
+        @if (selectedFeeType) {
           <div class="field">
-            <label for="draftBaseAmount">{{ 'admin.feeSettings.form.baseAmount' | translate }}</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              id="draftBaseAmount"
-              name="draftBaseAmount"
-              [(ngModel)]="draftBaseAmount"
-              [disabled]="!auth.hasPermission('manage_fee_settings')"
-              required
-            />
+            <label for="draftUnit">{{ 'admin.feeSettings.form.unit' | translate }}</label>
+            <select id="draftUnit" name="draftUnit" [(ngModel)]="draftUnit" [disabled]="!canManage">
+              <option value="">{{ 'common.select' | translate }}</option>
+              @for (u of unitOptions; track u) {
+                <option [value]="u">{{ 'admin.feeSettings.units.' + u | translate }}</option>
+              }
+            </select>
           </div>
           <div class="field">
-            <label for="draftAdditionalRate">{{ 'admin.feeSettings.form.additionalRate' | translate }}</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              id="draftAdditionalRate"
-              name="draftAdditionalRate"
-              [(ngModel)]="draftAdditionalRate"
-              [disabled]="!auth.hasPermission('manage_fee_settings')"
-              required
-            />
-            <p class="field-hint">{{ 'admin.feeSettings.form.additionalRateHint' | translate }}</p>
-          </div>
-          <div class="field">
-            <label for="draftBaseThreshold">{{ 'admin.feeSettings.form.baseThreshold' | translate }}</label>
-            <input
-              type="number"
-              min="0.01"
-              step="0.01"
-              id="draftBaseThreshold"
-              name="draftBaseThreshold"
-              [(ngModel)]="draftBaseThreshold"
-              [disabled]="!auth.hasPermission('manage_fee_settings')"
-              required
-            />
-          </div>
-        } @else {
-          <div class="field">
-            <label for="draftValue">{{ 'admin.feeSettings.form.value' | translate }}</label>
-            <input
-              type="number"
-              id="draftValue"
-              name="draftValue"
-              [(ngModel)]="draftValue"
-              [disabled]="!auth.hasPermission('manage_fee_settings')"
-              required
-            />
+            <label for="draftStartDate">{{ 'admin.feeSettings.form.startDate' | translate }}</label>
+            <app-date-picker inputId="draftStartDate" [value]="draftStartDate"
+              (valueChange)="draftStartDate = $event" [clearable]="true"
+              [disabled]="!canManage"></app-date-picker>
+            <p class="field-hint">{{ 'admin.feeSettings.form.startDateHint' | translate }}</p>
           </div>
         }
-        <div class="field">
-          <label for="draftUnit">{{ 'admin.feeSettings.form.unit' | translate }}</label>
-          <select
-            id="draftUnit"
-            name="draftUnit"
-            [(ngModel)]="draftUnit"
-            [disabled]="!auth.hasPermission('manage_fee_settings')"
-          >
-            <option value="">{{ 'common.select' | translate }}</option>
-            @for (u of unitOptions; track u) {
-              <option [value]="u">{{ 'admin.feeSettings.units.' + u | translate }}</option>
-            }
-          </select>
-        </div>
-        <div class="field">
-          <label for="draftStartDate">{{ 'admin.feeSettings.form.startDate' | translate }}</label>
-          <app-date-picker
-            inputId="draftStartDate"
-            [value]="draftStartDate"
-            (valueChange)="draftStartDate = $event"
-            [clearable]="true"
-            [disabled]="!auth.hasPermission('manage_fee_settings')"
-          ></app-date-picker>
-          <p class="field-hint">{{ 'admin.feeSettings.form.startDateHint' | translate }}</p>
-        </div>
       </div>
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary" [disabled]="!canSave">
-          {{ 'admin.feeSettings.form.submit' | translate }}
-        </button>
-      </div>
+      @if (selectedFeeType) {
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="!canSaveVersion">
+            {{ 'admin.feeSettings.form.submit' | translate }}
+          </button>
+        </div>
+      }
     </form>
     @if (saveError) {
       <p class="error-box" style="margin-top:0.75rem;margin-bottom:0">{{ saveError }}</p>
     }
   </div>
 
-  @if (monthlySubscriptionTier) {
-    <div class="card card-pad" style="margin-bottom:1.5rem">
-      <h2 style="font-size:1rem;margin-top:0;margin-bottom:1rem">
-        {{ 'admin.feeSettings.calculator.title' | translate }}
-      </h2>
-      <div class="form-grid">
-        <div class="field">
-          <label for="calculatorLandSize">{{ 'admin.feeSettings.calculator.landSize' | translate }}</label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            id="calculatorLandSize"
-            name="calculatorLandSize"
-            [(ngModel)]="calculatorLandSize"
-          />
-        </div>
-        <div class="field">
-          <label>{{ 'admin.feeSettings.calculator.fee' | translate }}</label>
-          <p style="margin:0;font-weight:600">
-            {{ calculatorFee !== null ? calculatorFee : '—' }}
-          </p>
-        </div>
+  <!-- ============ Fee Calculator ============ -->
+  <div class="card card-pad section-card">
+    <h2 class="section-title">{{ 'admin.feeSettings.calculator.title' | translate }}</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label for="calcFeeKey">{{ 'admin.feeSettings.form.key' | translate }}</label>
+        <select id="calcFeeKey" name="calcFeeKey" [(ngModel)]="calcFeeKey" (ngModelChange)="onCalcFeeChange()">
+          <option value="" disabled hidden></option>
+          @for (ft of feeTypes; track ft.key) {
+            <option [value]="ft.key">{{ feeLabel(ft) }}</option>
+          }
+        </select>
       </div>
-    </div>
-  }
-
-  @if (!loading && !picnicConfigured) {
-    <div class="error-box" style="margin-bottom:1rem">
-      <p style="margin:0">{{ 'admin.feeSettings.picnicNotConfigured' | translate }}</p>
-    </div>
-  }
-
-  @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
-  } @else {
-    <div class="data-table-wrap table-scroll">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>{{ 'admin.feeSettings.table.key' | translate }}</th>
-            <th>{{ 'admin.feeSettings.table.value' | translate }}</th>
-            <th>{{ 'admin.feeSettings.table.unit' | translate }}</th>
-            <th>{{ 'admin.feeSettings.table.startDate' | translate }}</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (monthlySubscriptionTier; as tier) {
-            <tr>
-              <td>
-                {{ 'admin.feeSettings.keys.monthly_subscription' | translate }}
-                <span class="cell-secondary">monthly_subscription</span>
-              </td>
-              <td>
-                {{ 'admin.feeSettings.tieredSummary' | translate: {
-                  base: tier.base.value,
-                  threshold: tier.threshold.value,
-                  rate: tier.rate.value
-                } }}
-              </td>
-              <td>{{ tier.base.unit ?? '—' }}</td>
-              <td>{{ tier.base.startDate }}</td>
-              <td>
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-sm btn-icon"
-                  (click)="toggleHistory('monthly_subscription')"
-                  [attr.aria-expanded]="expandedKey === 'monthly_subscription'"
-                >
-                  <span
-                    class="prop-chevron"
-                    [style.transform]="expandedKey === 'monthly_subscription' ? 'rotate(180deg)' : 'none'"
-                  >
-                    <app-icon name="chevron-down" [size]="16" />
-                  </span>
-                  {{ (expandedKey === 'monthly_subscription' ? 'admin.feeSettings.hideHistory' : 'admin.feeSettings.viewHistory') | translate }}
-                </button>
-              </td>
-            </tr>
-            @if (expandedKey === 'monthly_subscription') {
-              <tr>
-                <td colspan="5">
-                  @if (loadingHistory) {
-                    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
-                  } @else {
-                    <div class="table-scroll">
-                      <table class="data-table">
-                        <thead>
-                          <tr>
-                            <th>{{ 'admin.feeSettings.form.baseAmount' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.form.additionalRate' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.form.baseThreshold' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.table.startDate' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.table.endDate' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.table.status' | translate }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @for (h of tieredHistory.base; track h.id; let i = $index) {
-                            <tr [class.is-current]="h.status === 1">
-                              <td>{{ h.value }}</td>
-                              <td>{{ tieredHistory.rate[i]?.value ?? '—' }}</td>
-                              <td>{{ tieredHistory.threshold[i]?.value ?? '—' }}</td>
-                              <td>{{ h.startDate }}</td>
-                              <td>{{ h.endDate ?? '—' }}</td>
-                              <td>
-                                <span
-                                  class="status-badge"
-                                  [class.status-active]="h.status === 1"
-                                  [class.status-inactive]="h.status !== 1"
-                                >
-                                  {{ h.status === 1 ? ('admin.feeSettings.active' | translate) : ('admin.feeSettings.inactive' | translate) }}
-                                </span>
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  }
-                </td>
-              </tr>
-            }
+      @if (calcFeeType; as calcFee) {
+        @switch (calcFee.calculationType) {
+          @case ('tiered') {
+            <div class="field">
+              <label for="calcLandSize">{{ 'admin.feeSettings.calculator.landSize' | translate }}</label>
+              <input type="number" min="0" step="0.01" id="calcLandSize" name="calcLandSize"
+                [(ngModel)]="calcLandSize" />
+            </div>
           }
-          @for (row of tableRows; track row.id) {
-            <tr>
-              <td>
-                {{ 'admin.feeSettings.keys.' + row.key | translate }}
-                <span class="cell-secondary">{{ row.key }}</span>
-                @if (isPicnicKey(row.key) && !picnicConfigured) {
-                  <span class="status-badge status-inactive" style="margin-left:0.5rem">
-                    {{ 'admin.feeSettings.picnicNotConfigured' | translate }}
-                  </span>
+          @case ('head_additional') {
+            <div class="field">
+              <label for="calcHeads">{{ 'admin.feeSettings.calculator.additionalHeads' | translate }}</label>
+              <input type="number" min="0" step="1" id="calcHeads" name="calcHeads"
+                [(ngModel)]="calcAdditionalHeads" />
+            </div>
+          }
+          @case ('variable') {
+            <div class="field">
+              <label for="calcAmount">{{ 'admin.feeSettings.calculator.amount' | translate }}</label>
+              <input type="number" min="0" step="0.01" id="calcAmount" name="calcAmount"
+                [(ngModel)]="calcAmount" />
+            </div>
+          }
+          @default {
+            <div class="field">
+              <label>{{ 'admin.feeSettings.calculator.fee' | translate }}</label>
+              <p class="calc-result">{{ summary(calcFee) }}</p>
+            </div>
+          }
+        }
+        @if (calcFee.calculationType !== 'fixed') {
+          <div class="field">
+            <label>{{ 'admin.feeSettings.calculator.fee' | translate }}</label>
+            <p class="calc-result">
+              @if (calcLoading) {
+                <span class="spinner"></span>
+              } @else if (calcResult) {
+                {{ formatTaka(calcResult.total) }}
+              } @else {
+                —
+              }
+            </p>
+          </div>
+          <div class="field calc-actions">
+            <button type="button" class="btn btn-secondary" (click)="calculate()"
+              [disabled]="calcLoading || missingVersion(calcFee)">
+              {{ 'admin.feeSettings.calc.button' | translate }}
+            </button>
+          </div>
+        }
+      }
+    </div>
+    @if (calcError) {
+      <p class="error-box" style="margin:0.75rem 0 0">{{ calcError }}</p>
+    }
+  </div>
+
+  <!-- ============ Versions table ============ -->
+  <div class="card section-card table-card">
+    <div class="table-toolbar">
+      <h2 class="section-title" style="margin:0">{{ 'admin.feeSettings.table.title' | translate }}</h2>
+      <input type="search" class="table-search" [ngModel]="search" (ngModelChange)="search = $event"
+        [placeholder]="'admin.feeSettings.table.searchPlaceholder' | translate" />
+    </div>
+
+    @if (loading) {
+      <div class="skeleton-list" aria-hidden="true">
+        @for (row of [1, 2, 3, 4]; track row) {
+          <div class="fee-skeleton-row"></div>
+        }
+      </div>
+    } @else if (feeTypes.length === 0) {
+      <div class="empty-state empty-state-block">
+        <span class="empty-state-icon"><app-icon name="coin" [size]="22" /></span>
+        <p>{{ 'admin.feeSettings.noSettings' | translate }}</p>
+        @if (canManage) {
+          <button type="button" class="btn btn-primary" (click)="openNewFeeDialog()">
+            {{ 'admin.feeSettings.newFee.button' | translate }}
+          </button>
+        }
+      </div>
+    } @else {
+      @for (group of filteredGroups; track group.key) {
+        <div class="fee-group-header">
+          <span class="fee-group-chip" [class.fee-group-chip-installment]="group.key === 'installment'">
+            {{ 'admin.feeSettings.groups.' + group.key | translate }}
+          </span>
+        </div>
+        <div class="data-table-wrap table-scroll">
+          <table class="data-table data-table-cards">
+            <thead>
+              <tr>
+                <th>{{ 'admin.feeSettings.table.fee' | translate }}</th>
+                <th>{{ 'admin.feeSettings.table.summary' | translate }}</th>
+                <th>{{ 'admin.feeSettings.table.unit' | translate }}</th>
+                <th>{{ 'admin.feeSettings.table.startDate' | translate }}</th>
+                <th>{{ 'admin.feeSettings.table.history' | translate }}</th>
+                <th>{{ 'admin.feeSettings.table.status' | translate }}</th>
+                <th>{{ 'admin.feeSettings.table.edit' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ft of group.fees; track ft.key) {
+                <tr [class.is-current]="expandedKey === ft.key">
+                  <td [attr.data-label]="'admin.feeSettings.table.fee' | translate">
+                    <strong>{{ feeLabel(ft) }}</strong>
+                    <span class="cell-secondary">{{ ft.key }}</span>
+                    @if (missingVersion(ft)) {
+                      <span class="status-badge status-inactive no-version-badge">
+                        {{ 'admin.feeSettings.noVersion' | translate }}
+                      </span>
+                    }
+                    @if (!ft.isActive) {
+                      <span class="status-badge status-inactive">
+                        {{ 'admin.feeSettings.inactive' | translate }}
+                      </span>
+                    }
+                  </td>
+                  <td [attr.data-label]="'admin.feeSettings.table.summary' | translate">{{ summary(ft) }}</td>
+                  <td [attr.data-label]="'admin.feeSettings.table.unit' | translate">
+                    {{ 'admin.feeSettings.units.' + ft.unit | translate }}</td>
+                  <td [attr.data-label]="'admin.feeSettings.table.startDate' | translate">
+                    {{ ft.currentVersion?.startDate ?? '—' }}</td>
+                  <td [attr.data-label]="'admin.feeSettings.table.history' | translate">
+                    <button type="button" class="btn btn-ghost btn-sm btn-icon" (click)="toggleHistory(ft)"
+                      [attr.aria-expanded]="expandedKey === ft.key">
+                      <span class="prop-chevron"
+                        [style.transform]="expandedKey === ft.key ? 'rotate(180deg)' : 'none'">
+                        <app-icon name="chevron-down" [size]="16" />
+                      </span>
+                      {{ (expandedKey === ft.key ? 'admin.feeSettings.hideHistory' : 'admin.feeSettings.viewHistory') | translate }}
+                    </button>
+                  </td>
+                  <td [attr.data-label]="'admin.feeSettings.table.status' | translate">
+                    @if (canManage) {
+                      <label class="fee-switch">
+                        <input type="checkbox" [checked]="ft.isActive" (change)="requestToggleActive(ft)"
+                          [attr.aria-label]="'admin.feeSettings.table.status' | translate" />
+                        <span class="fee-switch-slider"></span>
+                      </label>
+                    } @else {
+                      <span class="status-badge" [class.status-active]="ft.isActive"
+                        [class.status-inactive]="!ft.isActive">
+                        {{ (ft.isActive ? 'admin.feeSettings.active' : 'admin.feeSettings.inactive') | translate }}
+                      </span>
+                    }
+                  </td>
+                  <td [attr.data-label]="'admin.feeSettings.table.edit' | translate">
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="openEditFeeDialog(ft)"
+                      [disabled]="!canManage">
+                      {{ 'admin.feeSettings.table.edit' | translate }}
+                    </button>
+                  </td>
+                </tr>
+                @if (expandedKey === ft.key) {
+                  <tr>
+                    <td colspan="7">
+                      @if (loadingHistory) {
+                        <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+                      } @else {
+                        <div class="table-scroll">
+                          <table class="data-table history-table">
+                            <thead>
+                              <tr>
+                                <th>{{ 'admin.feeSettings.table.startDate' | translate }}</th>
+                                <th>{{ 'admin.feeSettings.table.summary' | translate }}</th>
+                                <th>{{ 'admin.feeSettings.table.endDate' | translate }}</th>
+                                <th>{{ 'admin.feeSettings.table.status' | translate }}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (version of history; track version.startDate) {
+                                <tr [class.is-current]="version.status === 1">
+                                  <td>{{ version.startDate }}</td>
+                                  <td>
+                                    @for (entry of version.values | keyvalue; track entry.key) {
+                                      <div>{{ versionValueLabel(entry.key) }}: {{ formatTaka(entry.value) }}</div>
+                                    }
+                                  </td>
+                                  <td>{{ version.endDate ?? '—' }}</td>
+                                  <td>
+                                    <span class="status-badge"
+                                      [class.status-active]="version.status === 1"
+                                      [class.status-inactive]="version.status !== 1">
+                                      {{ (version.status === 1 ? 'admin.feeSettings.active' : 'admin.feeSettings.inactive') | translate }}
+                                    </span>
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      }
+                    </td>
+                  </tr>
                 }
-              </td>
-              <td>{{ row.value }}</td>
-              <td>{{ row.unit ?? '—' }}</td>
-              <td>{{ row.startDate }}</td>
-              <td>
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-sm btn-icon"
-                  (click)="toggleHistory(row.key)"
-                  [attr.aria-expanded]="expandedKey === row.key"
-                >
-                  <span
-                    class="prop-chevron"
-                    [style.transform]="expandedKey === row.key ? 'rotate(180deg)' : 'none'"
-                  >
-                    <app-icon name="chevron-down" [size]="16" />
-                  </span>
-                  {{ (expandedKey === row.key ? 'admin.feeSettings.hideHistory' : 'admin.feeSettings.viewHistory') | translate }}
-                </button>
-              </td>
-            </tr>
-            @if (expandedKey === row.key) {
-              <tr>
-                <td colspan="5">
-                  @if (loadingHistory) {
-                    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
-                  } @else {
-                    <div class="table-scroll">
-                      <table class="data-table">
-                        <thead>
-                          <tr>
-                            <th>{{ 'admin.feeSettings.table.value' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.table.unit' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.table.startDate' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.table.endDate' | translate }}</th>
-                            <th>{{ 'admin.feeSettings.table.status' | translate }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @for (h of history; track h.id) {
-                            <tr [class.is-current]="h.status === 1">
-                              <td>{{ h.value }}</td>
-                              <td>{{ h.unit ?? '—' }}</td>
-                              <td>{{ h.startDate }}</td>
-                              <td>{{ h.endDate ?? '—' }}</td>
-                              <td>
-                                <span
-                                  class="status-badge"
-                                  [class.status-active]="h.status === 1"
-                                  [class.status-inactive]="h.status !== 1"
-                                >
-                                  {{ h.status === 1 ? ('admin.feeSettings.active' | translate) : ('admin.feeSettings.inactive' | translate) }}
-                                </span>
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  }
-                </td>
-              </tr>
-            }
-          } @empty {
-            @if (!monthlySubscriptionTier) {
-              <tr>
-                <td colspan="5" class="empty-state">
-                  <span class="empty-state-icon"><app-icon name="coin" [size]="22" /></span><br />
-                  {{ 'admin.feeSettings.noSettings' | translate }}
-                </td>
-              </tr>
-            }
-          }
-        </tbody>
-      </table>
-    </div>
-  }
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
 </div>
 
+<!-- ============ New / edit fee type dialog ============ -->
+@if (dialogOpen) {
+  <div class="fee-dialog-backdrop" (click)="closeFeeDialog()">
+    <div class="fee-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="fee-dialog-header">
+        <h2>
+          {{ (dialogMode === 'create' ? 'admin.feeSettings.newFee.title' : 'admin.feeSettings.editFee.title') | translate }}
+        </h2>
+        <button type="button" class="btn btn-ghost btn-sm btn-icon" (click)="closeFeeDialog()"
+          aria-label="Close">
+          <app-icon name="x" [size]="18" />
+        </button>
+      </div>
+
+      <div class="fee-dialog-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="feeLabelBn">{{ 'admin.feeSettings.newFee.labelBn' | translate }} *</label>
+            <input id="feeLabelBn" type="text" [(ngModel)]="draft.labelBn"
+              (ngModelChange)="onLabelEnChange()" maxlength="128" required />
+          </div>
+          <div class="field">
+            <label for="feeLabelEn">{{ 'admin.feeSettings.newFee.labelEn' | translate }} *</label>
+            <input id="feeLabelEn" type="text" [(ngModel)]="draft.labelEn"
+              (ngModelChange)="onLabelEnChange()" maxlength="128" required />
+          </div>
+          <div class="field">
+            <label for="feeKey">{{ 'admin.feeSettings.newFee.key' | translate }} *</label>
+            <input id="feeKey" type="text" [(ngModel)]="draft.key" (ngModelChange)="onKeyInput()"
+              [readonly]="dialogMode === 'edit'" [disabled]="dialogMode === 'edit'" maxlength="64" required />
+            <p class="field-hint">{{ 'admin.feeSettings.newFee.keyHint' | translate }}</p>
+            @if (keyError) {
+              <p class="field-error">{{ keyError }}</p>
+            }
+          </div>
+          <div class="field">
+            <label>{{ 'admin.feeSettings.newFee.calcType' | translate }} *</label>
+            <div class="calc-type-options">
+              @for (ct of ['fixed', 'tiered', 'head_additional', 'variable']; track ct) {
+                <label class="calc-type-option" [class.is-selected]="draft.calculationType === ct">
+                  <input type="radio" name="calculationType" value="{{ ct }}"
+                    [(ngModel)]="draft.calculationType" [disabled]="dialogMode === 'edit'" />
+                  {{ 'admin.feeSettings.calcTypes.' + ct | translate }}
+                </label>
+              }
+            </div>
+            <p class="field-hint">
+              {{ 'admin.feeSettings.calcTypes.' + draft.calculationType + '_hint' | translate }}
+            </p>
+          </div>
+          <div class="field">
+            <label for="feeUnit">{{ 'admin.feeSettings.form.unit' | translate }}</label>
+            <select id="feeUnit" [(ngModel)]="draft.unit">
+              @for (u of unitOptions; track u) {
+                <option [value]="u">{{ 'admin.feeSettings.units.' + u | translate }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label>{{ 'admin.feeSettings.newFee.group' | translate }}</label>
+            <div class="calc-type-options">
+              @for (gc of ['other', 'installment']; track gc) {
+                <label class="calc-type-option" [class.is-selected]="draft.feeCategory === gc">
+                  <input type="radio" name="feeCategory" value="{{ gc }}"
+                    [(ngModel)]="draft.feeCategory" />
+                  {{ 'admin.feeSettings.groups.' + gc | translate }}
+                </label>
+              }
+            </div>
+          </div>
+          <div class="field fee-flags">
+            <label class="fee-flag">
+              <input type="checkbox" [(ngModel)]="draft.isRecurring" />
+              {{ 'admin.feeSettings.newFee.recurring' | translate }}
+            </label>
+            <label class="fee-flag">
+              <input type="checkbox" [(ngModel)]="draft.isPayOnce" />
+              {{ 'admin.feeSettings.newFee.payOnce' | translate }}
+            </label>
+          </div>
+        </div>
+        @if (feeTypeError) {
+          <p class="error-box" style="margin-top:0.75rem;margin-bottom:0">{{ feeTypeError }}</p>
+        }
+      </div>
+
+      <div class="fee-dialog-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeFeeDialog()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="button" class="btn btn-primary" [disabled]="!canSubmitFeeType" (click)="submitFeeType()">
+          {{ (dialogMode === 'create' ? 'admin.feeSettings.newFee.submit' : 'admin.feeSettings.editFee.submit') | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
 <app-confirm-modal
-  [open]="confirmOpen"
+  [open]="confirmVersionOpen"
   [title]="'admin.feeSettings.confirmTitle' | translate"
   [message]="'admin.feeSettings.confirmMessage' | translate"
   [confirmLabel]="'admin.feeSettings.form.submit' | translate"
-  (confirm)="createVersion()"
-  (cancel)="cancelConfirm()"
+  (confirm)="saveVersion()"
+  (cancel)="confirmVersionOpen = false"
+/>
+
+<app-confirm-modal
+  [open]="confirmDeactivateOpen"
+  [title]="'admin.feeSettings.deactivateConfirmTitle' | translate"
+  [message]="'admin.feeSettings.deactivateConfirmMessage' | translate: { count: pendingToggle?.paymentCount ?? 0 }"
+  [danger]="true"
+  [confirmLabel]="'admin.feeSettings.deactivateConfirmButton' | translate"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()"
 />

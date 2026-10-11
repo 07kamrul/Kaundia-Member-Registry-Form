@@ -18,6 +18,8 @@ from app.api.routes import (
     land_data,
     shared_data,
     fee_payments,
+    fee_types,
+    other_fees,
     finance,
     installment_payments,
     member,
@@ -148,6 +150,8 @@ app.include_router(roadmap.router, prefix=api_router_prefix)
 app.include_router(resolution_book.router, prefix=api_router_prefix)
 app.include_router(installment_payments.router, prefix=api_router_prefix)
 app.include_router(fee_payments.router, prefix=api_router_prefix)
+app.include_router(fee_types.router, prefix=api_router_prefix)
+app.include_router(other_fees.router, prefix=api_router_prefix)
 app.include_router(plot_map.router, prefix=api_router_prefix)
 app.include_router(land_data.router, prefix=api_router_prefix)
 app.include_router(shared_data.router, prefix=api_router_prefix)

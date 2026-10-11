@@ -124,24 +124,25 @@ export const routes: Routes = [
               ),
           },
           {
-            path: 'picnic-payment',
+            path: 'other-fees',
             // Member payers only (MEMBER_PAYMENT_ROLES): fee managers are
             // redirected to Fee Settings, never shown the payment form.
             canActivate: [roleGuard(MEMBER_PAYMENT_ROLES)],
             loadComponent: () =>
-              import('./features/member/pages/picnic-payment/picnic-payment.component').then(
-                (m) => m.PicnicPaymentComponent,
+              import('./features/member/pages/other-fees/other-fees.component').then(
+                (m) => m.OtherFeesComponent,
               ),
           },
           {
+            // The standalone Picnic Fee page became a fee type inside Other
+            // Fees; old links land there with picnic preselected.
+            path: 'picnic-payment',
+            redirectTo: () => '/other-fees?type=picnic',
+          },
+          {
+            // The plain "Fees" page was folded into Other Fees too.
             path: 'fees',
-            // Member payers only: fee managers configure rates in Fee
-            // Settings and never pay as members (backend 403s them too).
-            canActivate: [roleGuard(MEMBER_PAYMENT_ROLES)],
-            loadComponent: () =>
-              import('./features/member/pages/fees/fees.component').then(
-                (m) => m.FeesComponent,
-              ),
+            redirectTo: () => '/other-fees',
           },
           {
             path: 'cost-shares',
@@ -290,12 +291,12 @@ export const routes: Routes = [
               ),
           },
           {
+            // The standalone Picnic Payments screen was folded into the
+            // unified Fee Payments list; old links land there with the
+            // picnic fee-type filter preselected so nothing 404s.
             path: 'picnic-payments',
             canActivate: [permissionGuard(['member.view_all'])],
-            loadComponent: () =>
-              import('./features/management/pages/picnic-payments/picnic-payments.component').then(
-                (m) => m.PicnicPaymentsComponent,
-              ),
+            redirectTo: () => '/fees-management?feeType=picnic',
           },
           {
             path: 'fee-settings',

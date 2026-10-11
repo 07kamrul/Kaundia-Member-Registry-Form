@@ -1,4 +1,4 @@
-<div>
+<div class="role-mgmt">
   <div class="page-header">
     <div>
       <h1 class="page-title">{{ 'admin.roleManagement.title' | translate }}</h1>
@@ -11,159 +11,239 @@
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
-    @for (role of roles; track role.id) {
-      <div class="card role-card">
-        <div class="role-card-header">
-          <span class="role-card-name">{{ role.name }}</span>
-          @if (savingRoleId === role.id) {
-            <span class="spinner"></span>
-          } @else if (role.name === 'super_admin') {
-            <span class="status-badge status-approved">{{ 'admin.roleManagement.allPermissionsAlways' | translate }}</span>
-          }
-        </div>
-        <div class="role-card-permissions-grid">
-          @for (permission of permissions; track permission.key) {
-            <div class="role-card-permission">
-              <div class="role-card-permission-label">{{ permission.description }}</div>
-              <label class="toggle-switch">
-                <input
-                  type="checkbox"
-                  [checked]="hasPermission(role, permission.key)"
-                  [disabled]="role.name === 'super_admin' || savingRoleId === role.id"
-                  (change)="togglePermission(role, permission.key)"
-                />
-                <span class="toggle-switch-track"></span>
-              </label>
-            </div>
-          }
-        </div>
-      </div>
-    }
-
-    <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">{{ 'admin.roleManagement.createAdmin.title' | translate }}</h2>
-    <p class="page-subtitle" style="margin:0 0 1rem">{{ 'admin.roleManagement.createAdmin.subtitle' | translate }}</p>
-
-    <div class="card" style="padding:1.2rem;margin-bottom:1.3rem">
-      @if (createUserError) {
-        <div class="error-box"><p style="margin:0">{{ createUserError }}</p></div>
+    <!-- Role tabs -->
+    <div class="role-mgmt-tabs" role="tablist">
+      @for (role of roles; track role.id) {
+        <button
+          type="button"
+          role="tab"
+          class="role-mgmt-tab"
+          [class.active]="role.name === selectedRoleName"
+          [attr.aria-selected]="role.name === selectedRoleName"
+          (click)="selectRole(role.name)"
+        >
+          <span class="role-mgmt-tab-name">{{ roleLabel(role.name) }}</span>
+          <span class="role-mgmt-tab-count">{{ enabledCount(role) }}</span>
+        </button>
       }
-      @if (createUserSuccess) {
-        <div class="status-badge status-approved" style="margin-bottom:0.8rem">{{ createUserSuccess }}</div>
-      }
-      <div class="grid-2">
-        <div class="field">
-          <label>{{ 'admin.roleManagement.createAdmin.nameLabel' | translate }}</label>
-          <input type="text" [(ngModel)]="newUserName" [placeholder]="'admin.roleManagement.createAdmin.namePlaceholder' | translate" />
-        </div>
-        <div class="field">
-          <label>{{ 'admin.roleManagement.createAdmin.emailLabel' | translate }}</label>
-          <input type="email" [(ngModel)]="newUserEmail" placeholder="admin@example.com" />
-        </div>
-      </div>
-      <div class="grid-2">
-        <div class="field">
-          <label>{{ 'admin.roleManagement.createAdmin.passwordLabel' | translate }}</label>
-          <app-password-field [(ngModel)]="newUserPassword" autocomplete="new-password" [placeholder]="'admin.roleManagement.createAdmin.passwordPlaceholder' | translate" />
-        </div>
-        <div class="field">
-          <label>{{ 'admin.roleManagement.createAdmin.roleLabel' | translate }}</label>
-          <select [(ngModel)]="newUserRole">
-            <option value="administrator">Administrator</option>
-            <option value="executive_committee">Executive Committee</option>
-            <option value="super_admin">Super Admin</option>
-          </select>
-        </div>
-      </div>
-      <button type="button" class="btn btn-primary" [disabled]="creatingUser" (click)="createUser()">
-        {{ 'admin.roleManagement.createAdmin.submitButton' | translate }}
-      </button>
     </div>
 
-    <h2 class="page-title" style="font-size:1.1rem;margin:2rem 0 0.4rem">{{ 'admin.roleManagement.userOverrides.title' | translate }}</h2>
-    <p class="page-subtitle" style="margin:0 0 1rem">
-      {{ 'admin.roleManagement.userOverrides.subtitle' | translate }}
-    </p>
-
-    <div class="card" style="padding:1.2rem;margin-bottom:1.3rem">
-      <div class="field">
-        <label>{{ 'admin.roleManagement.userOverrides.userLabel' | translate }}</label>
-        <select [ngModel]="selectedUserId" (ngModelChange)="onSelectUser($event)">
-          @for (user of users; track user.id) {
-            <option [value]="user.id">{{ user.name }} ({{ user.role }})</option>
-          }
-        </select>
-      </div>
-
-      @if (selectedUserId) {
-        <div class="grid-2" style="margin-bottom:1rem">
-          <div class="field">
-            <label>{{ 'admin.roleManagement.userOverrides.assignRoleLabel' | translate }}</label>
-            <select [(ngModel)]="roleAssignDraft">
-              <option value="administrator">Administrator</option>
-              <option value="executive_committee">Executive Committee</option>
-              <option value="super_admin">Super Admin</option>
-            </select>
+    @if (selectedRole; as role) {
+      <div class="card role-mgmt-panel">
+        <div class="role-mgmt-panel-header">
+          <div class="role-mgmt-panel-heading">
+            <h2 class="role-mgmt-panel-title">{{ roleLabel(role.name) }}</h2>
+            @if (role.name === 'super_admin') {
+              <span class="status-badge status-approved">{{ 'admin.roleManagement.allPermissionsAlways' | translate }}</span>
+            } @else if (savingRoleId === role.id) {
+              <span class="spinner"></span>
+            }
           </div>
-          <div class="field" style="display:flex;align-items:flex-end">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              [disabled]="savingRoleAssignment"
-              (click)="assignRole()"
-            >
-              {{ 'admin.roleManagement.userOverrides.saveRoleButton' | translate }}
-            </button>
+          <div class="role-mgmt-panel-meta">
+            <span class="role-mgmt-count">
+              {{ 'admin.roleManagement.enabledCount' | translate: { enabled: enabledCount(role), total: permissions.length } }}
+            </span>
+            <input
+              type="search"
+              class="role-mgmt-search"
+              [placeholder]="'admin.roleManagement.searchPlaceholder' | translate"
+              [(ngModel)]="permissionSearch"
+              [disabled]="role.name === 'super_admin'"
+            />
           </div>
         </div>
-      }
 
-      @if (selectedUserId) {
-        <div class="grid-2">
-          <div class="field">
-            <label>{{ 'admin.roleManagement.userOverrides.permissionLabel' | translate }}</label>
-            <select [(ngModel)]="overrideDraftKey">
-              @for (permission of permissions; track permission.key) {
-                <option [value]="permission.key">{{ permission.description }}</option>
-              }
-            </select>
+        @if (role.name === 'super_admin') {
+          <div class="role-mgmt-super-note">
+            {{ 'admin.roleManagement.superAdminNote' | translate }}
           </div>
-          <div class="field">
-            <label>{{ 'admin.roleManagement.userOverrides.actionLabel' | translate }}</label>
-            <select [(ngModel)]="overrideDraftAction">
-              <option value="grant">{{ 'admin.roleManagement.userOverrides.grantOption' | translate }}</option>
-              <option value="revoke">{{ 'admin.roleManagement.userOverrides.revokeOption' | translate }}</option>
-            </select>
-          </div>
-        </div>
-        <button type="button" class="btn btn-primary" [disabled]="savingOverride" (click)="applyOverride()">
-          {{ 'admin.roleManagement.userOverrides.applyButton' | translate }}
-        </button>
-
-        @if (loadingOverrides) {
-          <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
-        } @else if (overrides.length) {
-          <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.4rem">
-            @for (override of overrides; track override.permission_key) {
-              <span
-                class="status-badge"
-                [class.status-approved]="override.granted"
-                [class.status-rejected]="!override.granted"
-              >
-                {{ override.granted ? '+' : '−' }} {{ permissionLabel(override.permission_key) }}
-                <button
-                  type="button"
-                  (click)="removeOverride(override.permission_key)"
-                  style="border:none;background:none;cursor:pointer;margin-left:0.3rem;color:inherit"
-                >
-                  ✕
-                </button>
-              </span>
+          <div class="role-mgmt-groups readonly">
+            @for (group of groupsForRole(role); track group.categoryKey) {
+              <div class="role-mgmt-group">
+                <div class="role-mgmt-group-header">
+                  <span class="role-mgmt-group-title">{{ 'admin.roleManagement.categories.' + group.categoryKey | translate }}</span>
+                  <span class="role-mgmt-group-count">{{ group.permissions.length }}</span>
+                </div>
+                @for (permission of group.permissions; track permission.key) {
+                  <div class="role-mgmt-permission">
+                    <span class="role-mgmt-permission-label">{{ permission.description }}</span>
+                    <label class="toggle-switch" [class.touch]="true">
+                      <input type="checkbox" checked disabled />
+                      <span class="toggle-switch-track"></span>
+                    </label>
+                  </div>
+                }
+              </div>
             }
           </div>
         } @else {
-          <p class="field-hint" style="margin-top:1rem">{{ 'admin.roleManagement.userOverrides.noOverrides' | translate }}</p>
+          @if (permissionSearch.trim() && groupsForRole(role).length === 0) {
+            <div class="role-mgmt-empty">{{ 'admin.roleManagement.noSearchResults' | translate }}</div>
+          }
+          <div class="role-mgmt-groups">
+            @for (group of groupsForRole(role); track group.categoryKey) {
+              <div class="role-mgmt-group">
+                <div class="role-mgmt-group-header">
+                  <span class="role-mgmt-group-title">{{ 'admin.roleManagement.categories.' + group.categoryKey | translate }}</span>
+                  <button
+                    type="button"
+                    class="role-mgmt-group-toggle"
+                    [disabled]="savingRoleId === role.id"
+                    (click)="toggleGroup(role, group)"
+                  >
+                    {{ (anyPermissionEnabled(role, group) ? 'admin.roleManagement.disableAll' : 'admin.roleManagement.enableAll') | translate }}
+                  </button>
+                </div>
+                @for (permission of group.permissions; track permission.key) {
+                  <div class="role-mgmt-permission">
+                    <span class="role-mgmt-permission-label">{{ permission.description }}</span>
+                    <label class="toggle-switch" [class.touch]="true">
+                      <input
+                        type="checkbox"
+                        [checked]="hasPermission(role, permission.key)"
+                        [disabled]="savingRoleId === role.id"
+                        (change)="togglePermission(role, permission.key)"
+                      />
+                      <span class="toggle-switch-track"></span>
+                    </label>
+                  </div>
+                }
+              </div>
+            }
+          </div>
         }
-      }
-    </div>
+      </div>
+    }
+
+    <!-- Create administrator -->
+    <section class="role-mgmt-section">
+      <h2 class="role-mgmt-section-title">{{ 'admin.roleManagement.createAdmin.title' | translate }}</h2>
+      <p class="role-mgmt-section-subtitle">{{ 'admin.roleManagement.createAdmin.subtitle' | translate }}</p>
+
+      <div class="card role-mgmt-card">
+        @if (createUserError) {
+          <div class="error-box"><p style="margin:0">{{ createUserError }}</p></div>
+        }
+        @if (createUserSuccess) {
+          <div class="status-badge status-approved role-mgmt-success">{{ createUserSuccess }}</div>
+        }
+        <div class="grid-2">
+          <div class="field">
+            <label>{{ 'admin.roleManagement.createAdmin.nameLabel' | translate }}</label>
+            <input type="text" [(ngModel)]="newUserName" [placeholder]="'admin.roleManagement.createAdmin.namePlaceholder' | translate" />
+          </div>
+          <div class="field">
+            <label>{{ 'admin.roleManagement.createAdmin.emailLabel' | translate }}</label>
+            <input type="email" [(ngModel)]="newUserEmail" placeholder="admin@example.com" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>{{ 'admin.roleManagement.createAdmin.passwordLabel' | translate }}</label>
+            <app-password-field [(ngModel)]="newUserPassword" autocomplete="new-password" [placeholder]="'admin.roleManagement.createAdmin.passwordPlaceholder' | translate" />
+          </div>
+          <div class="field">
+            <label>{{ 'admin.roleManagement.createAdmin.roleLabel' | translate }}</label>
+            <select [(ngModel)]="newUserRole">
+              <option value="administrator">{{ roleLabel('administrator') }}</option>
+              <option value="executive_committee">{{ roleLabel('executive_committee') }}</option>
+              <option value="super_admin">{{ roleLabel('super_admin') }}</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" [disabled]="creatingUser" (click)="createUser()">
+          {{ 'admin.roleManagement.createAdmin.submitButton' | translate }}
+        </button>
+      </div>
+    </section>
+
+    <!-- User-specific overrides -->
+    <section class="role-mgmt-section">
+      <h2 class="role-mgmt-section-title">{{ 'admin.roleManagement.userOverrides.title' | translate }}</h2>
+      <p class="role-mgmt-section-subtitle">{{ 'admin.roleManagement.userOverrides.subtitle' | translate }}</p>
+
+      <div class="card role-mgmt-card">
+        <div class="field">
+          <label>{{ 'admin.roleManagement.userOverrides.userLabel' | translate }}</label>
+          <select [ngModel]="selectedUserId" (ngModelChange)="onSelectUser($event)">
+            @for (user of users; track user.id) {
+              <option [value]="user.id">{{ user.name }} ({{ user.email }})</option>
+            }
+          </select>
+        </div>
+
+        @if (selectedUserId) {
+          <div class="grid-2 role-mgmt-stack">
+            <div class="field">
+              <label>{{ 'admin.roleManagement.userOverrides.assignRoleLabel' | translate }}</label>
+              <select [(ngModel)]="roleAssignDraft">
+                <option value="administrator">{{ roleLabel('administrator') }}</option>
+                <option value="executive_committee">{{ roleLabel('executive_committee') }}</option>
+                <option value="super_admin">{{ roleLabel('super_admin') }}</option>
+              </select>
+            </div>
+            <div class="field role-mgmt-field-end">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                [disabled]="savingRoleAssignment"
+                (click)="assignRole()"
+              >
+                {{ 'admin.roleManagement.userOverrides.saveRoleButton' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (selectedUserId) {
+          <div class="grid-2 role-mgmt-stack">
+            <div class="field">
+              <label>{{ 'admin.roleManagement.userOverrides.permissionLabel' | translate }}</label>
+              <select [(ngModel)]="overrideDraftKey">
+                @for (permission of permissions; track permission.key) {
+                  <option [value]="permission.key">{{ permission.description }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label>{{ 'admin.roleManagement.userOverrides.actionLabel' | translate }}</label>
+              <select [(ngModel)]="overrideDraftAction">
+                <option value="grant">{{ 'admin.roleManagement.userOverrides.grantOption' | translate }}</option>
+                <option value="revoke">{{ 'admin.roleManagement.userOverrides.revokeOption' | translate }}</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" [disabled]="savingOverride" (click)="applyOverride()">
+            {{ 'admin.roleManagement.userOverrides.applyButton' | translate }}
+          </button>
+
+          @if (loadingOverrides) {
+            <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+          } @else if (overrides.length) {
+            <div class="role-mgmt-override-list">
+              @for (override of overrides; track override.permission_key) {
+                <span
+                  class="status-badge"
+                  [class.status-approved]="override.granted"
+                  [class.status-rejected]="!override.granted"
+                >
+                  {{ override.granted ? '+' : '−' }} {{ permissionLabel(override.permission_key) }}
+                  <button
+                    type="button"
+                    class="role-mgmt-override-remove"
+                    [attr.aria-label]="'admin.roleManagement.userOverrides.revokeOption' | translate"
+                    (click)="removeOverride(override.permission_key)"
+                  >
+                    ✕
+                  </button>
+                </span>
+              }
+            </div>
+          } @else {
+            <p class="field-hint role-mgmt-no-overrides">{{ 'admin.roleManagement.userOverrides.noOverrides' | translate }}</p>
+          }
+        }
+      </div>
+    </section>
   }
 </div>

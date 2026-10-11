@@ -10,6 +10,11 @@ import {
   RoleDef,
 } from '../../../../core/services/rbac.service';
 
+interface PermissionGroup {
+  categoryKey: string;
+  permissions: PermissionDef[];
+}
+
 @Component({
   selector: 'app-role-management',
   standalone: true,
@@ -23,6 +28,9 @@ export class RoleManagementComponent implements OnInit {
   loading = false;
   error = '';
   savingRoleId: number | null = null;
+
+  selectedRoleName = '';
+  permissionSearch = '';
 
   users: AdminUserDef[] = [];
   selectedUserId: number | null = null;
@@ -43,6 +51,19 @@ export class RoleManagementComponent implements OnInit {
   roleAssignDraft = '';
   savingRoleAssignment = false;
 
+  // Resources grouped into reviewer-friendly categories; anything not listed
+  // lands in "other" so a new backend permission still renders.
+  private static readonly CATEGORY_RESOURCES: { key: string; resources: string[] }[] = [
+    { key: 'access', resources: ['user', 'role', 'system', 'organization', 'audit'] },
+    { key: 'members', resources: ['member', 'membership', 'document'] },
+    { key: 'properties', resources: ['property', 'boundary', 'neighbour'] },
+    { key: 'feesFinance', resources: ['fee_settings', 'cost', 'finance'] },
+    { key: 'complaints', resources: ['complaint', 'request'] },
+    { key: 'content', resources: ['notice', 'event', 'resolution_book', 'roadmap'] },
+    { key: 'reports', resources: ['report'] },
+    { key: 'selfService', resources: ['profile'] },
+  ];
+
   constructor(
     private rbacService: RbacService,
     private cdr: ChangeDetectorRef,
@@ -58,6 +79,7 @@ export class RoleManagementComponent implements OnInit {
         this.rbacService.listRoles().subscribe({
           next: (roles) => {
             this.roles = roles;
+            this.selectedRoleName = roles[0]?.name ?? '';
             this.loading = false;
             this.cdr.markForCheck();
           },
@@ -88,14 +110,90 @@ export class RoleManagementComponent implements OnInit {
     });
   }
 
+  get selectedRole(): RoleDef | null {
+    return this.roles.find((role) => role.name === this.selectedRoleName) ?? null;
+  }
+
+  selectRole(name: string): void {
+    this.selectedRoleName = name;
+    this.permissionSearch = '';
+    this.cdr.markForCheck();
+    // On narrow screens the tab row scrolls horizontally; keep the active
+    // chip visible after switching roles.
+    setTimeout(() => {
+      document
+        .querySelector('.role-mgmt-tab.active')
+        ?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
+  }
+
+  roleLabel(name: string): string {
+    const key = `admin.roleManagement.roles.${name}`;
+    const label = this.translate.instant(key);
+    return label === key ? name : label;
+  }
+
+  enabledCount(role: RoleDef): number {
+    return role.permission_keys.length;
+  }
+
   hasPermission(role: RoleDef, permissionKey: string): boolean {
     return role.permission_keys.includes(permissionKey);
   }
 
+  groupsForRole(role: RoleDef): PermissionGroup[] {
+    const search = this.permissionSearch.trim().toLowerCase();
+    const groups: PermissionGroup[] = [];
+    const seen = new Set<string>();
+
+    for (const category of RoleManagementComponent.CATEGORY_RESOURCES) {
+      const permissions = this.permissions.filter(
+        (permission) =>
+          category.resources.includes(permission.resource) &&
+          (!search ||
+            permission.description.toLowerCase().includes(search) ||
+            permission.key.toLowerCase().includes(search)),
+      );
+      if (permissions.length) {
+        groups.push({ categoryKey: category.key, permissions });
+        permissions.forEach((permission) => seen.add(permission.key));
+      }
+    }
+
+    const other = this.permissions.filter(
+      (permission) =>
+        !seen.has(permission.key) &&
+        (!search ||
+          permission.description.toLowerCase().includes(search) ||
+          permission.key.toLowerCase().includes(search)),
+    );
+    if (other.length) groups.push({ categoryKey: 'other', permissions: other });
+    return groups;
+  }
+
+  anyPermissionEnabled(role: RoleDef, group: PermissionGroup): boolean {
+    return group.permissions.some((permission) => this.hasPermission(role, permission.key));
+  }
+
+  toggleGroup(role: RoleDef, group: PermissionGroup): void {
+    const enable = !this.anyPermissionEnabled(role, group);
+    this.setPermissions(
+      role,
+      group.permissions.map((permission) => permission.key),
+      enable,
+    );
+  }
+
   togglePermission(role: RoleDef, permissionKey: string): void {
-    const nextKeys = this.hasPermission(role, permissionKey)
-      ? role.permission_keys.filter((key) => key !== permissionKey)
-      : [...role.permission_keys, permissionKey];
+    this.setPermissions(role, [permissionKey], !this.hasPermission(role, permissionKey));
+  }
+
+  private setPermissions(role: RoleDef, keys: string[], enable: boolean): void {
+    if (role.name === 'super_admin' || this.savingRoleId === role.id) return;
+
+    const nextKeys = enable
+      ? [...new Set([...role.permission_keys, ...keys])]
+      : role.permission_keys.filter((key) => !keys.includes(key));
 
     this.savingRoleId = role.id;
     this.rbacService.updateRolePermissions(role.id, nextKeys).subscribe({

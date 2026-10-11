@@ -1,4 +1,4 @@
-<div style="max-width:64rem;margin:0 auto">
+<div style="max-width:72rem;margin:0 auto">
   <div class="page-header">
     <div>
       <h1 class="page-title">{{ 'admin.feesManagement.title' | translate }}</h1>
@@ -7,15 +7,21 @@
   </div>
 
   <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
-    <div class="grid-2">
+    <div class="form-grid">
       <div class="field">
         <label for="feeTypeFilter">{{ 'admin.feesManagement.feeTypeFilter' | translate }}</label>
         <select id="feeTypeFilter" [(ngModel)]="feeTypeFilter">
           <option value="">{{ 'admin.feesManagement.allTypes' | translate }}</option>
-          @for (key of feeTypeKeys; track key) {
-            <option [value]="key">{{ 'member.fees.types.' + key + '.label' | translate }}</option>
+          @for (option of feeTypeOptions; track option.value) {
+            <option [value]="option.value">
+              {{ option.custom ? option.label : ('member.fees.types.' + option.value + '.label' | translate) }}
+            </option>
           }
         </select>
+      </div>
+      <div class="field">
+        <label for="memberFilter">{{ 'admin.feesManagement.memberFilter' | translate }}</label>
+        <input id="memberFilter" type="number" min="1" [(ngModel)]="memberFilter" placeholder="ID" />
       </div>
       <div class="field">
         <label>{{ 'admin.feesManagement.dateRange' | translate }}</label>
@@ -44,7 +50,7 @@
   <div class="card" style="padding:1.25rem;margin-bottom:1.5rem;display:flex;gap:2rem;flex-wrap:wrap">
     <div>
       <p class="field-hint" style="margin:0">{{ 'admin.feesManagement.totalCollected' | translate }}</p>
-      <strong style="font-size:1.25rem">৳ {{ totalCollected }}</strong>
+      <strong style="font-size:1.25rem">৳ {{ totalCollected | number: '1.2-2' }}</strong>
     </div>
     <div>
       <p class="field-hint" style="margin:0">{{ 'admin.feesManagement.count' | translate }}</p>
@@ -53,12 +59,16 @@
   </div>
 
   @if (loading) {
-    <div class="loading-state"><span class="spinner"></span> {{ 'common.loading' | translate }}</div>
+    <div class="card" style="padding:1rem" aria-hidden="true">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <div class="fee-skeleton-row"></div>
+      }
+    </div>
   } @else if (error) {
     <div class="error-box"><p style="margin:0">{{ error }}</p></div>
   } @else {
     <div class="data-table-wrap">
-      <table class="data-table">
+      <table class="data-table data-table-cards">
         <thead>
           <tr>
             <th>{{ 'admin.feesManagement.memberColumn' | translate }}</th>
@@ -73,13 +83,21 @@
         <tbody>
           @for (payment of payments; track payment.id) {
             <tr>
-              <td>{{ payment.memberName || ('#' + payment.memberId) }}</td>
-              <td>{{ 'member.fees.types.' + payment.feeType + '.label' | translate }}</td>
-              <td>{{ payment.paymentDate }}</td>
-              <td>৳ {{ payment.amount }}</td>
-              <td>{{ payment.paymentMethod ? ('member.fees.methods.' + payment.paymentMethod | translate) : '—' }}</td>
-              <td>{{ payment.receiptNo || '—' }}</td>
-              <td>{{ payment.note || '—' }}</td>
+              <td [attr.data-label]=" 'admin.feesManagement.memberColumn' | translate ">
+                {{ payment.memberName || ('#' + payment.memberId) }}
+              </td>
+              <td [attr.data-label]=" 'admin.feesManagement.feeColumn' | translate ">
+                <span class="fee-type-chip" [class.fee-type-chip-picnic]="payment.feeType === 'picnic'">
+                  {{ customFeeLabel(payment.feeType) || ('member.fees.types.' + payment.feeType + '.label' | translate) }}
+                </span>
+              </td>
+              <td [attr.data-label]=" 'admin.feesManagement.dateColumn' | translate ">{{ payment.paymentDate }}</td>
+              <td [attr.data-label]=" 'admin.feesManagement.amountColumn' | translate ">৳ {{ payment.amount | number: '1.2-2' }}</td>
+              <td [attr.data-label]=" 'admin.feesManagement.methodColumn' | translate ">
+                {{ methodLabel(payment.paymentMethod) }}
+              </td>
+              <td [attr.data-label]=" 'admin.feesManagement.receiptColumn' | translate ">{{ payment.receiptNo || '—' }}</td>
+              <td [attr.data-label]=" 'admin.feesManagement.noteColumn' | translate ">{{ payment.note || '—' }}</td>
             </tr>
           } @empty {
             <tr><td colspan="7" class="empty-state">{{ 'admin.feesManagement.emptyState' | translate }}</td></tr>

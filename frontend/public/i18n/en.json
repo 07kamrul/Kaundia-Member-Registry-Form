@@ -200,7 +200,6 @@
     "openMenu": "Open menu",
     "paymentVerifications": "Payment Verifications",
     "picnicPayment": "Picnic Fee",
-    "picnicPayments": "Picnic Payments",
     "plotBoundaries": "Plot Boundaries",
     "plotMap": "Plot Boundary Map",
     "profile": "Profile",
@@ -218,7 +217,8 @@
       "administration": "Administration"
     },
     "societyCosts": "Society Costs",
-    "submissions": "Submissions"
+    "submissions": "Submissions",
+    "otherFees": "Other Fees"
   },
   "forbidden": {
     "title": "Access Denied",
@@ -942,6 +942,76 @@
           "rateLimited": "Too many requests. Please try again in a few minutes."
         }
       }
+    },
+    "otherFees": {
+      "title": "Other Fees",
+      "subtitle": "Pay any non-installment fee - admission, picnic, development, donation and more - in one place.",
+      "typeLabel": "Fee Type",
+      "paidSuffix": "Paid",
+      "loadingRates": "Loading rates…",
+      "notConfigured": "Fees have not been set up yet. Please contact the committee.",
+      "accessDenied": "You do not have access to fee payments.",
+      "feeLoadFailed": "Could not load the fee types.",
+      "retry": "Retry",
+      "alreadyPaid": "{{type}} was already paid - no further payment is needed.",
+      "dateLabel": "Payment Date",
+      "additionalHeadsLabel": "Additional Heads",
+      "additionalHeadsHint": "0 to {{max}} (spouse, children, guests)",
+      "amountLabel": "Amount",
+      "fixedAmountHint": "The amount is fixed by the committee's rate - read-only.",
+      "variableAmountHint": "Enter the amount you are paying (must be greater than zero).",
+      "headNameLabel": "Head {{n}} Name",
+      "headRelationLabel": "Head {{n}} Relation",
+      "relations": {
+        "spouse": "Spouse",
+        "child": "Child",
+        "guest": "Guest"
+      },
+      "memberHead": "Member head",
+      "additionalHeads": "Additional heads",
+      "total": "Total",
+      "taka": "Taka",
+      "methodLabel": "Payment Method",
+      "receiptNoLabel": "Receipt No",
+      "noteLabel": "Note / Purpose (optional)",
+      "submit": "Confirm Payment",
+      "saving": "Saving…",
+      "saveSuccess": "Payment of ৳ {{total}} recorded. Thank you!",
+      "saveError": "Could not record the payment. Please try again.",
+      "historyTitle": "Payment History",
+      "filterType": "Filter by fee type",
+      "filterAll": "All fee types",
+      "filterApply": "Apply",
+      "filterReset": "Reset",
+      "summaryTotal": "Total paid",
+      "dateColumn": "Date",
+      "typeColumn": "Fee Type",
+      "detailsColumn": "Details",
+      "totalColumn": "Total",
+      "receiptColumn": "Receipt No",
+      "methodColumn": "Method",
+      "detailsHeads": "+{{n}} additional heads",
+      "detailsAdmission": "Recorded at registration",
+      "emptyState": "No other-fee payments yet.",
+      "emptyStateFiltered": "No payments match the selected filters.",
+      "historyLoadFailed": "Could not load the payment history.",
+      "prevPage": "Previous",
+      "nextPage": "Next",
+      "types": {
+        "admission": "Admission Fee",
+        "picnic": "Picnic Fee",
+        "maintenance": "Maintenance Fee",
+        "development": "Development Fee",
+        "donation": "Donation",
+        "extra": "Extra Fee"
+      },
+      "methods": {
+        "Cash": "Cash",
+        "bKash": "bKash",
+        "Nagad": "Nagad",
+        "Bank Transfer": "Bank Transfer",
+        "Other": "Other"
+      }
     }
   },
   "auth": {
@@ -1161,7 +1231,30 @@
         "assignRoleFailed": "Could not assign role.",
         "loadOverridesFailed": "Could not load individual permissions.",
         "saveOverridesFailed": "Could not save individual permissions."
-      }
+      },
+      "roles": {
+        "super_admin": "Super Admin",
+        "administrator": "Administrator",
+        "executive_committee": "Executive Committee",
+        "member": "Member"
+      },
+      "categories": {
+        "access": "Users & Access",
+        "members": "Members & Membership",
+        "properties": "Properties & Land",
+        "feesFinance": "Fees & Finance",
+        "complaints": "Complaints & Requests",
+        "content": "Content & Communication",
+        "reports": "Reports",
+        "selfService": "Member Self-Service",
+        "other": "Other"
+      },
+      "searchPlaceholder": "Search permissions…",
+      "enabledCount": "{{enabled}} of {{total}} permissions enabled",
+      "enableAll": "Enable all",
+      "disableAll": "Disable all",
+      "noSearchResults": "No permissions match your search.",
+      "superAdminNote": "Super Admin always has every permission — this role cannot be edited."
     },
     "membersList": {
       "title": "All Members",
@@ -1239,7 +1332,8 @@
         "monthly_subscription_additional_rate": "Monthly Subscription Additional Rate",
         "monthly_subscription_base_threshold": "Monthly Subscription Base Threshold",
         "picnic_head_fee": "Picnic Fee - Member Head",
-        "picnic_additional_head_fee": "Picnic Fee - Additional Head"
+        "picnic_additional_head_fee": "Picnic Fee - Additional Head",
+        "picnic_fee": "Picnic Fee"
       },
       "units": {
         "taka": "Taka",
@@ -1255,7 +1349,11 @@
         "baseAmount": "Base Amount",
         "additionalRate": "Additional Rate per Decimal",
         "additionalRateHint": "Each additional decimal, or part of a decimal, is charged in full.",
-        "baseThreshold": "Base Threshold (decimals)"
+        "baseThreshold": "Base Threshold (decimals)",
+        "headFee": "Head Fee",
+        "additionalHeadFee": "Additional Head Fee",
+        "additionalHeadFeeHint": "Charged for each additional head (spouse, children, guests).",
+        "boundsHint": "Leave empty when there is no minimum."
       },
       "confirmTitle": "Confirm New Version",
       "confirmMessage": "The current version will be deactivated from today. Save the new version?",
@@ -1265,7 +1363,13 @@
         "unit": "Unit",
         "startDate": "Start Date",
         "endDate": "End Date",
-        "status": "Status"
+        "status": "Active",
+        "title": "Configured Fees",
+        "fee": "Fee",
+        "summary": "Calculation",
+        "history": "History",
+        "edit": "Edit",
+        "searchPlaceholder": "Search by name or key…"
       },
       "viewHistory": "View History",
       "hideHistory": "Hide History",
@@ -1282,7 +1386,62 @@
       "calculator": {
         "title": "Fee Calculator",
         "landSize": "Land Size (decimal)",
-        "fee": "Monthly Fee"
+        "fee": "Monthly Fee",
+        "additionalHeads": "Additional Heads",
+        "amount": "Amount"
+      },
+      "newFee": {
+        "button": "+ New Fee Type",
+        "title": "New Fee Type",
+        "labelBn": "Label (Bangla)",
+        "labelEn": "Label (English)",
+        "key": "Key",
+        "keyHint": "Unique identifier, auto-filled from the English label. Lowercase letters, digits and underscores only.",
+        "keyTaken": "A fee type with this key already exists.",
+        "keyInvalid": "Key must start with a letter and use only lowercase letters, digits and underscores.",
+        "calcType": "Calculation Type",
+        "group": "Fee Group",
+        "recurring": "Recurring",
+        "payOnce": "Pay once",
+        "submit": "Create Fee Type"
+      },
+      "editFee": {
+        "title": "Edit Fee Type",
+        "submit": "Save Changes"
+      },
+      "calcTypes": {
+        "fixed": "Fixed amount",
+        "tiered": "Tiered by land size",
+        "head_additional": "Head + additional head",
+        "variable": "Variable amount",
+        "fixed_hint": "A single amount per member.",
+        "tiered_hint": "Base amount up to a threshold, plus a rate per additional decimal - like the monthly subscription.",
+        "head_additional_hint": "A per-head fee with a separate rate for additional heads - like the picnic fee.",
+        "variable_hint": "Members enter the amount themselves (e.g. donation); you may set optional minimum/maximum bounds."
+      },
+      "groups": {
+        "installment": "Installment fees",
+        "other": "Other fees"
+      },
+      "fixedSummary": "Fixed: ৳{{value}}",
+      "headSummary": "Head: {{head}}, Additional: {{additional}}",
+      "variableRange": "Variable amount (৳{{min}} – ৳{{max}})",
+      "variableMin": "Variable amount (min ৳{{min}})",
+      "variableMax": "Variable amount (max ৳{{max}})",
+      "noVersion": "No version",
+      "versionSaved": "New fee version saved.",
+      "feeTypeCreated": "New fee type created - set its first version below.",
+      "feeTypeUpdated": "Fee type updated.",
+      "feeActivated": "Fee type activated.",
+      "feeDeactivated": "Fee type deactivated.",
+      "deactivateConfirmTitle": "Deactivate Fee Type",
+      "deactivateConfirmMessage": "This fee type has {{count}} recorded payment(s). Deactivating it hides it from member payment pages, but its history is preserved. Continue?",
+      "deactivateConfirmButton": "Deactivate",
+      "calc": {
+        "min": "Minimum (optional)",
+        "max": "Maximum (optional)",
+        "button": "Calculate",
+        "unavailable": "This fee has no active version to calculate with yet."
       }
     },
     "auditLog": {
@@ -1976,7 +2135,8 @@
       "methodColumn": "Method",
       "receiptColumn": "Receipt no.",
       "noteColumn": "Note",
-      "emptyState": "No fee payments found for this filter."
+      "emptyState": "No fee payments found for this filter.",
+      "memberFilter": "Member ID"
     },
     "plotBoundaries": {
       "title": "Plot Boundaries",

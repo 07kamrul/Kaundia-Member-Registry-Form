@@ -1,0 +1,328 @@
+// Fee Settings screen — generic fee-type catalog styling.
+// Relies on the shared design tokens / .card / .form-grid / .data-table rules
+// in styles.scss; only page-specific pieces live here.
+
+.section-card {
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  margin: 0 0 1rem;
+}
+
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  background: var(--emerald-50);
+  border: 1px solid var(--emerald-200);
+  color: var(--emerald-800);
+  font-weight: 600;
+}
+
+.calc-result {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--gold-strong);
+  overflow-wrap: anywhere;
+}
+
+.calc-actions {
+  display: flex;
+  align-items: end;
+}
+
+// ---- Table toolbar ---------------------------------------------------------
+
+.table-card {
+  padding: 1.25rem;
+}
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.table-search {
+  min-width: 14rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--gray-800);
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+  }
+}
+
+// ---- Fee group chips --------------------------------------------------------
+
+.fee-group-header {
+  margin: 1.25rem 0 0.5rem;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.fee-group-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: var(--surface-2);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.fee-group-chip-installment {
+  background: var(--amber-50);
+  border-color: var(--amber-200);
+  color: var(--gold-strong);
+}
+
+.no-version-badge {
+  margin-left: 0.5rem;
+}
+
+// ---- Active toggle switch ----------------------------------------------------
+
+.fee-switch {
+  position: relative;
+  display: inline-block;
+  width: 2.6rem;
+  height: 1.4rem;
+  vertical-align: middle;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+}
+
+.fee-switch-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--gray-300);
+  transition: background 0.15s ease;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0.2rem;
+    left: 0.2rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.15s ease;
+  }
+}
+
+.fee-switch input:checked + .fee-switch-slider {
+  background: var(--emerald-600);
+
+  &::before {
+    transform: translateX(1.2rem);
+  }
+}
+
+.fee-switch input:focus-visible + .fee-switch-slider {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+// ---- Skeleton loaders ---------------------------------------------------------
+
+.fee-skeleton-row {
+  height: 2.6rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.6rem;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--gray-200) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: fee-skeleton 1.3s ease infinite;
+}
+
+@keyframes fee-skeleton {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-list {
+  padding: 0.25rem 0;
+}
+
+.empty-state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+// ---- New / edit fee type dialog -------------------------------------------------
+
+.fee-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(26, 42, 32, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.fee-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(40rem, 100%);
+  max-height: min(90vh, 100%);
+  background: var(--modal-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.fee-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--gray-200);
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+}
+
+.fee-dialog-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+}
+
+.fee-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.field-error {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--red-600);
+}
+
+.calc-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.calc-type-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--surface);
+
+  &.is-selected {
+    border-color: var(--gold);
+    background: var(--amber-50);
+    color: var(--gold-strong);
+    font-weight: 600;
+  }
+
+  input {
+    accent-color: var(--gold);
+  }
+}
+
+.fee-flags {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.fee-flag {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+
+  input {
+    accent-color: var(--gold);
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+// ---- Responsive ------------------------------------------------------------------
+
+// Full-screen sheet for the dialog on small screens.
+@media (max-width: 640px) {
+  .fee-dialog-backdrop {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .fee-dialog {
+    width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .fee-dialog-actions {
+    gap: 0.5rem;
+
+    .btn {
+      flex: 1;
+      min-height: 2.5rem;
+    }
+  }
+
+  .calc-type-options {
+    grid-template-columns: 1fr;
+  }
+
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

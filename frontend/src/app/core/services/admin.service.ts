@@ -213,6 +213,100 @@ function toFeeSetting(api: FeeSettingApiModel): FeeSetting {
   };
 }
 
+export type FeeTypeCalculationType = 'fixed' | 'tiered' | 'head_additional' | 'variable';
+
+export interface AdminFeeTypeCurrentVersion {
+  values: Record<string, number>;
+  unit?: string | null;
+  startDate: string;
+}
+
+export interface AdminFeeType {
+  key: string;
+  labelBn: string;
+  labelEn: string;
+  calculationType: FeeTypeCalculationType;
+  unit: string;
+  isRecurring: boolean;
+  isPayOnce: boolean;
+  feeCategory: 'installment' | 'other';
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  currentVersion: AdminFeeTypeCurrentVersion | null;
+  paymentCount: number;
+}
+
+export interface AdminFeeTypeVersion {
+  startDate: string;
+  endDate: string | null;
+  status: number;
+  values: Record<string, number>;
+}
+
+export interface FeeTypeCalculation {
+  calculationType: string;
+  total: number | null;
+  breakdown: Record<string, number | null>;
+}
+
+interface AdminFeeTypeApiModel {
+  key: string;
+  label_bn: string;
+  label_en: string;
+  calculation_type: FeeTypeCalculationType;
+  unit: string;
+  is_recurring: boolean;
+  is_pay_once: boolean;
+  fee_category: 'installment' | 'other';
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  current_version: {
+    values: Record<string, number>;
+    unit: string | null;
+    start_date: string;
+  } | null;
+  payment_count: number;
+}
+
+function toFeeType(api: AdminFeeTypeApiModel): AdminFeeType {
+  return {
+    key: api.key,
+    labelBn: api.label_bn,
+    labelEn: api.label_en,
+    calculationType: api.calculation_type,
+    unit: api.unit,
+    isRecurring: api.is_recurring,
+    isPayOnce: api.is_pay_once,
+    feeCategory: api.fee_category,
+    isActive: api.is_active,
+    sortOrder: api.sort_order,
+    createdAt: api.created_at,
+    currentVersion: api.current_version
+      ? {
+          values: api.current_version.values,
+          unit: api.current_version.unit,
+          startDate: api.current_version.start_date,
+        }
+      : null,
+    paymentCount: api.payment_count,
+  };
+}
+
+interface AdminFeeTypeVersionApiModel {
+  start_date: string;
+  end_date: string | null;
+  status: number;
+  values: Record<string, number>;
+}
+
+interface FeeTypeCalculationApiModel {
+  calculation_type: string;
+  total: number | string | null;
+  breakdown: Record<string, number | null>;
+}
+
 function toConfigListItem(api: ConfigListItemApiModel): ConfigListItem {
   return {
     id: String(api.id),
@@ -556,34 +650,48 @@ export class AdminService {
   }
 
 
+  /** All members' non-installment payments in one ledger - the generalized
+   * (paginated) picnic payments list, picnic rows included, installments
+   * never. Backed by GET /admin/other-fees/payments. */
   getFeePayments(filters: {
     memberId?: number;
     feeType?: string;
     dateFrom?: string;
     dateTo?: string;
+    page?: number;
+    pageSize?: number;
   }): Observable<FeePaymentsPage> {
     const params: Record<string, string> = {};
     if (filters.memberId != null) params['member_id'] = String(filters.memberId);
     if (filters.feeType) params['fee_type'] = filters.feeType;
     if (filters.dateFrom) params['date_from'] = filters.dateFrom;
     if (filters.dateTo) params['date_to'] = filters.dateTo;
-    return this.http.get<FeePaymentsPageApiModel>(`${this.base}/fee-payments`, { params }).pipe(
-      map((page) => ({
-        totalCollected: page.total_collected,
-        count: page.count,
-        items: page.items.map((row) => ({
-          id: row.id,
-          memberId: row.member_id,
-          memberName: row.member_name,
-          feeType: row.fee_type,
-          amount: Number(row.amount),
-          paymentDate: row.payment_date,
-          receiptNo: row.receipt_no,
-          paymentMethod: row.payment_method,
-          note: row.note,
+    if (filters.page != null) params['page'] = String(filters.page);
+    if (filters.pageSize != null) params['page_size'] = String(filters.pageSize);
+    return this.http
+      .get<FeePaymentsPageApiModel>(`${this.base}/other-fees/payments`, { params })
+      .pipe(
+        map((page) => ({
+          totalCollected: page.summary.total_paid,
+          count: page.total,
+          page: page.page,
+          pageSize: page.page_size,
+          byType: page.summary.by_type,
+          items: page.items.map((row) => ({
+            id: row.id,
+            memberId: row.member_id,
+            memberName: row.member_name,
+            feeType: row.fee_type,
+            amount: Number(row.amount),
+            paymentDate: row.payment_date,
+            receiptNo: row.receipt_no,
+            paymentMethod: row.payment_method,
+            note: row.note,
+            additionalHeads: row.additional_heads,
+            source: row.source,
+          })),
         })),
-      })),
-    );
+      );
   }
 
   getActiveFeeSettings(): Observable<FeeSetting[]> {
@@ -612,6 +720,132 @@ export class AdminService {
         start_date: payload.startDate,
       })
       .pipe(map(toFeeSetting));
+  }
+
+  getFeeTypes(): Observable<AdminFeeType[]> {
+    return this.http
+      .get<AdminFeeTypeApiModel[]>(`${this.base}/fee-types`)
+      .pipe(map((rows) => rows.map(toFeeType)));
+  }
+
+  createFeeType(payload: {
+    key: string;
+    labelBn: string;
+    labelEn: string;
+    calculationType: string;
+    unit?: string;
+    isRecurring?: boolean;
+    isPayOnce?: boolean;
+    feeCategory?: string;
+  }): Observable<AdminFeeType> {
+    return this.http
+      .post<AdminFeeTypeApiModel>(`${this.base}/fee-types`, {
+        key: payload.key,
+        label_bn: payload.labelBn,
+        label_en: payload.labelEn,
+        calculation_type: payload.calculationType,
+        unit: payload.unit ?? 'taka',
+        is_recurring: payload.isRecurring ?? false,
+        is_pay_once: payload.isPayOnce ?? false,
+        fee_category: payload.feeCategory ?? 'other',
+      })
+      .pipe(map(toFeeType));
+  }
+
+  updateFeeType(key: string, payload: Partial<AdminFeeType>): Observable<AdminFeeType> {
+    const body: Record<string, unknown> = {};
+    if (payload.labelBn !== undefined) body['label_bn'] = payload.labelBn;
+    if (payload.labelEn !== undefined) body['label_en'] = payload.labelEn;
+    if (payload.unit !== undefined) body['unit'] = payload.unit;
+    if (payload.isRecurring !== undefined) body['is_recurring'] = payload.isRecurring;
+    if (payload.isPayOnce !== undefined) body['is_pay_once'] = payload.isPayOnce;
+    if (payload.feeCategory !== undefined) body['fee_category'] = payload.feeCategory;
+    if (payload.isActive !== undefined) body['is_active'] = payload.isActive;
+    return this.http
+      .put<AdminFeeTypeApiModel>(`${this.base}/fee-types/${encodeURIComponent(key)}`, body)
+      .pipe(map(toFeeType));
+  }
+
+  getFeeTypeVersions(key: string): Observable<AdminFeeTypeVersion[]> {
+    return this.http
+      .get<AdminFeeTypeVersionApiModel[]>(
+        `${this.base}/fee-types/${encodeURIComponent(key)}/versions`,
+      )
+      .pipe(
+        map((rows) =>
+          rows.map((row) => ({
+            startDate: row.start_date,
+            endDate: row.end_date ?? null,
+            status: row.status,
+            values: row.values,
+          })),
+        ),
+      );
+  }
+
+  createFeeTypeVersion(
+    key: string,
+    payload: {
+      value?: number;
+      baseAmount?: number;
+      additionalRate?: number;
+      baseThreshold?: number;
+      headFee?: number;
+      additionalHeadFee?: number;
+      minAmount?: number;
+      maxAmount?: number;
+      unit?: string;
+      startDate?: string;
+    },
+  ): Observable<AdminFeeTypeVersion[]> {
+    return this.http
+      .post<AdminFeeTypeVersionApiModel[]>(
+        `${this.base}/fee-types/${encodeURIComponent(key)}/versions`,
+        {
+          value: payload.value,
+          base_amount: payload.baseAmount,
+          additional_rate: payload.additionalRate,
+          base_threshold: payload.baseThreshold,
+          head_fee: payload.headFee,
+          additional_head_fee: payload.additionalHeadFee,
+          min_amount: payload.minAmount,
+          max_amount: payload.maxAmount,
+          unit: payload.unit,
+          start_date: payload.startDate,
+        },
+      )
+      .pipe(
+        map((rows) =>
+          rows.map((row) => ({
+            startDate: row.start_date,
+            endDate: row.end_date ?? null,
+            status: row.status,
+            values: row.values,
+          })),
+        ),
+      );
+  }
+
+  calculateFeeType(
+    key: string,
+    payload: { landSize?: number; additionalHeads?: number; amount?: number },
+  ): Observable<FeeTypeCalculation> {
+    return this.http
+      .post<FeeTypeCalculationApiModel>(
+        `${this.base}/fee-types/${encodeURIComponent(key)}/calculate`,
+        {
+          land_size: payload.landSize,
+          additional_heads: payload.additionalHeads,
+          amount: payload.amount,
+        },
+      )
+      .pipe(
+        map((res) => ({
+          calculationType: res.calculation_type,
+          total: res.total === null ? null : Number(res.total),
+          breakdown: res.breakdown,
+        })),
+      );
   }
 
   listAuditLog(): Observable<AuditLogEntry[]> {
@@ -780,9 +1014,13 @@ interface FeePaymentsPageApiModel {
     receipt_no: string | null;
     payment_method: string | null;
     note: string | null;
+    additional_heads: number | null;
+    source: string;
   }[];
-  total_collected: number;
-  count: number;
+  total: number;
+  page: number;
+  page_size: number;
+  summary: { total_paid: number; by_type: Record<string, number> };
 }
 
 export interface AdminFeePayment {
@@ -795,10 +1033,15 @@ export interface AdminFeePayment {
   receiptNo: string | null;
   paymentMethod: string | null;
   note: string | null;
+  additionalHeads: number | null;
+  source: string;
 }
 
 export interface FeePaymentsPage {
   items: AdminFeePayment[];
   totalCollected: number;
   count: number;
+  page: number;
+  pageSize: number;
+  byType: Record<string, number>;
 }

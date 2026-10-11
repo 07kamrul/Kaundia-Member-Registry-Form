@@ -63,16 +63,9 @@ const NAV_SECTIONS: NavSection[] = [
         requiredPermission: ['profile.view_own'],
       },
       {
-        labelKey: 'nav.picnicPayment',
-        route: '/picnic-payment',
-        icon: 'sun',
-        requiredPermission: ['profile.view_own'],
-        requiredRoles: MEMBER_PAYMENT_ROLES,
-      },
-      {
-        labelKey: 'nav.fees',
-        route: '/fees',
-        icon: 'coin',
+        labelKey: 'nav.otherFees',
+        route: '/other-fees',
+        icon: 'receipt',
         requiredPermission: ['profile.view_own'],
         requiredRoles: MEMBER_PAYMENT_ROLES,
       },
@@ -162,12 +155,6 @@ const NAV_SECTIONS: NavSection[] = [
         labelKey: 'nav.membersList',
         route: '/members',
         icon: 'users',
-        requiredPermission: ['member.view_all'],
-      },
-      {
-        labelKey: 'nav.picnicPayments',
-        route: '/picnic-payments',
-        icon: 'wallet',
         requiredPermission: ['member.view_all'],
       },
       {

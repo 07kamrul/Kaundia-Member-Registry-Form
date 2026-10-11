@@ -8,6 +8,9 @@ class FeeSettingCreate(BaseModel):
     value: float
     unit: str | None = None
     start_date: date | None = None
+    # 'other' | 'installment' - which member payment page offers this fee.
+    # Defaults to the current active version's category, else 'other'.
+    fee_category: str | None = None
 
 
 class FeeSettingOut(BaseModel):
@@ -17,6 +20,7 @@ class FeeSettingOut(BaseModel):
     key: str
     value: float
     unit: str | None = None
+    fee_category: str = "other"
     start_date: date
     end_date: date | None = None
     status: int
