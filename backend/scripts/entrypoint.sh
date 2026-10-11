@@ -6,7 +6,7 @@
 #    settings) resolves under /app, which is NOT a volume - uploads written
 #    there are lost on every redeploy.
 # 2. Ensures the upload root exists and is writable.
-# 3. Runs migrations (scripts/migrate.sh owns the DB-ready retry loop - do not
+# 3. Runs migrations (scripts/run.sh owns the DB-ready retry loop - do not
 #    run alembic anywhere else) and seeds the admin account.
 set -eu
 
@@ -37,8 +37,7 @@ if ! grep -qs " ${STORAGE_BASE_DIR} " /proc/mounts; then
     log "WARNING: mount persistent storage at ${STORAGE_BASE_DIR} (Dokploy: Advanced -> Volumes)." >&2
 fi
 
-sh scripts/migrate.sh
-python -m app.seed
+sh scripts/run.sh setup
 
 log "Setup complete, starting: $*"
 exec "$@"
