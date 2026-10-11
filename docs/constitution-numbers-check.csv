@@ -1,0 +1,12 @@
+﻿claim,pdf_article,verdict
+Admission fee ৳500,৬৬.১,✔ correct
+Subscription ৳100 up to 1 decimal + ৳20/extra decimal (`100 + (dec−1)×20`; 3 decimals = ৳140),"৬৬.২, সংযুক্তি ২",✔ correct
+Membership decision within 20 working days,৩৬.৪,✔ correct
+Complaint no. in 3 working days; first progress in 15,"৭৯.২, সংযুক্তি ৬",✔ correct
+Appeal within 30 days,৪৩.১,✔ correct
+AGM notice 15 days,৫৯.১,✔ correct
+"Extraordinary meeting: ⅕ of voting members, called within 30 days",৫৯.৩,✔ correct
+Voter list ≥ 30 days before election,৫৮.১,✔ correct
+Quorum: Standing Council ⅓; EC 6 of 11,৬১.১–৬১.২,✔ correct
+EC term 3 years (or authority-approved term),৪৬.২,✔ correct
+EC = 11 posts,"৪৬.১, সংযুক্তি ১",✔ correct

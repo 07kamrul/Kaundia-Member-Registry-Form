@@ -96,24 +96,23 @@ def upgrade() -> None:
     )
     op.create_index("ix_fee_types_key", "fee_types", ["key"], unique=True)
 
+    insert_stmt = sa.text(
+        "INSERT INTO fee_types (key, label_bn, label_en, calculation_type, unit,"
+        " is_recurring, is_pay_once, fee_category, is_active, head_setting_key,"
+        " additional_setting_key, sort_order)"
+        " VALUES (:key, :label_bn, :label_en, :calculation_type, 'taka',"
+        " :is_recurring, :is_pay_once, :fee_category, true, :head_setting_key,"
+        " :additional_setting_key, :sort_order)"
+    )
+    bind = op.get_bind()
     for row in SEED_ROWS:
-        op.execute(
-            "INSERT INTO fee_types (key, label_bn, label_en, calculation_type, unit,"
-            " is_recurring, is_pay_once, fee_category, is_active, head_setting_key,"
-            " additional_setting_key, sort_order)"
-            " VALUES (?, ?, ?, ?, 'taka', ?, ?, ?, 1, ?, ?, ?)",
-            (
-                row["key"],
-                row["label_bn"],
-                row["label_en"],
-                row["calculation_type"],
-                row["is_recurring"],
-                row["is_pay_once"],
-                row["fee_category"],
-                row.get("head_setting_key"),
-                row.get("additional_setting_key"),
-                row["sort_order"],
-            ),
+        bind.execute(
+            insert_stmt,
+            {
+                **row,
+                "head_setting_key": row.get("head_setting_key"),
+                "additional_setting_key": row.get("additional_setting_key"),
+            },
         )
 
 
